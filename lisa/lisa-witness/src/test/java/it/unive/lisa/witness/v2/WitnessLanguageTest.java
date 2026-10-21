@@ -15,10 +15,13 @@ import it.unive.lisa.witness.v2.correctness.ghost.GhostContent;
 import it.unive.lisa.witness.v2.correctness.ghost.GhostInstrumentation;
 import it.unive.lisa.witness.v2.correctness.ghost.GhostScope;
 import it.unive.lisa.witness.v2.correctness.ghost.GhostVariable;
+import it.unive.lisa.witness.v2.metadata.Metadata;
+import it.unive.lisa.witness.v2.metadata.Task;
 import it.unive.lisa.witness.v2.violation.Segment;
 import it.unive.lisa.witness.v2.violation.ViolationSequence;
 import it.unive.lisa.witness.v2.violation.Waypoint;
 import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 public class WitnessLanguageTest {
@@ -90,5 +93,42 @@ public class WitnessLanguageTest {
 	public void aFunctionContractNeedsRequiresOrEnsures() {
 		assertThrows(InvalidWitnessException.class,
 				() -> new FunctionContract(at(3), null, null, Format.JAVA_EXPRESSION, null));
+	}
+
+	@Test
+	@SuppressWarnings("deprecation")
+	public void aCInvariantRejectsAcsl() {
+		assertThrows(InvalidWitnessException.class, () -> new CorrectnessWitness(
+				invariants(Language.C, InvariantType.LOCATION_INVARIANT, Format.ACSL_EXPRESSION)));
+	}
+
+	@Test
+	public void ghostCodeRejectsExtendedC() {
+		GhostVariable lock = new GhostVariable("held", "int", GhostScope.GLOBAL,
+				new Expression("0", Format.EXT_C_EXPRESSION));
+		GhostInstrumentation ghost = new GhostInstrumentation(metadata(Language.C),
+				new GhostContent(List.of(lock), List.of()));
+		assertThrows(InvalidWitnessException.class, () -> new CorrectnessWitness(
+				invariants(Language.C, InvariantType.LOCATION_INVARIANT, Format.C_EXPRESSION), ghost));
+	}
+
+	@Test
+	public void aWaypointMustBeInAnInputFile() {
+		ViolationSequence sequence = new ViolationSequence(metadata(Language.JAVA),
+				List.of(Segment.of(Waypoint.target(new Location("Other.java", 2)))));
+		assertThrows(InvalidWitnessException.class, () -> new ViolationWitness(sequence));
+	}
+
+	@Test
+	public void theGhostCodeMustHaveTheTaskOfTheInvariants() {
+		Metadata other = new Metadata("2.4", metadata(Language.C).getUuid(), metadata(Language.C).getCreationTime(),
+				metadata(Language.C).getProducer(), new Task(List.of("Other.c"),
+						Map.of("Other.c", TestValues.HASH), "G ! call(reach_error())", Language.C,
+						DataModel.LP64));
+		GhostVariable lock = new GhostVariable("held", "int", GhostScope.GLOBAL,
+				new Expression("0", Format.C_EXPRESSION));
+		GhostInstrumentation ghost = new GhostInstrumentation(other, new GhostContent(List.of(lock), List.of()));
+		assertThrows(InvalidWitnessException.class, () -> new CorrectnessWitness(
+				invariants(Language.C, InvariantType.LOCATION_INVARIANT, Format.C_EXPRESSION), ghost));
 	}
 }

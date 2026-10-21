@@ -1,5 +1,6 @@
 package it.unive.lisa.witness.v2.violation;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import it.unive.lisa.witness.v2.InvalidWitnessException;
@@ -10,8 +11,9 @@ public final class Segment {
 
 	private final List<Waypoint> waypoints;
 
+	@JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
 	public Segment(
-			List<Waypoint> waypoints) {
+			@JsonProperty(value = "segment", required = true) List<Waypoint> waypoints) {
 		this.waypoints = List.copyOf(Objects.requireNonNull(waypoints, "waypoints"));
 		if (this.waypoints.isEmpty())
 			throw new InvalidWitnessException("A segment needs at least one waypoint");

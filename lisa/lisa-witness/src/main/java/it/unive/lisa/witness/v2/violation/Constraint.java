@@ -1,6 +1,8 @@
 package it.unive.lisa.witness.v2.violation;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import it.unive.lisa.witness.v2.Format;
 import it.unive.lisa.witness.v2.FormattedValue;
@@ -12,9 +14,10 @@ public final class Constraint
 		extends
 		FormattedValue {
 
+	@JsonCreator
 	public Constraint(
-			String value,
-			Format format) {
+			@JsonProperty(value = "value", required = true) String value,
+			@JsonProperty("format") Format format) {
 		super(value, format);
 	}
 

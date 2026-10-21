@@ -6,8 +6,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import it.unive.lisa.witness.v2.Format;
-import it.unive.lisa.witness.v2.Language;
+import it.unive.lisa.witness.v2.InvalidWitnessException;
 import it.unive.lisa.witness.v2.Location;
+import it.unive.lisa.witness.v2.metadata.Task;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Objects;
@@ -57,10 +58,18 @@ public abstract class InvariantSetItem {
 		return labels.contains(Label.INDUCTIVE);
 	}
 
-	void checkLanguage(
-			Language language) {
-		language.checkAllows(format, this);
+	@SuppressWarnings("deprecation")
+	final void check(
+			Task task) {
+		task.checkLocation(location);
+		task.getLanguage().checkAllows(format, this);
+		if (format == Format.ACSL_EXPRESSION)
+			throw new InvalidWitnessException("acsl_expression is only allowed in function_return waypoints: " + this);
+		checkContent(task);
 	}
+
+	protected abstract void checkContent(
+			Task task);
 
 	@Override
 	public int hashCode() {

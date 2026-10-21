@@ -1,5 +1,6 @@
 package it.unive.lisa.witness.v2.correctness.ghost;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import it.unive.lisa.witness.v2.Format;
@@ -13,10 +14,11 @@ public final class GhostAssignment
 
 	private final String variable;
 
+	@JsonCreator
 	public GhostAssignment(
-			String variable,
-			String value,
-			Format format) {
+			@JsonProperty(value = "variable", required = true) String variable,
+			@JsonProperty(value = "value", required = true) String value,
+			@JsonProperty(value = "format", required = true) Format format) {
 		super(value, Objects.requireNonNull(format, "format"));
 		this.variable = Objects.requireNonNull(variable, "variable");
 	}

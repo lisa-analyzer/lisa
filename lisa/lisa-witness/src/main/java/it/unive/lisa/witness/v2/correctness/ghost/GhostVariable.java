@@ -1,5 +1,6 @@
 package it.unive.lisa.witness.v2.correctness.ghost;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import java.util.Objects;
@@ -15,11 +16,12 @@ public final class GhostVariable {
 
 	private final Expression initial;
 
+	@JsonCreator
 	public GhostVariable(
-			String name,
-			String type,
-			GhostScope scope,
-			Expression initial) {
+			@JsonProperty(value = "name", required = true) String name,
+			@JsonProperty(value = "type", required = true) String type,
+			@JsonProperty(value = "scope", required = true) GhostScope scope,
+			@JsonProperty(value = "initial", required = true) Expression initial) {
 		this.name = Objects.requireNonNull(name, "name");
 		this.type = Objects.requireNonNull(type, "type");
 		this.scope = Objects.requireNonNull(scope, "scope");

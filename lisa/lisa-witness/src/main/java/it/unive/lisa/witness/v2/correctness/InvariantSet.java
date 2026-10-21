@@ -1,10 +1,11 @@
 package it.unive.lisa.witness.v2.correctness;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import it.unive.lisa.witness.v2.Entry;
 import it.unive.lisa.witness.v2.EntryType;
-import it.unive.lisa.witness.v2.Language;
 import it.unive.lisa.witness.v2.metadata.Metadata;
+import it.unive.lisa.witness.v2.metadata.Task;
 import java.util.List;
 import java.util.Objects;
 
@@ -14,9 +15,10 @@ public final class InvariantSet
 
 	private final List<InvariantSetItem> content;
 
+	@JsonCreator
 	public InvariantSet(
-			Metadata metadata,
-			List<InvariantSetItem> content) {
+			@JsonProperty(value = "metadata", required = true) Metadata metadata,
+			@JsonProperty(value = "content", required = true) List<InvariantSetItem> content) {
 		super(metadata);
 		this.content = List.copyOf(Objects.requireNonNull(content, "content"));
 	}
@@ -33,9 +35,9 @@ public final class InvariantSet
 
 	@Override
 	protected void checkContent(
-			Language language) {
+			Task task) {
 		for (InvariantSetItem item : content)
-			item.checkLanguage(language);
+			item.check(task);
 	}
 
 	@Override

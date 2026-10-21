@@ -19,6 +19,6 @@ public class ProducerTest {
 
 	@Test
 	public void ofNeedsAVersionInTheManifest() {
-		assertThrows(InvalidWitnessException.class, () -> Producer.of("Test", ProducerTest.class));
+		assertThrows(IllegalStateException.class, () -> Producer.of("Test", ProducerTest.class));
 	}
 }

@@ -1,11 +1,12 @@
 package it.unive.lisa.witness.v2.violation;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import it.unive.lisa.witness.v2.Entry;
 import it.unive.lisa.witness.v2.EntryType;
 import it.unive.lisa.witness.v2.InvalidWitnessException;
-import it.unive.lisa.witness.v2.Language;
 import it.unive.lisa.witness.v2.metadata.Metadata;
+import it.unive.lisa.witness.v2.metadata.Task;
 import java.util.List;
 import java.util.Objects;
 
@@ -15,9 +16,10 @@ public final class ViolationSequence
 
 	private final List<Segment> content;
 
+	@JsonCreator
 	public ViolationSequence(
-			Metadata metadata,
-			List<Segment> content) {
+			@JsonProperty(value = "metadata", required = true) Metadata metadata,
+			@JsonProperty(value = "content", required = true) List<Segment> content) {
 		super(metadata);
 		this.content = List.copyOf(Objects.requireNonNull(content, "content"));
 		if (this.content.isEmpty())
@@ -39,11 +41,13 @@ public final class ViolationSequence
 
 	@Override
 	protected void checkContent(
-			Language language) {
+			Task task) {
 		for (Segment segment : content)
-			for (Waypoint waypoint : segment.getWaypoints())
+			for (Waypoint waypoint : segment.getWaypoints()) {
+				task.checkLocation(waypoint.getLocation());
 				if (waypoint.getConstraint() != null && waypoint.getConstraint().getFormat() != null)
-					language.checkAllows(waypoint.getConstraint().getFormat(), waypoint);
+					task.getLanguage().checkAllows(waypoint.getConstraint().getFormat(), waypoint);
+			}
 	}
 
 	@Override

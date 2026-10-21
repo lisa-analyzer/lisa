@@ -1,5 +1,6 @@
 package it.unive.lisa.witness.v2;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
@@ -30,11 +31,12 @@ public final class Location {
 		this(fileName, line, column, null);
 	}
 
+	@JsonCreator
 	public Location(
-			String fileName,
-			int line,
-			Integer column,
-			String function) {
+			@JsonProperty(value = "file_name", required = true) String fileName,
+			@JsonProperty(value = "line", required = true) int line,
+			@JsonProperty("column") Integer column,
+			@JsonProperty("function") String function) {
 		this.fileName = Objects.requireNonNull(fileName, "fileName");
 		if (line < 1)
 			throw new InvalidWitnessException("The line must be at least 1: " + line);

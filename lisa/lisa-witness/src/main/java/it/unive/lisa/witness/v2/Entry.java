@@ -7,10 +7,11 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import it.unive.lisa.witness.v2.correctness.InvariantSet;
 import it.unive.lisa.witness.v2.correctness.ghost.GhostInstrumentation;
 import it.unive.lisa.witness.v2.metadata.Metadata;
+import it.unive.lisa.witness.v2.metadata.Task;
 import it.unive.lisa.witness.v2.violation.ViolationSequence;
 import java.util.Objects;
 
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "entry_type", visible = true)
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "entry_type")
 @JsonSubTypes({
 		@JsonSubTypes.Type(value = ViolationSequence.class, name = "violation_sequence"),
 		@JsonSubTypes.Type(value = InvariantSet.class, name = "invariant_set"),
@@ -33,12 +34,12 @@ public abstract class Entry {
 		return metadata;
 	}
 
-	final void checkLanguage() {
-		checkContent(metadata.getTask().getLanguage());
+	final void check() {
+		checkContent(metadata.getTask());
 	}
 
 	protected abstract void checkContent(
-			Language language);
+			Task task);
 
 	@Override
 	public int hashCode() {

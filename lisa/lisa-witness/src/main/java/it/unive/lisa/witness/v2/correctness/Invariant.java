@@ -1,11 +1,12 @@
 package it.unive.lisa.witness.v2.correctness;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import it.unive.lisa.witness.v2.Format;
 import it.unive.lisa.witness.v2.InvalidWitnessException;
-import it.unive.lisa.witness.v2.Language;
 import it.unive.lisa.witness.v2.Location;
+import it.unive.lisa.witness.v2.metadata.Task;
 import java.util.Objects;
 import java.util.Set;
 
@@ -18,12 +19,13 @@ public final class Invariant
 
 	private final String value;
 
+	@JsonCreator
 	public Invariant(
-			InvariantType type,
-			Location location,
-			String value,
-			Format format,
-			Set<Label> labels) {
+			@JsonProperty(value = "type", required = true) InvariantType type,
+			@JsonProperty(value = "location", required = true) Location location,
+			@JsonProperty(value = "value", required = true) String value,
+			@JsonProperty(value = "format", required = true) Format format,
+			@JsonProperty("labels") Set<Label> labels) {
 		super(location, format, labels);
 		this.type = Objects.requireNonNull(type, "type");
 		this.value = Objects.requireNonNull(value, "value");
@@ -48,11 +50,10 @@ public final class Invariant
 	}
 
 	@Override
-	void checkLanguage(
-			Language language) {
-		super.checkLanguage(language);
-		if (type.isTransition() && !language.supportsTransitionInvariants())
-			throw new InvalidWitnessException("Transition invariants are not supported for " + language);
+	protected void checkContent(
+			Task task) {
+		if (type.isTransition() && !task.getLanguage().supportsTransitionInvariants())
+			throw new InvalidWitnessException("Transition invariants are not supported for " + task.getLanguage());
 	}
 
 	@Override

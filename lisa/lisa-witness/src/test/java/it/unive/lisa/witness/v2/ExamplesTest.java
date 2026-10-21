@@ -1,6 +1,7 @@
 package it.unive.lisa.witness.v2;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -26,7 +27,6 @@ import it.unive.lisa.witness.v2.violation.Segment;
 import it.unive.lisa.witness.v2.violation.ViolationSequence;
 import it.unive.lisa.witness.v2.violation.Waypoint;
 import it.unive.lisa.witness.v2.violation.WaypointType;
-import java.io.IOException;
 import java.io.InputStream;
 import java.time.Instant;
 import java.time.OffsetDateTime;
@@ -48,15 +48,23 @@ public class ExamplesTest {
 
 	private static JsonNode example(
 			String name)
-			throws IOException {
+			throws Exception {
 		try (InputStream in = ExamplesTest.class.getResourceAsStream("/examples/" + name)) {
 			return YAML.readTree(in);
 		}
 	}
 
+	private static Witness read(
+			String name)
+			throws Exception {
+		try (InputStream in = ExamplesTest.class.getResourceAsStream("/examples/" + name)) {
+			return WitnessReader.read(in);
+		}
+	}
+
 	private static JsonNode written(
 			Witness witness)
-			throws IOException {
+			throws Exception {
 		return YAML.readTree(WitnessWriter.write(witness));
 	}
 
@@ -86,7 +94,7 @@ public class ExamplesTest {
 
 	@Test
 	public void theViolationExampleIsReproduced()
-			throws IOException {
+			throws Exception {
 		String main = "./java/jpf-regression/ExDarko_false/Main.java";
 		Map<String, String> hashes = new LinkedHashMap<>();
 		hashes.put(VERIFIER, VERIFIER_HASH);
@@ -102,11 +110,12 @@ public class ExamplesTest {
 				Segment.of(Waypoint.target(new Location(main, 48, 12))))));
 
 		assertEquals(example("ExDarko_false.witness-2.4.yml"), written(witness));
+		assertEquals(witness, read("ExDarko_false.witness-2.4.yml"));
 	}
 
 	@Test
 	public void theCorrectnessExampleIsReproduced()
-			throws IOException {
+			throws Exception {
 		String main = "./java/jpf-regression/ExDarko_true/Main.java";
 		Map<String, String> hashes = new LinkedHashMap<>();
 		hashes.put(main, "be9360466f076b2c5156aa1dff4479180025c5698cdfb03b0885f5007519a7d7");
@@ -119,11 +128,12 @@ public class ExamplesTest {
 						"i != j", Format.JAVA_EXPRESSION))));
 
 		assertSameIgnoringCreationTime(example("ExDarko_true.witness-2.4.yml"), written(witness));
+		assertEquals(witness, read("ExDarko_true.witness-2.4.yml"));
 	}
 
 	@Test
 	public void theCConcurrentViolationExampleIsReproduced()
-			throws IOException {
+			throws Exception {
 		String file = "./concurrent-unreach.c";
 		Metadata metadata = new Metadata("2.2", UUID.fromString("b1c2d3e4-f5a6-4789-abcd-ef0123456789"),
 				Instant.parse("2025-10-01T12:00:00Z"), new Producer("Handcrafted", "1.0"),
@@ -139,11 +149,13 @@ public class ExamplesTest {
 						new Location(file, 26, 17, "main"), null, 0)))));
 
 		assertEquals(example("concurrent-unreach.witness-2.2.yml"), written(witness));
+		// only format version 2.4 is read
+		assertThrows(WitnessReadException.class, () -> read("concurrent-unreach.witness-2.2.yml"));
 	}
 
 	@Test
 	public void theCCorrectnessExampleWithGhostCodeIsReproduced()
-			throws IOException {
+			throws Exception {
 		String file = "./safe-simple-concurrent.c";
 		Metadata metadata = new Metadata("2.1", UUID.fromString("c66c3ee7-e0de-4bae-87f0-fd48fc7b961d"),
 				Instant.parse("2025-10-04T09:29:38Z"),
@@ -165,11 +177,13 @@ public class ExamplesTest {
 				new GhostInstrumentation(metadata, new GhostContent(List.of(ghost), updates)));
 
 		assertSameIgnoringCreationTime(example("safe-simple-concurrent.witness-2.1.yml"), written(witness));
+		// only format version 2.4 is read
+		assertThrows(WitnessReadException.class, () -> read("safe-simple-concurrent.witness-2.1.yml"));
 	}
 
 	@Test
 	public void theCCorrectnessExampleWithContractsIsReproduced()
-			throws IOException {
+			throws Exception {
 		String file = "./multivar_1-1.c";
 		Metadata metadata = new Metadata("2.1", UUID.fromString("c66c3ee7-e0de-4bae-87f0-fd48fc7b961e"),
 				Instant.parse("2023-11-21T09:29:38Z"), new Producer("CPAchecker", "2.2.1-svn", "svcomp24", null, null),
@@ -183,5 +197,7 @@ public class ExamplesTest {
 						Format.EXT_C_EXPRESSION, null))));
 
 		assertSameIgnoringCreationTime(example("multivar_1-1.witness-2.1.yml"), written(witness));
+		// only format version 2.4 is read
+		assertThrows(WitnessReadException.class, () -> read("multivar_1-1.witness-2.1.yml"));
 	}
 }

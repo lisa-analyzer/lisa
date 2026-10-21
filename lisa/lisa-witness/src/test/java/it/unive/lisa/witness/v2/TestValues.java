@@ -12,6 +12,8 @@ public final class TestValues {
 
 	public static final String FILE = "Main.java";
 
+	public static final String HASH = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855";
+
 	private TestValues() {
 	}
 
@@ -22,7 +24,7 @@ public final class TestValues {
 
 	public static Task task(
 			Language language) {
-		return new Task(List.of(FILE), Map.of(FILE, "00"), "CHECK( init(main()), LTL(G assert) )", language,
+		return new Task(List.of(FILE), Map.of(FILE, HASH), "CHECK( init(main()), LTL(G assert) )", language,
 				language.requiresDataModel() ? DataModel.LP64 : null);
 	}
 

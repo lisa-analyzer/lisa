@@ -1,5 +1,6 @@
 package it.unive.lisa.witness.v2.violation;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
@@ -26,12 +27,13 @@ public final class Waypoint {
 
 	private final Integer threadId;
 
+	@JsonCreator
 	public Waypoint(
-			WaypointType type,
-			Action action,
-			Location location,
-			Constraint constraint,
-			Integer threadId) {
+			@JsonProperty(value = "type", required = true) WaypointType type,
+			@JsonProperty(value = "action", required = true) Action action,
+			@JsonProperty(value = "location", required = true) Location location,
+			@JsonProperty("constraint") Constraint constraint,
+			@JsonProperty("thread_id") Integer threadId) {
 		this.type = Objects.requireNonNull(type, "type");
 		this.action = Objects.requireNonNull(action, "action");
 		this.location = Objects.requireNonNull(location, "location");
@@ -47,6 +49,25 @@ public final class Waypoint {
 			String value,
 			Format format) {
 		return new Waypoint(WaypointType.FUNCTION_RETURN, Action.FOLLOW, location, Constraint.of(value, format), null);
+	}
+
+	public static Waypoint assumption(
+			Location location,
+			String value,
+			Format format) {
+		return new Waypoint(WaypointType.ASSUMPTION, Action.FOLLOW, location, Constraint.of(value, format), null);
+	}
+
+	public static Waypoint branching(
+			Location location,
+			boolean taken) {
+		return new Waypoint(WaypointType.BRANCHING, Action.FOLLOW, location,
+				Constraint.withoutFormat(String.valueOf(taken)), null);
+	}
+
+	public static Waypoint functionEnter(
+			Location location) {
+		return new Waypoint(WaypointType.FUNCTION_ENTER, Action.FOLLOW, location, null, null);
 	}
 
 	public static Waypoint target(

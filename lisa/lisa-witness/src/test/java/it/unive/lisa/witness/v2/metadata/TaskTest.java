@@ -1,11 +1,14 @@
 package it.unive.lisa.witness.v2.metadata;
 
+import static it.unive.lisa.witness.v2.TestValues.HASH;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import it.unive.lisa.witness.v2.DataModel;
 import it.unive.lisa.witness.v2.InvalidWitnessException;
 import it.unive.lisa.witness.v2.Language;
+import it.unive.lisa.witness.v2.Location;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -22,19 +25,19 @@ public class TaskTest {
 	@Test
 	public void aCTaskRequiresADataModel() {
 		assertThrows(InvalidWitnessException.class,
-				() -> new Task(List.of("a.c"), Map.of("a.c", "00"), SPEC, Language.C, null));
+				() -> new Task(List.of("a.c"), Map.of("a.c", HASH), SPEC, Language.C, null));
 	}
 
 	@Test
 	public void aJavaTaskRejectsADataModel() {
 		assertThrows(InvalidWitnessException.class, () -> new Task(List.of("Main.java"),
-				Map.of("Main.java", "00"), SPEC, Language.JAVA, DataModel.LP64));
+				Map.of("Main.java", HASH), SPEC, Language.JAVA, DataModel.LP64));
 	}
 
 	@Test
 	public void everyInputFileNeedsAHash() {
 		assertThrows(InvalidWitnessException.class, () -> new Task(List.of("Main.java", "Verifier.java"),
-				Map.of("Main.java", "00"), SPEC, Language.JAVA, null));
+				Map.of("Main.java", HASH), SPEC, Language.JAVA, null));
 	}
 
 	@Test
@@ -55,5 +58,24 @@ public class TaskTest {
 		assertEquals("e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
 				task.getInputFileHashes().get(common.resolve("b.java").toString()));
 		assertEquals("CHECK( init(Main.main()), LTL(G assert) )", task.getSpecification());
+	}
+
+	@Test
+	public void anInputFileIsListedOnce() {
+		assertThrows(InvalidWitnessException.class, () -> new Task(List.of("Main.java", "Main.java"),
+				Map.of("Main.java", HASH), SPEC, Language.JAVA, null));
+	}
+
+	@Test
+	public void aHashIsASha256Hash() {
+		assertThrows(InvalidWitnessException.class,
+				() -> new Task(List.of("Main.java"), Map.of("Main.java", "00"), SPEC, Language.JAVA, null));
+	}
+
+	@Test
+	public void aLocationMustBeInAnInputFile() {
+		Task task = new Task(List.of("Main.java"), Map.of("Main.java", HASH), SPEC, Language.JAVA, null);
+		assertDoesNotThrow(() -> task.checkLocation(new Location("Main.java", 1)));
+		assertThrows(InvalidWitnessException.class, () -> task.checkLocation(new Location("Other.java", 1)));
 	}
 }

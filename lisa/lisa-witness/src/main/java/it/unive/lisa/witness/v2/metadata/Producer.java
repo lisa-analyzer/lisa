@@ -1,5 +1,6 @@
 package it.unive.lisa.witness.v2.metadata;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
@@ -26,12 +27,13 @@ public final class Producer {
 		this(name, version, null, null, null);
 	}
 
+	@JsonCreator
 	public Producer(
-			String name,
-			String version,
-			String configuration,
-			String commandLine,
-			String description) {
+			@JsonProperty(value = "name", required = true) String name,
+			@JsonProperty(value = "version", required = true) String version,
+			@JsonProperty("configuration") String configuration,
+			@JsonProperty("command_line") String commandLine,
+			@JsonProperty("description") String description) {
 		this.name = Objects.requireNonNull(name, "name");
 		this.version = Objects.requireNonNull(version, "version");
 		if (name.isBlank())
@@ -49,7 +51,7 @@ public final class Producer {
 		Package pkg = anchor.getPackage();
 		String version = pkg == null ? null : pkg.getImplementationVersion();
 		if (version == null)
-			throw new InvalidWitnessException("No Implementation-Version in the manifest of " + anchor.getName()
+			throw new IllegalStateException("No Implementation-Version in the manifest of " + anchor.getName()
 					+ ": the version of the producer " + name + " is required");
 		return new Producer(name, version);
 	}

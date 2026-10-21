@@ -1,21 +1,26 @@
 package it.unive.lisa.witness.v2.metadata;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import it.unive.lisa.witness.v2.DataModel;
 import it.unive.lisa.witness.v2.InvalidWitnessException;
 import it.unive.lisa.witness.v2.Language;
+import it.unive.lisa.witness.v2.Location;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.regex.Pattern;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({ "input_files", "input_file_hashes", "specification", "data_model", "language" })
 public final class Task {
+
+	private static final Pattern SHA_256 = Pattern.compile("[0-9a-fA-F]{64}");
 
 	private final List<String> inputFiles;
 
@@ -27,12 +32,13 @@ public final class Task {
 
 	private final DataModel dataModel;
 
+	@JsonCreator
 	public Task(
-			List<String> inputFiles,
-			Map<String, String> inputFileHashes,
-			String specification,
-			Language language,
-			DataModel dataModel) {
+			@JsonProperty(value = "input_files", required = true) List<String> inputFiles,
+			@JsonProperty(value = "input_file_hashes", required = true) Map<String, String> inputFileHashes,
+			@JsonProperty(value = "specification", required = true) String specification,
+			@JsonProperty(value = "language", required = true) Language language,
+			@JsonProperty("data_model") DataModel dataModel) {
 		this.inputFiles = List.copyOf(Objects.requireNonNull(inputFiles, "inputFiles"));
 		this.inputFileHashes = Collections.unmodifiableMap(
 				new LinkedHashMap<>(Objects.requireNonNull(inputFileHashes, "inputFileHashes")));
@@ -43,8 +49,21 @@ public final class Task {
 			throw new InvalidWitnessException("A data model is required for " + language);
 		if (!language.requiresDataModel() && dataModel != null)
 			throw new InvalidWitnessException("A data model is not allowed for " + language);
+		if (new HashSet<>(this.inputFiles).size() != this.inputFiles.size())
+			throw new InvalidWitnessException("An input file is listed more than once: " + this.inputFiles);
 		if (!this.inputFileHashes.keySet().equals(new HashSet<>(this.inputFiles)))
 			throw new InvalidWitnessException("Every input file needs exactly one hash");
+		for (Map.Entry<String, String> hash : this.inputFileHashes.entrySet())
+			if (!SHA_256.matcher(hash.getValue()).matches())
+				throw new InvalidWitnessException(
+						"The hash of " + hash.getKey() + " is not a SHA-256 hash: " + hash.getValue());
+	}
+
+	public void checkLocation(
+			Location location) {
+		if (!inputFiles.contains(location.getFileName()))
+			throw new InvalidWitnessException(
+					"The location " + location + " is not in an input file of the task: " + inputFiles);
 	}
 
 	@JsonProperty("input_files")

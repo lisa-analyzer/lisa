@@ -1,12 +1,13 @@
 package it.unive.lisa.witness.v2.correctness;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import it.unive.lisa.witness.v2.Format;
 import it.unive.lisa.witness.v2.InvalidWitnessException;
-import it.unive.lisa.witness.v2.Language;
 import it.unive.lisa.witness.v2.Location;
+import it.unive.lisa.witness.v2.metadata.Task;
 import java.util.Objects;
 import java.util.Set;
 
@@ -33,6 +34,19 @@ public final class FunctionContract
 		this.ensures = ensures;
 	}
 
+	// the type key has a single value: Jackson rejects any other one when
+	// reading it as a ContractType
+	@JsonCreator
+	private static FunctionContract read(
+			@JsonProperty(value = "type", required = true) ContractType type,
+			@JsonProperty(value = "location", required = true) Location location,
+			@JsonProperty("requires") String requires,
+			@JsonProperty("ensures") String ensures,
+			@JsonProperty(value = "format", required = true) Format format,
+			@JsonProperty("labels") Set<Label> labels) {
+		return new FunctionContract(location, requires, ensures, format, labels);
+	}
+
 	@JsonProperty("type")
 	public ContractType getType() {
 		return ContractType.FUNCTION_CONTRACT;
@@ -49,11 +63,10 @@ public final class FunctionContract
 	}
 
 	@Override
-	void checkLanguage(
-			Language language) {
-		super.checkLanguage(language);
-		if (!language.supportsContracts())
-			throw new InvalidWitnessException("Function contracts are not supported for " + language);
+	protected void checkContent(
+			Task task) {
+		if (!task.getLanguage().supportsContracts())
+			throw new InvalidWitnessException("Function contracts are not supported for " + task.getLanguage());
 	}
 
 	@Override

@@ -1,10 +1,14 @@
 package it.unive.lisa.witness.v2.metadata;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import it.unive.lisa.witness.v2.InvalidWitnessException;
 import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 import java.util.UUID;
@@ -35,6 +39,22 @@ public final class Metadata {
 		this.creationTime = Objects.requireNonNull(creationTime, "creationTime");
 		this.producer = Objects.requireNonNull(producer, "producer");
 		this.task = Objects.requireNonNull(task, "task");
+	}
+
+	@JsonCreator
+	private static Metadata read(
+			@JsonProperty(value = "format_version", required = true) String formatVersion,
+			@JsonProperty(value = "uuid", required = true) UUID uuid,
+			@JsonProperty(value = "creation_time", required = true) String creationTime,
+			@JsonProperty(value = "producer", required = true) Producer producer,
+			@JsonProperty(value = "task", required = true) Task task) {
+		Instant time;
+		try {
+			time = OffsetDateTime.parse(creationTime).toInstant();
+		} catch (DateTimeParseException e) {
+			throw new InvalidWitnessException("The creation time is not an ISO 8601 date and time: " + creationTime);
+		}
+		return new Metadata(formatVersion, uuid, time, producer, task);
 	}
 
 	public static Metadata create(

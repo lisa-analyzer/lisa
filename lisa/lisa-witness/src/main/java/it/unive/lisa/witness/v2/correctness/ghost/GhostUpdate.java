@@ -1,5 +1,6 @@
 package it.unive.lisa.witness.v2.correctness.ghost;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import it.unive.lisa.witness.v2.Location;
@@ -13,9 +14,10 @@ public final class GhostUpdate {
 
 	private final List<GhostAssignment> updates;
 
+	@JsonCreator
 	public GhostUpdate(
-			Location location,
-			List<GhostAssignment> updates) {
+			@JsonProperty(value = "location", required = true) Location location,
+			@JsonProperty(value = "updates", required = true) List<GhostAssignment> updates) {
 		this.location = Objects.requireNonNull(location, "location");
 		this.updates = List.copyOf(Objects.requireNonNull(updates, "updates"));
 	}
