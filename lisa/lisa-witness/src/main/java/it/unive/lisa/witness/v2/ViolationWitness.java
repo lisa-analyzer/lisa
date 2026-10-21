@@ -15,11 +15,6 @@ public final class ViolationWitness
 		Witness {
 
 	/**
-	 * The violation sequence of this witness.
-	 */
-	private final ViolationSequence sequence;
-
-	/**
 	 * Builds the witness.
 	 * 
 	 * @param sequence the violation sequence of the witness
@@ -30,7 +25,6 @@ public final class ViolationWitness
 	public ViolationWitness(
 			ViolationSequence sequence) {
 		super(List.of(Objects.requireNonNull(sequence, "sequence")));
-		this.sequence = sequence;
 	}
 
 	/**
@@ -39,21 +33,7 @@ public final class ViolationWitness
 	 * @return the violation sequence
 	 */
 	public ViolationSequence getSequence() {
-		return sequence;
+		return (ViolationSequence) getEntries().get(0);
 	}
 
-	@Override
-	public int hashCode() {
-		return sequence.hashCode();
-	}
-
-	@Override
-	public boolean equals(
-			Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null || getClass() != obj.getClass())
-			return false;
-		return sequence.equals(((ViolationWitness) obj).sequence);
-	}
 }

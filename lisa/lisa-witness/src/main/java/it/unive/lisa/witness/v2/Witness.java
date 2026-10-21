@@ -6,9 +6,10 @@ import it.unive.lisa.witness.v2.violation.ViolationSequence;
 import java.util.List;
 
 /**
- * An abstract witness, made of the entries of the witness format. Its
- * implementations are {@link ViolationWitness} and {@link CorrectnessWitness}.
- * When a witness is built, each of its entries is checked against its task, for
+ * An abstract witness, made of the entries of the witness format. The entries
+ * are the only data of a witness. Its implementations, {@link ViolationWitness}
+ * and {@link CorrectnessWitness}, read them through typed getters. When a
+ * witness is built, each of its entries is checked against its task, for
  * instance that every location is in one of its input files and that every
  * expression format is allowed for its language.
  * 
@@ -67,5 +68,20 @@ public abstract class Witness {
 	@JsonValue
 	public final List<Entry> getEntries() {
 		return entries;
+	}
+
+	@Override
+	public int hashCode() {
+		return entries.hashCode();
+	}
+
+	@Override
+	public boolean equals(
+			Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null || getClass() != obj.getClass())
+			return false;
+		return entries.equals(((Witness) obj).entries);
 	}
 }

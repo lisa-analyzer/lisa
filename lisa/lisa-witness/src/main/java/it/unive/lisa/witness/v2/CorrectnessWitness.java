@@ -19,16 +19,6 @@ public final class CorrectnessWitness
 		Witness {
 
 	/**
-	 * The invariants and contracts of this witness.
-	 */
-	private final InvariantSet invariants;
-
-	/**
-	 * The ghost code of this witness, or {@code null} if it has none.
-	 */
-	private final GhostInstrumentation ghost;
-
-	/**
 	 * Builds a witness without ghost code.
 	 * 
 	 * @param invariants the invariants and contracts of the witness
@@ -57,8 +47,6 @@ public final class CorrectnessWitness
 			GhostInstrumentation ghost) {
 		super(ghost == null ? List.of(Objects.requireNonNull(invariants, "invariants"))
 				: List.of(Objects.requireNonNull(invariants, "invariants"), ghost));
-		this.invariants = invariants;
-		this.ghost = ghost;
 		if (ghost != null && !ghost.getMetadata().getTask().equals(invariants.getMetadata().getTask()))
 			throw new InvalidWitnessException(
 					"The invariant_set and the ghost_instrumentation of a witness must have the same task");
@@ -112,7 +100,7 @@ public final class CorrectnessWitness
 	 * @return the invariant set
 	 */
 	public InvariantSet getInvariants() {
-		return invariants;
+		return (InvariantSet) getEntries().get(0);
 	}
 
 	/**
@@ -122,22 +110,7 @@ public final class CorrectnessWitness
 	 *             has none
 	 */
 	public Optional<GhostInstrumentation> getGhost() {
-		return Optional.ofNullable(ghost);
+		return getEntries().size() == 2 ? Optional.of((GhostInstrumentation) getEntries().get(1)) : Optional.empty();
 	}
 
-	@Override
-	public int hashCode() {
-		return Objects.hash(invariants, ghost);
-	}
-
-	@Override
-	public boolean equals(
-			Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null || getClass() != obj.getClass())
-			return false;
-		CorrectnessWitness other = (CorrectnessWitness) obj;
-		return invariants.equals(other.invariants) && Objects.equals(ghost, other.ghost);
-	}
 }
