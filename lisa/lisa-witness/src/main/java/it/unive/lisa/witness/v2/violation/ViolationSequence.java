@@ -44,7 +44,7 @@ public final class ViolationSequence
 			Task task) {
 		for (Segment segment : content)
 			for (Waypoint waypoint : segment.getWaypoints()) {
-				task.checkLocation(waypoint.getLocation());
+				checkLocation(task, waypoint.getLocation());
 				if (waypoint.getConstraint() != null && waypoint.getConstraint().getFormat() != null)
 					task.getLanguage().checkAllows(waypoint.getConstraint().getFormat(), waypoint);
 			}

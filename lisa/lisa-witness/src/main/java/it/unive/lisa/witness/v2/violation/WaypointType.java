@@ -2,10 +2,18 @@ package it.unive.lisa.witness.v2.violation;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 import it.unive.lisa.witness.v2.InvalidWitnessException;
+import it.unive.lisa.witness.v2.Language;
 
 public enum WaypointType {
 
 	ASSUMPTION("assumption") {
+
+		@Override
+		public Constraint constraint(
+				String value,
+				Language language) {
+			return Constraint.of(required(value), language.getExpressionFormat());
+		}
 
 		@Override
 		void check(
@@ -19,6 +27,13 @@ public enum WaypointType {
 	},
 
 	TARGET("target") {
+
+		@Override
+		public Constraint constraint(
+				String value,
+				Language language) {
+			return none(value);
+		}
 
 		@Override
 		void check(
@@ -35,6 +50,13 @@ public enum WaypointType {
 	FUNCTION_ENTER("function_enter") {
 
 		@Override
+		public Constraint constraint(
+				String value,
+				Language language) {
+			return none(value);
+		}
+
+		@Override
 		void check(
 				Action action,
 				Constraint constraint) {
@@ -45,6 +67,13 @@ public enum WaypointType {
 	},
 
 	FUNCTION_RETURN("function_return") {
+
+		@Override
+		public Constraint constraint(
+				String value,
+				Language language) {
+			return Constraint.of(required(value), language.getExtendedExpressionFormat());
+		}
 
 		@Override
 		void check(
@@ -58,6 +87,13 @@ public enum WaypointType {
 	},
 
 	BRANCHING("branching") {
+
+		@Override
+		public Constraint constraint(
+				String value,
+				Language language) {
+			return Constraint.withoutFormat(required(value));
+		}
 
 		@Override
 		void check(
@@ -79,6 +115,24 @@ public enum WaypointType {
 	abstract void check(
 			Action action,
 			Constraint constraint);
+
+	public abstract Constraint constraint(
+			String value,
+			Language language);
+
+	private static String required(
+			String value) {
+		if (value == null)
+			throw new InvalidWitnessException("This waypoint type needs a value");
+		return value;
+	}
+
+	private static Constraint none(
+			String value) {
+		if (value != null)
+			throw new InvalidWitnessException("This waypoint type has no value: " + value);
+		return null;
+	}
 
 	@JsonValue
 	public String getName() {

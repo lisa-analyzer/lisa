@@ -61,6 +61,35 @@ public enum Language {
 		return supports(LanguageFeature.FUNCTION_CONTRACTS);
 	}
 
+	public Format getExpressionFormat() {
+		return format(false);
+	}
+
+	public Format getExtendedExpressionFormat() {
+		return format(true);
+	}
+
+	// the extension keywords (\\result, \\at, \\old, ...) all start with a
+	// backslash
+	public Format getFormatFor(
+			String... expressions) {
+		for (String expression : expressions)
+			if (expression != null && expression.indexOf('\\') >= 0)
+				return getExtendedExpressionFormat();
+		return getExpressionFormat();
+	}
+
+	// acsl_expression is a deprecated extended C format: ext_c_expression
+	// replaces it
+	@SuppressWarnings("deprecation")
+	private Format format(
+			boolean extended) {
+		for (Format format : Format.values())
+			if (format.getLanguage() == this && format.isExtended() == extended && format != Format.ACSL_EXPRESSION)
+				return format;
+		throw new IllegalStateException("No " + (extended ? "extended " : "") + "expression format for " + this);
+	}
+
 	public boolean allows(
 			Format format) {
 		return format.getLanguage() == this;

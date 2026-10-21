@@ -41,6 +41,14 @@ public abstract class Entry {
 	protected abstract void checkContent(
 			Task task);
 
+	protected static void checkLocation(
+			Task task,
+			Location location) {
+		if (!task.getInputFiles().contains(location.getFileName()))
+			throw new InvalidWitnessException(
+					"The location " + location + " is not in an input file of the task: " + task.getInputFiles());
+	}
+
 	@Override
 	public int hashCode() {
 		return Objects.hash(getEntryType(), metadata);

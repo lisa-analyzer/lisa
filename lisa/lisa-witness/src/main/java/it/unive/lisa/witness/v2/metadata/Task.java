@@ -7,7 +7,6 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import it.unive.lisa.witness.v2.DataModel;
 import it.unive.lisa.witness.v2.InvalidWitnessException;
 import it.unive.lisa.witness.v2.Language;
-import it.unive.lisa.witness.v2.Location;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -57,13 +56,6 @@ public final class Task {
 			if (!SHA_256.matcher(hash.getValue()).matches())
 				throw new InvalidWitnessException(
 						"The hash of " + hash.getKey() + " is not a SHA-256 hash: " + hash.getValue());
-	}
-
-	public void checkLocation(
-			Location location) {
-		if (!inputFiles.contains(location.getFileName()))
-			throw new InvalidWitnessException(
-					"The location " + location + " is not in an input file of the task: " + inputFiles);
 	}
 
 	@JsonProperty("input_files")

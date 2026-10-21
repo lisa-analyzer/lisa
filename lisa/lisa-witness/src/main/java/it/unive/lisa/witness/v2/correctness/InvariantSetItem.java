@@ -61,7 +61,6 @@ public abstract class InvariantSetItem {
 	@SuppressWarnings("deprecation")
 	final void check(
 			Task task) {
-		task.checkLocation(location);
 		task.getLanguage().checkAllows(format, this);
 		if (format == Format.ACSL_EXPRESSION)
 			throw new InvalidWitnessException("acsl_expression is only allowed in function_return waypoints: " + this);

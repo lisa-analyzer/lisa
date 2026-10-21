@@ -54,7 +54,7 @@ public final class GhostInstrumentation
 		for (GhostVariable variable : getGhostVariables())
 			checkFormat(variable.getInitial().getFormat(), variable);
 		for (GhostUpdate update : getGhostUpdates()) {
-			task.checkLocation(update.getLocation());
+			checkLocation(task, update.getLocation());
 			for (GhostAssignment assignment : update.getUpdates())
 				checkFormat(assignment.getFormat(), assignment);
 		}
