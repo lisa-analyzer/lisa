@@ -2,12 +2,18 @@ package it.unive.lisa.analysis;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import it.unive.lisa.lattices.GenericSetLattice;
+import it.unive.lisa.lattices.SetLattice;
+import it.unive.lisa.program.SyntheticLocation;
+import it.unive.lisa.program.cfg.ProgramPoint;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import org.junit.jupiter.api.Test;
@@ -19,20 +25,75 @@ public class FixpointInfoTest {
 		return new GenericSetLattice<>(Set.of(elements));
 	}
 
+	/**
+	 * A set of strings that records the scoping operations applied to it.
+	 */
+	private static class ScopedSet
+			extends
+			SetLattice<ScopedSet, String>
+			implements
+			ScopedObject<ScopedSet> {
+
+		private ScopedSet(
+				Set<String> elements,
+				boolean isTop) {
+			super(elements, isTop);
+		}
+
+		@Override
+		public ScopedSet top() {
+			return new ScopedSet(Set.of(), true);
+		}
+
+		@Override
+		public ScopedSet bottom() {
+			return new ScopedSet(Set.of(), false);
+		}
+
+		@Override
+		public ScopedSet mk(
+				Set<String> set) {
+			return new ScopedSet(set, false);
+		}
+
+		private ScopedSet with(
+				String element) {
+			Set<String> result = new HashSet<>(elements);
+			result.add(element);
+			return mk(result);
+		}
+
+		@Override
+		public ScopedSet pushScope(
+				ScopeToken token,
+				ProgramPoint pp) {
+			return with("push");
+		}
+
+		@Override
+		public ScopedSet popScope(
+				ScopeToken token,
+				ProgramPoint pp) {
+			return with("pop");
+		}
+
+	}
+
 	@Test
-	public void defaultConstructorIsTop() {
+	public void defaultConstructorIsEmptyButNotTop() {
 		FixpointInfo info = new FixpointInfo();
-		assertTrue(info.isTop());
+		assertFalse(info.isTop());
 		assertFalse(info.isBottom());
 		assertTrue(info.isEmpty());
 	}
 
 	@Test
-	public void constructorWithEmptyMapIsAlsoTop() {
+	public void constructorWithEmptyMapIsEquivalentToDefaultConstructor() {
 		// an empty (but non-null) mapping carries no information, and is thus
 		// normalized to the same representation as the default constructor
 		FixpointInfo info = new FixpointInfo(Map.of());
-		assertTrue(info.isTop());
+		assertEquals(new FixpointInfo(), info);
+		assertFalse(info.isTop());
 	}
 
 	@Test
@@ -44,6 +105,67 @@ public class FixpointInfoTest {
 	}
 
 	@Test
+	public void topIsUniqueAndDistinctFromBottom() {
+		FixpointInfo top = FixpointInfo.TOP;
+		assertTrue(top.isTop());
+		assertFalse(top.isBottom());
+		assertSame(FixpointInfo.TOP, new FixpointInfo().top());
+		assertNotEquals(new FixpointInfo(), FixpointInfo.TOP);
+	}
+
+	@Test
+	public void emptyIsTheNeutralElementOfLub()
+			throws SemanticException {
+		// regression test: the empty mapping used to be considered top, and the
+		// lub with it used to discard all the information of the other operand
+		FixpointInfo info = new FixpointInfo(Map.of("a", set("x")));
+		assertEquals(info, new FixpointInfo().lub(info));
+		assertEquals(info, info.lub(new FixpointInfo()));
+		assertEquals(info, new FixpointInfo().upchain(info));
+		assertEquals(info, new FixpointInfo().widening(info));
+	}
+
+	@Test
+	public void emptyIsLessOrEqualThanNonEmpty()
+			throws SemanticException {
+		FixpointInfo info = new FixpointInfo(Map.of("a", set("x")));
+		assertTrue(new FixpointInfo().lessOrEqual(info));
+		assertFalse(info.lessOrEqual(new FixpointInfo()));
+		assertTrue(info.lessOrEqual(FixpointInfo.TOP));
+	}
+
+	@Test
+	public void scopingIsForwardedOnlyToScopedValues()
+			throws SemanticException {
+		// the program point is not used by the scoping operations under test
+		ProgramPoint pp = null;
+		ScopeToken token = new ScopeToken(() -> SyntheticLocation.INSTANCE);
+		ScopedSet scoped = new ScopedSet(Set.of(), false);
+		FixpointInfo info = new FixpointInfo(Map.of("scoped", scoped, "plain", set("x")));
+
+		FixpointInfo pushed = info.pushScope(token, pp);
+		assertEquals(scoped.with("push"), pushed.get("scoped"));
+		assertEquals(set("x"), pushed.get("plain"));
+
+		FixpointInfo popped = pushed.popScope(token, pp);
+		assertEquals(scoped.with("push").with("pop"), popped.get("scoped"));
+		assertEquals(set("x"), popped.get("plain"));
+	}
+
+	@Test
+	public void scopingWithoutScopedValuesYieldsTheSameInstance()
+			throws SemanticException {
+		// the program point is not used by the scoping operations under test
+		ProgramPoint pp = null;
+		ScopeToken token = new ScopeToken(() -> SyntheticLocation.INSTANCE);
+		FixpointInfo info = new FixpointInfo(Map.of("plain", set("x")));
+		assertSame(info, info.pushScope(token, pp));
+		assertSame(info, info.popScope(token, pp));
+		assertSame(FixpointInfo.TOP, FixpointInfo.TOP.pushScope(token, pp));
+		assertSame(FixpointInfo.BOTTOM, FixpointInfo.BOTTOM.popScope(token, pp));
+	}
+
+	@Test
 	public void getOnMissingKeyReturnsNull() {
 		FixpointInfo info = new FixpointInfo(Map.of("a", set("x")));
 		assertNull(info.get("missing"));
@@ -51,7 +173,7 @@ public class FixpointInfoTest {
 
 	@Test
 	public void getOnTopOrBottomReturnsNullRegardlessOfKey() {
-		assertNull(new FixpointInfo().get("anything"));
+		assertNull(FixpointInfo.TOP.get("anything"));
 		assertNull(FixpointInfo.BOTTOM.get("anything"));
 	}
 
@@ -145,7 +267,7 @@ public class FixpointInfoTest {
 	}
 
 	@Test
-	public void topIsTheNeutralElementOfLub()
+	public void topIsTheAbsorbingElementOfLub()
 			throws SemanticException {
 		FixpointInfo info = new FixpointInfo(Map.of("a", set("x")));
 		assertTrue(info.lub(info.top()).isTop());

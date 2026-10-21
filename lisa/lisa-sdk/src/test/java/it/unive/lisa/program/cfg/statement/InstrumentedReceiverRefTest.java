@@ -6,17 +6,17 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.InstrumentedReceiver;
-import it.unive.lisa.symbolic.value.Variable;
 import org.junit.jupiter.api.Test;
 
 public class InstrumentedReceiverRefTest {
 
 	@Test
-	public void getVariableOverridesTheDefaultToBuildAnInstrumentedReceiver() {
+	public void getIdentifierOverridesTheDefaultToBuildAnInstrumentedReceiver() {
 		CFG cfg = newCfg();
 		InstrumentedReceiverRef arrayReceiver = new InstrumentedReceiverRef(cfg, LOC, true);
-		Variable v = arrayReceiver.getVariable();
+		Identifier v = arrayReceiver.getIdentifier();
 		assertEquals(InstrumentedReceiver.class, v.getClass());
 		assertEquals(InstrumentedReceiver.getName(true, LOC), arrayReceiver.getName());
 	}

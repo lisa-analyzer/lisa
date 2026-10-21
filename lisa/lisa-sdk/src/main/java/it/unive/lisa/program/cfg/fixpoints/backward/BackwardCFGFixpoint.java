@@ -128,7 +128,7 @@ public abstract class BackwardCFGFixpoint<A extends AbstractLattice<A>, D extend
 
 		Collection<Identifier> ids = new LinkedList<>();
 		for (VariableTableEntry entry : toRemove) {
-			SymbolicExpression v = entry.createReference(graph).getVariable();
+			SymbolicExpression v = entry.createReference(graph).getIdentifier();
 			for (SymbolicExpression expr : interprocedural.getAnalysis()
 					.smallStepSemantics(approx, v, edge.getSource())
 					.getExecutionExpressions())

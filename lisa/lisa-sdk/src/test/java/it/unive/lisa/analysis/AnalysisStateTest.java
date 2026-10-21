@@ -43,7 +43,7 @@ public class AnalysisStateTest {
 	private static Identifier id(
 			CFG cfg,
 			String name) {
-		return new VariableRef(cfg, LOC, name).getVariable();
+		return new VariableRef(cfg, LOC, name).getIdentifier();
 	}
 
 	private static ProgramState<MarkerAbstractLattice> ps(

@@ -42,7 +42,6 @@ import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.PushAny;
 import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.symbolic.value.ValueExpression;
-import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.Type;
 import java.util.Collection;
 import java.util.HashMap;
@@ -616,7 +615,7 @@ public class Analysis<
 				.collect(Collectors.toList());
 		if (variable != null) {
 			A assigned = start.bottom();
-			Variable target = variable.getVariable();
+			Identifier target = variable.getIdentifier();
 			for (SymbolicExpression e : excs)
 				assigned = assigned.lub(domain.assign(start, target, e, variable));
 			moved = assigned.forgetIdentifiers(
@@ -628,9 +627,11 @@ public class Analysis<
 		} else
 			moved = moved.forgetIdentifiers(toForget, protectedBlock.getStart());
 
+		// the fixpoint information is the one of the caught errors
 		result = new ProgramState<>(
 				moved,
-				variable == null ? new Skip(SyntheticLocation.INSTANCE) : variable.getVariable());
+				new ExpressionSet(variable == null ? new Skip(SyntheticLocation.INSTANCE) : variable.getIdentifier()),
+				result.getFixpointInformation());
 		// no uncaught exceptions should remain
 		// in the resulting state
 		// since they are not caught by this block
