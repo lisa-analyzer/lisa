@@ -21,6 +21,10 @@ import org.junit.jupiter.api.io.TempDir;
  */
 public class ExampleHashesTest {
 
+	/**
+	 * The examples whose hashes are checked. The Symbiotic example is left out,
+	 * since its input file is an absolute path of another machine.
+	 */
 	private static final List<String> EXAMPLES = List.of(
 			"java/ExDarko_false.witness-2.4.yml",
 			"java/ExDarko_true.witness-2.4.yml",
@@ -37,8 +41,10 @@ public class ExampleHashesTest {
 			"multivar_1-1.witness-2.1.yml",
 			"safe-simple-concurrent.witness-2.1.yml");
 
-	// in sv-witnesses at 0ef19deb, these files differ from the ones their
-	// examples were made for
+	/**
+	 * The sources that differ from the ones their examples were made for, in
+	 * sv-witnesses at commit {@code 0ef19deb}.
+	 */
 	private static final Set<String> CHANGED_SOURCES = Set.of(
 			"./java/jpf-regression/ExDarko_true/Main.java",
 			"./zero_div.py",

@@ -18,6 +18,9 @@ import org.junit.jupiter.api.TestFactory;
  */
 public class RoundTripTest {
 
+	/**
+	 * Every example of the witness format.
+	 */
 	private static final List<String> EXAMPLES = List.of(
 			"java/ExDarko_false.witness-2.4.yml",
 			"java/ExDarko_true.witness-2.4.yml",

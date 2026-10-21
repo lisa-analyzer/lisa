@@ -45,12 +45,24 @@ import org.junit.jupiter.api.Test;
  */
 public class ExamplesTest {
 
+	/**
+	 * The mapper reading YAML trees, to compare witnesses with the examples.
+	 */
 	private static final ObjectMapper YAML = new ObjectMapper(new YAMLFactory());
 
+	/**
+	 * The {@code Verifier.java} input file of the Java examples.
+	 */
 	private static final String VERIFIER = "./java/common/org/sosy_lab/sv_benchmarks/Verifier.java";
 
+	/**
+	 * The hash of {@link #VERIFIER} in the Java examples.
+	 */
 	private static final String VERIFIER_HASH = "d544c9e74f86b4ed8e692b7b7bcb00ec3901e19f5b0d4740b49e5c3c672031ba";
 
+	/**
+	 * The specification of the Java examples.
+	 */
 	private static final String SPEC = "CHECK( init(Main.main()), LTL(G assert) )";
 
 	/**

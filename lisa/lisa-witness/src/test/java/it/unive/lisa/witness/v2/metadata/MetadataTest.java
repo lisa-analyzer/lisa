@@ -16,6 +16,9 @@ import org.junit.jupiter.api.Test;
  */
 public class MetadataTest {
 
+	/**
+	 * The producer of the witnesses of the tests.
+	 */
 	private static final Producer PRODUCER = new Producer("Test", "1");
 
 	/**

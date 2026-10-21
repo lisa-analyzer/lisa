@@ -58,10 +58,8 @@ public final class InvariantSet
 	@Override
 	protected void checkContent(
 			Task task) {
-		for (InvariantSetItem item : content) {
-			checkLocation(task, item.getLocation());
+		for (InvariantSetItem item : content)
 			item.check(task);
-		}
 	}
 
 	@Override

@@ -1,6 +1,7 @@
 package it.unive.lisa.witness.v2;
 
 import com.fasterxml.jackson.core.JsonLocation;
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
@@ -14,19 +15,21 @@ import java.nio.file.Path;
  * {@value it.unive.lisa.witness.v2.metadata.Metadata#FORMAT_VERSION} of the
  * witness format. A witness is read into the objects of this package through
  * their constructors, which perform the same checks as when a witness is built
- * by hand. Keys that are not part of the format are rejected. When a witness is
- * not valid, the message of the exception reports the line where the problem
- * was found, if known.
+ * by hand. Keys that are not part of the format, and keys written twice, are
+ * rejected. When a witness is not valid, the message of the exception reports
+ * the line where the problem was found, if known.
  * 
  * @author <a href="mailto:giacomo.zanatta@unive.it">Giacomo Zanatta</a>
  */
 public final class WitnessReader {
 
 	/**
-	 * The mapper reading the YAML text into the objects of this package. It
-	 * keeps the default settings of Jackson, which reject unknown keys.
+	 * The mapper reading the YAML text into the objects of this package.
+	 * Unknown keys are rejected, as in the default settings of Jackson, and so
+	 * are keys written twice in the same mapping.
 	 */
-	private static final ObjectMapper MAPPER = new ObjectMapper(new YAMLFactory());
+	private static final ObjectMapper MAPPER = new ObjectMapper(new YAMLFactory())
+			.enable(JsonParser.Feature.STRICT_DUPLICATE_DETECTION);
 
 	/**
 	 * This class only has static methods, and it is never instantiated.

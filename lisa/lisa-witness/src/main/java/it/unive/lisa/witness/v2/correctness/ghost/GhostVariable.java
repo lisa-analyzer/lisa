@@ -3,6 +3,7 @@ package it.unive.lisa.witness.v2.correctness.ghost;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import it.unive.lisa.witness.v2.InvalidWitnessException;
 import java.util.Objects;
 
 /**
@@ -41,6 +42,8 @@ public final class GhostVariable {
 	 * @param type    the C type of the variable
 	 * @param scope   the scope of the variable
 	 * @param initial the initial value of the variable
+	 * 
+	 * @throws InvalidWitnessException if the name or the type is blank
 	 */
 	@JsonCreator
 	public GhostVariable(
@@ -52,6 +55,10 @@ public final class GhostVariable {
 		this.type = Objects.requireNonNull(type, "type");
 		this.scope = Objects.requireNonNull(scope, "scope");
 		this.initial = Objects.requireNonNull(initial, "initial");
+		if (name.isBlank())
+			throw new InvalidWitnessException("A ghost variable needs a name");
+		if (type.isBlank())
+			throw new InvalidWitnessException("The ghost variable " + name + " needs a type");
 	}
 
 	/**

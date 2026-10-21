@@ -45,4 +45,14 @@ public class GhostTest {
 	public void aGhostUpdateNeedsAnAssignment() {
 		assertThrows(InvalidWitnessException.class, () -> new GhostUpdate(at(1), List.of()));
 	}
+
+	/**
+	 * Checks that a ghost variable needs a name and a type.
+	 */
+	@Test
+	public void aGhostVariableNeedsANameAndAType() {
+		Expression zero = new Expression("0", Format.C_EXPRESSION);
+		assertThrows(InvalidWitnessException.class, () -> new GhostVariable(" ", "int", GhostScope.GLOBAL, zero));
+		assertThrows(InvalidWitnessException.class, () -> new GhostVariable("g", "", GhostScope.GLOBAL, zero));
+	}
 }

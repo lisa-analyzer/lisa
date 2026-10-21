@@ -193,4 +193,13 @@ public class WitnessReaderTest {
 				List.of(new FunctionContract(at(1), null, "x > 0", Format.JAVA_EXPRESSION, null))));
 		assertEquals(witness, WitnessReader.read(WitnessWriter.write(witness)));
 	}
+
+	/**
+	 * Checks that a key written twice in the same mapping is rejected.
+	 */
+	@Test
+	public void aDuplicateKeyIsRejected()
+			throws Exception {
+		rejected(violationText().replace("action: follow", "action: follow\n            action: follow"));
+	}
 }

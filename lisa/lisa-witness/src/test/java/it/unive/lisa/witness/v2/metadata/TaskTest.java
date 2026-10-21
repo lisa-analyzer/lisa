@@ -24,6 +24,9 @@ import org.junit.jupiter.api.io.TempDir;
  */
 public class TaskTest {
 
+	/**
+	 * The specification of the tasks of the tests.
+	 */
 	private static final String SPEC = "CHECK( init(main()), LTL(G ! call(reach_error())) )";
 
 	/**

@@ -23,10 +23,19 @@ import org.junit.jupiter.api.Test;
  */
 public class BuilderLocationsTest {
 
+	/**
+	 * The producer of the witnesses of the tests.
+	 */
 	private static final Producer PRODUCER = new Producer("Test", "1");
 
+	/**
+	 * An input file named as BenchExec gives it to a verifier.
+	 */
 	private static final String MAIN = "../../sv-benchmarks/java/jpf-regression/ExDarko_false/Main.java";
 
+	/**
+	 * A location in a file that is not an input file of the tasks.
+	 */
 	private static final Location OTHER = new Location("Other.java", 2);
 
 	/**

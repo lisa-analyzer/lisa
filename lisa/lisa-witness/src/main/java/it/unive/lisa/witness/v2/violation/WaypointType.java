@@ -126,6 +126,9 @@ public enum WaypointType {
 				Constraint constraint) {
 			if (constraint == null || constraint.getFormat() != null)
 				throw new InvalidWitnessException("A branching waypoint needs a constraint without a format");
+			if (!constraint.getValue().equals("true") && !constraint.getValue().equals("false"))
+				throw new InvalidWitnessException(
+						"The constraint of a branching waypoint is true or false, not " + constraint.getValue());
 		}
 
 	};

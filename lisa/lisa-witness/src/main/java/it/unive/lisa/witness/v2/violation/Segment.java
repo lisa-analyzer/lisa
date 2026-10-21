@@ -86,6 +86,17 @@ public final class Segment {
 		return waypoints.stream().anyMatch(w -> w.getType() == WaypointType.TARGET);
 	}
 
+	/**
+	 * Returns whether this segment has a cycle waypoint, that is, whether it is
+	 * a cycle segment.
+	 * 
+	 * @return {@code true} if this segment has a cycle waypoint
+	 */
+	@JsonIgnore
+	public boolean isCycle() {
+		return waypoints.stream().anyMatch(w -> w.getAction() == Action.CYCLE);
+	}
+
 	@Override
 	public int hashCode() {
 		return waypoints.hashCode();

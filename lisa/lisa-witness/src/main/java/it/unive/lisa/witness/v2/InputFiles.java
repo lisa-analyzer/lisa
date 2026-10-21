@@ -7,7 +7,7 @@ import java.nio.file.Path;
  * The names of the input files of a task. A file is found by comparing absolute
  * and normalized paths, and its name is yielded exactly as the task writes it.
  * Relative names are resolved against the working directory, and symbolic links
- * are not followed, as in {@link TaskLoader}.
+ * are not followed, as in {@link it.unive.lisa.witness.v2.metadata.TaskLoader}.
  * 
  * @author <a href="mailto:giacomo.zanatta@unive.it">Giacomo Zanatta</a>
  */

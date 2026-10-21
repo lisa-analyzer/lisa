@@ -199,4 +199,30 @@ public class WitnessLanguageTest {
 				InvariantType.LOCATION_INVARIANT, new Location("Other.java", 4), "x >= 0", Format.JAVA_EXPRESSION)));
 		assertThrows(InvalidWitnessException.class, () -> new CorrectnessWitness(set));
 	}
+
+	/**
+	 * Checks that a location matches an input file written with {@code ./}, and
+	 * the other way round.
+	 */
+	@Test
+	public void aLocationMatchesAnInputFileWithADotSlash() {
+		Metadata dotSlash = new Metadata("2.4", metadata(Language.JAVA).getUuid(),
+				metadata(Language.JAVA).getCreationTime(), metadata(Language.JAVA).getProducer(),
+				new Task(List.of("./Main.java"), Map.of("./Main.java", TestValues.HASH),
+						"CHECK( init(Main.main()), LTL(G assert) )", Language.JAVA, null));
+		assertDoesNotThrow(() -> new ViolationWitness(
+				new ViolationSequence(dotSlash, List.of(Segment.of(Waypoint.target(new Location("Main.java", 2)))))));
+		assertDoesNotThrow(() -> new ViolationWitness(new ViolationSequence(metadata(Language.JAVA),
+				List.of(Segment.of(Waypoint.target(new Location("./Main.java", 2)))))));
+	}
+
+	/**
+	 * Checks that a Python correctness witness rejects ghost code.
+	 */
+	@Test
+	public void aPythonCorrectnessWitnessRejectsGhostCode() {
+		assertThrows(InvalidWitnessException.class, () -> new CorrectnessWitness(
+				invariants(Language.PYTHON, InvariantType.LOCATION_INVARIANT, Format.PYTHON_EXPRESSION),
+				ghost(Language.PYTHON)));
+	}
 }

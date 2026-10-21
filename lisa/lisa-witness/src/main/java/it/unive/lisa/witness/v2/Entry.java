@@ -9,6 +9,7 @@ import it.unive.lisa.witness.v2.correctness.ghost.GhostInstrumentation;
 import it.unive.lisa.witness.v2.metadata.Metadata;
 import it.unive.lisa.witness.v2.metadata.Task;
 import it.unive.lisa.witness.v2.violation.ViolationSequence;
+import java.nio.file.Path;
 import java.util.Objects;
 
 /**
@@ -87,7 +88,9 @@ public abstract class Entry {
 
 	/**
 	 * Checks that the given location is in one of the input files of the given
-	 * task. File names are compared exactly as they are written.
+	 * task. File names are compared after normalizing their paths, so that
+	 * {@code foo.c} and {@code ./foo.c} are the same file. A task never lists
+	 * two spellings of one file.
 	 * 
 	 * @param task     the task the location refers to
 	 * @param location the location to check
@@ -95,12 +98,15 @@ public abstract class Entry {
 	 * @throws InvalidWitnessException if the file of the location is not an
 	 *                                     input file of the task
 	 */
-	protected static void checkLocation(
+	public static void checkLocation(
 			Task task,
 			Location location) {
-		if (!task.getInputFiles().contains(location.getFileName()))
-			throw new InvalidWitnessException(
-					"The location " + location + " is not in an input file of the task: " + task.getInputFiles());
+		Path file = Path.of(location.getFileName()).normalize();
+		for (String input : task.getInputFiles())
+			if (Path.of(input).normalize().equals(file))
+				return;
+		throw new InvalidWitnessException(
+				"The location " + location + " is not in an input file of the task: " + task.getInputFiles());
 	}
 
 	@Override

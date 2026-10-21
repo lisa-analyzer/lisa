@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import it.unive.lisa.witness.v2.Entry;
 import it.unive.lisa.witness.v2.Format;
 import it.unive.lisa.witness.v2.InvalidWitnessException;
 import it.unive.lisa.witness.v2.Location;
@@ -52,6 +53,8 @@ public abstract class InvariantSetItem {
 	 * @param location the location of the item
 	 * @param format   the format of the expressions of the item
 	 * @param labels   the labels of the item, or {@code null} if it has none
+	 * 
+	 * @throws InvalidWitnessException if a label is {@code null}
 	 */
 	protected InvariantSetItem(
 			Location location,
@@ -59,6 +62,8 @@ public abstract class InvariantSetItem {
 			Set<Label> labels) {
 		this.location = Objects.requireNonNull(location, "location");
 		this.format = Objects.requireNonNull(format, "format");
+		if (labels != null && labels.stream().anyMatch(Objects::isNull))
+			throw new InvalidWitnessException("A label cannot be null");
 		this.labels = labels == null || labels.isEmpty() ? Collections.emptySet()
 				: Collections.unmodifiableSet(EnumSet.copyOf(labels));
 	}
@@ -105,9 +110,10 @@ public abstract class InvariantSetItem {
 	}
 
 	/**
-	 * Checks the item against the given task. Its format must be allowed for
-	 * the language of the task, and the rules of each kind of item are checked
-	 * by {@link #checkContent(Task)}.
+	 * Checks the item against the given task. Its location must be in an input
+	 * file of the task, its format must be allowed for the language of the
+	 * task, and the rules of each kind of item are checked by
+	 * {@link #checkContent(Task)}.
 	 * 
 	 * @param task the task of the item
 	 * 
@@ -117,6 +123,7 @@ public abstract class InvariantSetItem {
 	@SuppressWarnings("deprecation")
 	public final void check(
 			Task task) {
+		Entry.checkLocation(task, location);
 		task.getLanguage().checkAllows(format, this);
 		if (format == Format.ACSL_EXPRESSION)
 			throw new InvalidWitnessException("acsl_expression is only allowed in function_return waypoints: " + this);

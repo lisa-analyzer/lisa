@@ -31,10 +31,21 @@ import org.junit.jupiter.api.io.TempDir;
  */
 public class WitnessWriterTest {
 
+	/**
+	 * The producer of the witnesses of the tests.
+	 */
 	private static final Producer PRODUCER = new Producer("Test", "1");
 
+	/**
+	 * The mapper reading back the YAML text written by the writer.
+	 */
 	private static final ObjectMapper YAML = new ObjectMapper(new YAMLFactory());
 
+	/**
+	 * Values that YAML could read as something else than a string, such as
+	 * booleans, numbers, tags, anchors, aliases and comments, unless they are
+	 * quoted.
+	 */
 	private static final List<String> VALUES = List.of("true", "null", "yes", "1", "-1", "2.4", "!flag", "a: b",
 			"x # y", "*p", "&x", "x == 1 ? 2 : 3", "s.equals(\"a\")", "'c' == c", "[1]", "{x}", "@x", "%x", "-x",
 			"x || y", "`x`");

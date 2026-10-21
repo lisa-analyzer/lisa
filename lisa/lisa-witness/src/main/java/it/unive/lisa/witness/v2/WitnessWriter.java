@@ -49,13 +49,17 @@ public final class WitnessWriter {
 	 * 
 	 * @return the YAML text of the witness
 	 * 
-	 * @throws JsonProcessingException if the witness cannot be converted to
-	 *                                     YAML
+	 * @throws IllegalStateException if the witness cannot be converted to YAML,
+	 *                                   which only happens if the objects of
+	 *                                   this package cannot be serialized
 	 */
 	public static String write(
-			Witness witness)
-			throws JsonProcessingException {
-		return WRITER.writeValueAsString(witness.getEntries());
+			Witness witness) {
+		try {
+			return WRITER.writeValueAsString(witness.getEntries());
+		} catch (JsonProcessingException e) {
+			throw new IllegalStateException("The witness cannot be converted to YAML", e);
+		}
 	}
 
 	/**

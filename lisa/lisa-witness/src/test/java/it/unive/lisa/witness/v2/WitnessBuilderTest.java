@@ -21,6 +21,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Set;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -31,6 +32,9 @@ import org.junit.jupiter.api.io.TempDir;
  */
 public class WitnessBuilderTest {
 
+	/**
+	 * The producer of the witnesses of the tests.
+	 */
 	private static final Producer PRODUCER = new Producer("Test", "1");
 
 	/**
@@ -240,5 +244,39 @@ public class WitnessBuilderTest {
 				.build();
 		assertEquals(Integer.valueOf(1),
 				witness.getSequence().getSegments().get(0).getWaypoints().get(0).getThreadId());
+	}
+
+	/**
+	 * Checks that a label given twice is kept once.
+	 */
+	@Test
+	public void aRepeatedLabelIsKeptOnce() {
+		CorrectnessWitness witness = new CorrectnessWitnessBuilder(task(Language.C), PRODUCER)
+				.invariant(InvariantType.LOOP_INVARIANT, at(4), "i >= 0", Label.INDUCTIVE, Label.INDUCTIVE)
+				.build();
+		assertEquals(Set.of(Label.INDUCTIVE), witness.getInvariants().getItems().get(0).getLabels());
+	}
+
+	/**
+	 * Checks that a {@code null} label is rejected as an invalid witness.
+	 */
+	@Test
+	public void aNullLabelIsRejected() {
+		CorrectnessWitnessBuilder builder = new CorrectnessWitnessBuilder(task(Language.C), PRODUCER);
+		assertThrows(InvalidWitnessException.class,
+				() -> builder.invariant(InvariantType.LOOP_INVARIANT, at(4), "i >= 0", (Label) null));
+	}
+
+	/**
+	 * Checks that an explicit format is kept for invariants and contracts.
+	 */
+	@Test
+	public void anExplicitFormatIsKeptForInvariantsAndContracts() {
+		CorrectnessWitness witness = new CorrectnessWitnessBuilder(task(Language.C), PRODUCER)
+				.invariant(InvariantType.LOOP_INVARIANT, at(4), "i >= 0", Format.EXT_C_EXPRESSION)
+				.contract(at(5), "x > 0", "1", Format.EXT_C_EXPRESSION)
+				.build();
+		assertEquals(Format.EXT_C_EXPRESSION, witness.getInvariants().getItems().get(0).getFormat());
+		assertEquals(Format.EXT_C_EXPRESSION, witness.getInvariants().getItems().get(1).getFormat());
 	}
 }

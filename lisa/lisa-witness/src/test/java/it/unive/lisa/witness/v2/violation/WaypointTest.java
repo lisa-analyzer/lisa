@@ -142,4 +142,15 @@ public class WaypointTest {
 		assertNotEquals(a, Waypoint.functionReturn(at(3), "\\result == 1", Format.EXT_JAVA_EXPRESSION));
 		assertNotEquals(a, Waypoint.target(at(3)));
 	}
+
+	/**
+	 * Checks that a branching waypoint only accepts {@code true} or
+	 * {@code false}.
+	 */
+	@Test
+	public void aBranchingAcceptsOnlyTrueOrFalse() {
+		assertThrows(InvalidWitnessException.class,
+				() -> waypoint(WaypointType.BRANCHING, Action.FOLLOW, Constraint.withoutFormat("yes")));
+		assertDoesNotThrow(() -> waypoint(WaypointType.BRANCHING, Action.FOLLOW, Constraint.withoutFormat("false")));
+	}
 }

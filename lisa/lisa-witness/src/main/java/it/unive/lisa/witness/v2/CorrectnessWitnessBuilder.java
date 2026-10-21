@@ -20,11 +20,12 @@ import it.unive.lisa.witness.v2.metadata.TaskLoader;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 
 /**
  * A builder of correctness witnesses. Invariants and contracts use the plain
@@ -151,7 +152,36 @@ public final class CorrectnessWitnessBuilder
 			Location location,
 			String value,
 			Label... labels) {
-		return item(new Invariant(type, location, value, task.getLanguage().getFormatFor(value), Set.of(labels)));
+		return invariant(type, location, value, task.getLanguage().getFormatFor(value), labels);
+	}
+
+	/**
+	 * Adds an invariant of the given type, with an explicit format and the
+	 * given labels. The format is not chosen from the expression.
+	 * 
+	 * @param type     the type of the invariant
+	 * @param location the location of the invariant
+	 * @param value    the invariant
+	 * @param format   the format of the invariant
+	 * @param labels   the labels of the invariant, such as
+	 *                     {@link Label#INDUCTIVE}
+	 * 
+	 * @return this builder
+	 * 
+	 * @throws InvalidWitnessException if the location is not in an input file
+	 *                                     of the task, or if the invariant
+	 *                                     breaks a rule of the format, for
+	 *                                     instance a format not allowed for the
+	 *                                     language or a {@code null} label
+	 */
+	public CorrectnessWitnessBuilder invariant(
+			InvariantType type,
+			Location location,
+			String value,
+			Format format,
+			Label... labels) {
+		return item(new Invariant(type, location, value, format,
+				labels == null ? null : new HashSet<>(Arrays.asList(labels))));
 	}
 
 	/**
@@ -173,8 +203,32 @@ public final class CorrectnessWitnessBuilder
 			Location location,
 			String requires,
 			String ensures) {
-		return item(new FunctionContract(location, requires, ensures,
-				task.getLanguage().getFormatFor(requires, ensures), null));
+		return contract(location, requires, ensures, task.getLanguage().getFormatFor(requires, ensures));
+	}
+
+	/**
+	 * Adds a contract of the function at the location, with an explicit format.
+	 * The format is not chosen from the conditions.
+	 * 
+	 * @param location the location of the function
+	 * @param requires the precondition of the function, or {@code null} if it
+	 *                     is not given
+	 * @param ensures  the postcondition of the function, or {@code null} if it
+	 *                     is not given
+	 * @param format   the format of the conditions
+	 * 
+	 * @return this builder
+	 * 
+	 * @throws InvalidWitnessException if the location is not in an input file
+	 *                                     of the task, or if the contract
+	 *                                     breaks a rule of the format
+	 */
+	public CorrectnessWitnessBuilder contract(
+			Location location,
+			String requires,
+			String ensures,
+			Format format) {
+		return item(new FunctionContract(location, requires, ensures, format, null));
 	}
 
 	/**
@@ -190,8 +244,7 @@ public final class CorrectnessWitnessBuilder
 	 */
 	public CorrectnessWitnessBuilder item(
 			InvariantSetItem item) {
-		Entry.checkLocation(task, Objects.requireNonNull(item, "item").getLocation());
-		item.check(task);
+		Objects.requireNonNull(item, "item").check(task);
 		items.add(item);
 		return this;
 	}
