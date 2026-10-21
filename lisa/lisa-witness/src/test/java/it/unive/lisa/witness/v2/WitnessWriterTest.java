@@ -24,6 +24,11 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+/**
+ * Tests of the witness writer.
+ * 
+ * @author <a href="mailto:giacomo.zanatta@unive.it">Giacomo Zanatta</a>
+ */
 public class WitnessWriterTest {
 
 	private static final Producer PRODUCER = new Producer("Test", "1");
@@ -34,6 +39,12 @@ public class WitnessWriterTest {
 			"x # y", "*p", "&x", "x == 1 ? 2 : 3", "s.equals(\"a\")", "'c' == c", "[1]", "{x}", "@x", "%x", "-x",
 			"x || y", "`x`");
 
+	/**
+	 * Returns a correctness witness with one invariant for each of the tricky
+	 * values.
+	 * 
+	 * @return the witness
+	 */
 	private static CorrectnessWitness witness() {
 		List<InvariantSetItem> items = new ArrayList<>();
 		for (int i = 0; i < VALUES.size(); i++)
@@ -42,6 +53,9 @@ public class WitnessWriterTest {
 		return new CorrectnessWitness(new InvariantSet(TestValues.metadata(Language.JAVA), items));
 	}
 
+	/**
+	 * Checks that every value is read back as the same string.
+	 */
 	@Test
 	public void everyValueIsReadBackAsTheSameString()
 			throws IOException {
@@ -53,6 +67,9 @@ public class WitnessWriterTest {
 		}
 	}
 
+	/**
+	 * Checks that the format version stays a string.
+	 */
 	@Test
 	public void theFormatVersionStaysAString()
 			throws IOException {
@@ -60,6 +77,9 @@ public class WitnessWriterTest {
 		assertTrue(metadata.get("format_version").isTextual());
 	}
 
+	/**
+	 * Checks that the output is a list without a document start marker.
+	 */
 	@Test
 	public void theOutputIsAListWithoutADocumentStartMarker()
 			throws IOException {
@@ -68,6 +88,9 @@ public class WitnessWriterTest {
 		assertTrue(text.strip().startsWith("- entry_type: invariant_set"));
 	}
 
+	/**
+	 * Checks that writing to a file gives the same text.
+	 */
 	@Test
 	public void writingToAFileGivesTheSameText(
 			@TempDir Path dir)
@@ -77,6 +100,9 @@ public class WitnessWriterTest {
 		assertEquals(WitnessWriter.write(witness()), Files.readString(file, StandardCharsets.UTF_8));
 	}
 
+	/**
+	 * Checks that writing to a stream leaves it open.
+	 */
 	@Test
 	public void writingToAStreamLeavesItOpen()
 			throws IOException {
@@ -86,9 +112,12 @@ public class WitnessWriterTest {
 		assertEquals(WitnessWriter.write(witness()) + "#", out.toString(StandardCharsets.UTF_8));
 	}
 
+	/**
+	 * Checks that a witness is serialized as its list of entries. A plain JSON
+	 * mapper gives the same tree as the writer, while a plain YAML mapper would
+	 * write the type keys as YAML tags, which the writer turns off.
+	 */
 	@Test
-	// a plain YAML mapper would write the type keys as YAML tags: the writer
-	// turns them off
 	public void aWitnessIsSerializedAsItsEntries()
 			throws Exception {
 		ViolationWitness witness = new ViolationWitnessBuilder(task(Language.JAVA), PRODUCER).target(at(2)).build();

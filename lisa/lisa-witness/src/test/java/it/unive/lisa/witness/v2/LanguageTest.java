@@ -6,8 +6,16 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
+/**
+ * Tests of the languages and of their expression formats.
+ * 
+ * @author <a href="mailto:giacomo.zanatta@unive.it">Giacomo Zanatta</a>
+ */
 public class LanguageTest {
 
+	/**
+	 * Checks that each language allows only its own formats.
+	 */
 	@Test
 	@SuppressWarnings("deprecation")
 	public void eachLanguageAllowsOnlyItsOwnFormats() {
@@ -18,6 +26,9 @@ public class LanguageTest {
 		assertTrue(Language.C.allows(Format.ACSL_EXPRESSION));
 	}
 
+	/**
+	 * Checks that only C requires a data model and supports ghost code.
+	 */
 	@Test
 	public void onlyCRequiresADataModelAndSupportsGhostCode() {
 		assertTrue(Language.C.requiresDataModel());
@@ -26,6 +37,10 @@ public class LanguageTest {
 		assertFalse(Language.PYTHON.supportsGhost());
 	}
 
+	/**
+	 * Checks that the extended formats are the {@code ext_*} ones and the ACSL
+	 * one.
+	 */
 	@Test
 	@SuppressWarnings("deprecation")
 	public void extendedFormatsAreTheExtOnes() {
@@ -34,6 +49,9 @@ public class LanguageTest {
 					format.isExtended(), format.getName());
 	}
 
+	/**
+	 * Checks that each language has an expression and an extended format.
+	 */
 	@Test
 	public void eachLanguageHasAnExpressionAndAnExtendedFormat() {
 		assertEquals(Format.JAVA_EXPRESSION, Language.JAVA.getExpressionFormat());
@@ -44,6 +62,9 @@ public class LanguageTest {
 		assertEquals(Format.EXT_PYTHON_EXPRESSION, Language.PYTHON.getExtendedExpressionFormat());
 	}
 
+	/**
+	 * Checks that any backslash outside literals needs the extended format.
+	 */
 	@Test
 	public void anyBackslashOutsideLiteralsNeedsTheExtendedFormat() {
 		assertEquals(Format.EXT_C_EXPRESSION, Language.C.getFormatFor("\\valid(p)"));
@@ -59,6 +80,9 @@ public class LanguageTest {
 		assertEquals(Format.EXT_PYTHON_EXPRESSION, Language.PYTHON.getFormatFor("\\old(x) < x"));
 	}
 
+	/**
+	 * Checks that a long literal is handled in linear time.
+	 */
 	@Test
 	public void aLongLiteralIsHandledInLinearTime() {
 		String literal = "s.equals(\"" + "\\n".repeat(500_000) + "\")";

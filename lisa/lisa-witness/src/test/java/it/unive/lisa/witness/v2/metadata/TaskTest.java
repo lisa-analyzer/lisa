@@ -17,28 +17,46 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+/**
+ * Tests of tasks and of the task loader.
+ * 
+ * @author <a href="mailto:giacomo.zanatta@unive.it">Giacomo Zanatta</a>
+ */
 public class TaskTest {
 
 	private static final String SPEC = "CHECK( init(main()), LTL(G ! call(reach_error())) )";
 
+	/**
+	 * Checks that a C task requires a data model.
+	 */
 	@Test
 	public void aCTaskRequiresADataModel() {
 		assertThrows(InvalidWitnessException.class,
 				() -> new Task(List.of("a.c"), Map.of("a.c", HASH), SPEC, Language.C, null));
 	}
 
+	/**
+	 * Checks that a Java task rejects a data model.
+	 */
 	@Test
 	public void aJavaTaskRejectsADataModel() {
 		assertThrows(InvalidWitnessException.class, () -> new Task(List.of("Main.java"),
 				Map.of("Main.java", HASH), SPEC, Language.JAVA, DataModel.LP64));
 	}
 
+	/**
+	 * Checks that every input file needs a hash.
+	 */
 	@Test
 	public void everyInputFileNeedsAHash() {
 		assertThrows(InvalidWitnessException.class, () -> new Task(List.of("Main.java", "Verifier.java"),
 				Map.of("Main.java", HASH), SPEC, Language.JAVA, null));
 	}
 
+	/**
+	 * Checks that {@code TaskLoader.load} expands directories and hashes every
+	 * file.
+	 */
 	@Test
 	public void loadExpandsDirectoriesAndHashesEveryFile(
 			@TempDir Path dir)
@@ -59,30 +77,46 @@ public class TaskTest {
 		assertEquals("CHECK( init(Main.main()), LTL(G assert) )", task.getSpecification());
 	}
 
+	/**
+	 * Checks that an input file is listed once.
+	 */
 	@Test
 	public void anInputFileIsListedOnce() {
 		assertThrows(InvalidWitnessException.class, () -> new Task(List.of("Main.java", "Main.java"),
 				Map.of("Main.java", HASH), SPEC, Language.JAVA, null));
 	}
 
+	/**
+	 * Checks that a hash is a SHA-256 hash.
+	 */
 	@Test
 	public void aHashIsASha256Hash() {
 		assertThrows(InvalidWitnessException.class,
 				() -> new Task(List.of("Main.java"), Map.of("Main.java", "00"), SPEC, Language.JAVA, null));
 	}
 
+	/**
+	 * Checks that a task needs an input file.
+	 */
 	@Test
 	public void aTaskNeedsAnInputFile() {
 		assertThrows(InvalidWitnessException.class,
 				() -> new Task(List.of(), Map.of(), SPEC, Language.JAVA, null));
 	}
 
+	/**
+	 * Checks that the same file under two spellings is rejected.
+	 */
 	@Test
 	public void theSameFileUnderTwoSpellingsIsRejected() {
 		assertThrows(InvalidWitnessException.class, () -> new Task(List.of("a/B.java", "./a/B.java"),
 				Map.of("a/B.java", HASH, "./a/B.java", HASH), SPEC, Language.JAVA, null));
 	}
 
+	/**
+	 * Checks that the loader keeps only the source files of the language, each
+	 * once.
+	 */
 	@Test
 	public void theLoaderKeepsTheSourcesOfTheLanguageOnce(
 			@TempDir Path dir)

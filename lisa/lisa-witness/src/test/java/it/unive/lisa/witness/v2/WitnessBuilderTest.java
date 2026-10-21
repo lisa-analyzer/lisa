@@ -24,10 +24,18 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+/**
+ * Tests of the violation and correctness witness builders.
+ * 
+ * @author <a href="mailto:giacomo.zanatta@unive.it">Giacomo Zanatta</a>
+ */
 public class WitnessBuilderTest {
 
 	private static final Producer PRODUCER = new Producer("Test", "1");
 
+	/**
+	 * Checks that the violation builder fills the metadata.
+	 */
 	@Test
 	public void theViolationBuilderFillsTheMetadata() {
 		Metadata metadata = new ViolationWitnessBuilder(task(Language.JAVA), PRODUCER).target(at(2)).build()
@@ -37,6 +45,9 @@ public class WitnessBuilderTest {
 		assertEquals(task(Language.JAVA), metadata.getTask());
 	}
 
+	/**
+	 * Checks that the formats follow the language.
+	 */
 	@Test
 	public void theFormatsFollowTheLanguage() {
 		ViolationWitness witness = new ViolationWitnessBuilder(task(Language.C), PRODUCER)
@@ -49,6 +60,9 @@ public class WitnessBuilderTest {
 		assertEquals(Format.EXT_C_EXPRESSION, segments.get(1).getWaypoints().get(0).getConstraint().getFormat());
 	}
 
+	/**
+	 * Checks that the correctness builder chooses the formats.
+	 */
 	@Test
 	public void theCorrectnessBuilderChoosesTheFormats() {
 		CorrectnessWitness witness = new CorrectnessWitnessBuilder(task(Language.JAVA), PRODUCER)
@@ -61,6 +75,9 @@ public class WitnessBuilderTest {
 		assertFalse(witness.getGhost().isPresent());
 	}
 
+	/**
+	 * Checks that ghost code makes a second entry with the same metadata.
+	 */
 	@Test
 	public void ghostCodeMakesASecondEntryWithTheSameMetadata() {
 		CorrectnessWitness witness = new CorrectnessWitnessBuilder(task(Language.C), PRODUCER)
@@ -72,6 +89,9 @@ public class WitnessBuilderTest {
 		assertEquals(witness.getInvariants().getMetadata(), witness.getGhost().get().getMetadata());
 	}
 
+	/**
+	 * Checks that ghost code is rejected for Java when added.
+	 */
 	@Test
 	public void ghostCodeIsRejectedForJavaWhenAdded() {
 		CorrectnessWitnessBuilder builder = new CorrectnessWitnessBuilder(task(Language.JAVA), PRODUCER);
@@ -79,6 +99,10 @@ public class WitnessBuilderTest {
 		assertThrows(InvalidWitnessException.class, () -> builder.ghostUpdate(at(1), "ghost", "1"));
 	}
 
+	/**
+	 * Checks that {@code forInputs} hashes the files and keeps their names as
+	 * given.
+	 */
 	@Test
 	public void forInputsHashesTheFilesAsGiven(
 			@TempDir Path dir)
@@ -93,6 +117,9 @@ public class WitnessBuilderTest {
 		assertEquals(witness, WitnessReader.read(WitnessWriter.write(witness)));
 	}
 
+	/**
+	 * Checks that avoid waypoints come before the follow waypoint.
+	 */
 	@Test
 	public void avoidWaypointsComeBeforeTheFollowWaypoint() {
 		ViolationWitness witness = new ViolationWitnessBuilder(task(Language.C), PRODUCER)
@@ -109,6 +136,9 @@ public class WitnessBuilderTest {
 		assertEquals(2, witness.getSequence().getSegments().size());
 	}
 
+	/**
+	 * Checks that a cycle segment can be built.
+	 */
 	@Test
 	public void aCycleSegment() {
 		ViolationWitness witness = new ViolationWitnessBuilder(task(Language.C), PRODUCER)
@@ -118,6 +148,9 @@ public class WitnessBuilderTest {
 		assertEquals(Action.CYCLE, witness.getSequence().getSegments().get(1).getWaypoints().get(0).getAction());
 	}
 
+	/**
+	 * Checks that a data race ends with two targets.
+	 */
 	@Test
 	public void aDataRaceEndsWithTwoTargets() {
 		ViolationWitness witness = new ViolationWitnessBuilder(task(Language.C), PRODUCER)
@@ -128,6 +161,9 @@ public class WitnessBuilderTest {
 		assertEquals(Integer.valueOf(2), last.getWaypoints().get(1).getThreadId());
 	}
 
+	/**
+	 * Checks that assignments at the same location form one update.
+	 */
 	@Test
 	public void assignmentsAtTheSameLocationFormOneUpdate() {
 		CorrectnessWitness witness = new CorrectnessWitnessBuilder(task(Language.C), PRODUCER)
@@ -141,6 +177,9 @@ public class WitnessBuilderTest {
 		assertEquals(2, witness.getGhost().get().getGhostUpdates().get(0).getUpdates().size());
 	}
 
+	/**
+	 * Checks that a plain expression keeps the plain format.
+	 */
 	@Test
 	public void aPlainExpressionKeepsThePlainFormat() {
 		CorrectnessWitness witness = new CorrectnessWitnessBuilder(task(Language.C), PRODUCER)
@@ -152,6 +191,9 @@ public class WitnessBuilderTest {
 		assertTrue(witness.getInvariants().getItems().get(1).isInductive());
 	}
 
+	/**
+	 * Checks that the builder checks an item when it is added.
+	 */
 	@Test
 	public void theBuilderChecksAnItemWhenItIsAdded() {
 		CorrectnessWitnessBuilder builder = new CorrectnessWitnessBuilder(task(Language.JAVA), PRODUCER);
@@ -161,6 +203,9 @@ public class WitnessBuilderTest {
 				new Invariant(InvariantType.LOCATION_INVARIANT, at(1), "x == 0", Format.C_EXPRESSION)));
 	}
 
+	/**
+	 * Checks that the builder rejects a duplicate ghost variable at the call.
+	 */
 	@Test
 	public void theBuilderRejectsADuplicateGhostVariableAtTheCall() {
 		CorrectnessWitnessBuilder builder = new CorrectnessWitnessBuilder(task(Language.C), PRODUCER)
@@ -168,6 +213,9 @@ public class WitnessBuilderTest {
 		assertThrows(InvalidWitnessException.class, () -> builder.ghostVariable("g", "int", "1"));
 	}
 
+	/**
+	 * Checks that an update before its declaration is accepted.
+	 */
 	@Test
 	public void anUpdateBeforeItsDeclarationIsAccepted() {
 		CorrectnessWitness witness = new CorrectnessWitnessBuilder(task(Language.C), PRODUCER)
@@ -177,6 +225,9 @@ public class WitnessBuilderTest {
 		assertEquals(1, witness.getGhost().get().getGhostUpdates().size());
 	}
 
+	/**
+	 * Checks that an explicit format is checked when added.
+	 */
 	@Test
 	@SuppressWarnings("deprecation")
 	public void anExplicitFormatIsCheckedWhenAdded() {

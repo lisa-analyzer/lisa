@@ -13,12 +13,26 @@ import java.nio.file.Path;
 import org.junit.jupiter.api.Test;
 
 // every example of the sv-witnesses repository, rebuilt with the builders
+/**
+ * Tests rebuilding every example of the witness format with the witness
+ * builders.
+ * 
+ * @author <a href="mailto:giacomo.zanatta@unive.it">Giacomo Zanatta</a>
+ */
 public class ExamplesFromBuildersTest {
 
 	private static final Producer PRODUCER = new Producer("Test", "1");
 
-	// the older examples have the same content in 2.4: only their version is
-	// changed
+	/**
+	 * Reads an example of the witness format. The older examples have the same
+	 * content in version 2.4, and only their version is changed.
+	 * 
+	 * @param name the name of the example in the test cases
+	 * 
+	 * @return the witness
+	 * 
+	 * @throws Exception if the example cannot be read
+	 */
 	static Witness example(
 			String name)
 			throws Exception {
@@ -29,11 +43,24 @@ public class ExamplesFromBuildersTest {
 		}
 	}
 
+	/**
+	 * Returns the task of the given witness.
+	 * 
+	 * @param witness the witness
+	 * 
+	 * @return the task of its first entry
+	 */
 	private static Task task(
 			Witness witness) {
 		return witness.getEntries().get(0).getMetadata().getTask();
 	}
 
+	/**
+	 * Checks that the builder builds the segments of the given example.
+	 * 
+	 * @param example the example
+	 * @param builder the builder
+	 */
 	private static void assertSameSegments(
 			Witness example,
 			ViolationWitnessBuilder builder) {
@@ -41,6 +68,13 @@ public class ExamplesFromBuildersTest {
 				builder.build().getSequence().getSegments());
 	}
 
+	/**
+	 * Checks that the builder builds the invariants and contracts of the given
+	 * example.
+	 * 
+	 * @param example the example
+	 * @param builder the builder
+	 */
 	private static void assertSameItems(
 			Witness example,
 			CorrectnessWitnessBuilder builder) {
@@ -50,6 +84,10 @@ public class ExamplesFromBuildersTest {
 
 	// ---------------------------------------------------------------- Java
 
+	/**
+	 * Checks that the builders rebuild the Java violation example
+	 * ({@code ExDarko_false}).
+	 */
 	@Test
 	public void javaViolation()
 			throws Exception {
@@ -61,6 +99,10 @@ public class ExamplesFromBuildersTest {
 				.target(new Location(main, 48, 12)));
 	}
 
+	/**
+	 * Checks that the builders rebuild the Java correctness example
+	 * ({@code ExDarko_true}).
+	 */
 	@Test
 	public void javaCorrectness()
 			throws Exception {
@@ -72,6 +114,10 @@ public class ExamplesFromBuildersTest {
 
 	// ---------------------------------------------------------------- Python
 
+	/**
+	 * Checks that the builders rebuild the Python violation example
+	 * ({@code zero_div}).
+	 */
 	@Test
 	public void pythonViolation()
 			throws Exception {
@@ -82,6 +128,10 @@ public class ExamplesFromBuildersTest {
 				.target(new Location(file, 20, 15)));
 	}
 
+	/**
+	 * Checks that the builders rebuild the Python correctness example
+	 * ({@code sum}).
+	 */
 	@Test
 	public void pythonCorrectness()
 			throws Exception {
@@ -93,6 +143,10 @@ public class ExamplesFromBuildersTest {
 	// ---------------------------------------------------------------- C,
 	// violation
 
+	/**
+	 * Checks that the builders rebuild the C concurrent violation example
+	 * ({@code concurrent-unreach}).
+	 */
 	@Test
 	public void cConcurrentUnreach()
 			throws Exception {
@@ -105,6 +159,10 @@ public class ExamplesFromBuildersTest {
 				.target(new Location(file, 26, 17, "main"), 0));
 	}
 
+	/**
+	 * Checks that the builders rebuild the C concurrent overflow example
+	 * ({@code concurrent-no-overflow}).
+	 */
 	@Test
 	public void cConcurrentNoOverflow()
 			throws Exception {
@@ -116,6 +174,10 @@ public class ExamplesFromBuildersTest {
 				.target(new Location(file, 25, 5, "main"), 0));
 	}
 
+	/**
+	 * Checks that the builders rebuild the C data race example
+	 * ({@code concurrent-data-race}).
+	 */
 	@Test
 	public void cConcurrentDataRace()
 			throws Exception {
@@ -129,6 +191,10 @@ public class ExamplesFromBuildersTest {
 						.target(new Location(file, 21, 5, "t2_func"), 2)));
 	}
 
+	/**
+	 * Checks that the builders rebuild the C non-termination example
+	 * ({@code nonterminating-program-example}).
+	 */
 	@Test
 	public void cNonTerminating()
 			throws Exception {
@@ -143,6 +209,10 @@ public class ExamplesFromBuildersTest {
 				.segment(s -> s.branching(Action.CYCLE, new Location(file, 24, 13), false)));
 	}
 
+	/**
+	 * Checks that the builders rebuild the C violation example
+	 * ({@code unsafe-program-example.cpachecker}).
+	 */
 	@Test
 	public void cUnsafeFromCPAchecker()
 			throws Exception {
@@ -156,8 +226,12 @@ public class ExamplesFromBuildersTest {
 				.target(new Location(file, 23, 5, "main")));
 	}
 
-	// this example uses acsl_expression, deprecated since 2.1: only an explicit
-	// format gives it
+	/**
+	 * Checks that the builders rebuild the C violation example
+	 * ({@code unsafe-program-example.symbiotic}). It uses
+	 * {@code acsl_expression}, deprecated since version 2.1, which only an
+	 * explicit format gives.
+	 */
 	@Test
 	@SuppressWarnings("deprecation")
 	public void cUnsafeFromSymbiotic()
@@ -177,6 +251,10 @@ public class ExamplesFromBuildersTest {
 	// ---------------------------------------------------------------- C,
 	// correctness
 
+	/**
+	 * Checks that the builders rebuild the C correctness example
+	 * ({@code safe-program-example}).
+	 */
 	@Test
 	public void cSafe()
 			throws Exception {
@@ -186,6 +264,10 @@ public class ExamplesFromBuildersTest {
 						"s <= i*255 && 0 <= i && i <= 255 && n <= 255"));
 	}
 
+	/**
+	 * Checks that the builders rebuild the C termination example
+	 * ({@code terminating-program-example}).
+	 */
 	@Test
 	public void cTerminating()
 			throws Exception {
@@ -195,6 +277,10 @@ public class ExamplesFromBuildersTest {
 						new Location("terminating-program-example.c", 15, 5, "main"), "\\at(i, AnyPrev) > i"));
 	}
 
+	/**
+	 * Checks that the builders rebuild the C correctness example
+	 * ({@code multivar_1-1, version 2.0}).
+	 */
 	@Test
 	public void cMultivar20()
 			throws Exception {
@@ -203,6 +289,10 @@ public class ExamplesFromBuildersTest {
 				.loopInvariant(new Location("./multivar_1-1.c", 25, 9, "main"), "( y == x )"));
 	}
 
+	/**
+	 * Checks that the builders rebuild the C correctness with contracts example
+	 * ({@code multivar_1-1, version 2.1}).
+	 */
 	@Test
 	public void cMultivarWithContracts()
 			throws Exception {
@@ -214,6 +304,10 @@ public class ExamplesFromBuildersTest {
 				.contract(new Location(file, 21, 1, "main"), "1", "\\return == 0"));
 	}
 
+	/**
+	 * Checks that the builders rebuild the C correctness with ghost code
+	 * example ({@code safe-simple-concurrent}).
+	 */
 	@Test
 	public void cGhostCode()
 			throws Exception {

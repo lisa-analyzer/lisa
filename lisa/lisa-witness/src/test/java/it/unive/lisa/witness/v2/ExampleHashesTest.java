@@ -14,6 +14,11 @@ import java.util.Set;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+/**
+ * Tests of the hashes written in the examples of the witness format.
+ * 
+ * @author <a href="mailto:giacomo.zanatta@unive.it">Giacomo Zanatta</a>
+ */
 public class ExampleHashesTest {
 
 	private static final List<String> EXAMPLES = List.of(
@@ -41,6 +46,10 @@ public class ExampleHashesTest {
 			"nonterminating-program-example.c",
 			"./safe-simple-concurrent.c");
 
+	/**
+	 * Checks that the hashes of the examples are the ones of their sources,
+	 * apart from the sources known to differ.
+	 */
 	@Test
 	public void theHashesAreTheOnesOfTheSources(
 			@TempDir Path dir)

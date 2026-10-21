@@ -24,8 +24,23 @@ import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 
+/**
+ * Tests of the rules a witness checks against the language and the input files
+ * of its task.
+ * 
+ * @author <a href="mailto:giacomo.zanatta@unive.it">Giacomo Zanatta</a>
+ */
 public class WitnessLanguageTest {
 
+	/**
+	 * Returns an invariant set with one invariant of the given type and format.
+	 * 
+	 * @param language the language of the task
+	 * @param type     the type of the invariant
+	 * @param format   the format of the invariant
+	 * 
+	 * @return the invariant set
+	 */
 	private static InvariantSet invariants(
 			Language language,
 			InvariantType type,
@@ -33,6 +48,13 @@ public class WitnessLanguageTest {
 		return new InvariantSet(metadata(language), List.of(new Invariant(type, at(4), "x >= 0", format)));
 	}
 
+	/**
+	 * Returns a ghost instrumentation declaring one ghost variable.
+	 * 
+	 * @param language the language of the task
+	 * 
+	 * @return the ghost instrumentation
+	 */
 	private static GhostInstrumentation ghost(
 			Language language) {
 		GhostVariable lock = new GhostVariable("held", "int", GhostScope.GLOBAL,
@@ -40,6 +62,9 @@ public class WitnessLanguageTest {
 		return new GhostInstrumentation(metadata(language), new GhostContent(List.of(lock), List.of()));
 	}
 
+	/**
+	 * Checks that a Java violation witness rejects a C format.
+	 */
 	@Test
 	public void aJavaViolationWitnessRejectsACFormat() {
 		ViolationSequence sequence = new ViolationSequence(metadata(Language.JAVA),
@@ -48,6 +73,9 @@ public class WitnessLanguageTest {
 		assertThrows(InvalidWitnessException.class, () -> new ViolationWitness(sequence));
 	}
 
+	/**
+	 * Checks that a Java violation witness accepts a Java format.
+	 */
 	@Test
 	public void aJavaViolationWitnessAcceptsAJavaFormat() {
 		ViolationSequence sequence = new ViolationSequence(metadata(Language.JAVA),
@@ -56,18 +84,27 @@ public class WitnessLanguageTest {
 		assertDoesNotThrow(() -> new ViolationWitness(sequence));
 	}
 
+	/**
+	 * Checks that a Java correctness witness rejects transition invariants.
+	 */
 	@Test
 	public void aJavaCorrectnessWitnessRejectsTransitionInvariants() {
 		assertThrows(InvalidWitnessException.class, () -> new CorrectnessWitness(
 				invariants(Language.JAVA, InvariantType.LOOP_TRANSITION_INVARIANT, Format.JAVA_EXPRESSION)));
 	}
 
+	/**
+	 * Checks that a C correctness witness accepts transition invariants.
+	 */
 	@Test
 	public void aCCorrectnessWitnessAcceptsTransitionInvariants() {
 		assertDoesNotThrow(() -> new CorrectnessWitness(
 				invariants(Language.C, InvariantType.LOOP_TRANSITION_INVARIANT, Format.C_EXPRESSION)));
 	}
 
+	/**
+	 * Checks that a Java correctness witness rejects ghost code.
+	 */
 	@Test
 	public void aJavaCorrectnessWitnessRejectsGhostCode() {
 		assertThrows(InvalidWitnessException.class, () -> new CorrectnessWitness(
@@ -75,6 +112,9 @@ public class WitnessLanguageTest {
 				ghost(Language.JAVA)));
 	}
 
+	/**
+	 * Checks that a C correctness witness accepts ghost code.
+	 */
 	@Test
 	public void aCCorrectnessWitnessAcceptsGhostCode() {
 		CorrectnessWitness witness = new CorrectnessWitness(
@@ -82,6 +122,9 @@ public class WitnessLanguageTest {
 		assertEquals(2, witness.getEntries().size());
 	}
 
+	/**
+	 * Checks that a Java correctness witness accepts function contracts.
+	 */
 	@Test
 	public void aJavaCorrectnessWitnessAcceptsFunctionContracts() {
 		InvariantSet set = new InvariantSet(metadata(Language.JAVA),
@@ -89,12 +132,18 @@ public class WitnessLanguageTest {
 		assertDoesNotThrow(() -> new CorrectnessWitness(set));
 	}
 
+	/**
+	 * Checks that a function contract needs requires or ensures.
+	 */
 	@Test
 	public void aFunctionContractNeedsRequiresOrEnsures() {
 		assertThrows(InvalidWitnessException.class,
 				() -> new FunctionContract(at(3), null, null, Format.JAVA_EXPRESSION, null));
 	}
 
+	/**
+	 * Checks that a C invariant rejects the ACSL format.
+	 */
 	@Test
 	@SuppressWarnings("deprecation")
 	public void aCInvariantRejectsAcsl() {
@@ -102,6 +151,9 @@ public class WitnessLanguageTest {
 				invariants(Language.C, InvariantType.LOCATION_INVARIANT, Format.ACSL_EXPRESSION)));
 	}
 
+	/**
+	 * Checks that ghost code rejects the extended C format.
+	 */
 	@Test
 	public void ghostCodeRejectsExtendedC() {
 		GhostVariable lock = new GhostVariable("held", "int", GhostScope.GLOBAL,
@@ -112,6 +164,9 @@ public class WitnessLanguageTest {
 				invariants(Language.C, InvariantType.LOCATION_INVARIANT, Format.C_EXPRESSION), ghost));
 	}
 
+	/**
+	 * Checks that a waypoint must be in an input file.
+	 */
 	@Test
 	public void aWaypointMustBeInAnInputFile() {
 		ViolationSequence sequence = new ViolationSequence(metadata(Language.JAVA),
@@ -119,6 +174,9 @@ public class WitnessLanguageTest {
 		assertThrows(InvalidWitnessException.class, () -> new ViolationWitness(sequence));
 	}
 
+	/**
+	 * Checks that the ghost code must have the task of the invariants.
+	 */
 	@Test
 	public void theGhostCodeMustHaveTheTaskOfTheInvariants() {
 		Metadata other = new Metadata("2.4", metadata(Language.C).getUuid(), metadata(Language.C).getCreationTime(),
@@ -132,6 +190,9 @@ public class WitnessLanguageTest {
 				invariants(Language.C, InvariantType.LOCATION_INVARIANT, Format.C_EXPRESSION), ghost));
 	}
 
+	/**
+	 * Checks that an invariant must be in an input file.
+	 */
 	@Test
 	public void anInvariantMustBeInAnInputFile() {
 		InvariantSet set = new InvariantSet(metadata(Language.JAVA), List.of(new Invariant(

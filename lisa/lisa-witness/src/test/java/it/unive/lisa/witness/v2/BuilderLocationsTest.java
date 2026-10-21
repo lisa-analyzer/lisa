@@ -16,6 +16,11 @@ import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 
+/**
+ * Tests of the locations used by the witness builders.
+ * 
+ * @author <a href="mailto:giacomo.zanatta@unive.it">Giacomo Zanatta</a>
+ */
 public class BuilderLocationsTest {
 
 	private static final Producer PRODUCER = new Producer("Test", "1");
@@ -24,11 +29,20 @@ public class BuilderLocationsTest {
 
 	private static final Location OTHER = new Location("Other.java", 2);
 
+	/**
+	 * Returns a Java task whose input file is named as BenchExec gives it.
+	 * 
+	 * @return the task
+	 */
 	private static Task benchexecTask() {
 		return new Task(List.of(MAIN), Map.of(MAIN, HASH), "CHECK( init(Main.main()), LTL(G assert) )", Language.JAVA,
 				null);
 	}
 
+	/**
+	 * Checks that a location in a wrong file fails at the call of the violation
+	 * builder that adds it.
+	 */
 	@Test
 	public void aWrongFileFailsAtTheViolationCall() {
 		ViolationWitnessBuilder builder = new ViolationWitnessBuilder(task(Language.JAVA), PRODUCER)
@@ -38,6 +52,10 @@ public class BuilderLocationsTest {
 				() -> builder.segment(s -> s.assumption(Action.AVOID, OTHER, "x == 0")));
 	}
 
+	/**
+	 * Checks that a location in a wrong file fails at the call of the
+	 * correctness builder that adds it.
+	 */
 	@Test
 	public void aWrongFileFailsAtTheCorrectnessCall() {
 		CorrectnessWitnessBuilder builder = new CorrectnessWitnessBuilder(task(Language.C), PRODUCER);
@@ -48,6 +66,9 @@ public class BuilderLocationsTest {
 				new Invariant(InvariantType.LOCATION_INVARIANT, OTHER, "x == 0", Format.C_EXPRESSION)));
 	}
 
+	/**
+	 * Checks that a path gives the name as written in the task.
+	 */
 	@Test
 	public void aPathGivesTheNameAsWrittenInTheTask() {
 		ViolationWitnessBuilder builder = new ViolationWitnessBuilder(benchexecTask(), PRODUCER);
@@ -59,12 +80,18 @@ public class BuilderLocationsTest {
 		assertEquals(new Location(MAIN, 48), builder.location(Path.of(MAIN), 48));
 	}
 
+	/**
+	 * Checks that a path outside the task is rejected.
+	 */
 	@Test
 	public void aPathOutsideTheTaskIsRejected() {
 		CorrectnessWitnessBuilder builder = new CorrectnessWitnessBuilder(benchexecTask(), PRODUCER);
 		assertThrows(InvalidWitnessException.class, () -> builder.location(Path.of("Main.java"), 1));
 	}
 
+	/**
+	 * Checks that the locations of a path build a witness.
+	 */
 	@Test
 	public void theLocationsOfAPathBuildAWitness() {
 		ViolationWitnessBuilder builder = new ViolationWitnessBuilder(benchexecTask(), PRODUCER);

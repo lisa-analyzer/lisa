@@ -9,8 +9,16 @@ import it.unive.lisa.witness.v2.correctness.InvariantType;
 import it.unive.lisa.witness.v2.correctness.ghost.Expression;
 import org.junit.jupiter.api.Test;
 
+/**
+ * Tests of the values of invariants, contracts and ghost code.
+ * 
+ * @author <a href="mailto:giacomo.zanatta@unive.it">Giacomo Zanatta</a>
+ */
 public class ValuesTest {
 
+	/**
+	 * Checks that blank values are rejected.
+	 */
 	@Test
 	public void blankValuesAreRejected() {
 		assertThrows(InvalidWitnessException.class,

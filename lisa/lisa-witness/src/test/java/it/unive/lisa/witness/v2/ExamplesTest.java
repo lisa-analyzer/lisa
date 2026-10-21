@@ -37,6 +37,12 @@ import java.util.Map;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 
+/**
+ * Tests reproducing some examples of the witness format by hand, both when
+ * writing and when reading them.
+ * 
+ * @author <a href="mailto:giacomo.zanatta@unive.it">Giacomo Zanatta</a>
+ */
 public class ExamplesTest {
 
 	private static final ObjectMapper YAML = new ObjectMapper(new YAMLFactory());
@@ -47,8 +53,16 @@ public class ExamplesTest {
 
 	private static final String SPEC = "CHECK( init(Main.main()), LTL(G assert) )";
 
-	// the older examples have the same content in 2.4: only their version is
-	// changed
+	/**
+	 * Returns the text of an example of the witness format. The older examples
+	 * have the same content in version 2.4, and only their version is changed.
+	 * 
+	 * @param name the name of the example in the test cases
+	 * 
+	 * @return the text of the example
+	 * 
+	 * @throws Exception if the example cannot be read
+	 */
 	private static String text(
 			String name)
 			throws Exception {
@@ -56,34 +70,74 @@ public class ExamplesTest {
 		return text.replaceAll("format_version: (['\"]?)2\\.[0-3]\\1", "format_version: \"2.4\"");
 	}
 
+	/**
+	 * Returns the YAML tree of an example of the witness format.
+	 * 
+	 * @param name the name of the example in the test cases
+	 * 
+	 * @return the tree of the example
+	 * 
+	 * @throws Exception if the example cannot be read
+	 */
 	private static JsonNode example(
 			String name)
 			throws Exception {
 		return YAML.readTree(text(name));
 	}
 
+	/**
+	 * Reads an example of the witness format.
+	 * 
+	 * @param name the name of the example in the test cases
+	 * 
+	 * @return the witness
+	 * 
+	 * @throws Exception if the example cannot be read
+	 */
 	private static Witness read(
 			String name)
 			throws Exception {
 		return WitnessReader.read(text(name));
 	}
 
+	/**
+	 * Returns the YAML tree of the given witness, as the writer writes it.
+	 * 
+	 * @param witness the witness
+	 * 
+	 * @return the tree of the written witness
+	 * 
+	 * @throws Exception if the witness cannot be written
+	 */
 	private static JsonNode written(
 			Witness witness)
 			throws Exception {
 		return YAML.readTree(WitnessWriter.write(witness));
 	}
 
+	/**
+	 * Returns a C task with a single input file, as in the C examples.
+	 * 
+	 * @param file the input file
+	 * @param hash the hash of the input file
+	 * 
+	 * @return the task
+	 */
 	private static Task cTask(
 			String file,
 			String hash) {
 		return new Task(List.of(file), Map.of(file, hash), "G ! call(reach_error())", Language.C, DataModel.ILP32);
 	}
 
-	// some examples write their creation time with an offset (e.g. +01:00),
-	// while we write the same instant
-	// in UTC: the two trees are compared without it, and the instants are
-	// compared separately
+	/**
+	 * Checks that two YAML trees of witnesses are the same. Some examples write
+	 * their creation time with an offset, such as {@code +01:00}, while the
+	 * writer writes the same instant in UTC. The instants are compared, and the
+	 * rest of the trees is compared without them.
+	 * 
+	 * @param expected the tree of the example
+	 * @param actual   the tree of the written witness
+	 */
 	private static void assertSameIgnoringCreationTime(
 			JsonNode expected,
 			JsonNode actual) {
@@ -98,6 +152,9 @@ public class ExamplesTest {
 		assertEquals(expected, actual);
 	}
 
+	/**
+	 * Checks that the violation example is reproduced.
+	 */
 	@Test
 	public void theViolationExampleIsReproduced()
 			throws Exception {
@@ -119,6 +176,9 @@ public class ExamplesTest {
 		assertEquals(witness, read("java/ExDarko_false.witness-2.4.yml"));
 	}
 
+	/**
+	 * Checks that the correctness example is reproduced.
+	 */
 	@Test
 	public void theCorrectnessExampleIsReproduced()
 			throws Exception {
@@ -137,6 +197,9 @@ public class ExamplesTest {
 		assertEquals(witness, read("java/ExDarko_true.witness-2.4.yml"));
 	}
 
+	/**
+	 * Checks that the C concurrent violation example is reproduced.
+	 */
 	@Test
 	public void theCConcurrentViolationExampleIsReproduced()
 			throws Exception {
@@ -158,6 +221,9 @@ public class ExamplesTest {
 		assertEquals(witness, read("concurrent-unreach.witness-2.2.yml"));
 	}
 
+	/**
+	 * Checks that the C correctness example with ghost code is reproduced.
+	 */
 	@Test
 	public void theCCorrectnessExampleWithGhostCodeIsReproduced()
 			throws Exception {
@@ -185,6 +251,9 @@ public class ExamplesTest {
 		assertEquals(witness, read("safe-simple-concurrent.witness-2.1.yml"));
 	}
 
+	/**
+	 * Checks that the C correctness example with contracts is reproduced.
+	 */
 	@Test
 	public void theCCorrectnessExampleWithContractsIsReproduced()
 			throws Exception {

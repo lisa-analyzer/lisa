@@ -18,30 +18,60 @@ import java.util.List;
 import java.util.Set;
 import org.junit.jupiter.api.Test;
 
+/**
+ * Tests of the witness reader.
+ * 
+ * @author <a href="mailto:giacomo.zanatta@unive.it">Giacomo Zanatta</a>
+ */
 public class WitnessReaderTest {
 
+	/**
+	 * Returns a Java violation witness with a function return and a target.
+	 * 
+	 * @return the witness
+	 */
 	private static ViolationWitness violation() {
 		return new ViolationWitness(new ViolationSequence(metadata(Language.JAVA), List.of(
 				Segment.of(Waypoint.functionReturn(at(1), "\\result == 0", Format.EXT_JAVA_EXPRESSION)),
 				Segment.of(Waypoint.target(at(2))))));
 	}
 
+	/**
+	 * Returns the text of the witness of {@link #violation()}.
+	 * 
+	 * @return the text
+	 * 
+	 * @throws Exception if the witness cannot be written
+	 */
 	private static String violationText()
 			throws Exception {
 		return WitnessWriter.write(violation());
 	}
 
+	/**
+	 * Checks that the given text is rejected by the reader.
+	 * 
+	 * @param text the text of a witness
+	 * 
+	 * @return the exception thrown by the reader
+	 */
 	private static WitnessReadException rejected(
 			String text) {
 		return assertThrows(WitnessReadException.class, () -> WitnessReader.read(text));
 	}
 
+	/**
+	 * Checks that a written violation witness is read back.
+	 */
 	@Test
 	public void aWrittenViolationWitnessIsReadBack()
 			throws Exception {
 		assertEquals(violation(), WitnessReader.read(violationText()));
 	}
 
+	/**
+	 * Checks that a written correctness witness is read back.
+	 */
 	@Test
 	public void aWrittenCorrectnessWitnessIsReadBack()
 			throws Exception {
@@ -52,12 +82,18 @@ public class WitnessReaderTest {
 		assertEquals(witness, WitnessReader.read(WitnessWriter.write(witness)));
 	}
 
+	/**
+	 * Checks that an unknown key is rejected.
+	 */
 	@Test
 	public void anUnknownKeyIsRejected()
 			throws Exception {
 		rejected(violationText().replace("action: follow", "action: follow\n            colour: red"));
 	}
 
+	/**
+	 * Checks that a missing required key is rejected.
+	 */
 	@Test
 	public void aMissingRequiredKeyIsRejected()
 			throws Exception {
@@ -65,6 +101,10 @@ public class WitnessReaderTest {
 		assertTrue(e.getMessage().contains("'line'"), e.getMessage());
 	}
 
+	/**
+	 * Checks that the reader applies the rules of the constructors and reports
+	 * the line.
+	 */
 	@Test
 	public void theRulesOfTheConstructorsApply()
 			throws Exception {
@@ -73,12 +113,18 @@ public class WitnessReaderTest {
 		assertTrue(e.getMessage().contains("assumption waypoint"), e.getMessage());
 	}
 
+	/**
+	 * Checks that two violation sequences are rejected.
+	 */
 	@Test
 	public void twoViolationSequencesAreRejected()
 			throws Exception {
 		rejected(violationText() + violationText());
 	}
 
+	/**
+	 * Checks that a creation time with an offset is read.
+	 */
 	@Test
 	public void aCreationTimeWithAnOffsetIsRead()
 			throws Exception {
@@ -88,17 +134,26 @@ public class WitnessReaderTest {
 		assertEquals(violation(), witness);
 	}
 
+	/**
+	 * Checks that a creation time that is not a date is rejected.
+	 */
 	@Test
 	public void aCreationTimeThatIsNotADateIsRejected()
 			throws Exception {
 		rejected(violationText().replace("creation_time: 2026-09-08T17:36:11Z", "creation_time: yesterday"));
 	}
 
+	/**
+	 * Checks that an empty witness is rejected.
+	 */
 	@Test
 	public void anEmptyWitnessIsRejected() {
 		rejected("[]");
 	}
 
+	/**
+	 * Checks that only format version 2.4 is read.
+	 */
 	@Test
 	public void onlyFormatVersion24IsRead()
 			throws Exception {
@@ -107,6 +162,9 @@ public class WitnessReaderTest {
 		assertTrue(e.getMessage().contains("2.3"), e.getMessage());
 	}
 
+	/**
+	 * Checks that a contract with another type is rejected.
+	 */
 	@Test
 	public void aContractWithAnotherTypeIsRejected()
 			throws Exception {
@@ -115,6 +173,9 @@ public class WitnessReaderTest {
 		rejected(WitnessWriter.write(witness).replace("type: function_contract", "type: loop_contract"));
 	}
 
+	/**
+	 * Checks that the error keeps the cause.
+	 */
 	@Test
 	public void theErrorKeepsTheCause()
 			throws Exception {
@@ -122,6 +183,9 @@ public class WitnessReaderTest {
 		assertTrue(e.getCause() != null);
 	}
 
+	/**
+	 * Checks that a contract with only ensures survives the round trip.
+	 */
 	@Test
 	public void aContractWithOnlyEnsuresSurvivesTheRoundTrip()
 			throws Exception {

@@ -11,6 +11,11 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 
+/**
+ * Tests writing and reading back every example of the witness format.
+ * 
+ * @author <a href="mailto:giacomo.zanatta@unive.it">Giacomo Zanatta</a>
+ */
 public class RoundTripTest {
 
 	private static final List<String> EXAMPLES = List.of(
@@ -30,8 +35,16 @@ public class RoundTripTest {
 			"multivar_1-1.witness-2.1.yml",
 			"safe-simple-concurrent.witness-2.1.yml");
 
-	// the C examples are older versions with the same content in 2.4: only
-	// their version is changed
+	/**
+	 * Reads an example of the witness format. The older examples have the same
+	 * content in version 2.4, and only their version is changed.
+	 * 
+	 * @param name the name of the example in the test cases
+	 * 
+	 * @return the witness
+	 * 
+	 * @throws Exception if the example cannot be read
+	 */
 	private static Witness read(
 			String name)
 			throws Exception {
@@ -42,6 +55,10 @@ public class RoundTripTest {
 		}
 	}
 
+	/**
+	 * Checks, for every example, that a witness written and read again is the
+	 * same.
+	 */
 	@TestFactory
 	public Stream<DynamicTest> aWitnessWrittenAndReadAgainIsTheSame() {
 		return EXAMPLES.stream().map(name -> DynamicTest.dynamicTest(name, () -> {
