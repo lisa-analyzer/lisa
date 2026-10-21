@@ -1,0 +1,78 @@
+# This file is part of sv-witnesses repository: https://github.com/sosy-lab/sv-witnesses
+#
+# SPDX-FileCopyrightText: 2023 Dirk Beyer <https://www.sosy-lab.org>
+#
+# SPDX-License-Identifier: Apache-2.0
+
+- entry_type: "violation_sequence"
+  metadata:
+    format_version: "2.0"
+    uuid: "4412af70-389a-475e-849c-e57e5b92019e"
+    creation_time: "2023-09-28T14:42:30+02:00"
+    producer:
+      name: "CPAchecker"
+      version: "2.2.1-svn"
+      configuration: "svcomp23"
+    task:
+      input_files:
+      - "unsafe-program-example.c"
+      input_file_hashes:
+        "unsafe-program-example.c": "788d7646eac82f609530b21c31663b77db1405e2b5e4d86a794d2b2e4367fb8a"
+      specification: "G ! call(reach_error())"
+      data_model: "ILP32"
+      language: "C"
+  content:
+  - segment:
+    - waypoint:
+        type: "branching"
+        action: "follow"
+        constraint:
+          value: "false"
+        location:
+          file_name: "unsafe-program-example.c"
+          line: 11
+          column: 3
+  - segment:
+    - waypoint:
+        type: "assumption"
+        action: "follow"
+        constraint:
+          value: "v == 0"
+          format: "c_expression"
+        location:
+          file_name: "unsafe-program-example.c"
+          line: 15
+          column: 3
+          function: "main"
+  - segment:
+    - waypoint:
+        type: "assumption"
+        action: "follow"
+        constraint:
+          value: "s == 0"
+          format: "c_expression"
+        location:
+          file_name: "unsafe-program-example.c"
+          line: 16
+          column: 3
+          function: "main"
+  - segment:
+    - waypoint:
+        type: "branching"
+        action: "follow"
+        constraint:
+          value: "true"
+        location:
+          file_name: "unsafe-program-example.c"
+          line: 17
+          column: 3
+          function: "main"
+  - segment:
+    - waypoint:
+        type: "target"
+        action: "follow"
+        location:
+          file_name: "unsafe-program-example.c"
+          line: 23
+          column: 5
+          function: "main"

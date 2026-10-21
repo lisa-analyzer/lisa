@@ -1,0 +1,64 @@
+# This file is part of sv-witnesses repository: https://github.com/sosy-lab/sv-witnesses
+#
+# SPDX-FileCopyrightText: 2023 Dirk Beyer <https://www.sosy-lab.org>
+#
+# SPDX-License-Identifier: Apache-2.0
+
+- content:
+  - segment:
+    - waypoint:
+        action: follow
+        constraint:
+          format: acsl_expression
+          value: \result == 2
+        location:
+          column: 45
+          file_name: /home/paula/Downloads/unsafe-program-example.c
+          line: 10
+        type: function_return
+  - segment:
+    - waypoint:
+        action: follow
+        constraint:
+          format: acsl_expression
+          value: \result == 1
+        location:
+          column: 33
+          file_name: /home/paula/Downloads/unsafe-program-example.c
+          line: 18
+        type: function_return
+  - segment:
+    - waypoint:
+        action: follow
+        constraint:
+          format: acsl_expression
+          value: \result == 255
+        location:
+          column: 33
+          file_name: /home/paula/Downloads/unsafe-program-example.c
+          line: 18
+        type: function_return
+  - segment:
+    - waypoint:
+        action: follow
+        location:
+          column: 5
+          file_name: /home/paula/Downloads/unsafe-program-example.c
+          line: 23
+        type: target
+  entry_type: violation_sequence
+  metadata:
+    creation_time: '2024-03-06T15:21:07Z'
+    format_version: '2.0'
+    producer:
+      name: symbiotic
+      version: 10.0.0-rc1
+    task:
+      data_model: LP64
+      input_file_hashes:
+        /home/paula/Downloads/unsafe-program-example.c: 788d7646eac82f609530b21c31663b77db1405e2b5e4d86a794d2b2e4367fb8a
+      input_files:
+      - /home/paula/Downloads/unsafe-program-example.c
+      language: C
+      specification: CHECK( init(main()), LTL(G ! call(reach_error())) )
+    uuid: a7c9f989-d828-48c8-af63-6c19be01ae9d

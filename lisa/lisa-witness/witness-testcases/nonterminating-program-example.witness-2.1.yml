@@ -1,0 +1,84 @@
+# This file is part of sv-witnesses repository: https://github.com/sosy-lab/sv-witnesses
+#
+# SPDX-FileCopyrightText: 2023 Dirk Beyer <https://www.sosy-lab.org>
+#
+# SPDX-License-Identifier: Apache-2.0
+
+- entry_type: "violation_sequence"
+  metadata:
+    format_version: "2.1"
+    uuid: "99d56116-dd6f-4ca4-93a1-c59e7f40e8a4"
+    creation_time: "2025-02-18T02:07:15Z"
+    producer:
+      name: "Theta"
+      version: "no version found"
+    task:
+      input_files:
+      - "nonterminating-program-example.c"
+      input_file_hashes:
+        "nonterminating-program-example.c": "9816d5cc9e8c1fba9291af90498afaa319416e5c56fa3cf3ce8da9d63d3e9939"
+      specification: "F end"
+      data_model: "LP64"
+      language: "C"
+  content:
+  - segment:
+    - waypoint:
+        type: "assumption"
+        constraint:
+          value: "(i == -1)"
+          format: "c_expression"
+        location:
+          file_name: "nonterminating-program-example.c"
+          line: 15
+          column: 5
+        action: "follow"
+  - segment:
+    - waypoint:
+        type: "branching"
+        constraint:
+          value: "true"
+        location:
+          file_name: "nonterminating-program-example.c"
+          line: 16
+          column: 9
+        action: "cycle"
+  - segment:
+    - waypoint:
+        type: "branching"
+        constraint:
+          value: "false"
+        location:
+          file_name: "nonterminating-program-example.c"
+          line: 18
+          column: 13
+        action: "cycle"
+  - segment:
+    - waypoint:
+        type: "branching"
+        constraint:
+          value: "true"
+        location:
+          file_name: "nonterminating-program-example.c"
+          line: 15
+          column: 5
+        action: "cycle"
+  - segment:
+    - waypoint:
+        type: "branching"
+        constraint:
+          value: "false"
+        location:
+          file_name: "nonterminating-program-example.c"
+          line: 16
+          column: 9
+        action: "cycle"
+  - segment:
+    - waypoint:
+        type: "branching"
+        constraint:
+          value: "false"
+        location:
+          file_name: "nonterminating-program-example.c"
+          line: 24
+          column: 13
+        action: "cycle"

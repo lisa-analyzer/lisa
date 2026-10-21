@@ -1,14 +1,12 @@
 package it.unive.lisa.witness.v2.metadata;
 
 import static it.unive.lisa.witness.v2.TestValues.HASH;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import it.unive.lisa.witness.v2.DataModel;
 import it.unive.lisa.witness.v2.InvalidWitnessException;
 import it.unive.lisa.witness.v2.Language;
-import it.unive.lisa.witness.v2.Location;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -70,12 +68,5 @@ public class TaskTest {
 	public void aHashIsASha256Hash() {
 		assertThrows(InvalidWitnessException.class,
 				() -> new Task(List.of("Main.java"), Map.of("Main.java", "00"), SPEC, Language.JAVA, null));
-	}
-
-	@Test
-	public void aLocationMustBeInAnInputFile() {
-		Task task = new Task(List.of("Main.java"), Map.of("Main.java", HASH), SPEC, Language.JAVA, null);
-		assertDoesNotThrow(() -> task.checkLocation(new Location("Main.java", 1)));
-		assertThrows(InvalidWitnessException.class, () -> task.checkLocation(new Location("Other.java", 1)));
 	}
 }

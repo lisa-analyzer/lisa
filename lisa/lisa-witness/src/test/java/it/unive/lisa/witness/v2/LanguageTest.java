@@ -40,4 +40,14 @@ public class LanguageTest {
 		assertEquals("ext_java_expression", Format.EXT_JAVA_EXPRESSION.getName());
 		assertEquals("invariant_set", EntryType.INVARIANT_SET.getName());
 	}
+
+	@Test
+	public void eachLanguageHasAnExpressionAndAnExtendedFormat() {
+		assertEquals(Format.JAVA_EXPRESSION, Language.JAVA.getExpressionFormat());
+		assertEquals(Format.EXT_JAVA_EXPRESSION, Language.JAVA.getExtendedExpressionFormat());
+		assertEquals(Format.C_EXPRESSION, Language.C.getExpressionFormat());
+		assertEquals(Format.EXT_C_EXPRESSION, Language.C.getExtendedExpressionFormat());
+		assertEquals(Format.PYTHON_EXPRESSION, Language.PYTHON.getExpressionFormat());
+		assertEquals(Format.EXT_PYTHON_EXPRESSION, Language.PYTHON.getExtendedExpressionFormat());
+	}
 }

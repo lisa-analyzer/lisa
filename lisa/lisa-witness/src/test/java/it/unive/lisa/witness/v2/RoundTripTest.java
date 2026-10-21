@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.DynamicTest;
@@ -12,8 +14,8 @@ import org.junit.jupiter.api.TestFactory;
 public class RoundTripTest {
 
 	private static final List<String> EXAMPLES = List.of(
-			"ExDarko_false.witness-2.4.yml",
-			"ExDarko_true.witness-2.4.yml",
+			"java/ExDarko_false.witness-2.4.yml",
+			"java/ExDarko_true.witness-2.4.yml",
 			"concurrent-unreach.witness-2.2.yml",
 			"safe-simple-concurrent.witness-2.1.yml",
 			"multivar_1-1.witness-2.1.yml");
@@ -23,7 +25,7 @@ public class RoundTripTest {
 	private static Witness read(
 			String name)
 			throws Exception {
-		try (InputStream in = RoundTripTest.class.getResourceAsStream("/examples/" + name)) {
+		try (InputStream in = Files.newInputStream(Path.of("witness-testcases", name))) {
 			String text = new String(in.readAllBytes(), StandardCharsets.UTF_8);
 			return WitnessReader.read(text.replaceAll("format_version: \"2\\.[0-3]\"", "format_version: \"2.4\""));
 		}

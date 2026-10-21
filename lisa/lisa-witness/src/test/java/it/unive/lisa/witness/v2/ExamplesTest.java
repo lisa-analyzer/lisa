@@ -28,6 +28,8 @@ import it.unive.lisa.witness.v2.violation.ViolationSequence;
 import it.unive.lisa.witness.v2.violation.Waypoint;
 import it.unive.lisa.witness.v2.violation.WaypointType;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.LinkedHashMap;
@@ -49,7 +51,7 @@ public class ExamplesTest {
 	private static JsonNode example(
 			String name)
 			throws Exception {
-		try (InputStream in = ExamplesTest.class.getResourceAsStream("/examples/" + name)) {
+		try (InputStream in = Files.newInputStream(Path.of("witness-testcases", name))) {
 			return YAML.readTree(in);
 		}
 	}
@@ -57,7 +59,7 @@ public class ExamplesTest {
 	private static Witness read(
 			String name)
 			throws Exception {
-		try (InputStream in = ExamplesTest.class.getResourceAsStream("/examples/" + name)) {
+		try (InputStream in = Files.newInputStream(Path.of("witness-testcases", name))) {
 			return WitnessReader.read(in);
 		}
 	}
@@ -109,8 +111,8 @@ public class ExamplesTest {
 						Format.EXT_JAVA_EXPRESSION)),
 				Segment.of(Waypoint.target(new Location(main, 48, 12))))));
 
-		assertEquals(example("ExDarko_false.witness-2.4.yml"), written(witness));
-		assertEquals(witness, read("ExDarko_false.witness-2.4.yml"));
+		assertEquals(example("java/ExDarko_false.witness-2.4.yml"), written(witness));
+		assertEquals(witness, read("java/ExDarko_false.witness-2.4.yml"));
 	}
 
 	@Test
@@ -127,8 +129,8 @@ public class ExamplesTest {
 				List.of(new Invariant(InvariantType.LOCATION_INVARIANT, new Location(main, 43, 4, "unboxed"),
 						"i != j", Format.JAVA_EXPRESSION))));
 
-		assertSameIgnoringCreationTime(example("ExDarko_true.witness-2.4.yml"), written(witness));
-		assertEquals(witness, read("ExDarko_true.witness-2.4.yml"));
+		assertSameIgnoringCreationTime(example("java/ExDarko_true.witness-2.4.yml"), written(witness));
+		assertEquals(witness, read("java/ExDarko_true.witness-2.4.yml"));
 	}
 
 	@Test

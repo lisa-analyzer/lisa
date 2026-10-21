@@ -131,4 +131,11 @@ public class WitnessLanguageTest {
 		assertThrows(InvalidWitnessException.class, () -> new CorrectnessWitness(
 				invariants(Language.C, InvariantType.LOCATION_INVARIANT, Format.C_EXPRESSION), ghost));
 	}
+
+	@Test
+	public void anInvariantMustBeInAnInputFile() {
+		InvariantSet set = new InvariantSet(metadata(Language.JAVA), List.of(new Invariant(
+				InvariantType.LOCATION_INVARIANT, new Location("Other.java", 4), "x >= 0", Format.JAVA_EXPRESSION)));
+		assertThrows(InvalidWitnessException.class, () -> new CorrectnessWitness(set));
+	}
 }

@@ -1,0 +1,67 @@
+# This file is part of the SV-Witnesses repository as regression test:
+# https://gitlab.com/sosy-lab/benchmarking/sv-witnesses
+#
+# SPDX-FileCopyrightText: 2025 The SV-Witnesses Community
+#
+# SPDX-License-Identifier: Apache-2.0
+
+- entry_type: violation_sequence
+  metadata:
+    format_version: "2.2"
+    uuid: "e4f5a6b7-c8d9-4012-def0-23456789abcd"
+    creation_time: "2025-10-01T15:00:00Z"
+    producer:
+      name: "Handcrafted"
+      version: "1.0"
+    task:
+      input_files:
+        - "./concurrent-no-overflow.c"
+      input_file_hashes:
+        "./concurrent-no-overflow.c": "921fb44a4f6cce0c9d683210afc27d0148ede4041e41abf4a823d8250412ab5d"
+      specification: "G ! overflow"
+      data_model: "ILP32"
+      language: "C"
+  content:
+  - segment:
+    - waypoint:
+        # registers writer as thread 1 (1st function_enter'd pthread_create)
+        type: function_enter
+        action: follow
+        thread_id: 0
+        location:
+          file_name: "./concurrent-no-overflow.c"
+          line: 24
+          column: 42
+          function: "main"
+  - segment:
+    - waypoint:
+        # thread 1 has performed its store: at its `return NULL;` (s.p. before
+        # it, i.e. after `x = 2147483647;`) x is INT_MAX. Placing this in an
+        # earlier segment than main's read makes the store happen-before the
+        # read, so v is INT_MAX.
+        type: assumption
+        action: follow
+        thread_id: 1
+        constraint:
+          value: "x == 2147483647"
+          format: c_expression
+        location:
+          file_name: "./concurrent-no-overflow.c"
+          line: 19
+          column: 5
+          function: "writer"
+  - segment:
+    - waypoint:
+        # main observes x == INT_MAX (the read of x and the overflow are in the
+        # same statement, so the read happens after the writer's store); the
+        # signed-integer overflow occurs while evaluating `x + 1`, whose
+        # containing statement is `y = x + 1;`. A target waypoint points at the
+        # first character of that statement.
+        type: target
+        action: follow
+        thread_id: 0
+        location:
+          file_name: "./concurrent-no-overflow.c"
+          line: 25
+          column: 5
+          function: "main"

@@ -1,0 +1,32 @@
+# This file is part of sv-witnesses repository: https://github.com/sosy-lab/sv-witnesses
+#
+# SPDX-FileCopyrightText: 2023 Dirk Beyer <https://www.sosy-lab.org>
+#
+# SPDX-License-Identifier: Apache-2.0
+- entry_type: "invariant_set"
+  metadata:
+    format_version: "2.0"
+    uuid: "c66c3ee7-e0de-4bae-87f0-fd48fc7b961e"
+    creation_time: "2023-11-21T10:29:38+01:00"
+    producer:
+      name: "CPAchecker"
+      version: "2.2.1-svn"
+      configuration: "svcomp24"
+    task:
+      input_files:
+      - "./multivar_1-1.c"
+      input_file_hashes:
+        "./multivar_1-1.c": "97265278cdbf3d456e80b67308db3a1e9b0ddca2be6450a8581510c7e5bc4295"
+      specification: "G ! call(reach_error())"
+      data_model: "ILP32"
+      language: "C"
+  content:
+  - invariant:
+      type: "loop_invariant"
+      location:
+        file_name: "./multivar_1-1.c"
+        line: 25
+        column: 9
+        function: "main"
+      value: "( y == x )"
+      format: "c_expression"
