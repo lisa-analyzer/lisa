@@ -11,23 +11,19 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.function.Consumer;
 
 // the shortcuts add a segment with a single follow waypoint; segment(...) adds any other segment
-public final class ViolationWitnessBuilder {
-
-	private final Task task;
-
-	private final Producer producer;
+public final class ViolationWitnessBuilder
+		extends
+		WitnessBuilder {
 
 	private final List<Segment> segments = new ArrayList<>();
 
 	public ViolationWitnessBuilder(
 			Task task,
 			Producer producer) {
-		this.task = Objects.requireNonNull(task, "task");
-		this.producer = Objects.requireNonNull(producer, "producer");
+		super(task, producer);
 	}
 
 	public static ViolationWitnessBuilder forInputs(
@@ -103,7 +99,7 @@ public final class ViolationWitnessBuilder {
 
 	public ViolationWitnessBuilder segment(
 			Consumer<SegmentBuilder> waypoints) {
-		SegmentBuilder segment = new SegmentBuilder(task.getLanguage());
+		SegmentBuilder segment = new SegmentBuilder(task);
 		waypoints.accept(segment);
 		segments.add(segment.build());
 		return this;

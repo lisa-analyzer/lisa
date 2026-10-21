@@ -9,13 +9,20 @@ import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public final class TaskLoader {
+
+	private static final Map<Language, List<String>> EXTENSIONS = Map.of(
+			Language.C, List.of(".c", ".h", ".i"),
+			Language.JAVA, List.of(".java"),
+			Language.PYTHON, List.of(".py"));
 
 	private TaskLoader() {
 	}
@@ -28,22 +35,38 @@ public final class TaskLoader {
 			throws IOException {
 		List<Path> files = new ArrayList<>();
 		for (Path input : inputs)
-			files.addAll(sourceFiles(input));
+			files.addAll(sourceFiles(input, language));
 		Map<String, String> hashes = new LinkedHashMap<>();
+		Set<Path> seen = new HashSet<>();
 		for (Path file : files)
-			hashes.put(file.toString(), sha256(file));
+			if (seen.add(file.toAbsolutePath().normalize()))
+				hashes.put(file.toString(), sha256(file));
 		String specification = Files.readString(propertyFile, StandardCharsets.UTF_8).strip();
 		return new Task(new ArrayList<>(hashes.keySet()), hashes, specification, language, dataModel);
 	}
 
+	// a file given directly is always kept; in a directory, only the source
+	// files of the language
 	private static List<Path> sourceFiles(
-			Path input)
+			Path input,
+			Language language)
 			throws IOException {
 		if (!Files.isDirectory(input))
 			return List.of(input);
 		try (Stream<Path> walk = Files.walk(input)) {
-			return walk.filter(Files::isRegularFile).sorted().collect(Collectors.toList());
+			return walk.filter(Files::isRegularFile).filter(f -> isSource(f, language)).sorted()
+					.collect(Collectors.toList());
 		}
+	}
+
+	private static boolean isSource(
+			Path file,
+			Language language) {
+		String name = file.getFileName().toString();
+		for (String extension : EXTENSIONS.get(language))
+			if (name.endsWith(extension))
+				return true;
+		return false;
 	}
 
 	private static String sha256(

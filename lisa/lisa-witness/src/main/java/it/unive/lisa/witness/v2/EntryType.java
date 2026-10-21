@@ -8,7 +8,7 @@ public enum EntryType {
 
 	INVARIANT_SET("invariant_set"),
 
-	GHOST_INSTRUMENTATION("ghost_instrumentation"); // use only for C witnesses
+	GHOST_INSTRUMENTATION("ghost_instrumentation");
 
 	private final String name;
 

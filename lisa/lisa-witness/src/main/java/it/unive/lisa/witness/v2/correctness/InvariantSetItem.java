@@ -19,7 +19,7 @@ import java.util.Set;
 		@JsonSubTypes.Type(value = Invariant.class, name = "invariant"),
 		@JsonSubTypes.Type(value = FunctionContract.class, name = "contract")
 })
-@JsonInclude(JsonInclude.Include.NON_EMPTY)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public abstract class InvariantSetItem {
 
 	private final Location location;
@@ -49,6 +49,7 @@ public abstract class InvariantSetItem {
 	}
 
 	@JsonProperty("labels")
+	@JsonInclude(JsonInclude.Include.NON_EMPTY)
 	public Set<Label> getLabels() {
 		return labels;
 	}
@@ -59,7 +60,7 @@ public abstract class InvariantSetItem {
 	}
 
 	@SuppressWarnings("deprecation")
-	final void check(
+	public final void check(
 			Task task) {
 		task.getLanguage().checkAllows(format, this);
 		if (format == Format.ACSL_EXPRESSION)

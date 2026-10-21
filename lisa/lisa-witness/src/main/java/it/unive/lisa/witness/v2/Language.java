@@ -69,14 +69,36 @@ public enum Language {
 		return format(true);
 	}
 
-	// the extension keywords (\\result, \\at, \\old, ...) all start with a
-	// backslash
+	// outside string and character literals, a backslash only appears in the
+	// extension keywords (\\result, \\at, \\old, ...): it is never valid in a
+	// plain C, Java or Python expression
 	public Format getFormatFor(
 			String... expressions) {
 		for (String expression : expressions)
-			if (expression != null && expression.indexOf('\\') >= 0)
+			if (expression != null && hasBackslashOutsideLiterals(expression))
 				return getExtendedExpressionFormat();
 		return getExpressionFormat();
+	}
+
+	// one pass, no regular expression: a long literal must not exhaust the
+	// stack
+	private static boolean hasBackslashOutsideLiterals(
+			String expression) {
+		char quote = 0;
+		for (int i = 0; i < expression.length(); i++) {
+			char c = expression.charAt(i);
+			if (quote != 0) {
+				if (c == '\\')
+					// the escaped character belongs to the literal
+					i++;
+				else if (c == quote)
+					quote = 0;
+			} else if (c == '"' || c == '\'')
+				quote = c;
+			else if (c == '\\')
+				return true;
+		}
+		return false;
 	}
 
 	// acsl_expression is a deprecated extended C format: ext_c_expression

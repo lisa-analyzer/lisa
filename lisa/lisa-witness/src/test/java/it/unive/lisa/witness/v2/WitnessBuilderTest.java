@@ -84,17 +84,16 @@ public class WitnessBuilderTest {
 	}
 
 	@Test
-	public void ghostCodeIsRejectedForJava() {
-		CorrectnessWitnessBuilder builder = new CorrectnessWitnessBuilder(task(Language.JAVA), PRODUCER)
-				.ghostVariable("ghost", "int", "0");
-		assertThrows(InvalidWitnessException.class, builder::build);
+	public void ghostCodeIsRejectedForJavaWhenAdded() {
+		CorrectnessWitnessBuilder builder = new CorrectnessWitnessBuilder(task(Language.JAVA), PRODUCER);
+		assertThrows(InvalidWitnessException.class, () -> builder.ghostVariable("ghost", "int", "0"));
+		assertThrows(InvalidWitnessException.class, () -> builder.ghostUpdate(at(1), "ghost", "1"));
 	}
 
 	@Test
-	public void aLocationOutsideTheInputFilesIsRejected() {
-		ViolationWitnessBuilder builder = new ViolationWitnessBuilder(task(Language.JAVA), PRODUCER)
-				.target(new Location("Other.java", 2));
-		assertThrows(InvalidWitnessException.class, builder::build);
+	public void aLocationOutsideTheInputFilesIsRejectedWhenAdded() {
+		ViolationWitnessBuilder builder = new ViolationWitnessBuilder(task(Language.JAVA), PRODUCER);
+		assertThrows(InvalidWitnessException.class, () -> builder.target(new Location("Other.java", 2)));
 	}
 
 	@Test

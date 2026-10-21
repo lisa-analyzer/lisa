@@ -7,12 +7,14 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import it.unive.lisa.witness.v2.DataModel;
 import it.unive.lisa.witness.v2.InvalidWitnessException;
 import it.unive.lisa.witness.v2.Language;
+import java.nio.file.Path;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -48,8 +50,17 @@ public final class Task {
 			throw new InvalidWitnessException("A data model is required for " + language);
 		if (!language.requiresDataModel() && dataModel != null)
 			throw new InvalidWitnessException("A data model is not allowed for " + language);
-		if (new HashSet<>(this.inputFiles).size() != this.inputFiles.size())
-			throw new InvalidWitnessException("An input file is listed more than once: " + this.inputFiles);
+		if (this.inputFiles.isEmpty())
+			throw new InvalidWitnessException("A task needs at least one input file");
+		// two spellings of one relative path are the same file; an absolute and
+		// a
+		// relative path are not compared, as the working directory of the
+		// producer
+		// is unknown (TaskLoader compares them)
+		Set<Path> distinct = new HashSet<>();
+		for (String file : this.inputFiles)
+			if (!distinct.add(Path.of(file).normalize()))
+				throw new InvalidWitnessException("An input file is listed more than once: " + file);
 		if (!this.inputFileHashes.keySet().equals(new HashSet<>(this.inputFiles)))
 			throw new InvalidWitnessException("Every input file needs exactly one hash");
 		for (Map.Entry<String, String> hash : this.inputFileHashes.entrySet())

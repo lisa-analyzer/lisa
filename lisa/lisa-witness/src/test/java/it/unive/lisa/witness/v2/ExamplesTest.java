@@ -1,7 +1,6 @@
 package it.unive.lisa.witness.v2;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -27,7 +26,7 @@ import it.unive.lisa.witness.v2.violation.Segment;
 import it.unive.lisa.witness.v2.violation.ViolationSequence;
 import it.unive.lisa.witness.v2.violation.Waypoint;
 import it.unive.lisa.witness.v2.violation.WaypointType;
-import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
@@ -48,20 +47,25 @@ public class ExamplesTest {
 
 	private static final String SPEC = "CHECK( init(Main.main()), LTL(G assert) )";
 
+	// the older examples have the same content in 2.4: only their version is
+	// changed
+	private static String text(
+			String name)
+			throws Exception {
+		String text = Files.readString(Path.of("witness-testcases", name), StandardCharsets.UTF_8);
+		return text.replaceAll("format_version: (['\"]?)2\\.[0-3]\\1", "format_version: \"2.4\"");
+	}
+
 	private static JsonNode example(
 			String name)
 			throws Exception {
-		try (InputStream in = Files.newInputStream(Path.of("witness-testcases", name))) {
-			return YAML.readTree(in);
-		}
+		return YAML.readTree(text(name));
 	}
 
 	private static Witness read(
 			String name)
 			throws Exception {
-		try (InputStream in = Files.newInputStream(Path.of("witness-testcases", name))) {
-			return WitnessReader.read(in);
-		}
+		return WitnessReader.read(text(name));
 	}
 
 	private static JsonNode written(
@@ -137,7 +141,7 @@ public class ExamplesTest {
 	public void theCConcurrentViolationExampleIsReproduced()
 			throws Exception {
 		String file = "./concurrent-unreach.c";
-		Metadata metadata = new Metadata("2.2", UUID.fromString("b1c2d3e4-f5a6-4789-abcd-ef0123456789"),
+		Metadata metadata = new Metadata("2.4", UUID.fromString("b1c2d3e4-f5a6-4789-abcd-ef0123456789"),
 				Instant.parse("2025-10-01T12:00:00Z"), new Producer("Handcrafted", "1.0"),
 				cTask(file, "43a2fe6641f8f4e3142bc55e614b442f698645f3f5af79e7ce68a32f9918b562"));
 		ViolationWitness witness = new ViolationWitness(new ViolationSequence(metadata, List.of(
@@ -151,15 +155,14 @@ public class ExamplesTest {
 						new Location(file, 26, 17, "main"), null, 0)))));
 
 		assertEquals(example("concurrent-unreach.witness-2.2.yml"), written(witness));
-		// only format version 2.4 is read
-		assertThrows(WitnessReadException.class, () -> read("concurrent-unreach.witness-2.2.yml"));
+		assertEquals(witness, read("concurrent-unreach.witness-2.2.yml"));
 	}
 
 	@Test
 	public void theCCorrectnessExampleWithGhostCodeIsReproduced()
 			throws Exception {
 		String file = "./safe-simple-concurrent.c";
-		Metadata metadata = new Metadata("2.1", UUID.fromString("c66c3ee7-e0de-4bae-87f0-fd48fc7b961d"),
+		Metadata metadata = new Metadata("2.4", UUID.fromString("c66c3ee7-e0de-4bae-87f0-fd48fc7b961d"),
 				Instant.parse("2025-10-04T09:29:38Z"),
 				new Producer("Handcrafted", "Inspired by: https://arxiv.org/pdf/2411.16612"),
 				cTask(file, "939597023a4e5fc2915fcd9721261a49829641867ef067a9c88542826aefde8d"));
@@ -179,15 +182,14 @@ public class ExamplesTest {
 				new GhostInstrumentation(metadata, new GhostContent(List.of(ghost), updates)));
 
 		assertSameIgnoringCreationTime(example("safe-simple-concurrent.witness-2.1.yml"), written(witness));
-		// only format version 2.4 is read
-		assertThrows(WitnessReadException.class, () -> read("safe-simple-concurrent.witness-2.1.yml"));
+		assertEquals(witness, read("safe-simple-concurrent.witness-2.1.yml"));
 	}
 
 	@Test
 	public void theCCorrectnessExampleWithContractsIsReproduced()
 			throws Exception {
 		String file = "./multivar_1-1.c";
-		Metadata metadata = new Metadata("2.1", UUID.fromString("c66c3ee7-e0de-4bae-87f0-fd48fc7b961e"),
+		Metadata metadata = new Metadata("2.4", UUID.fromString("c66c3ee7-e0de-4bae-87f0-fd48fc7b961e"),
 				Instant.parse("2023-11-21T09:29:38Z"), new Producer("CPAchecker", "2.2.1-svn", "svcomp24", null, null),
 				cTask(file, "97265278cdbf3d456e80b67308db3a1e9b0ddca2be6450a8581510c7e5bc4295"));
 		CorrectnessWitness witness = new CorrectnessWitness(new InvariantSet(metadata, List.of(
@@ -199,7 +201,6 @@ public class ExamplesTest {
 						Format.EXT_C_EXPRESSION, null))));
 
 		assertSameIgnoringCreationTime(example("multivar_1-1.witness-2.1.yml"), written(witness));
-		// only format version 2.4 is read
-		assertThrows(WitnessReadException.class, () -> read("multivar_1-1.witness-2.1.yml"));
+		assertEquals(witness, read("multivar_1-1.witness-2.1.yml"));
 	}
 }

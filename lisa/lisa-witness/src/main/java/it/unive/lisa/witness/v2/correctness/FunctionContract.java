@@ -11,7 +11,7 @@ import it.unive.lisa.witness.v2.metadata.Task;
 import java.util.Objects;
 import java.util.Set;
 
-@JsonInclude(JsonInclude.Include.NON_EMPTY)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({ "type", "location", "requires", "ensures", "format", "labels" })
 public final class FunctionContract
 		extends
@@ -30,6 +30,8 @@ public final class FunctionContract
 		super(location, format, labels);
 		if (requires == null && ensures == null)
 			throw new InvalidWitnessException("A function contract needs requires, ensures, or both");
+		if (requires != null && requires.isBlank() || ensures != null && ensures.isBlank())
+			throw new InvalidWitnessException("The requires and ensures of a function contract cannot be blank");
 		this.requires = requires;
 		this.ensures = ensures;
 	}

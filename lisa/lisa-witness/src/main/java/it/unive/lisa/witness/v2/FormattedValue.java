@@ -13,6 +13,8 @@ public abstract class FormattedValue {
 			String value,
 			Format format) {
 		this.value = Objects.requireNonNull(value, "value");
+		if (value.isBlank())
+			throw new InvalidWitnessException("A value cannot be blank");
 		this.format = format;
 	}
 

@@ -29,6 +29,8 @@ public final class Invariant
 		super(location, format, labels);
 		this.type = Objects.requireNonNull(type, "type");
 		this.value = Objects.requireNonNull(value, "value");
+		if (value.isBlank())
+			throw new InvalidWitnessException("An invariant needs a value");
 	}
 
 	public Invariant(

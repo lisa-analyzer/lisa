@@ -1,5 +1,6 @@
 package it.unive.lisa.witness.v2;
 
+import it.unive.lisa.witness.v2.metadata.Task;
 import it.unive.lisa.witness.v2.violation.Action;
 import it.unive.lisa.witness.v2.violation.Constraint;
 import it.unive.lisa.witness.v2.violation.Segment;
@@ -9,16 +10,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-// the waypoints of one segment, in order; the formats follow the language of the task
+// the waypoints of one segment, in order; the formats follow the language of the task, and each
+// location is checked against its input files when it is added
 public final class SegmentBuilder {
 
-	private final Language language;
+	private final Task task;
 
 	private final List<Waypoint> waypoints = new ArrayList<>();
 
 	SegmentBuilder(
-			Language language) {
-		this.language = Objects.requireNonNull(language, "language");
+			Task task) {
+		this.task = Objects.requireNonNull(task, "task");
 	}
 
 	public SegmentBuilder assumption(
@@ -79,12 +81,35 @@ public final class SegmentBuilder {
 		return add(WaypointType.FUNCTION_RETURN, action, location, value, threadId);
 	}
 
+	// an explicit format, e.g. the deprecated acsl_expression of older C
+	// witnesses
 	public SegmentBuilder functionReturn(
 			Action action,
 			Location location,
 			String value,
 			Format format) {
-		waypoints.add(new Waypoint(WaypointType.FUNCTION_RETURN, action, location, Constraint.of(value, format), null));
+		return functionReturn(action, location, value, format, null);
+	}
+
+	public SegmentBuilder functionReturn(
+			Action action,
+			Location location,
+			String value,
+			Format format,
+			int threadId) {
+		return functionReturn(action, location, value, format, Integer.valueOf(threadId));
+	}
+
+	private SegmentBuilder functionReturn(
+			Action action,
+			Location location,
+			String value,
+			Format format,
+			Integer threadId) {
+		Entry.checkLocation(task, location);
+		task.getLanguage().checkAllows(format, location);
+		waypoints.add(
+				new Waypoint(WaypointType.FUNCTION_RETURN, action, location, Constraint.of(value, format), threadId));
 		return this;
 	}
 
@@ -110,7 +135,8 @@ public final class SegmentBuilder {
 			Location location,
 			String value,
 			Integer threadId) {
-		waypoints.add(new Waypoint(type, action, location, type.constraint(value, language), threadId));
+		Entry.checkLocation(task, location);
+		waypoints.add(new Waypoint(type, action, location, type.constraint(value, task.getLanguage()), threadId));
 		return this;
 	}
 }

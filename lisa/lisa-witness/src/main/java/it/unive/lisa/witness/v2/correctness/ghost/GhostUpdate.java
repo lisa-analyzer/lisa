@@ -3,6 +3,7 @@ package it.unive.lisa.witness.v2.correctness.ghost;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import it.unive.lisa.witness.v2.InvalidWitnessException;
 import it.unive.lisa.witness.v2.Location;
 import java.util.List;
 import java.util.Objects;
@@ -20,6 +21,8 @@ public final class GhostUpdate {
 			@JsonProperty(value = "updates", required = true) List<GhostAssignment> updates) {
 		this.location = Objects.requireNonNull(location, "location");
 		this.updates = List.copyOf(Objects.requireNonNull(updates, "updates"));
+		if (this.updates.isEmpty())
+			throw new InvalidWitnessException("A ghost update at " + location + " needs at least one assignment");
 	}
 
 	@JsonProperty("location")

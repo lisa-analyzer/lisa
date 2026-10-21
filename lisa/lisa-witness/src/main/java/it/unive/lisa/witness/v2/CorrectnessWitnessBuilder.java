@@ -27,11 +27,9 @@ import java.util.Objects;
 import java.util.Set;
 
 // an expression gets the extended format of the language only if it uses an extension keyword
-public final class CorrectnessWitnessBuilder {
-
-	private final Task task;
-
-	private final Producer producer;
+public final class CorrectnessWitnessBuilder
+		extends
+		WitnessBuilder {
 
 	private final List<InvariantSetItem> items = new ArrayList<>();
 
@@ -43,8 +41,7 @@ public final class CorrectnessWitnessBuilder {
 	public CorrectnessWitnessBuilder(
 			Task task,
 			Producer producer) {
-		this.task = Objects.requireNonNull(task, "task");
-		this.producer = Objects.requireNonNull(producer, "producer");
+		super(task, producer);
 	}
 
 	public static CorrectnessWitnessBuilder forInputs(
@@ -87,7 +84,9 @@ public final class CorrectnessWitnessBuilder {
 
 	public CorrectnessWitnessBuilder item(
 			InvariantSetItem item) {
-		items.add(Objects.requireNonNull(item, "item"));
+		Entry.checkLocation(task, Objects.requireNonNull(item, "item").getLocation());
+		item.check(task);
+		items.add(item);
 		return this;
 	}
 
@@ -97,6 +96,10 @@ public final class CorrectnessWitnessBuilder {
 			String name,
 			String type,
 			String initial) {
+		checkGhost();
+		for (GhostVariable declared : ghostVariables)
+			if (declared.getName().equals(name))
+				throw new InvalidWitnessException("The ghost variable " + name + " is declared twice");
 		ghostVariables.add(new GhostVariable(name, type, GhostScope.GLOBAL,
 				new Expression(initial, Format.C_EXPRESSION)));
 		return this;
@@ -107,9 +110,16 @@ public final class CorrectnessWitnessBuilder {
 			Location location,
 			String variable,
 			String value) {
-		ghostUpdates.computeIfAbsent(Objects.requireNonNull(location, "location"), l -> new ArrayList<>())
+		checkGhost();
+		Entry.checkLocation(task, Objects.requireNonNull(location, "location"));
+		ghostUpdates.computeIfAbsent(location, l -> new ArrayList<>())
 				.add(new GhostAssignment(variable, value, Format.C_EXPRESSION));
 		return this;
+	}
+
+	private void checkGhost() {
+		if (!task.getLanguage().supportsGhost())
+			throw new InvalidWitnessException("Ghost instrumentation is not supported for " + task.getLanguage());
 	}
 
 	// both entries share the same metadata, as in the official examples
