@@ -12,12 +12,27 @@ import it.unive.lisa.witness.v2.metadata.Task;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * The entry of a correctness witness holding its ghost code. It is only allowed
+ * for C, and all its expressions use {@link Format#C_EXPRESSION}.
+ * 
+ * @author <a href="mailto:giacomo.zanatta@unive.it">Giacomo Zanatta</a>
+ */
 public final class GhostInstrumentation
 		extends
 		Entry {
 
+	/**
+	 * The ghost variables and updates of the entry.
+	 */
 	private final GhostContent content;
 
+	/**
+	 * Builds the entry.
+	 * 
+	 * @param metadata the metadata of the entry
+	 * @param content  the ghost variables and updates of the entry
+	 */
 	@JsonCreator
 	public GhostInstrumentation(
 			@JsonProperty(value = "metadata", required = true) Metadata metadata,
@@ -31,16 +46,31 @@ public final class GhostInstrumentation
 		return EntryType.GHOST_INSTRUMENTATION;
 	}
 
+	/**
+	 * Returns the ghost variables and updates of the entry.
+	 * 
+	 * @return the content
+	 */
 	@JsonProperty("content")
 	public GhostContent getContent() {
 		return content;
 	}
 
+	/**
+	 * Returns the declared ghost variables, in order.
+	 * 
+	 * @return the variables, which cannot be modified
+	 */
 	@JsonIgnore
 	public List<GhostVariable> getGhostVariables() {
 		return content.getGhostVariables();
 	}
 
+	/**
+	 * Returns the updates of the ghost variables, in order.
+	 * 
+	 * @return the updates, which cannot be modified
+	 */
 	@JsonIgnore
 	public List<GhostUpdate> getGhostUpdates() {
 		return content.getGhostUpdates();
@@ -60,6 +90,16 @@ public final class GhostInstrumentation
 		}
 	}
 
+	/**
+	 * Checks that the given format is {@link Format#C_EXPRESSION}, the only
+	 * format of ghost code.
+	 * 
+	 * @param format  the format
+	 * @param element the element using the format, reported in the message of
+	 *                    the exception
+	 * 
+	 * @throws InvalidWitnessException if the format is another one
+	 */
 	private static void checkFormat(
 			Format format,
 			Object element) {

@@ -10,15 +10,39 @@ import it.unive.lisa.witness.v2.metadata.Task;
 import java.util.Objects;
 import java.util.Set;
 
+/**
+ * An invariant of a correctness witness, an expression holding at its location.
+ * Transition invariants are only allowed for the languages that support them.
+ * 
+ * @author <a href="mailto:giacomo.zanatta@unive.it">Giacomo Zanatta</a>
+ */
 @JsonPropertyOrder({ "type", "location", "value", "format", "labels" })
 public final class Invariant
 		extends
 		InvariantSetItem {
 
+	/**
+	 * The type of the invariant.
+	 */
 	private final InvariantType type;
 
+	/**
+	 * The expression of the invariant.
+	 */
 	private final String value;
 
+	/**
+	 * Builds the invariant.
+	 * 
+	 * @param type     the type of the invariant
+	 * @param location the location of the invariant
+	 * @param value    the expression of the invariant
+	 * @param format   the format of the expression
+	 * @param labels   the labels of the invariant, or {@code null} if it has
+	 *                     none
+	 * 
+	 * @throws InvalidWitnessException if the expression is blank
+	 */
 	@JsonCreator
 	public Invariant(
 			@JsonProperty(value = "type", required = true) InvariantType type,
@@ -33,6 +57,16 @@ public final class Invariant
 			throw new InvalidWitnessException("An invariant needs a value");
 	}
 
+	/**
+	 * Builds an invariant without labels.
+	 * 
+	 * @param type     the type of the invariant
+	 * @param location the location of the invariant
+	 * @param value    the expression of the invariant
+	 * @param format   the format of the expression
+	 * 
+	 * @throws InvalidWitnessException if the expression is blank
+	 */
 	public Invariant(
 			InvariantType type,
 			Location location,
@@ -41,11 +75,21 @@ public final class Invariant
 		this(type, location, value, format, null);
 	}
 
+	/**
+	 * Returns the type of the invariant.
+	 * 
+	 * @return the type
+	 */
 	@JsonProperty("type")
 	public InvariantType getType() {
 		return type;
 	}
 
+	/**
+	 * Returns the expression of the invariant.
+	 * 
+	 * @return the expression
+	 */
 	@JsonProperty("value")
 	public String getValue() {
 		return value;

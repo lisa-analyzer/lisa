@@ -14,6 +14,15 @@ import java.util.EnumSet;
 import java.util.Objects;
 import java.util.Set;
 
+/**
+ * An abstract item of an invariant set. Its implementations are
+ * {@link Invariant} and {@link FunctionContract}. Every item has a location, a
+ * format and optional {@link Label}s. Its format must be allowed for the
+ * language of the task, and the deprecated {@link Format#ACSL_EXPRESSION} is
+ * never allowed.
+ * 
+ * @author <a href="mailto:giacomo.zanatta@unive.it">Giacomo Zanatta</a>
+ */
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.WRAPPER_OBJECT)
 @JsonSubTypes({
 		@JsonSubTypes.Type(value = Invariant.class, name = "invariant"),
@@ -22,12 +31,28 @@ import java.util.Set;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public abstract class InvariantSetItem {
 
+	/**
+	 * The location of the item.
+	 */
 	private final Location location;
 
+	/**
+	 * The format of the expressions of the item.
+	 */
 	private final Format format;
 
+	/**
+	 * The labels of the item, which can be empty.
+	 */
 	private final Set<Label> labels;
 
+	/**
+	 * Builds the item.
+	 * 
+	 * @param location the location of the item
+	 * @param format   the format of the expressions of the item
+	 * @param labels   the labels of the item, or {@code null} if it has none
+	 */
 	protected InvariantSetItem(
 			Location location,
 			Format format,
@@ -38,27 +63,57 @@ public abstract class InvariantSetItem {
 				: Collections.unmodifiableSet(EnumSet.copyOf(labels));
 	}
 
+	/**
+	 * Returns the location of the item.
+	 * 
+	 * @return the location
+	 */
 	@JsonProperty("location")
 	public Location getLocation() {
 		return location;
 	}
 
+	/**
+	 * Returns the format of the expressions of the item.
+	 * 
+	 * @return the format
+	 */
 	@JsonProperty("format")
 	public Format getFormat() {
 		return format;
 	}
 
+	/**
+	 * Returns the labels of the item.
+	 * 
+	 * @return the labels, which can be empty and cannot be modified
+	 */
 	@JsonProperty("labels")
 	@JsonInclude(JsonInclude.Include.NON_EMPTY)
 	public Set<Label> getLabels() {
 		return labels;
 	}
 
+	/**
+	 * Returns whether the item is labelled as inductive.
+	 * 
+	 * @return {@code true} if the item has the label {@link Label#INDUCTIVE}
+	 */
 	@JsonIgnore
 	public boolean isInductive() {
 		return labels.contains(Label.INDUCTIVE);
 	}
 
+	/**
+	 * Checks the item against the given task. Its format must be allowed for
+	 * the language of the task, and the rules of each kind of item are checked
+	 * by {@link #checkContent(Task)}.
+	 * 
+	 * @param task the task of the item
+	 * 
+	 * @throws InvalidWitnessException if the item breaks a rule of the format
+	 *                                     for the task
+	 */
 	@SuppressWarnings("deprecation")
 	public final void check(
 			Task task) {
@@ -68,6 +123,14 @@ public abstract class InvariantSetItem {
 		checkContent(task);
 	}
 
+	/**
+	 * Checks the rules of this kind of item against the given task.
+	 * 
+	 * @param task the task of the item
+	 * 
+	 * @throws InvalidWitnessException if the item breaks a rule of the format
+	 *                                     for the task
+	 */
 	protected abstract void checkContent(
 			Task task);
 

@@ -11,16 +11,44 @@ import it.unive.lisa.witness.v2.metadata.Task;
 import java.util.Objects;
 import java.util.Set;
 
+/**
+ * A contract of a function, made of a precondition, a postcondition, or both.
+ * Its location is the location of the function. Contracts are only allowed for
+ * the languages that support them.
+ * 
+ * @author <a href="mailto:giacomo.zanatta@unive.it">Giacomo Zanatta</a>
+ */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({ "type", "location", "requires", "ensures", "format", "labels" })
 public final class FunctionContract
 		extends
 		InvariantSetItem {
 
+	/**
+	 * The precondition of the function, or {@code null} if it is not given.
+	 */
 	private final String requires;
 
+	/**
+	 * The postcondition of the function, or {@code null} if it is not given.
+	 */
 	private final String ensures;
 
+	/**
+	 * Builds the contract.
+	 * 
+	 * @param location the location of the function
+	 * @param requires the precondition of the function, or {@code null} if it
+	 *                     is not given
+	 * @param ensures  the postcondition of the function, or {@code null} if it
+	 *                     is not given
+	 * @param format   the format of the conditions
+	 * @param labels   the labels of the contract, or {@code null} if it has
+	 *                     none
+	 * 
+	 * @throws InvalidWitnessException if both conditions are missing, or if a
+	 *                                     condition is blank
+	 */
 	public FunctionContract(
 			Location location,
 			String requires,
@@ -36,8 +64,26 @@ public final class FunctionContract
 		this.ensures = ensures;
 	}
 
-	// the type key has a single value: Jackson rejects any other one when
-	// reading it as a ContractType
+	/**
+	 * Builds the contract read from a witness. The type of a contract has a
+	 * single value, and any other one is rejected when it is read as a
+	 * {@link ContractType}.
+	 * 
+	 * @param type     the type of the contract
+	 * @param location the location of the function
+	 * @param requires the precondition of the function, or {@code null} if it
+	 *                     is not given
+	 * @param ensures  the postcondition of the function, or {@code null} if it
+	 *                     is not given
+	 * @param format   the format of the conditions
+	 * @param labels   the labels of the contract, or {@code null} if it has
+	 *                     none
+	 * 
+	 * @return the contract
+	 * 
+	 * @throws InvalidWitnessException if both conditions are missing, or if a
+	 *                                     condition is blank
+	 */
 	@JsonCreator
 	private static FunctionContract read(
 			@JsonProperty(value = "type", required = true) ContractType type,
@@ -49,16 +95,31 @@ public final class FunctionContract
 		return new FunctionContract(location, requires, ensures, format, labels);
 	}
 
+	/**
+	 * Returns the type of the contract.
+	 * 
+	 * @return {@link ContractType#FUNCTION_CONTRACT}
+	 */
 	@JsonProperty("type")
 	public ContractType getType() {
 		return ContractType.FUNCTION_CONTRACT;
 	}
 
+	/**
+	 * Returns the precondition of the function.
+	 * 
+	 * @return the precondition, or {@code null} if it is not given
+	 */
 	@JsonProperty("requires")
 	public String getRequires() {
 		return requires;
 	}
 
+	/**
+	 * Returns the postcondition of the function.
+	 * 
+	 * @return the postcondition, or {@code null} if it is not given
+	 */
 	@JsonProperty("ensures")
 	public String getEnsures() {
 		return ensures;

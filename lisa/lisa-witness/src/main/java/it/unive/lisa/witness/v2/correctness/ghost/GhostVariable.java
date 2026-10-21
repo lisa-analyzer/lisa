@@ -5,17 +5,43 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import java.util.Objects;
 
+/**
+ * A ghost variable, declared by the ghost instrumentation of a correctness
+ * witness and used by its invariants.
+ * 
+ * @author <a href="mailto:giacomo.zanatta@unive.it">Giacomo Zanatta</a>
+ */
 @JsonPropertyOrder({ "name", "type", "scope", "initial" })
 public final class GhostVariable {
 
+	/**
+	 * The name of the variable.
+	 */
 	private final String name;
 
+	/**
+	 * The C type of the variable.
+	 */
 	private final String type;
 
+	/**
+	 * The scope of the variable.
+	 */
 	private final GhostScope scope;
 
+	/**
+	 * The initial value of the variable.
+	 */
 	private final Expression initial;
 
+	/**
+	 * Builds the variable.
+	 * 
+	 * @param name    the name of the variable
+	 * @param type    the C type of the variable
+	 * @param scope   the scope of the variable
+	 * @param initial the initial value of the variable
+	 */
 	@JsonCreator
 	public GhostVariable(
 			@JsonProperty(value = "name", required = true) String name,
@@ -28,21 +54,41 @@ public final class GhostVariable {
 		this.initial = Objects.requireNonNull(initial, "initial");
 	}
 
+	/**
+	 * Returns the name of the variable.
+	 * 
+	 * @return the name
+	 */
 	@JsonProperty("name")
 	public String getName() {
 		return name;
 	}
 
+	/**
+	 * Returns the C type of the variable.
+	 * 
+	 * @return the type
+	 */
 	@JsonProperty("type")
 	public String getType() {
 		return type;
 	}
 
+	/**
+	 * Returns the scope of the variable.
+	 * 
+	 * @return the scope
+	 */
 	@JsonProperty("scope")
 	public GhostScope getScope() {
 		return scope;
 	}
 
+	/**
+	 * Returns the initial value of the variable.
+	 * 
+	 * @return the initial value
+	 */
 	@JsonProperty("initial")
 	public Expression getInitial() {
 		return initial;

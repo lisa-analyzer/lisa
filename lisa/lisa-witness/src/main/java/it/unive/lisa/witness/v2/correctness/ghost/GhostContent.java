@@ -9,13 +9,35 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
+/**
+ * The content of a ghost instrumentation, made of the declared ghost variables
+ * and of their updates. Each variable is declared once, and every update
+ * assigns declared variables.
+ * 
+ * @author <a href="mailto:giacomo.zanatta@unive.it">Giacomo Zanatta</a>
+ */
 @JsonPropertyOrder({ "ghost_variables", "ghost_updates" })
 public final class GhostContent {
 
+	/**
+	 * The declared ghost variables, in order.
+	 */
 	private final List<GhostVariable> ghostVariables;
 
+	/**
+	 * The updates of the ghost variables, in order.
+	 */
 	private final List<GhostUpdate> ghostUpdates;
 
+	/**
+	 * Builds the content.
+	 * 
+	 * @param ghostVariables the declared ghost variables, in order
+	 * @param ghostUpdates   the updates of the ghost variables, in order
+	 * 
+	 * @throws InvalidWitnessException if a variable is declared twice, or if an
+	 *                                     update assigns an undeclared variable
+	 */
 	@JsonCreator
 	public GhostContent(
 			@JsonProperty(value = "ghost_variables", required = true) List<GhostVariable> ghostVariables,
@@ -34,11 +56,21 @@ public final class GhostContent {
 									+ assignment.getVariable());
 	}
 
+	/**
+	 * Returns the declared ghost variables, in order.
+	 * 
+	 * @return the variables, which cannot be modified
+	 */
 	@JsonProperty("ghost_variables")
 	public List<GhostVariable> getGhostVariables() {
 		return ghostVariables;
 	}
 
+	/**
+	 * Returns the updates of the ghost variables, in order.
+	 * 
+	 * @return the updates, which cannot be modified
+	 */
 	@JsonProperty("ghost_updates")
 	public List<GhostUpdate> getGhostUpdates() {
 		return ghostUpdates;

@@ -7,13 +7,31 @@ import it.unive.lisa.witness.v2.Format;
 import it.unive.lisa.witness.v2.FormattedValue;
 import java.util.Objects;
 
+/**
+ * An assignment of a ghost variable, part of a ghost update.
+ * 
+ * @author <a href="mailto:giacomo.zanatta@unive.it">Giacomo Zanatta</a>
+ */
 @JsonPropertyOrder({ "variable", "value", "format" })
 public final class GhostAssignment
 		extends
 		FormattedValue {
 
+	/**
+	 * The name of the assigned ghost variable.
+	 */
 	private final String variable;
 
+	/**
+	 * Builds the assignment.
+	 * 
+	 * @param variable the name of the assigned ghost variable
+	 * @param value    the assigned value
+	 * @param format   the format of the value
+	 * 
+	 * @throws it.unive.lisa.witness.v2.InvalidWitnessException if the value is
+	 *                                                              blank
+	 */
 	@JsonCreator
 	public GhostAssignment(
 			@JsonProperty(value = "variable", required = true) String variable,
@@ -23,6 +41,11 @@ public final class GhostAssignment
 		this.variable = Objects.requireNonNull(variable, "variable");
 	}
 
+	/**
+	 * Returns the name of the assigned ghost variable.
+	 * 
+	 * @return the name of the variable
+	 */
 	@JsonProperty("variable")
 	public String getVariable() {
 		return variable;

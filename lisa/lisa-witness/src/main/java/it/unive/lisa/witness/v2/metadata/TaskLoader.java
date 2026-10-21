@@ -17,16 +17,48 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+/**
+ * A loader of tasks from the files given to a verifier. Directories are
+ * expanded into the source files of the language they contain. Each file is
+ * listed once with the spelling of its path as it is given, and hashed with
+ * SHA-256.
+ * 
+ * @author <a href="mailto:giacomo.zanatta@unive.it">Giacomo Zanatta</a>
+ */
 public final class TaskLoader {
 
+	/**
+	 * The extensions of the source files of each language.
+	 */
 	private static final Map<Language, List<String>> EXTENSIONS = Map.of(
 			Language.C, List.of(".c", ".h", ".i"),
 			Language.JAVA, List.of(".java"),
 			Language.PYTHON, List.of(".py"));
 
+	/**
+	 * This class only has static methods, and it is never instantiated.
+	 */
 	private TaskLoader() {
 	}
 
+	/**
+	 * Loads the task made of the given inputs and property file. A file given
+	 * directly is always kept, while a directory is expanded into the source
+	 * files of the language it contains, in alphabetical order. A file reached
+	 * twice, for instance through a directory and directly, is listed once. The
+	 * specification is the content of the property file, without leading and
+	 * trailing blanks.
+	 * 
+	 * @param inputs       the files and directories given to the verifier
+	 * @param propertyFile the file containing the specification
+	 * @param language     the language of the program
+	 * @param dataModel    the data model of the program, or {@code null} if the
+	 *                         language has none
+	 * 
+	 * @return the task
+	 * 
+	 * @throws IOException if a file cannot be read
+	 */
 	public static Task load(
 			List<Path> inputs,
 			Path propertyFile,
@@ -45,8 +77,18 @@ public final class TaskLoader {
 		return new Task(new ArrayList<>(hashes.keySet()), hashes, specification, language, dataModel);
 	}
 
-	// a file given directly is always kept; in a directory, only the source
-	// files of the language
+	/**
+	 * Returns the files of the given input. A file is yielded as it is, while a
+	 * directory yields the source files of the language it contains, in
+	 * alphabetical order.
+	 * 
+	 * @param input    a file or a directory
+	 * @param language the language of the program
+	 * 
+	 * @return the files of the input
+	 * 
+	 * @throws IOException if the directory cannot be read
+	 */
 	private static List<Path> sourceFiles(
 			Path input,
 			Language language)
@@ -59,6 +101,15 @@ public final class TaskLoader {
 		}
 	}
 
+	/**
+	 * Returns whether the given file is a source file of the given language,
+	 * according to its extension.
+	 * 
+	 * @param file     the file
+	 * @param language the language
+	 * 
+	 * @return {@code true} if the file is a source file of the language
+	 */
 	private static boolean isSource(
 			Path file,
 			Language language) {
@@ -69,6 +120,15 @@ public final class TaskLoader {
 		return false;
 	}
 
+	/**
+	 * Returns the SHA-256 hash of the content of the given file.
+	 * 
+	 * @param file the file
+	 * 
+	 * @return the hash, as 64 lowercase hexadecimal digits
+	 * 
+	 * @throws IOException if the file cannot be read
+	 */
 	private static String sha256(
 			Path file)
 			throws IOException {

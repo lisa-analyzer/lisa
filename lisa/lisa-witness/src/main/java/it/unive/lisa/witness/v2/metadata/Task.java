@@ -17,22 +17,65 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+/**
+ * The verification task an entry of a witness refers to. A task is made of the
+ * input files of the program, written exactly as they were given to the
+ * verifier, with the SHA-256 hash of each of them, the specification to verify
+ * and the language of the program. C tasks also have a {@link DataModel}.
+ * 
+ * @author <a href="mailto:giacomo.zanatta@unive.it">Giacomo Zanatta</a>
+ */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({ "input_files", "input_file_hashes", "specification", "data_model", "language" })
 public final class Task {
 
+	/**
+	 * The text of a SHA-256 hash, made of 64 hexadecimal digits.
+	 */
 	private static final Pattern SHA_256 = Pattern.compile("[0-9a-fA-F]{64}");
 
+	/**
+	 * The input files of the program, as they were given to the verifier.
+	 */
 	private final List<String> inputFiles;
 
+	/**
+	 * The SHA-256 hash of each input file.
+	 */
 	private final Map<String, String> inputFileHashes;
 
+	/**
+	 * The specification to verify.
+	 */
 	private final String specification;
 
+	/**
+	 * The language of the program.
+	 */
 	private final Language language;
 
+	/**
+	 * The data model of the program, or {@code null} if the language has none.
+	 */
 	private final DataModel dataModel;
 
+	/**
+	 * Builds the task.
+	 * 
+	 * @param inputFiles      the input files of the program, as they were given
+	 *                            to the verifier
+	 * @param inputFileHashes the SHA-256 hash of each input file
+	 * @param specification   the specification to verify
+	 * @param language        the language of the program
+	 * @param dataModel       the data model of the program, or {@code null} if
+	 *                            the language has none
+	 * 
+	 * @throws InvalidWitnessException if there is no input file, if a file is
+	 *                                     listed twice, if a file has no hash
+	 *                                     or an invalid one, or if the data
+	 *                                     model is missing for C or given for
+	 *                                     another language
+	 */
 	@JsonCreator
 	public Task(
 			@JsonProperty(value = "input_files", required = true) List<String> inputFiles,
@@ -52,11 +95,10 @@ public final class Task {
 			throw new InvalidWitnessException("A data model is not allowed for " + language);
 		if (this.inputFiles.isEmpty())
 			throw new InvalidWitnessException("A task needs at least one input file");
-		// two spellings of one relative path are the same file; an absolute and
-		// a
-		// relative path are not compared, as the working directory of the
-		// producer
-		// is unknown (TaskLoader compares them)
+		// two spellings of one relative path are the same file,
+		// while an absolute and a relative path are not compared,
+		// since the working directory of the producer is unknown
+		// (TaskLoader compares them)
 		Set<Path> distinct = new HashSet<>();
 		for (String file : this.inputFiles)
 			if (!distinct.add(Path.of(file).normalize()))
@@ -69,26 +111,52 @@ public final class Task {
 						"The hash of " + hash.getKey() + " is not a SHA-256 hash: " + hash.getValue());
 	}
 
+	/**
+	 * Returns the input files of the program, as they were given to the
+	 * verifier.
+	 * 
+	 * @return the input files, which cannot be modified
+	 */
 	@JsonProperty("input_files")
 	public List<String> getInputFiles() {
 		return inputFiles;
 	}
 
+	/**
+	 * Returns the SHA-256 hash of each input file.
+	 * 
+	 * @return the hashes, which cannot be modified
+	 */
 	@JsonProperty("input_file_hashes")
 	public Map<String, String> getInputFileHashes() {
 		return inputFileHashes;
 	}
 
+	/**
+	 * Returns the specification to verify.
+	 * 
+	 * @return the specification
+	 */
 	@JsonProperty("specification")
 	public String getSpecification() {
 		return specification;
 	}
 
+	/**
+	 * Returns the data model of the program.
+	 * 
+	 * @return the data model, or {@code null} if the language has none
+	 */
 	@JsonProperty("data_model")
 	public DataModel getDataModel() {
 		return dataModel;
 	}
 
+	/**
+	 * Returns the language of the program.
+	 * 
+	 * @return the language
+	 */
 	@JsonProperty("language")
 	public Language getLanguage() {
 		return language;

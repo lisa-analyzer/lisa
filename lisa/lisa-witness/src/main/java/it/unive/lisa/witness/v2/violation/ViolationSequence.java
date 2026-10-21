@@ -10,12 +10,31 @@ import it.unive.lisa.witness.v2.metadata.Task;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * The entry of a violation witness. It describes an execution that violates the
+ * specification as a sequence of {@link Segment}s, which the execution matches
+ * one after the other. The segment with a target, if any, must be the last one.
+ * 
+ * @author <a href="mailto:giacomo.zanatta@unive.it">Giacomo Zanatta</a>
+ */
 public final class ViolationSequence
 		extends
 		Entry {
 
+	/**
+	 * The segments of the sequence, in order.
+	 */
 	private final List<Segment> content;
 
+	/**
+	 * Builds the sequence.
+	 * 
+	 * @param metadata the metadata of the entry
+	 * @param content  the segments of the sequence, in order
+	 * 
+	 * @throws InvalidWitnessException if there is no segment, or if the segment
+	 *                                     with a target is not the last one
+	 */
 	@JsonCreator
 	public ViolationSequence(
 			@JsonProperty(value = "metadata", required = true) Metadata metadata,
@@ -34,6 +53,11 @@ public final class ViolationSequence
 		return EntryType.VIOLATION_SEQUENCE;
 	}
 
+	/**
+	 * Returns the segments of the sequence, in order.
+	 * 
+	 * @return the segments, which cannot be modified
+	 */
 	@JsonProperty("content")
 	public List<Segment> getSegments() {
 		return content;
