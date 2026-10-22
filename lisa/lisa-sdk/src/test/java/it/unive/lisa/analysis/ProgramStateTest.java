@@ -137,6 +137,27 @@ public class ProgramStateTest {
 	}
 
 	@Test
+	public void bottomDiscardsTheInfo()
+			throws SemanticException {
+		ProgramState<MarkerAbstractLattice> ps = new ProgramState<>(new MarkerAbstractLattice(), new ExpressionSet())
+				.storeInfo("k", new GenericSetLattice<>("a"));
+		ProgramState<MarkerAbstractLattice> bottom = ps.bottom();
+		assertTrue(bottom.isBottom());
+		assertTrue(bottom.getFixpointInformation().isBottom());
+
+		// regression test: a state derived from a bottom one (e.g., by the
+		// semantics of a statement, that sets the computed expressions) is
+		// unreachable, and its info must not be joined with the one of
+		// reachable states
+		ProgramState<MarkerAbstractLattice> derived = bottom.withComputedExpression(new Skip(LOC));
+		assertFalse(derived.isBottom());
+		ProgramState<MarkerAbstractLattice> other = new ProgramState<>(new MarkerAbstractLattice(),
+				new ExpressionSet()).storeInfo("k", new GenericSetLattice<>("b"));
+		assertEquals(new GenericSetLattice<>("b"), derived.lub(other).getInfo("k"));
+		assertEquals(new GenericSetLattice<>("b"), other.lub(derived).getInfo("k"));
+	}
+
+	@Test
 	public void isBottomRequiresBothStateAndExpressionsToBeBottom() {
 		ProgramState<MarkerAbstractLattice> allBottom = new ProgramState<>(new MarkerAbstractLattice().bottom(),
 				new ExpressionSet().bottom());

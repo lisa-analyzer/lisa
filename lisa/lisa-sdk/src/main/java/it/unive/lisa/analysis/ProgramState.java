@@ -366,12 +366,12 @@ public class ProgramState<A extends AbstractLattice<A>>
 
 	/*
 	 * The default implementations of the lattice operations in BaseLattice
-	 * shortcut when one of the operands is top. Since the top and bottom
-	 * elements of this class carry the fixpoint information unchanged (that is,
-	 * isTop() and isBottom() ignore it), such shortcuts would discard the
-	 * information of the other operand. Instead, the operations below only
-	 * shortcut on trivial cases and on bottom states, delegating to the *Aux
-	 * methods (that also combine the information) in all other cases.
+	 * shortcut when one of the operands is top. Since the top elements of this
+	 * class carry the fixpoint information unchanged, and isTop() and
+	 * isBottom() ignore it, such shortcuts would discard the information of the
+	 * other operand. Instead, the operations below only shortcut on trivial
+	 * cases and on bottom states, delegating to the *Aux methods (that also
+	 * combine the information) in all other cases.
 	 */
 
 	@Override
@@ -458,9 +458,18 @@ public class ProgramState<A extends AbstractLattice<A>>
 		return new ProgramState<>(state.top(), computedExpressions.top(), info);
 	}
 
+	/**
+	 * {@inheritDoc}<br>
+	 * <br>
+	 * Differently from {@link #top()}, the fixpoint information of the returned
+	 * state is also bottom: the state is unreachable, and no fact holds in it.
+	 * Otherwise, a state derived from it (e.g., by the semantics of a
+	 * statement, that sets the computed expressions and makes it no longer
+	 * bottom) would carry the information to the states it is joined with.
+	 */
 	@Override
 	public ProgramState<A> bottom() {
-		return new ProgramState<>(state.bottom(), computedExpressions.bottom(), info);
+		return new ProgramState<>(state.bottom(), computedExpressions.bottom(), info.bottom());
 	}
 
 	@Override
