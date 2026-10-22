@@ -1,6 +1,7 @@
 package it.unive.lisa.analysis;
 
 import it.unive.lisa.lattices.FunctionalLattice;
+import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.util.representation.MapRepresentation;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
@@ -17,13 +18,24 @@ import org.apache.commons.collections4.SetUtils;
  * A generic mapping from string keys to {@link Lattice} instances that can
  * store custom user-defined information inside the {@link AnalysisState}. This
  * class itself is a special case of {@link FunctionalLattice} where values are
- * not required to have the same type.
- * 
+ * not required to have the same type.<br>
+ * <br>
+ * Keys that are missing from the mapping are treated as carrying no
+ * information: the least upper bound of two instances contains the union of
+ * their keys, and an empty mapping is less or equal than any other one. Hence,
+ * an empty mapping is <b>not</b> the top element of this lattice, that is
+ * instead represented by the unique instance {@link #TOP}.<br>
+ * <br>
+ * Values that are also {@link ScopedObject}s are subject to scoping: when a
+ * scope is pushed or popped on this object, the operation is forwarded to each
+ * of them, while the remaining values are left untouched.
+ *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public class FixpointInfo
 		implements
 		BaseLattice<FixpointInfo>,
+		ScopedObject<FixpointInfo>,
 		Iterable<Map.Entry<String, Lattice<?>>> {
 
 	/**
@@ -39,6 +51,23 @@ public class FixpointInfo
 		@Override
 		public boolean isTop() {
 			return false;
+		}
+
+	};
+
+	/**
+	 * The unique top instance of this class.
+	 */
+	public static final FixpointInfo TOP = new FixpointInfo() {
+
+		@Override
+		public boolean isBottom() {
+			return false;
+		}
+
+		@Override
+		public boolean isTop() {
+			return true;
 		}
 
 	};
@@ -320,12 +349,12 @@ public class FixpointInfo
 
 	@Override
 	public FixpointInfo top() {
-		return new FixpointInfo();
+		return TOP;
 	}
 
 	@Override
 	public boolean isTop() {
-		return function == null;
+		return false;
 	}
 
 	@Override
@@ -414,7 +443,62 @@ public class FixpointInfo
 	}
 
 	@Override
+	public FixpointInfo pushScope(
+			ScopeToken token,
+			ProgramPoint pp)
+			throws SemanticException {
+		return onScopedValues(v -> (Lattice<?>) v.pushScope(token, pp));
+	}
+
+	@Override
+	public FixpointInfo popScope(
+			ScopeToken token,
+			ProgramPoint pp)
+			throws SemanticException {
+		return onScopedValues(v -> (Lattice<?>) v.popScope(token, pp));
+	}
+
+	private FixpointInfo onScopedValues(
+			ScopingFunction op)
+			throws SemanticException {
+		if (isTop() || isBottom() || function == null)
+			return this;
+
+		Map<String, Lattice<?>> result = null;
+		for (Entry<String, Lattice<?>> entry : function.entrySet())
+			if (entry.getValue() instanceof ScopedObject)
+				try {
+					Lattice<?> scoped = op.apply((ScopedObject<?>) entry.getValue());
+					if (scoped != entry.getValue()) {
+						if (result == null)
+							result = mkNewFunction(function, false);
+						result.put(entry.getKey(), scoped);
+					}
+				} catch (SemanticException e) {
+					throw new SemanticException("Exception while scoping '" + entry.getKey() + "'", e);
+				}
+
+		return result == null ? this : new FixpointInfo(result);
+	}
+
+	/**
+	 * A scoping operation (push or pop) to apply to a scoped value.
+	 */
+	@FunctionalInterface
+	private interface ScopingFunction {
+
+		Lattice<?> apply(
+				ScopedObject<?> value)
+				throws SemanticException;
+
+	}
+
+	@Override
 	public StructuredRepresentation representation() {
+		if (isTop())
+			return Lattice.topRepresentation();
+		if (isBottom())
+			return Lattice.bottomRepresentation();
 		if (function == null)
 			return new StringRepresentation("empty");
 

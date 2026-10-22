@@ -19,7 +19,6 @@ import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.VariableRef;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.Skip;
-import it.unive.lisa.symbolic.value.Variable;
 import java.util.List;
 import java.util.Set;
 import org.junit.jupiter.api.Test;
@@ -33,10 +32,10 @@ public class ProgramStateTest {
 		return new CFG(new CodeMemberDescriptor(LOC, unit, false, "m"));
 	}
 
-	private static Variable id(
+	private static Identifier id(
 			CFG cfg,
 			String name) {
-		return new VariableRef(cfg, LOC, name).getVariable();
+		return new VariableRef(cfg, LOC, name).getIdentifier();
 	}
 
 	@Test
@@ -46,7 +45,7 @@ public class ProgramStateTest {
 		ProgramState<MarkerAbstractLattice> ps = new ProgramState<>(lattice, exp);
 		assertSame(lattice, ps.getState());
 		assertEquals(exp, ps.getComputedExpressions());
-		assertTrue(ps.getFixpointInformation().isTop());
+		assertTrue(ps.getFixpointInformation().isEmpty());
 	}
 
 	@Test
@@ -98,6 +97,43 @@ public class ProgramStateTest {
 		ProgramState<MarkerAbstractLattice> onlyStateTop = new ProgramState<>(new MarkerAbstractLattice().top(),
 				new ExpressionSet(new Skip(LOC)));
 		assertFalse(onlyStateTop.isTop());
+	}
+
+	@Test
+	public void topPreservesTheInfo() {
+		ProgramState<MarkerAbstractLattice> ps = new ProgramState<>(new MarkerAbstractLattice(), new ExpressionSet())
+				.storeInfo("k", new GenericSetLattice<>("a"));
+		ProgramState<MarkerAbstractLattice> top = ps.top();
+		assertTrue(top.isTop());
+		assertEquals(new GenericSetLattice<>("a"), top.getInfo("k"));
+	}
+
+	@Test
+	public void latticeOperationsWithTopKeepTheInfoOfBothOperands()
+			throws SemanticException {
+		// regression test: the lattice operations used to shortcut on top
+		// states, discarding the information of the other operand
+		ProgramState<MarkerAbstractLattice> withInfo = new ProgramState<>(new MarkerAbstractLattice(),
+				new ExpressionSet()).storeInfo("k", new GenericSetLattice<>("a"));
+		ProgramState<MarkerAbstractLattice> top = new ProgramState<>(new MarkerAbstractLattice().top(),
+				new ExpressionSet().top()).storeInfo("j", new GenericSetLattice<>("b"));
+
+		for (ProgramState<MarkerAbstractLattice> res : List.of(
+				top.lub(withInfo),
+				withInfo.lub(top),
+				top.upchain(withInfo),
+				withInfo.upchain(top),
+				top.widening(withInfo),
+				withInfo.widening(top))) {
+			assertTrue(res.isTop());
+			assertEquals(new GenericSetLattice<>("a"), res.getInfo("k"));
+			assertEquals(new GenericSetLattice<>("b"), res.getInfo("j"));
+		}
+
+		// k is missing from top's info, and j from withInfo's one
+		assertFalse(withInfo.lessOrEqual(top));
+		assertFalse(top.lessOrEqual(withInfo));
+		assertTrue(withInfo.lessOrEqual(withInfo.lub(top)));
 	}
 
 	@Test
@@ -170,7 +206,7 @@ public class ProgramStateTest {
 		CFG cfg = cfg();
 		Statement pp = new NoOp(cfg, LOC);
 		ScopeToken token = new ScopeToken(pp);
-		Variable v = id(cfg, "x");
+		Identifier v = id(cfg, "x");
 		ProgramState<MarkerAbstractLattice> ps = new ProgramState<>(new MarkerAbstractLattice(), v);
 
 		ProgramState<MarkerAbstractLattice> pushed = ps.pushScope(token, pp);

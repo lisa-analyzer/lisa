@@ -20,10 +20,10 @@ import org.junit.jupiter.api.Test;
 public class VariableRefTest {
 
 	@Test
-	public void getVariableBuildsAVariableWithTheSameNameLocationAndType() {
+	public void getIdentifierBuildsAVariableWithTheSameNameLocationAndType() {
 		CFG cfg = newCfg();
 		VariableRef v = new VariableRef(cfg, LOC, "x");
-		assertEquals(new Variable(Untyped.INSTANCE, "x", LOC), v.getVariable());
+		assertEquals(new Variable(Untyped.INSTANCE, "x", LOC), v.getIdentifier());
 	}
 
 	@Test
@@ -57,7 +57,7 @@ public class VariableRefTest {
 		VariableRef v = new VariableRef(newCfg(), LOC, "x");
 		AnalysisState<TestAbstractState> entry = emptyState();
 		AnalysisState<TestAbstractState> result = v.forwardSemantics(entry, interprocedural(), store(entry));
-		assertEquals(new ExpressionSet(v.getVariable()), result.getExecution().getComputedExpressions());
+		assertEquals(new ExpressionSet(v.getIdentifier()), result.getExecution().getComputedExpressions());
 	}
 
 }
