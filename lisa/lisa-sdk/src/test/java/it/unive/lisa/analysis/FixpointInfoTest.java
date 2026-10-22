@@ -28,6 +28,50 @@ public class FixpointInfoTest {
 	/**
 	 * A set of strings that records the scoping operations applied to it.
 	 */
+	/**
+	 * A set of strings that, on call returns, yields the value of the caller
+	 * with the elements of the callee that start with "global".
+	 */
+	private static class ReturningSet
+			extends
+			SetLattice<ReturningSet, String>
+			implements
+			CallAwareObject<ReturningSet> {
+
+		private ReturningSet(
+				Set<String> elements,
+				boolean isTop) {
+			super(elements, isTop);
+		}
+
+		@Override
+		public ReturningSet top() {
+			return new ReturningSet(Set.of(), true);
+		}
+
+		@Override
+		public ReturningSet bottom() {
+			return new ReturningSet(Set.of(), false);
+		}
+
+		@Override
+		public ReturningSet mk(
+				Set<String> set) {
+			return new ReturningSet(set, false);
+		}
+
+		@Override
+		public ReturningSet onCallReturn(
+				ReturningSet caller,
+				ProgramPoint call) {
+			Set<String> result = new HashSet<>(caller.elements);
+			for (String e : elements)
+				if (e.startsWith("global"))
+					result.add(e);
+			return mk(result);
+		}
+	}
+
 	private static class ScopedSet
 			extends
 			SetLattice<ScopedSet, String>
@@ -150,6 +194,32 @@ public class FixpointInfoTest {
 		FixpointInfo popped = pushed.popScope(token, pp);
 		assertEquals(scoped.with("push").with("pop"), popped.get("scoped"));
 		assertEquals(set("x"), popped.get("plain"));
+	}
+
+	@Test
+	public void callReturnIsForwardedOnlyToCallAwareValues()
+			throws SemanticException {
+		ReturningSet caller = new ReturningSet(Set.of("local-caller", "global-a"), false);
+		ReturningSet callee = new ReturningSet(Set.of("local-callee", "global-a", "global-b"), false);
+		FixpointInfo before = new FixpointInfo(Map.of("aware", caller, "plain", set("x")));
+		FixpointInfo after = new FixpointInfo(Map.of("aware", callee, "plain", set("y")));
+
+		FixpointInfo returned = after.onCallReturn(before, null);
+		assertEquals(new ReturningSet(Set.of("local-caller", "global-a", "global-b"), false),
+				returned.get("aware"));
+		// values that are not call-aware are the ones of the callee
+		assertEquals(set("y"), returned.get("plain"));
+	}
+
+	@Test
+	public void callReturnKeepsTheCalleeValueWhenTheCallerHasNone()
+			throws SemanticException {
+		ReturningSet callee = new ReturningSet(Set.of("local-callee"), false);
+		FixpointInfo after = new FixpointInfo(Map.of("aware", callee));
+		assertSame(after, after.onCallReturn(new FixpointInfo(), null));
+		// a value of a different type in the caller is ignored
+		assertSame(after, after.onCallReturn(new FixpointInfo(Map.of("aware", set("x"))), null));
+		assertSame(FixpointInfo.TOP, FixpointInfo.TOP.onCallReturn(after, null));
 	}
 
 	@Test

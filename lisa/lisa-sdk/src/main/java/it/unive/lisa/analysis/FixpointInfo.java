@@ -482,6 +482,53 @@ public class FixpointInfo
 	}
 
 	/**
+	 * Yields the information after returning from a call, given that this is
+	 * the information at the end of the callee, and the given one is the
+	 * information of the caller before the call. Each value of this mapping
+	 * that is a {@link CallAwareObject} is combined with the value mapped to
+	 * the same key in the caller's information, if it has the same type (see
+	 * {@link CallAwareObject#onCallReturn(Object, ProgramPoint)}), while the
+	 * remaining values are left untouched.
+	 *
+	 * @param caller the information of the caller, before the call
+	 * @param call   the program point of the call
+	 *
+	 * @return the information after the call
+	 *
+	 * @throws SemanticException if an error occurs during the computation
+	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public FixpointInfo onCallReturn(
+			FixpointInfo caller,
+			ProgramPoint call)
+			throws SemanticException {
+		if (isTop() || isBottom() || function == null || caller == null)
+			return this;
+
+		Map<String, Lattice<?>> result = null;
+		for (Entry<String, Lattice<?>> entry : function.entrySet()) {
+			Lattice<?> value = entry.getValue();
+			Lattice<?> before = caller.get(entry.getKey());
+			if (!(value instanceof CallAwareObject) || before == null || before.getClass() != value.getClass())
+				continue;
+			try {
+				// need to leave this raw to not have the compiler complaining
+				// about the invocation
+				Lattice<?> returned = (Lattice<?>) ((CallAwareObject) value).onCallReturn(before, call);
+				if (returned != value) {
+					if (result == null)
+						result = mkNewFunction(function, false);
+					result.put(entry.getKey(), returned);
+				}
+			} catch (SemanticException e) {
+				throw new SemanticException("Exception while returning from a call on '" + entry.getKey() + "'", e);
+			}
+		}
+
+		return result == null ? this : new FixpointInfo(result);
+	}
+
+	/**
 	 * A scoping operation (push or pop) to apply to a scoped value.
 	 */
 	@FunctionalInterface

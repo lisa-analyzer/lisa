@@ -829,7 +829,8 @@ public class Analysis<
 								callres.getExecutionState(),
 								call),
 						callres.getExecutionExpressions(),
-						callres.getExecutionInformation()));
+						callres.getExecutionInformation()
+								.onCallReturn(entryState.getExecutionInformation(), call)));
 
 		if (events != null)
 			events.post(new AnalysisOnCallReturnEnd<>(entryState, callres, res, call));
