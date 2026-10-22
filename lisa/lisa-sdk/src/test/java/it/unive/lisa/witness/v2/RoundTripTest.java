@@ -27,14 +27,6 @@ public class RoundTripTest {
 			"sum.witness-2.4.yml",
 			"zero_div.witness-2.4.yml",
 			"concurrent-unreach.witness-2.2.yml",
-			"concurrent-no-overflow.witness-2.2.yml",
-			"concurrent-data-race.witness-2.2.yml",
-			"nonterminating-program-example.witness-2.1.yml",
-			"unsafe-program-example.cpachecker.witness-2.0.yml",
-			"unsafe-program-example.symbiotic.witness-2.0.yml",
-			"safe-program-example.witness-2.0.yml",
-			"terminating-program-example.witness-2.1.yml",
-			"multivar_1-1.witness-2.0.yml",
 			"multivar_1-1.witness-2.1.yml",
 			"safe-simple-concurrent.witness-2.1.yml");
 

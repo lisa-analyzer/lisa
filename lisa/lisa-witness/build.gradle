@@ -1,5 +1,0 @@
-dependencies {
-    api 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.22.4'
-
-    testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.9.1'
-}

@@ -161,6 +161,24 @@ import it.unive.lisa.util.numeric.MathNumber;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
 import it.unive.lisa.util.testing.TestConfiguration;
+import it.unive.lisa.witness.v2.CorrectnessWitness;
+import it.unive.lisa.witness.v2.Location;
+import it.unive.lisa.witness.v2.ViolationWitness;
+import it.unive.lisa.witness.v2.correctness.FunctionContract;
+import it.unive.lisa.witness.v2.correctness.Invariant;
+import it.unive.lisa.witness.v2.correctness.InvariantSet;
+import it.unive.lisa.witness.v2.correctness.ghost.GhostAssignment;
+import it.unive.lisa.witness.v2.correctness.ghost.GhostContent;
+import it.unive.lisa.witness.v2.correctness.ghost.GhostInstrumentation;
+import it.unive.lisa.witness.v2.correctness.ghost.GhostUpdate;
+import it.unive.lisa.witness.v2.correctness.ghost.GhostVariable;
+import it.unive.lisa.witness.v2.metadata.Metadata;
+import it.unive.lisa.witness.v2.metadata.Producer;
+import it.unive.lisa.witness.v2.metadata.Task;
+import it.unive.lisa.witness.v2.violation.Constraint;
+import it.unive.lisa.witness.v2.violation.Segment;
+import it.unive.lisa.witness.v2.violation.ViolationSequence;
+import it.unive.lisa.witness.v2.violation.Waypoint;
 import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.Collections;
@@ -751,6 +769,34 @@ public class EqualityContractVerificationTest {
 		Reflections scanner = mkReflections();
 		for (Class<? extends Symbol> sym : scanner.getSubTypesOf(Symbol.class))
 			verify(sym);
+	}
+
+	@Test
+	public void testWitnesses() {
+		verify(Location.class, Warning.NULL_FIELDS);
+		// the entries of a witness have an abstract type
+		verify(ViolationWitness.class, verifier -> verifier.withPrefabValues(List.class, List.of("a"), List.of("b")),
+				Warning.NULL_FIELDS);
+		verify(CorrectnessWitness.class, verifier -> verifier.withPrefabValues(List.class, List.of("a"), List.of("b")),
+				Warning.NULL_FIELDS);
+		verify(Metadata.class, Warning.NULL_FIELDS);
+		verify(Producer.class, Warning.NULL_FIELDS);
+		verify(Task.class, Warning.NULL_FIELDS);
+		verify(ViolationSequence.class, Warning.NULL_FIELDS);
+		verify(Segment.class, Warning.NULL_FIELDS);
+		verify(Waypoint.class, Warning.NULL_FIELDS);
+		verify(Constraint.class, Warning.NULL_FIELDS);
+		// the items of an invariant set have an abstract type
+		verify(InvariantSet.class, verifier -> verifier.withPrefabValues(List.class, List.of("a"), List.of("b")),
+				Warning.NULL_FIELDS);
+		verify(Invariant.class, Warning.NULL_FIELDS);
+		verify(FunctionContract.class, Warning.NULL_FIELDS);
+		verify(GhostInstrumentation.class, Warning.NULL_FIELDS);
+		verify(GhostContent.class, Warning.NULL_FIELDS);
+		verify(GhostVariable.class, Warning.NULL_FIELDS);
+		verify(GhostUpdate.class, Warning.NULL_FIELDS);
+		verify(GhostAssignment.class, Warning.NULL_FIELDS);
+		verify(it.unive.lisa.witness.v2.correctness.ghost.Expression.class, Warning.NULL_FIELDS);
 	}
 
 }

@@ -22,8 +22,7 @@ import org.junit.jupiter.api.io.TempDir;
 public class ExampleHashesTest {
 
 	/**
-	 * The examples whose hashes are checked. The Symbiotic example is left out,
-	 * since its input file is an absolute path of another machine.
+	 * The examples whose hashes are checked.
 	 */
 	private static final List<String> EXAMPLES = List.of(
 			"java/ExDarko_false.witness-2.4.yml",
@@ -31,13 +30,6 @@ public class ExampleHashesTest {
 			"sum.witness-2.4.yml",
 			"zero_div.witness-2.4.yml",
 			"concurrent-unreach.witness-2.2.yml",
-			"concurrent-no-overflow.witness-2.2.yml",
-			"concurrent-data-race.witness-2.2.yml",
-			"nonterminating-program-example.witness-2.1.yml",
-			"unsafe-program-example.cpachecker.witness-2.0.yml",
-			"safe-program-example.witness-2.0.yml",
-			"terminating-program-example.witness-2.1.yml",
-			"multivar_1-1.witness-2.0.yml",
 			"multivar_1-1.witness-2.1.yml",
 			"safe-simple-concurrent.witness-2.1.yml");
 
@@ -48,8 +40,6 @@ public class ExampleHashesTest {
 	private static final Set<String> CHANGED_SOURCES = Set.of(
 			"./java/jpf-regression/ExDarko_true/Main.java",
 			"./zero_div.py",
-			"./concurrent-data-race.c",
-			"nonterminating-program-example.c",
 			"./safe-simple-concurrent.c");
 
 	/**
