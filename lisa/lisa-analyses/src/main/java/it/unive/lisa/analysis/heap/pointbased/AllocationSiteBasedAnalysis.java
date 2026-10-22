@@ -23,6 +23,7 @@ import it.unive.lisa.symbolic.heap.HeapReference;
 import it.unive.lisa.symbolic.heap.MemoryAllocation;
 import it.unive.lisa.symbolic.heap.NullConstant;
 import it.unive.lisa.symbolic.value.BinaryExpression;
+import it.unive.lisa.symbolic.value.GlobalVariable;
 import it.unive.lisa.symbolic.value.HeapLocation;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.MemoryPointer;
@@ -565,9 +566,9 @@ public abstract class AllocationSiteBasedAnalysis<
 				Identifier id = (Identifier) ref;
 				if (state.getKeys().contains(id))
 					result.addAll(resolveIdentifier(state, id, pp));
-				else if (id instanceof Variable) {
-					// this is a variable from the program that we know
-					// nothing about
+				else if (id instanceof Variable || id instanceof GlobalVariable) {
+					// this is a variable (or a global variable) from the
+					// program that we know nothing about
 					CodeLocation loc = expression.getCodeLocation();
 					AllocationSite site;
 					if (id.getStaticType().isPointerType())
