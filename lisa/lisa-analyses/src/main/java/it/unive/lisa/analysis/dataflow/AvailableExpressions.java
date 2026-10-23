@@ -30,13 +30,24 @@ import java.util.Set;
 
 /**
  * An implementation of the available expressions dataflow analysis, that
- * focuses only on the expressions that are stored into some variable. <br/>
+ * focuses only on the expressions that are stored into some variable. An
+ * expression is available at a program point if, on every path reaching that
+ * point, it has already been computed and none of the identifiers it involves
+ * has been reassigned since. This is a forward, must-style dataflow analysis,
+ * instantiated as a {@link DataflowDomain} over {@link DefiniteSet}s of
+ * {@link AE} elements: an expression is generated when it is assigned to a
+ * variable, and killed whenever one of its identifiers is reassigned. <br/>
  * <br/>
  * As a dataflow analysis, this domain does not take part in
  * {@link WholeValueAnalysis}, meaning that it will never generate constraints
  * when asked to.
- * 
+ *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ *
+ * @see <a href="https://doi.org/10.1145/512927.512945">Gary A. Kildall. A
+ *          Unified Approach to Global Program Optimization. In Proceedings of
+ *          the 1st Annual ACM SIGACT-SIGPLAN Symposium on Principles of
+ *          Programming Languages (POPL '73), pages 194-206, ACM, 1973.</a>
  */
 public class AvailableExpressions
 		extends

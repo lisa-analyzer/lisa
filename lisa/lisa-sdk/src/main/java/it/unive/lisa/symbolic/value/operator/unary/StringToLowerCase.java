@@ -14,7 +14,7 @@ import java.util.Set;
  * characters in lowercase.<br>
  * <br>
  * Argument expression type: {@link StringType}<br>
- * Computed expression type: {@link StringType} (integral)
+ * Computed expression type: {@link StringType}
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */

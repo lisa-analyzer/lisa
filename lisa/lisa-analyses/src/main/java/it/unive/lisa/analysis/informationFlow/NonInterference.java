@@ -27,17 +27,29 @@ import java.util.Collection;
 import java.util.Set;
 
 /**
- * Implementation of the non interference analysis, using annotations to detect
- * low confidentiality variables/fields/functions ({@link LOW_CONF_ANNOTATION})
- * and high integrity variables/fields/functions ({@link HIGH_INT_ANNOTATION}).
- * <br/>
+ * Implementation of the non-interference analysis, an information flow analysis
+ * checking that variations of high-confidentiality (secret) or low-integrity
+ * (untrusted) inputs never affect the low-confidentiality (public) or
+ * high-integrity (trusted) observable behavior of a program. Non-interference
+ * is checked here through a security lattice with four elements, combining
+ * confidentiality (low/high) and integrity (low/high), tracked independently
+ * for each expression and, through {@link NonInterferenceEnvironment#guards},
+ * for each guard that is currently open in the control flow, so that implicit
+ * flows caused by branching on secret or untrusted data are detected as well.
+ * Annotations are used to mark variables, fields and functions as low
+ * confidentiality ({@link #LOW_CONF_ANNOTATION}) or high integrity
+ * ({@link #HIGH_INT_ANNOTATION}). <br/>
  * <br/>
  * As an information flow analysis, this domain does not take part in
  * {@link WholeValueAnalysis}, meaning that it will never generate constraints
  * when asked to.
- * 
+ *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
- * 
+ *
+ * @see <a href="https://doi.org/10.1109/SP.1982.10014">Joseph A. Goguen, José
+ *          Meseguer. Security Policies and Security Models. In 1982 IEEE
+ *          Symposium on Security and Privacy, pages 11-20, IEEE Computer
+ *          Society, 1982.</a>
  * @see <a href=
  *          "https://en.wikipedia.org/wiki/Non-interference_(security)">Non-interference</a>
  */

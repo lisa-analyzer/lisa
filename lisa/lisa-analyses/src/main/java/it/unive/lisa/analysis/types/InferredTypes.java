@@ -36,9 +36,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 /**
- * A {@link NonRelationalTypeDomain} holding a set of {@link Type}s,
- * representing the inferred runtime types of an {@link Expression}.
- * 
+ * A {@link NonRelationalTypeDomain} holding a set of {@link Type}s
+ * ({@link TypeSet}), representing the inferred runtime types of an
+ * {@link Expression}. It computes the actual set of concrete runtime types that
+ * an expression can have, propagating and intersecting type information through
+ * casts, type checks, heap accesses and memory pointers.
+ *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public class InferredTypes

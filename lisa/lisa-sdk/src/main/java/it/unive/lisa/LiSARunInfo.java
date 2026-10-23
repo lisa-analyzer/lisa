@@ -45,6 +45,9 @@ public class LiSARunInfo {
 				Void tool,
 				CFG graph,
 				Statement node) {
+			// an expression counts as a top-level statement when it is its
+			// own root (i.e., it is not nested inside another statement or
+			// expression); every other expression is an inner sub-expression
 			if (node instanceof Expression) {
 				if (((Expression) node).getRootStatement() == node)
 					statements++;

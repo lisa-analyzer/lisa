@@ -5,9 +5,13 @@ import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.type.Type;
 
 /**
- * A heap allocation site, that is an allocation site pointing to something
- * allocated in the dynamic memory, the heap.
- * 
+ * A heap allocation site, that is, an {@link AllocationSite} pointing to
+ * something allocated in the dynamic memory (the heap), as opposed to
+ * {@link StackAllocationSite}s, which represent stack-allocated memory. Which
+ * kind of allocation site is generated for a given memory allocation expression
+ * is decided upstream (see
+ * {@link it.unive.lisa.symbolic.heap.MemoryAllocation#isStackAllocation()}).
+ *
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
 public class HeapAllocationSite
@@ -103,7 +107,7 @@ public class HeapAllocationSite
 	public HeapAllocationSite asNonAllocation() {
 		if (!isAllocation())
 			return this;
-		return new HeapAllocationSite(getStaticType(), getLocationName(), isWeak(), getCodeLocation());
+		return new HeapAllocationSite(getStaticType(), getLocationName(), getField(), isWeak(), getCodeLocation());
 	}
 
 }

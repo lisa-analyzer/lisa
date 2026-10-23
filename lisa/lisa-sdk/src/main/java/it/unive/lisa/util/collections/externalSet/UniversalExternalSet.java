@@ -15,7 +15,7 @@ public final class UniversalExternalSet<T>
 		implements
 		ExternalSet<T> {
 
-	private static final String CANNOT_PERFORM_ERROR = "Cannot remove elements from a universal view of an external set";
+	private static final String CANNOT_PERFORM_ERROR = "Cannot %s elements on a universal view of an external set";
 
 	/**
 	 * The cache that generated this set and that contains the elements of this

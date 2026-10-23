@@ -33,8 +33,10 @@ import org.apache.commons.lang3.tuple.Pair;
  * A type representing an IMP array defined in an IMP program. ArrayTypes are
  * instances of {@link it.unive.lisa.type.ArrayType}, have a {@link Type} and a
  * dimension. To ensure uniqueness of ArrayType objects,
- * {@link #lookup(Type, int)} must be used to retrieve existing instances (or
- * automatically create one if no matching instance exists).
+ * {@link #register(Type, int)} must be used to retrieve existing instances,
+ * automatically creating one if no matching instance exists yet;
+ * {@link #lookup(Type, int)} can be used instead to only retrieve an
+ * already-registered instance, without creating one.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
@@ -133,7 +135,7 @@ public final class ArrayType
 			return Untyped.INSTANCE;
 
 		// TODO not sure about this
-		return getInnerType().commonSupertype(other.asArrayType().getInnerType());
+		return register(getInnerType().commonSupertype(other.asArrayType().getInnerType()), dimensions);
 	}
 
 	@Override

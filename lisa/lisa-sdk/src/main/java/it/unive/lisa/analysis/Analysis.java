@@ -42,7 +42,6 @@ import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.PushAny;
 import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.symbolic.value.ValueExpression;
-import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.Type;
 import java.util.Collection;
 import java.util.HashMap;
@@ -516,8 +515,13 @@ public class Analysis<
 	 * currently associated with it. The smashed errors are also updated by
 	 * removing the caught errors, and their state is taken into the lub if at
 	 * least one error is removed. All error(s) not matching the given targets
-	 * are removed from the resulting state.
-	 * 
+	 * are removed from the resulting state as well: this method is meant to be
+	 * invoked once per outgoing error-handling edge of {@code protectedBlock}
+	 * (see {@code ErrorEdge}), each one starting from the same {@code state}
+	 * and independently computing the state entering its own destination, so
+	 * errors that are not caught by this specific invocation are expected to
+	 * still be available, unaltered, to the other edges that process them.
+	 *
 	 * @param state          the current analysis state
 	 * @param pp             the program point where the move happens
 	 * @param protectedBlock the block that is being protected from the errors
@@ -558,13 +562,11 @@ public class Analysis<
 				? protectedBlock.getBody().contains(((Expression) st).getRootStatement())
 				: protectedBlock.getBody().contains(st);
 
-		Set<Error> caught = new HashSet<>();
 		Map<Type, Set<Statement>> caughtSmashed = new HashMap<>();
 
 		for (Entry<Error, ProgramState<A>> entry : state.getErrors()) {
 			if (!isCaught.test(entry.getKey().getType()) || !isProtected.test(entry.getKey().getThrower()))
 				continue;
-			caught.add(entry.getKey());
 			result = result.lub(entry.getValue());
 			for (SymbolicExpression e : entry.getValue().getComputedExpressions())
 				excs.add(e);
@@ -613,7 +615,7 @@ public class Analysis<
 				.collect(Collectors.toList());
 		if (variable != null) {
 			A assigned = start.bottom();
-			Variable target = variable.getVariable();
+			Identifier target = variable.getIdentifier();
 			for (SymbolicExpression e : excs)
 				assigned = assigned.lub(domain.assign(start, target, e, variable));
 			moved = assigned.forgetIdentifiers(
@@ -625,9 +627,11 @@ public class Analysis<
 		} else
 			moved = moved.forgetIdentifiers(toForget, protectedBlock.getStart());
 
+		// the fixpoint information is the one of the caught errors
 		result = new ProgramState<>(
 				moved,
-				variable == null ? new Skip(SyntheticLocation.INSTANCE) : variable.getVariable());
+				new ExpressionSet(variable == null ? new Skip(SyntheticLocation.INSTANCE) : variable.getIdentifier()),
+				result.getFixpointInformation());
 		// no uncaught exceptions should remain
 		// in the resulting state
 		// since they are not caught by this block
@@ -662,8 +666,12 @@ public class Analysis<
 		if (state.isBottom() || state.isTop())
 			return state;
 
-		if (target instanceof Call)
-			target = ((Call) target).getSource();
+		if (target instanceof Call) {
+			Call original = (Call) target;
+			while (original.getSource() != null)
+				original = original.getSource();
+			target = original;
+		}
 
 		if (events != null)
 			events.post(new AnalysisTransferThrowersStart<>(state, target, origin));
@@ -821,7 +829,8 @@ public class Analysis<
 								callres.getExecutionState(),
 								call),
 						callres.getExecutionExpressions(),
-						callres.getExecutionInformation()));
+						callres.getExecutionInformation()
+								.onCallReturn(entryState.getExecutionInformation(), call)));
 
 		if (events != null)
 			events.post(new AnalysisOnCallReturnEnd<>(entryState, callres, res, call));

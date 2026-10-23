@@ -38,13 +38,11 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Implementation of the stability abstract domain (
- * <a href="https://doi.org/10.1145/3689609.3689995">Stability paper</a>). This
- * domain computes per-variable numerical trends to infer stability, covariance
- * and contravariance relations on program variables, exploiting an auxiliary
- * domain of choice. This is implemented as an open product where the stability
- * domain gathers information from the auxiliary one through boolean
- * queries.<br>
+ * Implementation of the stability abstract domain. This domain computes
+ * per-variable numerical trends to infer stability, covariance and
+ * contravariance relations on program variables, exploiting an auxiliary domain
+ * of choice. This is implemented as an open product where the stability domain
+ * gathers information from the auxiliary one through boolean queries.<br>
  * <br>
  * Implementation-wise, this class is built as a product between a given
  * {@link ValueDomain} {@code aux} and a {@link ValueEnvironment} {@code trends}
@@ -58,8 +56,15 @@ import java.util.Set;
  * directly model values of expressions.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
- * 
+ *
  * @param <L> the kind of lattice tracked by the auxiliary domain
+ *
+ * @see <a href="https://doi.org/10.1145/3689609.3689995">Luca Negrini, Samuele
+ *          Presotto, Pietro Ferrara, Enea Zaffanella, Agostino Cortesi,
+ *          Vincenzo Arceri, Matteo Pasqua. Stability: An Abstract Domain for
+ *          the Trend of Variation of Numerical Variables. In Proceedings of the
+ *          10th ACM SIGPLAN International Workshop on Numerical and Symbolic
+ *          Abstract Domains (NSAD 2024), ACM, 2024.</a>
  */
 public class Stability<L extends ValueLattice<L>>
 		implements

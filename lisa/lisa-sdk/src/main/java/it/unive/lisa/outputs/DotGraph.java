@@ -6,6 +6,7 @@ import guru.nidi.graphviz.attribute.Color;
 import guru.nidi.graphviz.attribute.Label;
 import guru.nidi.graphviz.attribute.Shape;
 import guru.nidi.graphviz.attribute.Style;
+import guru.nidi.graphviz.attribute.validate.ValidatorMessage;
 import guru.nidi.graphviz.engine.Format;
 import guru.nidi.graphviz.engine.Graphviz;
 import guru.nidi.graphviz.model.Factory;
@@ -21,9 +22,12 @@ import it.unive.lisa.outputs.serializableGraph.SerializableValue;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Map.Entry;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringEscapeUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * A graph that can be dumped into Dot format.
@@ -33,6 +37,18 @@ import org.apache.commons.text.StringEscapeUtils;
 public class DotGraph
 		extends
 		VisualGraph {
+
+	private static final Logger LOG = LogManager.getLogger(DotGraph.class);
+
+	/**
+	 * Validation message consumer that ignores messages about the {@code id}
+	 * attribute: it is not valid for the dot format, but it is consumed when
+	 * the graph is rendered to svg (e.g., by d3-graphviz in html outputs).
+	 */
+	private static final Consumer<ValidatorMessage> VALIDATOR = msg -> {
+		if (!"id".equals(msg.attribute))
+			LOG.warn(msg);
+	};
 
 	/**
 	 * The wrapped graph.
@@ -233,7 +249,7 @@ public class DotGraph
 		MutableGraph copy = graph.copy();
 		copy.graphAttrs().add(Label.of(title)).graphAttrs().add("labelloc", "t");
 		copy.add(buildLegend());
-		String exportedGraph = Graphviz.fromGraph(copy).render(Format.DOT).toString();
+		String exportedGraph = Graphviz.fromGraph(copy).validating(VALIDATOR).render(Format.DOT).toString();
 		writer.write(exportedGraph);
 	}
 
@@ -247,7 +263,7 @@ public class DotGraph
 	public void dumpStripped(
 			Writer writer)
 			throws IOException {
-		String exportedGraph = Graphviz.fromGraph(graph).render(Format.DOT).toString();
+		String exportedGraph = Graphviz.fromGraph(graph).validating(VALIDATOR).render(Format.DOT).toString();
 		writer.write(exportedGraph);
 	}
 

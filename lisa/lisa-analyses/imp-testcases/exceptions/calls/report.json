@@ -1,21 +1,21 @@
 {
   "warnings" : [ ],
   "notices" : [ ],
-  "files" : [ "report.json", "untyped_B.B(B__this)_-1674709231.graph.json", "untyped_B.B(B__this)_-1675098436.graph.json", "untyped_D.D(D__this)_-1679908799.graph.json", "untyped_D.D(D__this)_-1680794841.graph.json", "untyped_D.D(D__this)_1391713126.graph.json", "untyped_exceptions.assignAfterException(exceptions__this)_-1788012349.graph.json", "untyped_exceptions.catchAfterCall(exceptions__this,_untyped_b)_-1788017247.graph.json", "untyped_exceptions.catchAfterCallChain(exceptions__this,_untyped_b)_-1788012380.graph.json", "untyped_exceptions.intermediate1(exceptions__this,_untyped_b)_-1381827760.graph.json", "untyped_exceptions.intermediate2(exceptions__this,_untyped_b)_-1675007575.graph.json", "untyped_exceptions.intermediate3(exceptions__this,_untyped_b)_2121319924.graph.json", "untyped_exceptions.main(exceptions__this,_untyped_b).graph.json", "untyped_exceptions.thrower(exceptions__this,_untyped_b)_-1381985488.graph.json", "untyped_exceptions.thrower(exceptions__this,_untyped_b)_-1382014070.graph.json", "untyped_exceptions.thrower(exceptions__this,_untyped_b)_-451616917.graph.json", "untyped_exceptions.tryAfterThrow(exceptions__this,_untyped_b)_-1788018177.graph.json", "untyped_exceptions.unconditionalThrow(exceptions__this)_-1381817685.graph.json", "untyped_exceptions.unconditionalThrow(exceptions__this)_-1381830240.graph.json" ],
+  "files" : [ "report.json", "untyped_B.B(B__this)_-1699437683.graph.json", "untyped_B.B(B__this)_-1699826888.graph.json", "untyped_D.D(D__this)_-1699684257.graph.json", "untyped_D.D(D__this)_-1699721736.graph.json", "untyped_D.D(D__this)_-2133359496.graph.json", "untyped_exceptions.assignAfterException(exceptions__this)_-1788037335.graph.json", "untyped_exceptions.catchAfterCall(exceptions__this,_untyped_b)_-1788037428.graph.json", "untyped_exceptions.catchAfterCallChain(exceptions__this,_untyped_b)_-1788037366.graph.json", "untyped_exceptions.intermediate1(exceptions__this,_untyped_b)_-1382621546.graph.json", "untyped_exceptions.intermediate2(exceptions__this,_untyped_b)_-1699634161.graph.json", "untyped_exceptions.intermediate3(exceptions__this,_untyped_b)_1357876538.graph.json", "untyped_exceptions.main(exceptions__this,_untyped_b).graph.json", "untyped_exceptions.thrower(exceptions__this,_untyped_b)_-1382623344.graph.json", "untyped_exceptions.thrower(exceptions__this,_untyped_b)_-1382624553.graph.json", "untyped_exceptions.thrower(exceptions__this,_untyped_b)_1651428439.graph.json", "untyped_exceptions.tryAfterThrow(exceptions__this,_untyped_b)_-1788037397.graph.json", "untyped_exceptions.unconditionalThrow(exceptions__this)_-1382615315.graph.json", "untyped_exceptions.unconditionalThrow(exceptions__this)_-1382627870.graph.json" ],
   "info" : {
     "cfgs" : "15",
-    "duration" : "73ms",
-    "end" : "2026-01-07T11:13:43.284+01:00",
+    "duration" : "170ms",
+    "end" : "2026-09-04T15:53:24.912+02:00",
     "expressions" : "71",
     "files" : "18",
     "globals" : "0",
     "members" : "15",
     "notices" : "0",
     "programs" : "1",
-    "start" : "2026-01-07T11:13:43.211+01:00",
+    "start" : "2026-09-04T15:53:24.742+02:00",
     "statements" : "37",
     "units" : "6",
-    "version" : "0.1",
+    "version" : "1.0",
     "warnings" : "0"
   },
   "configuration" : {

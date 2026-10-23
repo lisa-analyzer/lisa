@@ -253,6 +253,12 @@ public final class Star
 	@Override
 	public RegularExpression repeat(
 			long n) {
+		// by definition L^0 = {epsilon} for every language L, consistently
+		// with Atom#repeat(long) and Comp#repeat(long); for n > 0, r* is
+		// already closed under concatenation with itself, so repeating it
+		// any (positive) number of times still yields r*
+		if (n == 0)
+			return Atom.EPSILON;
 		return this;
 	}
 

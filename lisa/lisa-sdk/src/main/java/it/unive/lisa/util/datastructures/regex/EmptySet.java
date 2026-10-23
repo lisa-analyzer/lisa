@@ -149,6 +149,12 @@ public final class EmptySet
 	@Override
 	public RegularExpression repeat(
 			long n) {
+		// by definition L^0 = {epsilon} for every language L, including the
+		// empty one, consistently with Atom#repeat(long) and
+		// Comp#repeat(long); for n > 0, concatenating the empty language
+		// with itself any number of times still yields the empty language
+		if (n == 0)
+			return Atom.EPSILON;
 		return this;
 	}
 

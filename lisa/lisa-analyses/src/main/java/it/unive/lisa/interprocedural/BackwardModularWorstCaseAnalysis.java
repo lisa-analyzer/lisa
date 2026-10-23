@@ -40,10 +40,14 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 /**
- * A worst case modular analysis were all cfg calls are treated as open calls.
- * 
+ * The backward counterpart of {@link ModularWorstCaseAnalysis}: a worst-case
+ * modular {@link InterproceduralAnalysis} where every {@link CFGCall} is
+ * treated as an {@link OpenCall}, and every {@link CFG} of the application is
+ * analyzed exactly once, in isolation, using a backward fixpoint instead of a
+ * forward one.
+ *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
- * 
+ *
  * @param <A> the kind of {@link AbstractLattice} produced by the domain
  *                {@code D}
  * @param <D> the kind of {@link AbstractDomain} to run during the analysis
@@ -121,7 +125,7 @@ public class BackwardModularWorstCaseAnalysis<A extends AbstractLattice<A>,
 			events.post(new FixpointIterationStart(1));
 		}
 
-		for (CFG cfg : IterationLogger.iterate(LOG, all, "Computing fixpoint over the whole program", "cfgs"))
+		for (CFG cfg : IterationLogger.iterate(LOG, all, "Analyzing control flow graphs", "cfgs"))
 			try {
 				if (events != null)
 					events.post(new CFGFixpointStart<>(cfg, id, entryState));

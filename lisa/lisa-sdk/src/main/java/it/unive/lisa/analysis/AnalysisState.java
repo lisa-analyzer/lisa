@@ -10,6 +10,7 @@ import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.type.Type;
+import it.unive.lisa.util.datastructures.trie.PatriciaTrieMap;
 import it.unive.lisa.util.representation.MapRepresentation;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredObject;
@@ -47,9 +48,18 @@ public class AnalysisState<A extends AbstractLattice<A>>
 	private final GenericMapLattice<Error, ProgramState<A>> errors;
 
 	/**
-	 * Builds a new analysis state.
-	 * 
-	 * @param lattice the program state to embed in this analysis state
+	 * Builds the top analysis state. All continuations (including the normal
+	 * execution one) are set to the top of the lattice induced by
+	 * {@code lattice}'s type: the given instance is used only to derive that
+	 * type through {@link ProgramState#top()}, and is otherwise discarded,
+	 * regardless of whether it is itself top, bottom, or a concrete value.
+	 * Callers that want the normal execution to actually carry {@code lattice}
+	 * should follow up with {@link #withExecution(ProgramState)} (this is the
+	 * idiom used throughout the codebase, e.g.
+	 * {@code new AnalysisState<>(lattice).withExecution(lattice)}).
+	 *
+	 * @param lattice the program state used to determine the concrete type of
+	 *                    this analysis state
 	 */
 	public AnalysisState(
 			ProgramState<A> lattice) {
@@ -378,17 +388,17 @@ public class AnalysisState<A extends AbstractLattice<A>>
 			return this;
 		// we don't check if this state is bottom here, since even if
 		// the whole state is bottom we still want to track the new error
-		Map<Error, ProgramState<A>> func = this.errors.mkNewFunction(this.errors.function, false);
+		PatriciaTrieMap<Error, ProgramState<A>> result = this.errors.mkNewFunction(this.errors.function, false);
 		for (Entry<Error, ProgramState<A>> e : errors.entrySet()) {
-			ProgramState<A> exc = func.get(e.getKey());
-			func.put(e.getKey(), e.getValue().lub(exc));
+			ProgramState<A> exc = result.get(e.getKey());
+			result = result.put(e.getKey(), e.getValue().lub(exc));
 		}
 		return new AnalysisState<>(
 				execution,
 				halt,
 				smashedErrors,
 				smashedErrorsState,
-				new GenericMapLattice<>(this.errors.lattice, func));
+				new GenericMapLattice<>(this.errors.lattice, result));
 	}
 
 	/**
@@ -405,10 +415,10 @@ public class AnalysisState<A extends AbstractLattice<A>>
 		if (caught.isEmpty() || isBottom() || isTop() || errors.function == null || errors.function.isEmpty())
 			return this;
 
-		Map<Error, ProgramState<A>> filtered = errors.mkNewFunction(errors.function, false);
+		PatriciaTrieMap<Error, ProgramState<A>> filtered = errors.mkNewFunction(errors.function, false);
 		for (Entry<Error, ProgramState<A>> e : errors)
 			if (caught.contains(e.getKey()))
-				filtered.remove(e.getKey());
+				filtered = filtered.remove(e.getKey());
 
 		return new AnalysisState<>(
 				execution,
@@ -471,18 +481,19 @@ public class AnalysisState<A extends AbstractLattice<A>>
 			return this;
 		// we don't check if this state is bottom here, since even if
 		// the whole state is bottom we still want to track the new error
-		Map<Type, GenericSetLattice<Statement>> func = smashedErrors.mkNewFunction(smashedErrors.function, false);
+		PatriciaTrieMap<Type,
+				GenericSetLattice<Statement>> result = smashedErrors.mkNewFunction(smashedErrors.function, false);
 		for (Entry<Type, Set<Statement>> e : errors.entrySet()) {
-			GenericSetLattice<Statement> throwers = func.get(e.getKey());
+			GenericSetLattice<Statement> throwers = result.get(e.getKey());
 			if (throwers == null)
-				func.put(e.getKey(), new GenericSetLattice<>(e.getValue()));
+				result = result.put(e.getKey(), new GenericSetLattice<>(e.getValue()));
 			else
-				func.put(e.getKey(), throwers.addAll(e.getValue()));
+				result = result.put(e.getKey(), throwers.addAll(e.getValue()));
 		}
 		return new AnalysisState<>(
 				execution,
 				halt,
-				new GenericMapLattice<>(smashedErrors.lattice, func),
+				new GenericMapLattice<>(smashedErrors.lattice, result),
 				smashedErrorsState.lub(state),
 				this.errors);
 	}
@@ -505,16 +516,17 @@ public class AnalysisState<A extends AbstractLattice<A>>
 				|| smashedErrors.function.isEmpty())
 			return this;
 
-		Map<Type, GenericSetLattice<Statement>> filtered = smashedErrors.mkNewFunction(smashedErrors.function, false);
+		PatriciaTrieMap<Type,
+				GenericSetLattice<Statement>> filtered = smashedErrors.mkNewFunction(smashedErrors.function, false);
 		for (Entry<Type, GenericSetLattice<Statement>> e : smashedErrors) {
 			Set<Statement> throwers = caught.get(e.getKey());
 			if (throwers != null) {
 				GenericSetLattice<Statement> set = filtered.get(e.getKey());
 				set = set.removeAll(throwers);
 				if (set.elements.isEmpty())
-					filtered.remove(e.getKey());
+					filtered = filtered.remove(e.getKey());
 				else
-					filtered.put(e.getKey(), set);
+					filtered = filtered.put(e.getKey(), set);
 			}
 		}
 

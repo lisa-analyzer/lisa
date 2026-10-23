@@ -12,6 +12,7 @@ import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -257,6 +258,11 @@ public class WholeValueAnalysis
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
+		if (state.isBottom())
+			return null;
+		if (state.isTop())
+			return Collections.emptySet();
+
 		EventQueue events = oracle.getEventQueue();
 		if (events != null)
 			events.post(new WholeValueConstraintsStart(state, e));
