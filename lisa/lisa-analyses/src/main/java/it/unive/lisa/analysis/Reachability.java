@@ -191,8 +191,16 @@ public class Reachability<D extends AbstractDomain<A>,
 			if (original != current)
 				current = original;
 		}
-		if (current instanceof Expression)
-			current = ((Expression) current).getRootStatement();
+		if (current instanceof Expression && ((Expression) current).getRootStatement() != current) {
+			// the split happens inside a statement (e.g., short-circuit
+			// operators, ternaries) and not while traversing an edge: all
+			// paths join again before the statement completes, so its
+			// reachability is not affected (if v is bottom, the reachability
+			// will be updated by the next semantic step)
+			if (v == state.second)
+				return state;
+			return new ReachabilityProduct<>(r, v);
+		}
 
 		PatriciaTrieMap<ProgramPoint, ReachabilityStatus> map = r.mkNewFunction(r.function, false);
 		ReachabilityStatus prev = map.get(current);
