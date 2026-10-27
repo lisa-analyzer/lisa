@@ -39,7 +39,6 @@ import it.unive.lisa.interprocedural.inlining.CallStackId;
 import it.unive.lisa.lattices.FunctionalLattice;
 import it.unive.lisa.lattices.HistoryState;
 import it.unive.lisa.lattices.InverseSetLattice;
-import it.unive.lisa.lattices.ReachLattice;
 import it.unive.lisa.lattices.SetLattice;
 import it.unive.lisa.lattices.SingleHeapLattice;
 import it.unive.lisa.lattices.SingleTypeLattice;
@@ -632,7 +631,6 @@ public class EqualityContractVerificationTest {
 			else if (subject == SingleHeapLattice.class
 					|| subject == SingleTypeLattice.class
 					|| subject == SingleValueLattice.class
-					|| subject == ReachLattice.ReachabilityStatus.class
 					|| subject == Monolith.class)
 				verify(subject, Warning.INHERITED_DIRECTLY_FROM_OBJECT);
 			else if (subject != AnalyzedCFG.class

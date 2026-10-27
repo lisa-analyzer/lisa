@@ -11,7 +11,6 @@ import it.unive.lisa.analysis.HistoryDomain;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.NoOpValues;
 import it.unive.lisa.analysis.ProgramState;
-import it.unive.lisa.analysis.Reachability;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.SimpleAbstractDomain;
@@ -52,7 +51,6 @@ import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.interprocedural.callgraph.CallGraphConstructionException;
 import it.unive.lisa.interprocedural.callgraph.RTACallGraph;
 import it.unive.lisa.lattices.ExpressionSet;
-import it.unive.lisa.lattices.ReachLattice;
 import it.unive.lisa.lattices.Satisfiability;
 import it.unive.lisa.lattices.SimpleAbstractState;
 import it.unive.lisa.lattices.SingleHeapLattice;
@@ -679,8 +677,6 @@ public class TestParameterProvider {
 			return (R) SingleValueLattice.SINGLETON;
 		if (clazz == SimpleAbstractDomain.class)
 			return (R) DefaultConfiguration.defaultAbstractDomain();
-		if (clazz == ReachLattice.ReachabilityStatus.class)
-			return (R) ReachLattice.ReachabilityStatus.POSSIBLY_REACHABLE;
 		return null;
 	}
 
@@ -738,8 +734,6 @@ public class TestParameterProvider {
 			return (R) new Interval();
 		if (param == SmashedSumStringDomain.class)
 			return (R) new Prefix();
-		if (param == ReachLattice.class)
-			return (R) new ReachLattice();
 		if (param == ValueLattice[].class)
 			return (R) new ValueLattice[] { SingleValueLattice.SINGLETON };
 
@@ -748,8 +742,7 @@ public class TestParameterProvider {
 			return (R) new Bricks();
 		if (param == BoundedStringSet.class)
 			return (R) new BoundedStringSet();
-		if (root == TracePartitioning.class || root == Analysis.class || root == Reachability.class
-				|| root == HistoryDomain.class)
+		if (root == TracePartitioning.class || root == Analysis.class || root == HistoryDomain.class)
 			return (R) DefaultConfiguration.defaultAbstractDomain();
 		if (param == ValueDomain[].class)
 			return (R) new ValueDomain[] { new NoOpValues() };

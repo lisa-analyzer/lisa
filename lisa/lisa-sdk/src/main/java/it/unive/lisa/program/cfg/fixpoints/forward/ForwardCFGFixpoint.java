@@ -2,6 +2,7 @@ package it.unive.lisa.program.cfg.fixpoints.forward;
 
 import it.unive.lisa.analysis.AbstractDomain;
 import it.unive.lisa.analysis.AbstractLattice;
+import it.unive.lisa.analysis.Analysis;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
@@ -110,17 +111,49 @@ public abstract class ForwardCFGFixpoint<A extends AbstractLattice<A>, D extends
 			Edge edge,
 			CompoundState<A> entrystate)
 			throws SemanticException {
-		AnalysisState<A> state = entrystate.postState;
+		AnalysisState<A> approx = traverseEdge(edge, entrystate.postState, graph, interprocedural.getAnalysis(),
+				events);
+		return CompoundState.of(approx, new StatementStore<>(approx).bottom());
+	}
 
+	/**
+	 * Traverses the given edge as done by forward fixpoints: errors caught by
+	 * the error edges leaving the source of the edge are removed (unless the
+	 * edge is itself an error edge), the semantics of the edge is applied, and
+	 * the variables whose scope ends at the source of the edge and the meta
+	 * variables of the source are forgotten.
+	 * 
+	 * @param <A>      the kind of {@link AbstractLattice} produced by the
+	 *                     domain {@code D}
+	 * @param <D>      the kind of {@link AbstractDomain} to run during the
+	 *                     analysis
+	 * @param edge     the edge to traverse
+	 * @param state    the post-state of the source of the edge
+	 * @param graph    the cfg containing the edge
+	 * @param analysis the analysis to use for the traversal
+	 * @param events   the event queue where traversal events are posted, or
+	 *                     {@code null} if events should not be posted
+	 * 
+	 * @return the state at the end of the edge
+	 * 
+	 * @throws SemanticException if something goes wrong during the traversal
+	 */
+	public static <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> traverseEdge(
+			Edge edge,
+			AnalysisState<A> state,
+			CFG graph,
+			Analysis<A, D> analysis,
+			EventQueue events)
+			throws SemanticException {
 		if (events != null)
 			events.post(new EdgeTraverseStart<>(edge, state));
 
 		// we remove the exceptions that are caught by error edges
 		// going out from the same source
 		if (!edge.isErrorHandling())
-			state = interprocedural.getAnalysis().removeCaughtErrors(state, edge.getSource());
+			state = analysis.removeCaughtErrors(state, edge.getSource());
 
-		AnalysisState<A> approx = edge.traverseForward(state, interprocedural.getAnalysis());
+		AnalysisState<A> approx = edge.traverseForward(state, analysis);
 
 		// we remove out of scope variables here
 		List<VariableTableEntry> toRemove = new LinkedList<>();
@@ -131,7 +164,7 @@ public abstract class ForwardCFGFixpoint<A extends AbstractLattice<A>, D extends
 		Collection<Identifier> ids = new LinkedList<>();
 		for (VariableTableEntry entry : toRemove) {
 			SymbolicExpression v = entry.createReference(graph).getIdentifier();
-			for (SymbolicExpression expr : interprocedural.getAnalysis()
+			for (SymbolicExpression expr : analysis
 					.smallStepSemantics(approx, v, edge.getSource())
 					.getExecutionExpressions())
 				ids.add((Identifier) expr);
@@ -149,7 +182,7 @@ public abstract class ForwardCFGFixpoint<A extends AbstractLattice<A>, D extends
 		if (events != null)
 			events.post(new EdgeTraverseEnd<>(edge, state, approx));
 
-		return CompoundState.of(approx, new StatementStore<>(approx).bottom());
+		return approx;
 	}
 
 	@Override
