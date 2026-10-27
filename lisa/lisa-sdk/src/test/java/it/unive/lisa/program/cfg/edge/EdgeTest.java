@@ -10,6 +10,7 @@ import it.unive.lisa.TestTypeSystem;
 import it.unive.lisa.analysis.AbstractDomain;
 import it.unive.lisa.analysis.Analysis;
 import it.unive.lisa.analysis.AnalysisState;
+import it.unive.lisa.analysis.AnalysisState.Error;
 import it.unive.lisa.analysis.ProgramState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
@@ -21,6 +22,7 @@ import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeMemberDescriptor;
 import it.unive.lisa.program.cfg.ProgramPoint;
+import it.unive.lisa.program.cfg.protection.ProtectedBlock;
 import it.unive.lisa.program.cfg.statement.NoOp;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.symbolic.SymbolicExpression;
@@ -29,6 +31,7 @@ import it.unive.lisa.symbolic.value.PushAny;
 import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.symbolic.value.operator.unary.LogicalNegation;
 import it.unive.lisa.type.Untyped;
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Test;
 
 public class EdgeTest {
@@ -164,6 +167,31 @@ public class EdgeTest {
 				RecordingState callres,
 				ProgramPoint call) {
 			return callres;
+		}
+
+		@Override
+		public Pair<RecordingState, RecordingState> onExecutionToError(
+				RecordingState remaining,
+				RecordingState moved,
+				Error error,
+				ProgramPoint pp) {
+			return Pair.of(remaining, moved);
+		}
+
+		@Override
+		public RecordingState onErrorToExecution(
+				RecordingState state,
+				ProtectedBlock protectedBlock,
+				ProgramPoint pp) {
+			return state;
+		}
+
+		@Override
+		public Pair<RecordingState, RecordingState> onExecutionToHalting(
+				RecordingState remaining,
+				RecordingState moved,
+				ProgramPoint pp) {
+			return Pair.of(remaining, moved);
 		}
 
 		@Override

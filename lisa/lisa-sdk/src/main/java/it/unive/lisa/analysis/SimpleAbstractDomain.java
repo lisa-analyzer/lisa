@@ -1,5 +1,6 @@
 package it.unive.lisa.analysis;
 
+import it.unive.lisa.analysis.AnalysisState.Error;
 import it.unive.lisa.analysis.combination.constraints.WholeValueAnalysis;
 import it.unive.lisa.analysis.events.DomainAssignEnd;
 import it.unive.lisa.analysis.events.DomainAssignStart;
@@ -25,6 +26,7 @@ import it.unive.lisa.lattices.ExpressionSet;
 import it.unive.lisa.lattices.Satisfiability;
 import it.unive.lisa.lattices.SimpleAbstractState;
 import it.unive.lisa.program.cfg.ProgramPoint;
+import it.unive.lisa.program.cfg.protection.ProtectedBlock;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.MemoryAllocation;
 import it.unive.lisa.symbolic.value.BinaryExpression;
@@ -773,6 +775,65 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLatti
 		if (h == callres.heapState && v == callres.valueState && t == callres.typeState)
 			return callres;
 		return new SimpleAbstractState<>(h, v, t);
+	}
+
+	@Override
+	public Pair<SimpleAbstractState<H, V, T>, SimpleAbstractState<H, V, T>> onExecutionToError(
+			SimpleAbstractState<H, V, T> remaining,
+			SimpleAbstractState<H, V, T> moved,
+			Error error,
+			ProgramPoint pp)
+			throws SemanticException {
+		Pair<H, H> h = heapDomain.onExecutionToError(remaining.heapState, moved.heapState, error, pp);
+		Pair<V, V> v = valueDomain.onExecutionToError(remaining.valueState, moved.valueState, error, pp);
+		Pair<T, T> t = typeDomain.onExecutionToError(remaining.typeState, moved.typeState, error, pp);
+		return Pair.of(
+				h.getLeft() == remaining.heapState
+						&& v.getLeft() == remaining.valueState
+						&& t.getLeft() == remaining.typeState
+								? remaining
+								: new SimpleAbstractState<>(h.getLeft(), v.getLeft(), t.getLeft()),
+				h.getRight() == moved.heapState
+						&& v.getRight() == moved.valueState
+						&& t.getRight() == moved.typeState
+								? moved
+								: new SimpleAbstractState<>(h.getRight(), v.getRight(), t.getRight()));
+	}
+
+	@Override
+	public SimpleAbstractState<H, V, T> onErrorToExecution(
+			SimpleAbstractState<H, V, T> state,
+			ProtectedBlock protectedBlock,
+			ProgramPoint pp)
+			throws SemanticException {
+		H h = heapDomain.onErrorToExecution(state.heapState, protectedBlock, pp);
+		V v = valueDomain.onErrorToExecution(state.valueState, protectedBlock, pp);
+		T t = typeDomain.onErrorToExecution(state.typeState, protectedBlock, pp);
+		if (h == state.heapState && v == state.valueState && t == state.typeState)
+			return state;
+		return new SimpleAbstractState<>(h, v, t);
+	}
+
+	@Override
+	public Pair<SimpleAbstractState<H, V, T>, SimpleAbstractState<H, V, T>> onExecutionToHalting(
+			SimpleAbstractState<H, V, T> remaining,
+			SimpleAbstractState<H, V, T> moved,
+			ProgramPoint pp)
+			throws SemanticException {
+		Pair<H, H> h = heapDomain.onExecutionToHalting(remaining.heapState, moved.heapState, pp);
+		Pair<V, V> v = valueDomain.onExecutionToHalting(remaining.valueState, moved.valueState, pp);
+		Pair<T, T> t = typeDomain.onExecutionToHalting(remaining.typeState, moved.typeState, pp);
+		return Pair.of(
+				h.getLeft() == remaining.heapState
+						&& v.getLeft() == remaining.valueState
+						&& t.getLeft() == remaining.typeState
+								? remaining
+								: new SimpleAbstractState<>(h.getLeft(), v.getLeft(), t.getLeft()),
+				h.getRight() == moved.heapState
+						&& v.getRight() == moved.valueState
+						&& t.getRight() == moved.typeState
+								? moved
+								: new SimpleAbstractState<>(h.getRight(), v.getRight(), t.getRight()));
 	}
 
 	@Override

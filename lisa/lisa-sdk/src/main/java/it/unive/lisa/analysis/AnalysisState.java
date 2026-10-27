@@ -109,6 +109,21 @@ public class AnalysisState<A extends AbstractLattice<A>>
 	}
 
 	/**
+	 * Stores the given state as the approximation for all smashed errors,
+	 * without modifying the smashed error types and their throwers.
+	 *
+	 * @param state the state to store
+	 *
+	 * @return a new instance with the updated mapping
+	 */
+	public AnalysisState<A> withSmashedErrorsState(
+			ProgramState<A> state) {
+		if (state == smashedErrorsState)
+			return this;
+		return new AnalysisState<>(execution, halt, smashedErrors, state, errors);
+	}
+
+	/**
 	 * Yields the {@link AbstractLattice} embedded into the program state of the
 	 * normal execution, containing abstract values for program variables and
 	 * memory locations.

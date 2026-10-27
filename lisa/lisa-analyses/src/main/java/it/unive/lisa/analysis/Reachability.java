@@ -1,5 +1,6 @@
 package it.unive.lisa.analysis;
 
+import it.unive.lisa.analysis.AnalysisState.Error;
 import it.unive.lisa.events.EventQueue;
 import it.unive.lisa.lattices.ReachLattice;
 import it.unive.lisa.lattices.ReachLattice.ReachabilityStatus;
@@ -7,6 +8,7 @@ import it.unive.lisa.lattices.ReachabilityProduct;
 import it.unive.lisa.lattices.Satisfiability;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.program.cfg.controlFlow.ControlFlowStructure;
+import it.unive.lisa.program.cfg.protection.ProtectedBlock;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.call.Call;
@@ -15,6 +17,7 @@ import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.util.datastructures.trie.PatriciaTrieMap;
 import java.util.HashSet;
 import java.util.Set;
+import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * A wrapper {@link AbstractDomain} that pairs an underlying domain {@code D}
@@ -265,4 +268,40 @@ public class Reachability<D extends AbstractDomain<A>,
 		return new ReachabilityProduct<>(reach, returned);
 	}
 
+	@Override
+	public Pair<ReachabilityProduct<A>, ReachabilityProduct<A>> onExecutionToError(
+			ReachabilityProduct<A> remaining,
+			ReachabilityProduct<A> moved,
+			Error error,
+			ProgramPoint pp)
+			throws SemanticException {
+		Pair<A, A> res = domain.onExecutionToError(remaining.second, moved.second, error, pp);
+		return Pair.of(
+				res.getLeft() == remaining.second ? remaining : new ReachabilityProduct<>(remaining.first, res.getLeft()),
+				res.getRight() == moved.second ? moved : new ReachabilityProduct<>(moved.first, res.getRight()));
+	}
+
+	@Override
+	public ReachabilityProduct<A> onErrorToExecution(
+			ReachabilityProduct<A> state,
+			ProtectedBlock protectedBlock,
+			ProgramPoint pp)
+			throws SemanticException {
+		A caught = domain.onErrorToExecution(state.second, protectedBlock, pp);
+		if (caught == state.second)
+			return state;
+		return new ReachabilityProduct<>(state.first, caught);
+	}
+
+	@Override
+	public Pair<ReachabilityProduct<A>, ReachabilityProduct<A>> onExecutionToHalting(
+			ReachabilityProduct<A> remaining,
+			ReachabilityProduct<A> moved,
+			ProgramPoint pp)
+			throws SemanticException {
+		Pair<A, A> res = domain.onExecutionToHalting(remaining.second, moved.second, pp);
+		return Pair.of(
+				res.getLeft() == remaining.second ? remaining : new ReachabilityProduct<>(remaining.first, res.getLeft()),
+				res.getRight() == moved.second ? moved : new ReachabilityProduct<>(moved.first, res.getRight()));
+	}
 }

@@ -223,6 +223,57 @@ public class AnalysisTest {
 	}
 
 	@Test
+	public void partialMoveExecutionToErrorKeepsTheNormalExecution()
+			throws SemanticException {
+		CFG cfg = cfg();
+		Identifier x = id(cfg, "x");
+		Identifier y = id(cfg, "y");
+		Statement pp = new NoOp(cfg, LOC);
+		Error err = new Error(VoidType.INSTANCE, pp);
+		AnalysisState<MarkerAbstractLattice> res = analysis().moveExecutionToError(base(ps(x)), base(ps(y)), err, pp);
+		assertEquals(Set.of(x), res.getExecutionState().known);
+		assertEquals(Set.of(y), res.getErrors().getState(err).getState().known);
+	}
+
+	@Test
+	public void partialMoveExecutionToErrorIsTotalWhenTheNormalExecutionIsBottom()
+			throws SemanticException {
+		CFG cfg = cfg();
+		Identifier y = id(cfg, "y");
+		Statement pp = new NoOp(cfg, LOC);
+		Error err = new Error(VoidType.INSTANCE, pp);
+		AnalysisState<MarkerAbstractLattice> erroneous = base(ps(y));
+		AnalysisState<MarkerAbstractLattice> res = analysis()
+				.moveExecutionToError(erroneous.bottomExecution(), erroneous, err, pp);
+		assertEquals(analysis().moveExecutionToError(erroneous, err, pp), res);
+	}
+
+	@Test
+	public void partialMoveExecutionToErrorDoesNotMoveABottomExecution()
+			throws SemanticException {
+		CFG cfg = cfg();
+		Identifier x = id(cfg, "x");
+		Statement pp = new NoOp(cfg, LOC);
+		Error err = new Error(VoidType.INSTANCE, pp);
+		AnalysisState<MarkerAbstractLattice> normal = base(ps(x));
+		AnalysisState<MarkerAbstractLattice> res = analysis()
+				.moveExecutionToError(normal, normal.bottomExecution(), err, pp);
+		assertEquals(normal, res);
+	}
+
+	@Test
+	public void partialMoveExecutionToHaltingKeepsTheNormalExecution()
+			throws SemanticException {
+		CFG cfg = cfg();
+		Identifier x = id(cfg, "x");
+		Identifier y = id(cfg, "y");
+		Statement pp = new NoOp(cfg, LOC);
+		AnalysisState<MarkerAbstractLattice> res = analysis().moveExecutionToHalting(base(ps(x)), base(ps(y)), pp);
+		assertEquals(Set.of(x), res.getExecutionState().known);
+		assertEquals(Set.of(y), res.getHalt().getState().known);
+	}
+
+	@Test
 	public void moveExecutionToHaltingLubsWithAnyPreviousHaltingState()
 			throws SemanticException {
 		CFG cfg = cfg();

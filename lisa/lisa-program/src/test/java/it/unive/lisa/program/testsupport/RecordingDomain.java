@@ -1,11 +1,13 @@
 package it.unive.lisa.program.testsupport;
 
 import it.unive.lisa.analysis.AbstractDomain;
+import it.unive.lisa.analysis.AnalysisState.Error;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.events.EventQueue;
 import it.unive.lisa.lattices.Satisfiability;
 import it.unive.lisa.program.cfg.ProgramPoint;
+import it.unive.lisa.program.cfg.protection.ProtectedBlock;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.type.Type;
@@ -16,6 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.apache.commons.lang3.tuple.Pair;
 
 // a hand-rolled fake AbstractDomain: it does not compute anything, it just
 // records every expression it is asked to compute the semantics of, and lets
@@ -86,6 +89,34 @@ public class RecordingDomain
 			ProgramPoint call)
 			throws SemanticException {
 		return entryState;
+	}
+
+	@Override
+	public Pair<UnitLattice, UnitLattice> onExecutionToError(
+			UnitLattice remaining,
+			UnitLattice moved,
+			Error error,
+			ProgramPoint pp)
+			throws SemanticException {
+		return Pair.of(remaining, moved);
+	}
+
+	@Override
+	public UnitLattice onErrorToExecution(
+			UnitLattice state,
+			ProtectedBlock protectedBlock,
+			ProgramPoint pp)
+			throws SemanticException {
+		return state;
+	}
+
+	@Override
+	public Pair<UnitLattice, UnitLattice> onExecutionToHalting(
+			UnitLattice remaining,
+			UnitLattice moved,
+			ProgramPoint pp)
+			throws SemanticException {
+		return Pair.of(remaining, moved);
 	}
 
 	@Override

@@ -471,7 +471,10 @@ public class Analysis<
 	 * exists for the given exception, it is merged with the current state.
 	 * Moreover, if the given exception should be smashed (see
 	 * {@link LiSAConfiguration#shouldSmashError}), the state is set/merged with
-	 * the smashed errors state instead.
+	 * the smashed errors state instead. This corresponds to a <i>total</i>
+	 * move, where all executions raise the error: use
+	 * {@link #moveExecutionToError(AnalysisState, AnalysisState, Error, ProgramPoint)}
+	 * if only some executions raise it.
 	 * 
 	 * @param state     the current analysis state
 	 * @param exception the exception to move the execution state to
@@ -493,14 +496,65 @@ public class Analysis<
 			events.post(new AnalysisExecToErrorStart<>(state, exception));
 
 		AnalysisState<A> result = state.bottomExecution();
-
+		ProgramState<A> moved = onExecutionToError(result, state, exception, pp).getRight().getExecution();
 		if (shouldSmashError == null || !shouldSmashError.test(exception.getType()))
-			result = result.addError(exception, state.getExecution());
+			result = result.addError(exception, moved);
 		else
-			result = result.addSmashedError(exception, state.getExecution());
+			result = result.addSmashedError(exception, moved);
 
 		if (events != null)
 			events.post(new AnalysisExecToErrorEnd<>(pp, state, result, exception));
+
+		return result;
+	}
+
+	/**
+	 * Moves part of the normal execution to the given exception. This
+	 * corresponds to a <i>partial</i> move, where only some executions raise
+	 * the error: {@code normal} is the state of the executions that continue
+	 * normally, while {@code erroneous} is the state of the ones that raise the
+	 * error, whose execution state is moved to the error as in
+	 * {@link #moveExecutionToError(AnalysisState, Error, ProgramPoint)}. The
+	 * result is the least upper bound of the two states after the move. If
+	 * either the normal execution of {@code normal} or the one of
+	 * {@code erroneous} is bottom, this method falls back to a total move or to
+	 * no move at all, respectively.
+	 * 
+	 * @param normal    the analysis state of the executions that do not raise
+	 *                      the error
+	 * @param erroneous the analysis state of the executions that raise the
+	 *                      error
+	 * @param exception the exception to move the execution state to
+	 * @param pp        the program point where the move happens
+	 * 
+	 * @return the updated analysis state
+	 * 
+	 * @throws SemanticException if something goes wrong during the computation
+	 */
+	public AnalysisState<A> moveExecutionToError(
+			AnalysisState<A> normal,
+			AnalysisState<A> erroneous,
+			Error exception,
+			ProgramPoint pp)
+			throws SemanticException {
+		if (erroneous.isBottom() || erroneous.getExecution().isBottom() || erroneous.getExecutionState().isBottom())
+			return normal.lub(erroneous);
+		if (normal.isBottom() || normal.getExecution().isBottom() || normal.getExecutionState().isBottom())
+			return normal.lub(moveExecutionToError(erroneous, exception, pp));
+
+		if (events != null)
+			events.post(new AnalysisExecToErrorStart<>(erroneous, exception));
+
+		Pair<AnalysisState<A>, AnalysisState<A>> moved = onExecutionToError(normal, erroneous, exception, pp);
+		AnalysisState<A> result = erroneous.bottomExecution();
+		if (shouldSmashError == null || !shouldSmashError.test(exception.getType()))
+			result = result.addError(exception, moved.getRight().getExecution());
+		else
+			result = result.addSmashedError(exception, moved.getRight().getExecution());
+		result = moved.getLeft().lub(result);
+
+		if (events != null)
+			events.post(new AnalysisExecToErrorEnd<>(pp, erroneous, result, exception));
 
 		return result;
 	}
@@ -635,7 +689,10 @@ public class Analysis<
 		// no uncaught exceptions should remain
 		// in the resulting state
 		// since they are not caught by this block
-		AnalysisState<A> res = state.removeAllErrors(false).withExecution(result);
+		AnalysisState<A> res = onErrorToExecution(
+				state.removeAllErrors(false).withExecution(result),
+				protectedBlock,
+				pp);
 
 		if (events != null)
 			events.post(new AnalysisErrorsToExecEnd<>(pp, state, res, protectedBlock, targets, excluded, variable));
@@ -785,7 +842,10 @@ public class Analysis<
 	/**
 	 * Sets the execution state to {@link ProgramState#bottom()} after moving
 	 * the current execution state to the halting state. If a state already
-	 * exists for halting, it is merged with the current state.
+	 * exists for halting, it is merged with the current state. This corresponds
+	 * to a <i>total</i> move, where all executions halt: use
+	 * {@link #moveExecutionToHalting(AnalysisState, AnalysisState, ProgramPoint)}
+	 * if only some executions halt.
 	 * 
 	 * @param state the current analysis state
 	 * @param pp    the program point where the move happens
@@ -804,8 +864,9 @@ public class Analysis<
 		if (events != null)
 			events.post(new AnalysisExecToHaltStart<>(state));
 
-		ProgramState<A> halt = state.getHalt().lub(state.getExecution());
-		AnalysisState<A> res = state.bottomExecution().withHalt(halt);
+		AnalysisState<A> res = state.bottomExecution();
+		ProgramState<A> moved = onExecutionToHalting(res, state, pp).getRight().getExecution();
+		res = res.withHalt(state.getHalt().lub(moved));
 
 		if (events != null)
 			events.post(new AnalysisExecToHaltEnd<>(pp, state, res));
@@ -813,6 +874,62 @@ public class Analysis<
 		return res;
 	}
 
+	/**
+	 * Moves part of the normal execution to the halting state. This corresponds
+	 * to a <i>partial</i> move, where only some executions halt: {@code normal}
+	 * is the state of the executions that continue normally, while
+	 * {@code halting} is the state of the ones that halt, whose execution state
+	 * is moved to the halting state as in
+	 * {@link #moveExecutionToHalting(AnalysisState, ProgramPoint)}. The result
+	 * is the least upper bound of the two states after the move. If either the
+	 * normal execution of {@code normal} or the one of {@code halting} is
+	 * bottom, this method falls back to a total move or to no move at all,
+	 * respectively.
+	 * 
+	 * @param normal  the analysis state of the executions that do not halt
+	 * @param halting the analysis state of the executions that halt
+	 * @param pp      the program point where the move happens
+	 * 
+	 * @return the updated analysis state
+	 * 
+	 * @throws SemanticException if something goes wrong during the computation
+	 */
+	public AnalysisState<A> moveExecutionToHalting(
+			AnalysisState<A> normal,
+			AnalysisState<A> halting,
+			ProgramPoint pp)
+			throws SemanticException {
+		if (halting.isBottom() || halting.getExecution().isBottom() || halting.getExecutionState().isBottom())
+			return normal.lub(halting);
+		if (normal.isBottom() || normal.getExecution().isBottom() || normal.getExecutionState().isBottom())
+			return normal.lub(moveExecutionToHalting(halting, pp));
+
+		if (events != null)
+			events.post(new AnalysisExecToHaltStart<>(halting));
+
+		Pair<AnalysisState<A>, AnalysisState<A>> moved = onExecutionToHalting(normal, halting, pp);
+		AnalysisState<A> res = halting.bottomExecution()
+				.withHalt(halting.getHalt().lub(moved.getRight().getExecution()));
+		res = moved.getLeft().lub(res);
+
+		if (events != null)
+			events.post(new AnalysisExecToHaltEnd<>(pp, halting, res));
+
+		return res;
+	}
+
+	/**
+	 * {@inheritDoc}<br>
+	 * <br>
+	 * Since the callee is analyzed starting from a state without errors and
+	 * halting executions, all the errors and the halting executions in
+	 * {@code callres} have been produced by the callee and escape from the
+	 * call. After applying {@link SemanticDomain#onCallReturn} to the normal
+	 * execution, the wrapped domain is thus notified of each of them through
+	 * {@link SemanticDomain#onExecutionToError} and
+	 * {@link SemanticDomain#onExecutionToHalting}, where the move is partial if
+	 * the normal execution of {@code callres} is not bottom.
+	 */
 	@Override
 	public AnalysisState<A> onCallReturn(
 			AnalysisState<A> entryState,
@@ -822,15 +939,56 @@ public class Analysis<
 		if (events != null)
 			events.post(new AnalysisOnCallReturnStart<>(entryState, callres, call));
 
-		AnalysisState<A> res = callres.withExecution(
-				new ProgramState<>(
-						domain.onCallReturn(
-								entryState.getExecutionState(),
-								callres.getExecutionState(),
-								call),
-						callres.getExecutionExpressions(),
-						callres.getExecutionInformation()
-								.onCallReturn(entryState.getExecutionInformation(), call)));
+		A exec = domain.onCallReturn(
+				entryState.getExecutionState(),
+				callres.getExecutionState(),
+				call);
+
+		Map<Error, ProgramState<A>> errors = new HashMap<>();
+		for (Entry<Error, ProgramState<A>> entry : callres.getErrors()) {
+			Pair<A, A> moved = domain.onExecutionToError(exec, entry.getValue().getState(), entry.getKey(), call);
+			exec = moved.getLeft();
+			ProgramState<A> err = entry.getValue();
+			errors.put(entry.getKey(), moved.getRight() == err.getState() ? err
+					: new ProgramState<>(moved.getRight(), err.getComputedExpressions(), err.getFixpointInformation()));
+		}
+
+		ProgramState<A> smashed = callres.getSmashedErrorsState();
+		for (Entry<Type, GenericSetLattice<Statement>> entry : callres.getSmashedErrors())
+			for (Statement thrower : entry.getValue()) {
+				Pair<A, A> moved = domain.onExecutionToError(
+						exec,
+						smashed.getState(),
+						new Error(entry.getKey(), thrower),
+						call);
+				exec = moved.getLeft();
+				if (moved.getRight() != smashed.getState())
+					smashed = new ProgramState<>(
+							moved.getRight(),
+							smashed.getComputedExpressions(),
+							smashed.getFixpointInformation());
+			}
+
+		ProgramState<A> halt = callres.getHalt();
+		if (!halt.isBottom()) {
+			Pair<A, A> moved = domain.onExecutionToHalting(exec, halt.getState(), call);
+			exec = moved.getLeft();
+			if (moved.getRight() != halt.getState())
+				halt = new ProgramState<>(moved.getRight(), halt.getComputedExpressions(),
+						halt.getFixpointInformation());
+		}
+
+		AnalysisState<A> res = callres
+				.removeErrors(errors.keySet())
+				.addErrors(errors)
+				.withSmashedErrorsState(smashed)
+				.withHalt(halt)
+				.withExecution(
+						new ProgramState<>(
+								exec,
+								callres.getExecutionExpressions(),
+								callres.getExecutionInformation()
+										.onCallReturn(entryState.getExecutionInformation(), call)));
 
 		if (events != null)
 			events.post(new AnalysisOnCallReturnEnd<>(entryState, callres, res, call));
@@ -838,4 +996,95 @@ public class Analysis<
 		return res;
 	}
 
+	/**
+	 * {@inheritDoc}<br>
+	 * <br>
+	 * This only applies the callback of the wrapped domain to the normal
+	 * executions of {@code remaining} and {@code moved}, without actually
+	 * moving the latter to the error continuation (see
+	 * {@link #moveExecutionToError(AnalysisState, Error, ProgramPoint)} and
+	 * {@link #moveExecutionToError(AnalysisState, AnalysisState, Error, ProgramPoint)}).
+	 * If the normal execution of {@code remaining} is bottom, it is left
+	 * untouched.
+	 */
+	@Override
+	public Pair<AnalysisState<A>, AnalysisState<A>> onExecutionToError(
+			AnalysisState<A> remaining,
+			AnalysisState<A> moved,
+			Error error,
+			ProgramPoint pp)
+			throws SemanticException {
+		Pair<A, A> res = domain.onExecutionToError(
+				remaining.getExecutionState(),
+				moved.getExecutionState(),
+				error,
+				pp);
+		ProgramState<A> rem = remaining.getExecution();
+		ProgramState<A> mov = moved.getExecution();
+		return Pair.of(
+				rem.isBottom() || res.getLeft() == rem.getState() ? remaining
+						: remaining.withExecution(
+								new ProgramState<>(res.getLeft(), rem.getComputedExpressions(),
+										rem.getFixpointInformation())),
+				res.getRight() == mov.getState() ? moved
+						: moved.withExecution(
+								new ProgramState<>(res.getRight(), mov.getComputedExpressions(),
+										mov.getFixpointInformation())));
+	}
+
+	/**
+	 * {@inheritDoc}<br>
+	 * <br>
+	 * This only applies the callback of the wrapped domain to the normal
+	 * execution of {@code state}, that is expected to already contain the
+	 * caught errors' states (see
+	 * {@link #moveErrorsToExecution(AnalysisState, ProgramPoint, ProtectedBlock, Collection, Collection, VariableRef)}).
+	 */
+	@Override
+	public AnalysisState<A> onErrorToExecution(
+			AnalysisState<A> state,
+			ProtectedBlock protectedBlock,
+			ProgramPoint pp)
+			throws SemanticException {
+		ProgramState<A> exec = state.getExecution();
+		A res = domain.onErrorToExecution(exec.getState(), protectedBlock, pp);
+		if (res == exec.getState())
+			return state;
+		return state.withExecution(
+				new ProgramState<>(res, exec.getComputedExpressions(), exec.getFixpointInformation()));
+	}
+
+	/**
+	 * {@inheritDoc}<br>
+	 * <br>
+	 * This only applies the callback of the wrapped domain to the normal
+	 * executions of {@code remaining} and {@code moved}, without actually
+	 * moving the latter to the halting continuation (see
+	 * {@link #moveExecutionToHalting(AnalysisState, ProgramPoint)} and
+	 * {@link #moveExecutionToHalting(AnalysisState, AnalysisState, ProgramPoint)}).
+	 * If the normal execution of {@code remaining} is bottom, it is left
+	 * untouched.
+	 */
+	@Override
+	public Pair<AnalysisState<A>, AnalysisState<A>> onExecutionToHalting(
+			AnalysisState<A> remaining,
+			AnalysisState<A> moved,
+			ProgramPoint pp)
+			throws SemanticException {
+		Pair<A, A> res = domain.onExecutionToHalting(
+				remaining.getExecutionState(),
+				moved.getExecutionState(),
+				pp);
+		ProgramState<A> rem = remaining.getExecution();
+		ProgramState<A> mov = moved.getExecution();
+		return Pair.of(
+				rem.isBottom() || res.getLeft() == rem.getState() ? remaining
+						: remaining.withExecution(
+								new ProgramState<>(res.getLeft(), rem.getComputedExpressions(),
+										rem.getFixpointInformation())),
+				res.getRight() == mov.getState() ? moved
+						: moved.withExecution(
+								new ProgramState<>(res.getRight(), mov.getComputedExpressions(),
+										mov.getFixpointInformation())));
+	}
 }

@@ -1,10 +1,12 @@
 package it.unive.lisa.analysis;
 
+import it.unive.lisa.analysis.AnalysisState.Error;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.events.EventQueue;
 import it.unive.lisa.lattices.ExpressionSet;
 import it.unive.lisa.lattices.Satisfiability;
 import it.unive.lisa.program.cfg.ProgramPoint;
+import it.unive.lisa.program.cfg.protection.ProtectedBlock;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Identifier;
@@ -16,6 +18,7 @@ import it.unive.lisa.type.Untyped;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * A minimal, hand-rolled {@link AbstractDomain} over
@@ -79,6 +82,31 @@ public class MarkerAbstractDomain
 			MarkerAbstractLattice callres,
 			ProgramPoint call) {
 		return callres;
+	}
+
+	@Override
+	public Pair<MarkerAbstractLattice, MarkerAbstractLattice> onExecutionToError(
+			MarkerAbstractLattice remaining,
+			MarkerAbstractLattice moved,
+			Error error,
+			ProgramPoint pp) {
+		return Pair.of(remaining, moved);
+	}
+
+	@Override
+	public MarkerAbstractLattice onErrorToExecution(
+			MarkerAbstractLattice state,
+			ProtectedBlock protectedBlock,
+			ProgramPoint pp) {
+		return state;
+	}
+
+	@Override
+	public Pair<MarkerAbstractLattice, MarkerAbstractLattice> onExecutionToHalting(
+			MarkerAbstractLattice remaining,
+			MarkerAbstractLattice moved,
+			ProgramPoint pp) {
+		return Pair.of(remaining, moved);
 	}
 
 	@Override
