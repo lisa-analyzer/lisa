@@ -2,6 +2,7 @@ package it.unive.lisa.analysis;
 
 import it.unive.lisa.analysis.AnalysisState.Error;
 import it.unive.lisa.events.EventQueue;
+import it.unive.lisa.interprocedural.ScopeId;
 import it.unive.lisa.lattices.Satisfiability;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.program.cfg.protection.ProtectedBlock;
@@ -34,6 +35,8 @@ public interface SemanticDomain<L extends DomainLattice<L, T>, T, E extends Symb
 	 *                       by this operation
 	 * @param id         the identifier to assign the value to
 	 * @param expression the expression to assign
+	 * @param context    the interprocedural context where this operation is
+	 *                       being evaluated
 	 * @param pp         the program point that where this operation is being
 	 *                       evaluated
 	 * 
@@ -45,6 +48,7 @@ public interface SemanticDomain<L extends DomainLattice<L, T>, T, E extends Symb
 			L state,
 			I id,
 			E expression,
+			ScopeId<?> context,
 			ProgramPoint pp)
 			throws SemanticException;
 
@@ -55,6 +59,8 @@ public interface SemanticDomain<L extends DomainLattice<L, T>, T, E extends Symb
 	 * @param state      the current state of the domain, that will be modified
 	 *                       by this operation
 	 * @param expression the expression whose semantics need to be computed
+	 * @param context    the interprocedural context where this operation is
+	 *                       being evaluated
 	 * @param pp         the program point that where this operation is being
 	 *                       evaluated
 	 * 
@@ -66,6 +72,7 @@ public interface SemanticDomain<L extends DomainLattice<L, T>, T, E extends Symb
 	T smallStepSemantics(
 			L state,
 			E expression,
+			ScopeId<?> context,
 			ProgramPoint pp)
 			throws SemanticException;
 
@@ -78,6 +85,8 @@ public interface SemanticDomain<L extends DomainLattice<L, T>, T, E extends Symb
 	 * @param state      the current state of the domain, that will be modified
 	 *                       by this operation
 	 * @param expression the expression to assume to hold.
+	 * @param context    the interprocedural context where this operation is
+	 *                       being evaluated
 	 * @param src        the program point that where this operation is being
 	 *                       evaluated, corresponding to the one that generated
 	 *                       the given expression
@@ -91,6 +100,7 @@ public interface SemanticDomain<L extends DomainLattice<L, T>, T, E extends Symb
 	T assume(
 			L state,
 			E expression,
+			ScopeId<?> context,
 			ProgramPoint src,
 			ProgramPoint dest)
 			throws SemanticException;
@@ -103,6 +113,8 @@ public interface SemanticDomain<L extends DomainLattice<L, T>, T, E extends Symb
 	 * 
 	 * @param state      the current state of the domain
 	 * @param expression the expression whose satisfiability is to be evaluated
+	 * @param context    the interprocedural context where this operation is
+	 *                       being evaluated
 	 * @param pp         the program point that where this operation is being
 	 *                       evaluated
 	 * 
@@ -119,6 +131,7 @@ public interface SemanticDomain<L extends DomainLattice<L, T>, T, E extends Symb
 	default Satisfiability satisfies(
 			L state,
 			E expression,
+			ScopeId<?> context,
 			ProgramPoint pp)
 			throws SemanticException {
 		return Satisfiability.UNKNOWN;
@@ -146,6 +159,8 @@ public interface SemanticDomain<L extends DomainLattice<L, T>, T, E extends Symb
 	 * 
 	 * @param entryState the state before the call
 	 * @param callres    the state returned by the callee
+	 * @param context    the interprocedural context of the caller, where the
+	 *                       execution returns to
 	 * @param call       the program point corresponding to the call
 	 * 
 	 * @return the state after the call
@@ -155,6 +170,7 @@ public interface SemanticDomain<L extends DomainLattice<L, T>, T, E extends Symb
 	L onCallReturn(
 			L entryState,
 			L callres,
+			ScopeId<?> context,
 			ProgramPoint call)
 			throws SemanticException;
 
@@ -173,6 +189,7 @@ public interface SemanticDomain<L extends DomainLattice<L, T>, T, E extends Symb
 	 *                      (bottom if the move is total)
 	 * @param moved     the state of the executions that raise the error
 	 * @param error     the error continuation that {@code moved} is moved to
+	 * @param context   the interprocedural context where the move happens
 	 * @param pp        the program point where the move happens
 	 * 
 	 * @return the pair containing the updated {@code remaining} (left) and
@@ -184,6 +201,7 @@ public interface SemanticDomain<L extends DomainLattice<L, T>, T, E extends Symb
 			L remaining,
 			L moved,
 			Error error,
+			ScopeId<?> context,
 			ProgramPoint pp)
 			throws SemanticException;
 
@@ -198,6 +216,7 @@ public interface SemanticDomain<L extends DomainLattice<L, T>, T, E extends Symb
 	 * @param state          the state of the caught error continuations being
 	 *                           moved
 	 * @param protectedBlock the block whose errors are being caught
+	 * @param context        the interprocedural context where the move happens
 	 * @param pp             the program point where the move happens
 	 * 
 	 * @return the state to use for the normal execution
@@ -207,6 +226,7 @@ public interface SemanticDomain<L extends DomainLattice<L, T>, T, E extends Symb
 	L onErrorToExecution(
 			L state,
 			ProtectedBlock protectedBlock,
+			ScopeId<?> context,
 			ProgramPoint pp)
 			throws SemanticException;
 
@@ -224,6 +244,7 @@ public interface SemanticDomain<L extends DomainLattice<L, T>, T, E extends Symb
 	 * @param remaining the state of the executions that continue normally
 	 *                      (bottom if the move is total)
 	 * @param moved     the state of the executions that halt
+	 * @param context   the interprocedural context where the move happens
 	 * @param pp        the program point where the move happens
 	 * 
 	 * @return the pair containing the updated {@code remaining} (left) and
@@ -234,6 +255,7 @@ public interface SemanticDomain<L extends DomainLattice<L, T>, T, E extends Symb
 	Pair<L, L> onExecutionToHalting(
 			L remaining,
 			L moved,
+			ScopeId<?> context,
 			ProgramPoint pp)
 			throws SemanticException;
 

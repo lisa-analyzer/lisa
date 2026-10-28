@@ -23,9 +23,9 @@ import org.junit.jupiter.api.Test;
  * Tests for the orchestration logic of {@link SimpleAbstractDomain}: how it
  * defaults missing sub-domains to their no-op counterparts, how it combines the
  * three sub-domains in {@link SimpleAbstractDomain#makeLattice()} and
- * {@link SimpleAbstractDomain#makeOracle(Object)}, and the reference-equality
+ * {@link SimpleAbstractDomain#makeOracle(Object, it.unive.lisa.interprocedural.ScopeId)}, and the reference-equality
  * optimization in
- * {@link SimpleAbstractDomain#onCallReturn(Object, Object, it.unive.lisa.program.cfg.ProgramPoint)}.
+ * {@link SimpleAbstractDomain#onCallReturn(Object, Object, it.unive.lisa.interprocedural.ScopeId, it.unive.lisa.program.cfg.ProgramPoint)}.
  * The substitution-application logic of {@code SimpleAbstractDomain} (its
  * private {@code applySubstitution} method) is instead covered by
  * {@link SubstitutionTest}, together with the rest of the identifier

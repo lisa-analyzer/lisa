@@ -294,6 +294,11 @@ public class TestParameterProvider {
 		}
 
 		@Override
+		public ScopeId<?> getContext() {
+			return null;
+		}
+
+		@Override
 		public Set<Type> getRuntimeTypesOf(
 				SymbolicExpression e,
 				ProgramPoint pp)

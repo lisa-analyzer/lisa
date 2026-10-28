@@ -1,5 +1,6 @@
 package it.unive.lisa.analysis.numeric;
 
+import it.unive.lisa.interprocedural.ScopeId;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import it.unive.lisa.TestParameterProvider;
@@ -153,6 +154,11 @@ public class ParityTest {
 
 		@Override
 		public EventQueue getEventQueue() {
+			return null;
+		}
+
+		@Override
+		public ScopeId<?> getContext() {
 			return null;
 		}
 

@@ -1,5 +1,6 @@
 package it.unive.lisa.analysis.dataflow;
 
+import it.unive.lisa.interprocedural.ScopeId;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -65,6 +66,11 @@ public class DataflowDomainTest {
 
 		@Override
 		public EventQueue getEventQueue() {
+			return null;
+		}
+
+		@Override
+		public ScopeId<?> getContext() {
 			return null;
 		}
 

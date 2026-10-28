@@ -23,6 +23,7 @@ import it.unive.lisa.analysis.events.AnalysisTransferThrowersEnd;
 import it.unive.lisa.analysis.events.AnalysisTransferThrowersStart;
 import it.unive.lisa.conf.LiSAConfiguration;
 import it.unive.lisa.events.EventQueue;
+import it.unive.lisa.interprocedural.ScopeId;
 import it.unive.lisa.lattices.ExpressionSet;
 import it.unive.lisa.lattices.GenericSetLattice;
 import it.unive.lisa.lattices.Satisfiability;
@@ -129,12 +130,13 @@ public class Analysis<
 			AnalysisState<A> state,
 			Identifier id,
 			SymbolicExpression value,
+			ScopeId<?> context,
 			ProgramPoint pp)
 			throws SemanticException {
 		if (events != null)
 			events.post(new AnalysisAssignStart<>(state, id, value));
 
-		A s = domain.assign(state.getExecutionState(), id, value, pp);
+		A s = domain.assign(state.getExecutionState(), id, value, context, pp);
 		AnalysisState<A> res = state.withExecution(new ProgramState<>(
 				s,
 				new ExpressionSet(id),
@@ -155,6 +157,8 @@ public class Analysis<
 	 * @param state      the current analysis state
 	 * @param id         the symbolic expression to be assigned
 	 * @param expression the expression to assign
+	 * @param context    the interprocedural context where this operation is
+	 *                       being evaluated
 	 * @param pp         the program point that where this operation is being
 	 *                       evaluated
 	 * 
@@ -166,23 +170,24 @@ public class Analysis<
 			AnalysisState<A> state,
 			SymbolicExpression id,
 			SymbolicExpression expression,
+			ScopeId<?> context,
 			ProgramPoint pp)
 			throws SemanticException {
 		if (id instanceof Identifier)
-			return assign(state, (Identifier) id, expression, pp);
+			return assign(state, (Identifier) id, expression, context, pp);
 
 		if (events != null)
 			events.post(new AnalysisAssignStart<>(state, id, expression));
 
 		A s = state.getExecutionState().bottom();
-		AnalysisState<A> sem = smallStepSemantics(state, id, pp);
-		SemanticOracle oracle = domain.makeOracle(state.getExecutionState());
+		AnalysisState<A> sem = smallStepSemantics(state, id, context, pp);
+		SemanticOracle oracle = domain.makeOracle(state.getExecutionState(), context);
 		ExpressionSet rewritten = oracle.rewrite(id, pp);
 		for (SymbolicExpression i : rewritten)
 			if (!(i instanceof Identifier))
 				throw new SemanticException("Rewriting '" + id + "' did not produce an identifier: " + i);
 			else
-				s = s.lub(domain.assign(sem.getExecutionState(), (Identifier) i, expression, pp));
+				s = s.lub(domain.assign(sem.getExecutionState(), (Identifier) i, expression, context, pp));
 
 		AnalysisState<A> res = state.withExecution(new ProgramState<>(
 				s,
@@ -199,12 +204,13 @@ public class Analysis<
 	public AnalysisState<A> smallStepSemantics(
 			AnalysisState<A> state,
 			SymbolicExpression expression,
+			ScopeId<?> context,
 			ProgramPoint pp)
 			throws SemanticException {
 		if (events != null)
 			events.post(new AnalysisSmallStepStart<>(state, expression));
 
-		A s = domain.smallStepSemantics(state.getExecutionState(), expression, pp);
+		A s = domain.smallStepSemantics(state.getExecutionState(), expression, context, pp);
 		AnalysisState<A> res = state.withExecution(new ProgramState<>(
 				s,
 				new ExpressionSet(expression),
@@ -220,13 +226,14 @@ public class Analysis<
 	public AnalysisState<A> assume(
 			AnalysisState<A> state,
 			SymbolicExpression expression,
+			ScopeId<?> context,
 			ProgramPoint src,
 			ProgramPoint dest)
 			throws SemanticException {
 		if (events != null)
 			events.post(new AnalysisAssumeStart<>(state, expression));
 
-		A assume = domain.assume(state.getExecutionState(), expression, src, dest);
+		A assume = domain.assume(state.getExecutionState(), expression, context, src, dest);
 		AnalysisState<A> res;
 		if (assume.isBottom())
 			res = state.bottomExecution();
@@ -246,12 +253,13 @@ public class Analysis<
 	public Satisfiability satisfies(
 			AnalysisState<A> state,
 			SymbolicExpression expression,
+			ScopeId<?> context,
 			ProgramPoint pp)
 			throws SemanticException {
 		if (events != null)
 			events.post(new AnalysisSatisfiesStart<>(state, expression));
 
-		Satisfiability sat = domain.satisfies(state.getExecutionState(), expression, pp);
+		Satisfiability sat = domain.satisfies(state.getExecutionState(), expression, context, pp);
 
 		if (events != null)
 			events.post(new AnalysisSatisfiesEnd<>(pp, state, sat, expression));
@@ -265,6 +273,8 @@ public class Analysis<
 	 * 
 	 * @param state the current analysis state
 	 * @param e     the expression to type
+	 * @param context the interprocedural context where this operation is being
+	 *                    evaluated
 	 * @param pp    the program point where the types are required
 	 * 
 	 * @return the runtime types
@@ -274,9 +284,10 @@ public class Analysis<
 	public Set<Type> getRuntimeTypesOf(
 			AnalysisState<A> state,
 			SymbolicExpression e,
+			ScopeId<?> context,
 			ProgramPoint pp)
 			throws SemanticException {
-		SemanticOracle oracle = domain.makeOracle(state.getExecutionState());
+		SemanticOracle oracle = domain.makeOracle(state.getExecutionState(), context);
 		return oracle.getRuntimeTypesOf(e, pp);
 	}
 
@@ -287,6 +298,8 @@ public class Analysis<
 	 * 
 	 * @param state the current analysis state
 	 * @param e     the expression to type
+	 * @param context the interprocedural context where this operation is being
+	 *                    evaluated
 	 * @param pp    the program point where the types are required
 	 * 
 	 * @return the dynamic type
@@ -296,9 +309,10 @@ public class Analysis<
 	public Type getDynamicTypeOf(
 			AnalysisState<A> state,
 			SymbolicExpression e,
+			ScopeId<?> context,
 			ProgramPoint pp)
 			throws SemanticException {
-		SemanticOracle oracle = domain.makeOracle(state.getExecutionState());
+		SemanticOracle oracle = domain.makeOracle(state.getExecutionState(), context);
 		return oracle.getDynamicTypeOf(e, pp);
 	}
 
@@ -310,6 +324,8 @@ public class Analysis<
 	 * 
 	 * @param state      the current analysis state
 	 * @param expression the expression to rewrite
+	 * @param context    the interprocedural context where this operation is
+	 *                       being evaluated
 	 * @param pp         the program point where the rewrite happens
 	 * 
 	 * @return the rewritten expressions
@@ -319,9 +335,10 @@ public class Analysis<
 	public ExpressionSet rewrite(
 			AnalysisState<A> state,
 			SymbolicExpression expression,
+			ScopeId<?> context,
 			ProgramPoint pp)
 			throws SemanticException {
-		SemanticOracle oracle = domain.makeOracle(state.getExecutionState());
+		SemanticOracle oracle = domain.makeOracle(state.getExecutionState(), context);
 		return oracle.rewrite(expression, pp);
 	}
 
@@ -333,6 +350,8 @@ public class Analysis<
 	 * 
 	 * @param state       the current analysis state
 	 * @param expressions the expressions to rewrite
+	 * @param context     the interprocedural context where this operation is
+	 *                        being evaluated
 	 * @param pp          the program point where the rewrite happens
 	 * 
 	 * @return the rewritten expressions
@@ -342,9 +361,10 @@ public class Analysis<
 	public ExpressionSet rewrite(
 			AnalysisState<A> state,
 			ExpressionSet expressions,
+			ScopeId<?> context,
 			ProgramPoint pp)
 			throws SemanticException {
-		SemanticOracle oracle = domain.makeOracle(state.getExecutionState());
+		SemanticOracle oracle = domain.makeOracle(state.getExecutionState(), context);
 		return oracle.rewrite(expressions, pp);
 	}
 
@@ -357,6 +377,8 @@ public class Analysis<
 	 * @param state the current analysis state
 	 * @param x     the first expression
 	 * @param y     the second expression
+	 * @param context the interprocedural context where this operation is being
+	 *                    evaluated
 	 * @param pp    the {@link ProgramPoint} where the computation happens
 	 * 
 	 * @return whether or not the two expressions are aliases
@@ -367,9 +389,10 @@ public class Analysis<
 			AnalysisState<A> state,
 			SymbolicExpression x,
 			SymbolicExpression y,
+			ScopeId<?> context,
 			ProgramPoint pp)
 			throws SemanticException {
-		SemanticOracle oracle = domain.makeOracle(state.getExecutionState());
+		SemanticOracle oracle = domain.makeOracle(state.getExecutionState(), context);
 		return oracle.alias(x, y, pp);
 	}
 
@@ -382,6 +405,8 @@ public class Analysis<
 	 * 
 	 * @param state the current analysis state
 	 * @param e     the expression corresponding to the starting point
+	 * @param context the interprocedural context where this operation is being
+	 *                    evaluated
 	 * @param pp    the {@link ProgramPoint} where the computation happens
 	 * 
 	 * @return the expressions representing memory regions reachable from
@@ -392,9 +417,10 @@ public class Analysis<
 	public ExpressionSet reachableFrom(
 			AnalysisState<A> state,
 			SymbolicExpression e,
+			ScopeId<?> context,
 			ProgramPoint pp)
 			throws SemanticException {
-		SemanticOracle oracle = domain.makeOracle(state.getExecutionState());
+		SemanticOracle oracle = domain.makeOracle(state.getExecutionState(), context);
 		return oracle.reachableFrom(e, pp);
 	}
 
@@ -410,6 +436,8 @@ public class Analysis<
 	 * @param state the current analysis state
 	 * @param x     the first expression
 	 * @param y     the second expression
+	 * @param context the interprocedural context where this operation is being
+	 *                    evaluated
 	 * @param pp    the {@link ProgramPoint} where the computation happens
 	 * 
 	 * @return whether or not the second expression can be reached from the
@@ -421,9 +449,10 @@ public class Analysis<
 			AnalysisState<A> state,
 			SymbolicExpression x,
 			SymbolicExpression y,
+			ScopeId<?> context,
 			ProgramPoint pp)
 			throws SemanticException {
-		SemanticOracle oracle = domain.makeOracle(state.getExecutionState());
+		SemanticOracle oracle = domain.makeOracle(state.getExecutionState(), context);
 		return oracle.isReachableFrom(x, y, pp);
 	}
 
@@ -438,6 +467,8 @@ public class Analysis<
 	 * @param state the current analysis state
 	 * @param x     the first expression
 	 * @param y     the second expression
+	 * @param context the interprocedural context where this operation is being
+	 *                    evaluated
 	 * @param pp    the {@link ProgramPoint} where the computation happens
 	 * 
 	 * @return whether or not the two expressions are mutually reachable
@@ -448,9 +479,10 @@ public class Analysis<
 			AnalysisState<A> state,
 			SymbolicExpression x,
 			SymbolicExpression y,
+			ScopeId<?> context,
 			ProgramPoint pp)
 			throws SemanticException {
-		SemanticOracle oracle = domain.makeOracle(state.getExecutionState());
+		SemanticOracle oracle = domain.makeOracle(state.getExecutionState(), context);
 		return oracle.areMutuallyReachable(x, y, pp);
 	}
 
@@ -473,11 +505,13 @@ public class Analysis<
 	 * {@link LiSAConfiguration#shouldSmashError}), the state is set/merged with
 	 * the smashed errors state instead. This corresponds to a <i>total</i>
 	 * move, where all executions raise the error: use
-	 * {@link #moveExecutionToError(AnalysisState, AnalysisState, Error, ProgramPoint)}
+	 * {@link #moveExecutionToError(AnalysisState, AnalysisState, Error, ScopeId, ProgramPoint)}
 	 * if only some executions raise it.
 	 * 
 	 * @param state     the current analysis state
 	 * @param exception the exception to move the execution state to
+	 * @param context   the interprocedural context where this operation is
+	 *                      being evaluated
 	 * @param pp        the program point where the move happens
 	 * 
 	 * @return the updated analysis state
@@ -487,6 +521,7 @@ public class Analysis<
 	public AnalysisState<A> moveExecutionToError(
 			AnalysisState<A> state,
 			Error exception,
+			ScopeId<?> context,
 			ProgramPoint pp)
 			throws SemanticException {
 		if (state.isBottom() || state.getExecution().isBottom() || state.getExecutionState().isBottom())
@@ -496,7 +531,7 @@ public class Analysis<
 			events.post(new AnalysisExecToErrorStart<>(state, exception));
 
 		AnalysisState<A> result = state.bottomExecution();
-		ProgramState<A> moved = onExecutionToError(result, state, exception, pp).getRight().getExecution();
+		ProgramState<A> moved = onExecutionToError(result, state, exception, context, pp).getRight().getExecution();
 		if (shouldSmashError == null || !shouldSmashError.test(exception.getType()))
 			result = result.addError(exception, moved);
 		else
@@ -514,7 +549,7 @@ public class Analysis<
 	 * the error: {@code normal} is the state of the executions that continue
 	 * normally, while {@code erroneous} is the state of the ones that raise the
 	 * error, whose execution state is moved to the error as in
-	 * {@link #moveExecutionToError(AnalysisState, Error, ProgramPoint)}. The
+	 * {@link #moveExecutionToError(AnalysisState, Error, ScopeId, ProgramPoint)}. The
 	 * result is the least upper bound of the two states after the move. If
 	 * either the normal execution of {@code normal} or the one of
 	 * {@code erroneous} is bottom, this method falls back to a total move or to
@@ -525,6 +560,8 @@ public class Analysis<
 	 * @param erroneous the analysis state of the executions that raise the
 	 *                      error
 	 * @param exception the exception to move the execution state to
+	 * @param context   the interprocedural context where this operation is
+	 *                      being evaluated
 	 * @param pp        the program point where the move happens
 	 * 
 	 * @return the updated analysis state
@@ -535,17 +572,18 @@ public class Analysis<
 			AnalysisState<A> normal,
 			AnalysisState<A> erroneous,
 			Error exception,
+			ScopeId<?> context,
 			ProgramPoint pp)
 			throws SemanticException {
 		if (erroneous.isBottom() || erroneous.getExecution().isBottom() || erroneous.getExecutionState().isBottom())
 			return normal.lub(erroneous);
 		if (normal.isBottom() || normal.getExecution().isBottom() || normal.getExecutionState().isBottom())
-			return normal.lub(moveExecutionToError(erroneous, exception, pp));
+			return normal.lub(moveExecutionToError(erroneous, exception, context, pp));
 
 		if (events != null)
 			events.post(new AnalysisExecToErrorStart<>(erroneous, exception));
 
-		Pair<AnalysisState<A>, AnalysisState<A>> moved = onExecutionToError(normal, erroneous, exception, pp);
+		Pair<AnalysisState<A>, AnalysisState<A>> moved = onExecutionToError(normal, erroneous, exception, context, pp);
 		AnalysisState<A> result = erroneous.bottomExecution();
 		if (shouldSmashError == null || !shouldSmashError.test(exception.getType()))
 			result = result.addError(exception, moved.getRight().getExecution());
@@ -577,6 +615,8 @@ public class Analysis<
 	 * still be available, unaltered, to the other edges that process them.
 	 *
 	 * @param state          the current analysis state
+	 * @param context        the interprocedural context where this operation is
+	 *                           being evaluated
 	 * @param pp             the program point where the move happens
 	 * @param protectedBlock the block that is being protected from the errors
 	 *                           to move
@@ -591,6 +631,7 @@ public class Analysis<
 	 */
 	public AnalysisState<A> moveErrorsToExecution(
 			AnalysisState<A> state,
+			ScopeId<?> context,
 			ProgramPoint pp,
 			ProtectedBlock protectedBlock,
 			Collection<Type> targets,
@@ -671,13 +712,13 @@ public class Analysis<
 			A assigned = start.bottom();
 			Identifier target = variable.getIdentifier();
 			for (SymbolicExpression e : excs)
-				assigned = assigned.lub(domain.assign(start, target, e, variable));
+				assigned = assigned.lub(domain.assign(start, target, e, context, variable));
 			moved = assigned.forgetIdentifiers(
 					toForget,
 					variable);
 			if (moved.isBottom())
 				// no exceptions have been assigned to the variable
-				moved = domain.assign(start, target, new PushAny(varType, variable.getLocation()), variable);
+				moved = domain.assign(start, target, new PushAny(varType, variable.getLocation()), context, variable);
 		} else
 			moved = moved.forgetIdentifiers(toForget, protectedBlock.getStart());
 
@@ -692,6 +733,7 @@ public class Analysis<
 		AnalysisState<A> res = onErrorToExecution(
 				state.removeAllErrors(false).withExecution(result),
 				protectedBlock,
+				context,
 				pp);
 
 		if (events != null)
@@ -844,10 +886,12 @@ public class Analysis<
 	 * the current execution state to the halting state. If a state already
 	 * exists for halting, it is merged with the current state. This corresponds
 	 * to a <i>total</i> move, where all executions halt: use
-	 * {@link #moveExecutionToHalting(AnalysisState, AnalysisState, ProgramPoint)}
+	 * {@link #moveExecutionToHalting(AnalysisState, AnalysisState, ScopeId, ProgramPoint)}
 	 * if only some executions halt.
 	 * 
 	 * @param state the current analysis state
+	 * @param context the interprocedural context where this operation is being
+	 *                    evaluated
 	 * @param pp    the program point where the move happens
 	 * 
 	 * @return the updated analysis state
@@ -856,6 +900,7 @@ public class Analysis<
 	 */
 	public AnalysisState<A> moveExecutionToHalting(
 			AnalysisState<A> state,
+			ScopeId<?> context,
 			ProgramPoint pp)
 			throws SemanticException {
 		if (state.isBottom() || state.getExecution().isBottom() || state.getExecutionState().isBottom())
@@ -865,7 +910,7 @@ public class Analysis<
 			events.post(new AnalysisExecToHaltStart<>(state));
 
 		AnalysisState<A> res = state.bottomExecution();
-		ProgramState<A> moved = onExecutionToHalting(res, state, pp).getRight().getExecution();
+		ProgramState<A> moved = onExecutionToHalting(res, state, context, pp).getRight().getExecution();
 		res = res.withHalt(state.getHalt().lub(moved));
 
 		if (events != null)
@@ -880,7 +925,7 @@ public class Analysis<
 	 * is the state of the executions that continue normally, while
 	 * {@code halting} is the state of the ones that halt, whose execution state
 	 * is moved to the halting state as in
-	 * {@link #moveExecutionToHalting(AnalysisState, ProgramPoint)}. The result
+	 * {@link #moveExecutionToHalting(AnalysisState, ScopeId, ProgramPoint)}. The result
 	 * is the least upper bound of the two states after the move. If either the
 	 * normal execution of {@code normal} or the one of {@code halting} is
 	 * bottom, this method falls back to a total move or to no move at all,
@@ -888,6 +933,8 @@ public class Analysis<
 	 * 
 	 * @param normal  the analysis state of the executions that do not halt
 	 * @param halting the analysis state of the executions that halt
+	 * @param context the interprocedural context where this operation is being
+	 *                    evaluated
 	 * @param pp      the program point where the move happens
 	 * 
 	 * @return the updated analysis state
@@ -897,17 +944,18 @@ public class Analysis<
 	public AnalysisState<A> moveExecutionToHalting(
 			AnalysisState<A> normal,
 			AnalysisState<A> halting,
+			ScopeId<?> context,
 			ProgramPoint pp)
 			throws SemanticException {
 		if (halting.isBottom() || halting.getExecution().isBottom() || halting.getExecutionState().isBottom())
 			return normal.lub(halting);
 		if (normal.isBottom() || normal.getExecution().isBottom() || normal.getExecutionState().isBottom())
-			return normal.lub(moveExecutionToHalting(halting, pp));
+			return normal.lub(moveExecutionToHalting(halting, context, pp));
 
 		if (events != null)
 			events.post(new AnalysisExecToHaltStart<>(halting));
 
-		Pair<AnalysisState<A>, AnalysisState<A>> moved = onExecutionToHalting(normal, halting, pp);
+		Pair<AnalysisState<A>, AnalysisState<A>> moved = onExecutionToHalting(normal, halting, context, pp);
 		AnalysisState<A> res = halting.bottomExecution()
 				.withHalt(halting.getHalt().lub(moved.getRight().getExecution()));
 		res = moved.getLeft().lub(res);
@@ -934,6 +982,7 @@ public class Analysis<
 	public AnalysisState<A> onCallReturn(
 			AnalysisState<A> entryState,
 			AnalysisState<A> callres,
+			ScopeId<?> context,
 			ProgramPoint call)
 			throws SemanticException {
 		if (events != null)
@@ -942,11 +991,12 @@ public class Analysis<
 		A exec = domain.onCallReturn(
 				entryState.getExecutionState(),
 				callres.getExecutionState(),
+				context,
 				call);
 
 		Map<Error, ProgramState<A>> errors = new HashMap<>();
 		for (Entry<Error, ProgramState<A>> entry : callres.getErrors()) {
-			Pair<A, A> moved = domain.onExecutionToError(exec, entry.getValue().getState(), entry.getKey(), call);
+			Pair<A, A> moved = domain.onExecutionToError(exec, entry.getValue().getState(), entry.getKey(), context, call);
 			exec = moved.getLeft();
 			ProgramState<A> err = entry.getValue();
 			errors.put(entry.getKey(), moved.getRight() == err.getState() ? err
@@ -960,6 +1010,7 @@ public class Analysis<
 						exec,
 						smashed.getState(),
 						new Error(entry.getKey(), thrower),
+						context,
 						call);
 				exec = moved.getLeft();
 				if (moved.getRight() != smashed.getState())
@@ -971,7 +1022,7 @@ public class Analysis<
 
 		ProgramState<A> halt = callres.getHalt();
 		if (!halt.isBottom()) {
-			Pair<A, A> moved = domain.onExecutionToHalting(exec, halt.getState(), call);
+			Pair<A, A> moved = domain.onExecutionToHalting(exec, halt.getState(), context, call);
 			exec = moved.getLeft();
 			if (moved.getRight() != halt.getState())
 				halt = new ProgramState<>(moved.getRight(), halt.getComputedExpressions(),
@@ -1002,8 +1053,8 @@ public class Analysis<
 	 * This only applies the callback of the wrapped domain to the normal
 	 * executions of {@code remaining} and {@code moved}, without actually
 	 * moving the latter to the error continuation (see
-	 * {@link #moveExecutionToError(AnalysisState, Error, ProgramPoint)} and
-	 * {@link #moveExecutionToError(AnalysisState, AnalysisState, Error, ProgramPoint)}).
+	 * {@link #moveExecutionToError(AnalysisState, Error, ScopeId, ProgramPoint)} and
+	 * {@link #moveExecutionToError(AnalysisState, AnalysisState, Error, ScopeId, ProgramPoint)}).
 	 * If the normal execution of {@code remaining} is bottom, it is left
 	 * untouched.
 	 */
@@ -1012,12 +1063,14 @@ public class Analysis<
 			AnalysisState<A> remaining,
 			AnalysisState<A> moved,
 			Error error,
+			ScopeId<?> context,
 			ProgramPoint pp)
 			throws SemanticException {
 		Pair<A, A> res = domain.onExecutionToError(
 				remaining.getExecutionState(),
 				moved.getExecutionState(),
 				error,
+				context,
 				pp);
 		ProgramState<A> rem = remaining.getExecution();
 		ProgramState<A> mov = moved.getExecution();
@@ -1038,16 +1091,17 @@ public class Analysis<
 	 * This only applies the callback of the wrapped domain to the normal
 	 * execution of {@code state}, that is expected to already contain the
 	 * caught errors' states (see
-	 * {@link #moveErrorsToExecution(AnalysisState, ProgramPoint, ProtectedBlock, Collection, Collection, VariableRef)}).
+	 * {@link #moveErrorsToExecution(AnalysisState, ScopeId, ProgramPoint, ProtectedBlock, Collection, Collection, VariableRef)}).
 	 */
 	@Override
 	public AnalysisState<A> onErrorToExecution(
 			AnalysisState<A> state,
 			ProtectedBlock protectedBlock,
+			ScopeId<?> context,
 			ProgramPoint pp)
 			throws SemanticException {
 		ProgramState<A> exec = state.getExecution();
-		A res = domain.onErrorToExecution(exec.getState(), protectedBlock, pp);
+		A res = domain.onErrorToExecution(exec.getState(), protectedBlock, context, pp);
 		if (res == exec.getState())
 			return state;
 		return state.withExecution(
@@ -1060,8 +1114,8 @@ public class Analysis<
 	 * This only applies the callback of the wrapped domain to the normal
 	 * executions of {@code remaining} and {@code moved}, without actually
 	 * moving the latter to the halting continuation (see
-	 * {@link #moveExecutionToHalting(AnalysisState, ProgramPoint)} and
-	 * {@link #moveExecutionToHalting(AnalysisState, AnalysisState, ProgramPoint)}).
+	 * {@link #moveExecutionToHalting(AnalysisState, ScopeId, ProgramPoint)} and
+	 * {@link #moveExecutionToHalting(AnalysisState, AnalysisState, ScopeId, ProgramPoint)}).
 	 * If the normal execution of {@code remaining} is bottom, it is left
 	 * untouched.
 	 */
@@ -1069,11 +1123,13 @@ public class Analysis<
 	public Pair<AnalysisState<A>, AnalysisState<A>> onExecutionToHalting(
 			AnalysisState<A> remaining,
 			AnalysisState<A> moved,
+			ScopeId<?> context,
 			ProgramPoint pp)
 			throws SemanticException {
 		Pair<A, A> res = domain.onExecutionToHalting(
 				remaining.getExecutionState(),
 				moved.getExecutionState(),
+				context,
 				pp);
 		ProgramState<A> rem = remaining.getExecution();
 		ProgramState<A> mov = moved.getExecution();

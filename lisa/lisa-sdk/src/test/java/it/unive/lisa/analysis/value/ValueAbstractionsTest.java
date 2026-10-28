@@ -1,5 +1,6 @@
 package it.unive.lisa.analysis.value;
 
+import it.unive.lisa.interprocedural.ScopeId;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -279,6 +280,11 @@ public class ValueAbstractionsTest {
 
 		@Override
 		public EventQueue getEventQueue() {
+			return null;
+		}
+
+		@Override
+		public ScopeId<?> getContext() {
 			return null;
 		}
 

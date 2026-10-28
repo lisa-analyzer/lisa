@@ -1,5 +1,6 @@
 package it.unive.lisa.program.cfg.edge;
 
+import it.unive.lisa.interprocedural.ScopeId;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -113,7 +114,7 @@ public class EdgeTest {
 	/**
 	 * A fake {@link AbstractDomain} that just records the expression it was
 	 * asked to
-	 * {@link #assume(RecordingState, SymbolicExpression, ProgramPoint, ProgramPoint)}
+	 * {@link #assume(RecordingState, SymbolicExpression, ScopeId, ProgramPoint, ProgramPoint)}
 	 * without changing the state, so that tests can check exactly what
 	 * expression {@link TrueEdge}/{@link FalseEdge} pass down.
 	 */
@@ -128,6 +129,7 @@ public class EdgeTest {
 				RecordingState state,
 				Identifier id,
 				SymbolicExpression expression,
+				ScopeId<?> context,
 				ProgramPoint pp) {
 			return state;
 		}
@@ -136,6 +138,7 @@ public class EdgeTest {
 		public RecordingState smallStepSemantics(
 				RecordingState state,
 				SymbolicExpression expression,
+				ScopeId<?> context,
 				ProgramPoint pp) {
 			return state;
 		}
@@ -144,6 +147,7 @@ public class EdgeTest {
 		public RecordingState assume(
 				RecordingState state,
 				SymbolicExpression expression,
+				ScopeId<?> context,
 				ProgramPoint src,
 				ProgramPoint dest) {
 			this.lastAssumed = expression;
@@ -152,7 +156,8 @@ public class EdgeTest {
 
 		@Override
 		public SemanticOracle makeOracle(
-				RecordingState state) {
+				RecordingState state,
+				ScopeId<?> context) {
 			return null;
 		}
 
@@ -165,6 +170,7 @@ public class EdgeTest {
 		public RecordingState onCallReturn(
 				RecordingState entryState,
 				RecordingState callres,
+				ScopeId<?> context,
 				ProgramPoint call) {
 			return callres;
 		}
@@ -174,6 +180,7 @@ public class EdgeTest {
 				RecordingState remaining,
 				RecordingState moved,
 				Error error,
+				ScopeId<?> context,
 				ProgramPoint pp) {
 			return Pair.of(remaining, moved);
 		}
@@ -182,6 +189,7 @@ public class EdgeTest {
 		public RecordingState onErrorToExecution(
 				RecordingState state,
 				ProtectedBlock protectedBlock,
+				ScopeId<?> context,
 				ProgramPoint pp) {
 			return state;
 		}
@@ -190,6 +198,7 @@ public class EdgeTest {
 		public Pair<RecordingState, RecordingState> onExecutionToHalting(
 				RecordingState remaining,
 				RecordingState moved,
+				ScopeId<?> context,
 				ProgramPoint pp) {
 			return Pair.of(remaining, moved);
 		}
