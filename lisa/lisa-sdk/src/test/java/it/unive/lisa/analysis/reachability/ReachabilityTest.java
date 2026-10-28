@@ -959,7 +959,6 @@ public class ReachabilityTest {
 		CFG main = cfg("main", true);
 		CFG rec = cfg("rec", false);
 		CFG orphan = cfg("orphan", false);
-		CFGCall toRec = call(main, rec, true);
 		Statement g = node(rec, true);
 		CFGCall self = call(rec, rec, false);
 		Statement base = node(rec);

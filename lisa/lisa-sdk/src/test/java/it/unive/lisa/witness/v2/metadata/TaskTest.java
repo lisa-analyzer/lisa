@@ -1,7 +1,6 @@
 package it.unive.lisa.witness.v2.metadata;
 
 import static it.unive.lisa.witness.v2.TestValues.HASH;
-import static it.unive.lisa.witness.v2.TestValues.task;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
