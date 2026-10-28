@@ -165,7 +165,7 @@ public class RecursionSolver<A extends AbstractLattice<A>,
 				// execution (that must start from bottom) or that the recursion
 				// diverges
 				PushInv inv = new PushInv(meta.getStaticType(), call.getLocation());
-				res = analysis.assign(res, meta, inv, call);
+				res = analysis.assign(res, meta, inv, getCurrentContext(), call);
 			}
 			finalResults.put(call, res);
 			return res;
@@ -318,7 +318,7 @@ public class RecursionSolver<A extends AbstractLattice<A>,
 		else {
 			for (Identifier variable : original.getMetaVariables())
 				// we transfer the return value
-				res = res.lub(analysis.assign(state, meta, variable, original));
+				res = res.lub(analysis.assign(state, meta, variable, getCurrentContext(), original));
 
 			if (!res.getExecutionState().knowsIdentifier(meta)) {
 				// if we have no information for the return value, we want to
@@ -326,7 +326,7 @@ public class RecursionSolver<A extends AbstractLattice<A>,
 				// execution (that must start from bottom) or that the recursion
 				// diverges
 				PushInv inv = new PushInv(meta.getStaticType(), destination.getLocation());
-				res = analysis.assign(res, meta, inv, destination);
+				res = analysis.assign(res, meta, inv, getCurrentContext(), destination);
 			}
 		}
 

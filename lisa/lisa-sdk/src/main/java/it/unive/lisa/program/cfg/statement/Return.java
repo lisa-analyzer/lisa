@@ -77,7 +77,7 @@ public class Return
 			StatementStore<A> expressions)
 			throws SemanticException {
 		Identifier meta = getMetaVariable();
-		return interprocedural.getAnalysis().assign(state, meta, expr, this);
+		return interprocedural.getAnalysis().assign(state, meta, expr, interprocedural.getCurrentContext(), this);
 	}
 
 }

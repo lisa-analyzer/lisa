@@ -271,11 +271,11 @@ public class Analysis<
 	 * Yields the runtime types that this analysis infers for the given
 	 * expression.
 	 * 
-	 * @param state the current analysis state
-	 * @param e     the expression to type
+	 * @param state   the current analysis state
+	 * @param e       the expression to type
 	 * @param context the interprocedural context where this operation is being
 	 *                    evaluated
-	 * @param pp    the program point where the types are required
+	 * @param pp      the program point where the types are required
 	 * 
 	 * @return the runtime types
 	 * 
@@ -296,11 +296,11 @@ public class Analysis<
 	 * expression. The dynamic type is the least common supertype of all its
 	 * runtime types.
 	 * 
-	 * @param state the current analysis state
-	 * @param e     the expression to type
+	 * @param state   the current analysis state
+	 * @param e       the expression to type
 	 * @param context the interprocedural context where this operation is being
 	 *                    evaluated
-	 * @param pp    the program point where the types are required
+	 * @param pp      the program point where the types are required
 	 * 
 	 * @return the dynamic type
 	 * 
@@ -374,12 +374,12 @@ public class Analysis<
 	 * return {@link Satisfiability#SATISFIED}, both expressions should be
 	 * pointers to other expressions.
 	 * 
-	 * @param state the current analysis state
-	 * @param x     the first expression
-	 * @param y     the second expression
+	 * @param state   the current analysis state
+	 * @param x       the first expression
+	 * @param y       the second expression
 	 * @param context the interprocedural context where this operation is being
 	 *                    evaluated
-	 * @param pp    the {@link ProgramPoint} where the computation happens
+	 * @param pp      the {@link ProgramPoint} where the computation happens
 	 * 
 	 * @return whether or not the two expressions are aliases
 	 * 
@@ -403,11 +403,11 @@ public class Analysis<
 	 * reachable by {@code e}, traversing all possible pointers until no more
 	 * are available.
 	 * 
-	 * @param state the current analysis state
-	 * @param e     the expression corresponding to the starting point
+	 * @param state   the current analysis state
+	 * @param e       the expression corresponding to the starting point
 	 * @param context the interprocedural context where this operation is being
 	 *                    evaluated
-	 * @param pp    the {@link ProgramPoint} where the computation happens
+	 * @param pp      the {@link ProgramPoint} where the computation happens
 	 * 
 	 * @return the expressions representing memory regions reachable from
 	 *             {@code e}
@@ -433,12 +433,12 @@ public class Analysis<
 	 * pointer to another expression, but the latter should be a pointer as
 	 * well, and so on until {@code y} is reached.
 	 * 
-	 * @param state the current analysis state
-	 * @param x     the first expression
-	 * @param y     the second expression
+	 * @param state   the current analysis state
+	 * @param x       the first expression
+	 * @param y       the second expression
 	 * @param context the interprocedural context where this operation is being
 	 *                    evaluated
-	 * @param pp    the {@link ProgramPoint} where the computation happens
+	 * @param pp      the {@link ProgramPoint} where the computation happens
 	 * 
 	 * @return whether or not the second expression can be reached from the
 	 *             first one
@@ -464,12 +464,12 @@ public class Analysis<
 	 * {@code isReachableFrom(x, y, pp, oracle).and(isReachableFrom(y, x, pp, oracle))},
 	 * that corresponds to the default implementation of this method.
 	 * 
-	 * @param state the current analysis state
-	 * @param x     the first expression
-	 * @param y     the second expression
+	 * @param state   the current analysis state
+	 * @param x       the first expression
+	 * @param y       the second expression
 	 * @param context the interprocedural context where this operation is being
 	 *                    evaluated
-	 * @param pp    the {@link ProgramPoint} where the computation happens
+	 * @param pp      the {@link ProgramPoint} where the computation happens
 	 * 
 	 * @return whether or not the two expressions are mutually reachable
 	 * 
@@ -549,8 +549,8 @@ public class Analysis<
 	 * the error: {@code normal} is the state of the executions that continue
 	 * normally, while {@code erroneous} is the state of the ones that raise the
 	 * error, whose execution state is moved to the error as in
-	 * {@link #moveExecutionToError(AnalysisState, Error, ScopeId, ProgramPoint)}. The
-	 * result is the least upper bound of the two states after the move. If
+	 * {@link #moveExecutionToError(AnalysisState, Error, ScopeId, ProgramPoint)}.
+	 * The result is the least upper bound of the two states after the move. If
 	 * either the normal execution of {@code normal} or the one of
 	 * {@code erroneous} is bottom, this method falls back to a total move or to
 	 * no move at all, respectively.
@@ -889,10 +889,10 @@ public class Analysis<
 	 * {@link #moveExecutionToHalting(AnalysisState, AnalysisState, ScopeId, ProgramPoint)}
 	 * if only some executions halt.
 	 * 
-	 * @param state the current analysis state
+	 * @param state   the current analysis state
 	 * @param context the interprocedural context where this operation is being
 	 *                    evaluated
-	 * @param pp    the program point where the move happens
+	 * @param pp      the program point where the move happens
 	 * 
 	 * @return the updated analysis state
 	 * 
@@ -925,11 +925,11 @@ public class Analysis<
 	 * is the state of the executions that continue normally, while
 	 * {@code halting} is the state of the ones that halt, whose execution state
 	 * is moved to the halting state as in
-	 * {@link #moveExecutionToHalting(AnalysisState, ScopeId, ProgramPoint)}. The result
-	 * is the least upper bound of the two states after the move. If either the
-	 * normal execution of {@code normal} or the one of {@code halting} is
-	 * bottom, this method falls back to a total move or to no move at all,
-	 * respectively.
+	 * {@link #moveExecutionToHalting(AnalysisState, ScopeId, ProgramPoint)}.
+	 * The result is the least upper bound of the two states after the move. If
+	 * either the normal execution of {@code normal} or the one of
+	 * {@code halting} is bottom, this method falls back to a total move or to
+	 * no move at all, respectively.
 	 * 
 	 * @param normal  the analysis state of the executions that do not halt
 	 * @param halting the analysis state of the executions that halt
@@ -996,7 +996,8 @@ public class Analysis<
 
 		Map<Error, ProgramState<A>> errors = new HashMap<>();
 		for (Entry<Error, ProgramState<A>> entry : callres.getErrors()) {
-			Pair<A, A> moved = domain.onExecutionToError(exec, entry.getValue().getState(), entry.getKey(), context, call);
+			Pair<A, A> moved = domain.onExecutionToError(exec, entry.getValue().getState(), entry.getKey(), context,
+					call);
 			exec = moved.getLeft();
 			ProgramState<A> err = entry.getValue();
 			errors.put(entry.getKey(), moved.getRight() == err.getState() ? err
@@ -1053,7 +1054,8 @@ public class Analysis<
 	 * This only applies the callback of the wrapped domain to the normal
 	 * executions of {@code remaining} and {@code moved}, without actually
 	 * moving the latter to the error continuation (see
-	 * {@link #moveExecutionToError(AnalysisState, Error, ScopeId, ProgramPoint)} and
+	 * {@link #moveExecutionToError(AnalysisState, Error, ScopeId, ProgramPoint)}
+	 * and
 	 * {@link #moveExecutionToError(AnalysisState, AnalysisState, Error, ScopeId, ProgramPoint)}).
 	 * If the normal execution of {@code remaining} is bottom, it is left
 	 * untouched.

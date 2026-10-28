@@ -2,11 +2,13 @@ package it.unive.lisa.program.cfg.fixpoints.backward;
 
 import it.unive.lisa.analysis.AbstractDomain;
 import it.unive.lisa.analysis.AbstractLattice;
+import it.unive.lisa.analysis.Analysis;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.events.EventQueue;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
+import it.unive.lisa.interprocedural.ScopeId;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.VariableTableEntry;
 import it.unive.lisa.program.cfg.edge.Edge;
@@ -113,12 +115,14 @@ public abstract class BackwardCFGFixpoint<A extends AbstractLattice<A>, D extend
 			Edge edge,
 			CompoundState<A> entrystate)
 			throws SemanticException {
+		Analysis<A, D> analysis = interprocedural.getAnalysis();
+		ScopeId<A> context = interprocedural.getCurrentContext();
 		AnalysisState<A> state = entrystate.postState;
 
 		if (events != null)
 			events.post(new EdgeTraverseStart<>(edge, state));
 
-		AnalysisState<A> approx = edge.traverseBackwards(state, interprocedural.getAnalysis());
+		AnalysisState<A> approx = edge.traverseBackwards(state, analysis, context);
 
 		// we remove out of scope variables here
 		List<VariableTableEntry> toRemove = new LinkedList<>();
@@ -129,8 +133,8 @@ public abstract class BackwardCFGFixpoint<A extends AbstractLattice<A>, D extend
 		Collection<Identifier> ids = new LinkedList<>();
 		for (VariableTableEntry entry : toRemove) {
 			SymbolicExpression v = entry.createReference(graph).getIdentifier();
-			for (SymbolicExpression expr : interprocedural.getAnalysis()
-					.smallStepSemantics(approx, v, edge.getSource())
+			for (SymbolicExpression expr : analysis
+					.smallStepSemantics(approx, v, context, edge.getSource())
 					.getExecutionExpressions())
 				ids.add((Identifier) expr);
 		}

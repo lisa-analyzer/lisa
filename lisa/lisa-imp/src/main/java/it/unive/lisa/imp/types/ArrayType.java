@@ -7,6 +7,7 @@ import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
+import it.unive.lisa.interprocedural.ScopeId;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.statement.DefaultParamInitialization;
@@ -208,19 +209,20 @@ public final class ArrayType
 					StatementStore<A> expressions)
 					throws SemanticException {
 				Analysis<A, D> analysis = interprocedural.getAnalysis();
+				ScopeId<A> context = interprocedural.getCurrentContext();
 				Type type = getStaticType();
 				ReferenceType reftype = cfg.getProgram().getTypes().getReference(type);
 				MemoryAllocation creation = new MemoryAllocation(type, getLocation(), false);
 				HeapReference ref = new HeapReference(reftype, creation, getLocation());
 
 				// we start by allocating the memory region
-				AnalysisState<A> allocated = analysis.smallStepSemantics(state, creation, this);
+				AnalysisState<A> allocated = analysis.smallStepSemantics(state, creation, context, this);
 
 				// we create the synthetic variable that will hold the reference
 				// to the
 				// newly allocated array until it is assigned to a variable
 				InstrumentedReceiver array = new InstrumentedReceiver(reftype, true, getLocation());
-				AnalysisState<A> tmp = analysis.assign(allocated, array, ref, this);
+				AnalysisState<A> tmp = analysis.assign(allocated, array, ref, context, this);
 
 				// we define the length of the array as a child element
 				AccessChild len = new AccessChild(
@@ -231,7 +233,8 @@ public final class ArrayType
 
 				// TODO fix when we'll support multidimensional arrays
 				AnalysisState<
-						A> lenSt = analysis.assign(tmp, len, new PushAny(Int32Type.INSTANCE, getLocation()), this);
+						A> lenSt = analysis.assign(tmp, len, new PushAny(Int32Type.INSTANCE, getLocation()), context,
+								this);
 
 				// we leave the synthetic array in the program variables
 				// until it is popped from the stack to keep a reference to the
@@ -240,7 +243,7 @@ public final class ArrayType
 
 				// finally, we leave a reference to the newly created array on
 				// the stack
-				return analysis.smallStepSemantics(lenSt, array, this);
+				return analysis.smallStepSemantics(lenSt, array, context, this);
 			}
 
 			@Override

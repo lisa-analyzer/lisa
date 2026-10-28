@@ -213,9 +213,9 @@ public interface InterproceduralAnalysis<A extends AbstractLattice<A>, D extends
 	/**
 	 * Yields the context (i.e., the {@link ScopeId}) under which this analysis
 	 * is currently computing the semantics of the code. This can be passed by
-	 * statements to the semantic functions of {@link Analysis}, so that
-	 * domains can be aware of the interprocedural context they are executing
-	 * in. Context-insensitive analyses will always return the same object.
+	 * statements to the semantic functions of {@link Analysis}, so that domains
+	 * can be aware of the interprocedural context they are executing in.
+	 * Context-insensitive analyses will always return the same object.
 	 * 
 	 * @return the current context
 	 */

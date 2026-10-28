@@ -105,7 +105,8 @@ public abstract class Literal<E>
 			StatementStore<A> expressions)
 			throws SemanticException {
 		return interprocedural.getAnalysis()
-				.smallStepSemantics(entryState, new Constant(getStaticType(), getValue(), getLocation()), this);
+				.smallStepSemantics(entryState, new Constant(getStaticType(), getValue(), getLocation()),
+						interprocedural.getCurrentContext(), this);
 	}
 
 	@Override

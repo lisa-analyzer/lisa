@@ -174,7 +174,7 @@ public abstract class CallGraphBasedAnalysis<
 			ExpressionSet[] parameters,
 			StatementStore<A> expressions)
 			throws SemanticException {
-		return policy.apply(call, entryState, analysis, parameters);
+		return policy.apply(call, entryState, analysis, getCurrentContext(), parameters);
 	}
 
 	/**
@@ -244,7 +244,7 @@ public abstract class CallGraphBasedAnalysis<
 				ExpressionSet[]> scoped = call.getProgram()
 						.getFeatures()
 						.getScopingStrategy()
-						.scope(call, scope, entryState, analysis, parameters);
+						.scope(call, scope, entryState, analysis, getCurrentContext(), parameters);
 		AnalysisState<A> callState = scoped.getLeft();
 		ExpressionSet[] locals = scoped.getRight();
 

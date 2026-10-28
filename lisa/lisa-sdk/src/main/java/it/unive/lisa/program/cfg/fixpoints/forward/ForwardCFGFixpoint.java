@@ -8,6 +8,7 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.events.EventQueue;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
+import it.unive.lisa.interprocedural.ScopeId;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.VariableTableEntry;
 import it.unive.lisa.program.cfg.edge.Edge;
@@ -112,7 +113,7 @@ public abstract class ForwardCFGFixpoint<A extends AbstractLattice<A>, D extends
 			CompoundState<A> entrystate)
 			throws SemanticException {
 		AnalysisState<A> approx = traverseEdge(edge, entrystate.postState, graph, interprocedural.getAnalysis(),
-				events);
+				interprocedural.getCurrentContext(), events);
 		return CompoundState.of(approx, new StatementStore<>(approx).bottom());
 	}
 
@@ -131,6 +132,7 @@ public abstract class ForwardCFGFixpoint<A extends AbstractLattice<A>, D extends
 	 * @param state    the post-state of the source of the edge
 	 * @param graph    the cfg containing the edge
 	 * @param analysis the analysis to use for the traversal
+	 * @param context  the interprocedural context where the edge is traversed
 	 * @param events   the event queue where traversal events are posted, or
 	 *                     {@code null} if events should not be posted
 	 * 
@@ -143,6 +145,7 @@ public abstract class ForwardCFGFixpoint<A extends AbstractLattice<A>, D extends
 			AnalysisState<A> state,
 			CFG graph,
 			Analysis<A, D> analysis,
+			ScopeId<?> context,
 			EventQueue events)
 			throws SemanticException {
 		if (events != null)
@@ -153,7 +156,7 @@ public abstract class ForwardCFGFixpoint<A extends AbstractLattice<A>, D extends
 		if (!edge.isErrorHandling())
 			state = analysis.removeCaughtErrors(state, edge.getSource());
 
-		AnalysisState<A> approx = edge.traverseForward(state, analysis);
+		AnalysisState<A> approx = edge.traverseForward(state, analysis, context);
 
 		// we remove out of scope variables here
 		List<VariableTableEntry> toRemove = new LinkedList<>();
@@ -165,7 +168,7 @@ public abstract class ForwardCFGFixpoint<A extends AbstractLattice<A>, D extends
 		for (VariableTableEntry entry : toRemove) {
 			SymbolicExpression v = entry.createReference(graph).getIdentifier();
 			for (SymbolicExpression expr : analysis
-					.smallStepSemantics(approx, v, edge.getSource())
+					.smallStepSemantics(approx, v, context, edge.getSource())
 					.getExecutionExpressions())
 				ids.add((Identifier) expr);
 		}

@@ -36,15 +36,16 @@ public class ReturnTopPolicy
 			OpenCall call,
 			AnalysisState<A> entryState,
 			Analysis<A, D> analysis,
+			ScopeId<?> context,
 			ExpressionSet[] params)
 			throws SemanticException {
 
 		if (call.getStaticType().isVoidType())
-			return analysis.smallStepSemantics(entryState, new Skip(call.getLocation()), call);
+			return analysis.smallStepSemantics(entryState, new Skip(call.getLocation()), context, call);
 		else {
 			PushAny pushany = new PushAny(call.getStaticType(), call.getLocation());
 			Identifier var = call.getMetaVariable();
-			return analysis.assign(entryState, var, pushany, call);
+			return analysis.assign(entryState, var, pushany, context, call);
 		}
 	}
 

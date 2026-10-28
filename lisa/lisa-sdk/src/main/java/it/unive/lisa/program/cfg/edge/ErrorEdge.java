@@ -5,6 +5,7 @@ import it.unive.lisa.analysis.AbstractLattice;
 import it.unive.lisa.analysis.Analysis;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.interprocedural.ScopeId;
 import it.unive.lisa.program.cfg.protection.CatchBlock;
 import it.unive.lisa.program.cfg.protection.ProtectedBlock;
 import it.unive.lisa.program.cfg.protection.ProtectionBlock;
@@ -188,18 +189,20 @@ public class ErrorEdge
 	@Override
 	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> traverseForward(
 			AnalysisState<A> state,
-			Analysis<A, D> analysis)
+			Analysis<A, D> analysis,
+			ScopeId<?> context)
 			throws SemanticException {
-		return analysis.moveErrorsToExecution(state, getSource(), protectedBlock, Arrays.asList(types),
+		return analysis.moveErrorsToExecution(state, context, getSource(), protectedBlock, Arrays.asList(types),
 				getExcludedTypes(), variable);
 	}
 
 	@Override
 	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> traverseBackwards(
 			AnalysisState<A> state,
-			Analysis<A, D> analysis)
+			Analysis<A, D> analysis,
+			ScopeId<?> context)
 			throws SemanticException {
-		return traverseForward(state, analysis);
+		return traverseForward(state, analysis, context);
 	}
 
 	@Override

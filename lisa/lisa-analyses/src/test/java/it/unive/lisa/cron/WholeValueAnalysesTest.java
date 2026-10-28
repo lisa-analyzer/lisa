@@ -186,7 +186,7 @@ public class WholeValueAnalysesTest
 				A state)
 				throws SemanticException {
 			for (SymbolicExpression expr : post.getExecutionExpressions()) {
-				Satisfiability sat = domain.satisfies(state, expr, node);
+				Satisfiability sat = domain.satisfies(state, expr, null, node);
 				if (sat == Satisfiability.UNKNOWN)
 					warnOn(tool, node, "This assertion might fail");
 				else if (sat == Satisfiability.NOT_SATISFIED)

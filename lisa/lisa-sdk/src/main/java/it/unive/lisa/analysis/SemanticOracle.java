@@ -41,8 +41,8 @@ public interface SemanticOracle {
 	 * Yields the interprocedural context (i.e., the {@link ScopeId}) where the
 	 * operation that is querying this oracle is being evaluated. This can be
 	 * used by {@link SemanticComponent}s to make their semantics
-	 * context-sensitive. Note that the return value might be {@code null} if
-	 * no context information is available.
+	 * context-sensitive. Note that the return value might be {@code null} if no
+	 * context information is available.
 	 * 
 	 * @return the current context, or {@code null}
 	 */

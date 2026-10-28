@@ -1,6 +1,5 @@
 package it.unive.lisa.program.cfg.edge;
 
-import it.unive.lisa.interprocedural.ScopeId;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -16,6 +15,7 @@ import it.unive.lisa.analysis.ProgramState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.events.EventQueue;
+import it.unive.lisa.interprocedural.ScopeId;
 import it.unive.lisa.lattices.ExpressionSet;
 import it.unive.lisa.program.ClassUnit;
 import it.unive.lisa.program.Program;
@@ -332,7 +332,7 @@ public class EdgeTest {
 		RecordingDomain domain = new RecordingDomain();
 		Analysis<RecordingState, RecordingDomain> analysis = new Analysis<>(domain);
 
-		edge.traverseForward(stateWithExpression(expr), analysis);
+		edge.traverseForward(stateWithExpression(expr), analysis, null);
 
 		assertSame(expr, domain.lastAssumed);
 	}
@@ -348,7 +348,7 @@ public class EdgeTest {
 		RecordingDomain domain = new RecordingDomain();
 		Analysis<RecordingState, RecordingDomain> analysis = new Analysis<>(domain);
 
-		edge.traverseForward(stateWithExpression(expr), analysis);
+		edge.traverseForward(stateWithExpression(expr), analysis, null);
 
 		assertTrue(domain.lastAssumed instanceof UnaryExpression);
 		UnaryExpression negated = (UnaryExpression) domain.lastAssumed;
@@ -367,7 +367,7 @@ public class EdgeTest {
 		RecordingDomain domain = new RecordingDomain();
 		Analysis<RecordingState, RecordingDomain> analysis = new Analysis<>(domain);
 
-		AnalysisState<RecordingState> result = edge.traverseForward(state, analysis);
+		AnalysisState<RecordingState> result = edge.traverseForward(state, analysis, null);
 
 		assertSame(state, result);
 	}

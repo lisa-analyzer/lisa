@@ -305,11 +305,11 @@ public class OptimizedAnalyzedCFG<A extends AbstractLattice<A>, D extends Abstra
 				AnalysisState<A> callres = call.getProgram()
 						.getFeatures()
 						.getScopingStrategy()
-						.unscope(call, scope, exitState, analysis);
+						.unscope(call, scope, exitState, analysis, getId());
 				callres = analysis.transferThrowers(callres, call, target);
 				// as done by the interprocedural analyses when computing the
 				// result of the call
-				callres = analysis.onCallReturn(entryState, callres, call);
+				callres = analysis.onCallReturn(entryState, callres, getId(), call);
 				result = result.lub(callres);
 			}
 

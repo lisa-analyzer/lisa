@@ -23,8 +23,8 @@ import org.junit.jupiter.api.Test;
  * Tests for the orchestration logic of {@link SimpleAbstractDomain}: how it
  * defaults missing sub-domains to their no-op counterparts, how it combines the
  * three sub-domains in {@link SimpleAbstractDomain#makeLattice()} and
- * {@link SimpleAbstractDomain#makeOracle(Object, it.unive.lisa.interprocedural.ScopeId)}, and the reference-equality
- * optimization in
+ * {@link SimpleAbstractDomain#makeOracle(Object, it.unive.lisa.interprocedural.ScopeId)},
+ * and the reference-equality optimization in
  * {@link SimpleAbstractDomain#onCallReturn(Object, Object, it.unive.lisa.interprocedural.ScopeId, it.unive.lisa.program.cfg.ProgramPoint)}.
  * The substitution-application logic of {@code SimpleAbstractDomain} (its
  * private {@code applySubstitution} method) is instead covered by
@@ -165,6 +165,7 @@ public class SimpleAbstractDomainTest {
 		SimpleAbstractState<SingleHeapLattice, SingleValueLattice, SingleTypeLattice> result = domain.onCallReturn(
 				entry,
 				callres,
+				null,
 				fake);
 
 		// none of the (no-op) sub-domains changes anything, so the very same
@@ -188,6 +189,7 @@ public class SimpleAbstractDomainTest {
 		SimpleAbstractState<SingleHeapLattice, SingleValueLattice, SingleTypeLattice> result = domain.onCallReturn(
 				entry,
 				callres,
+				null,
 				fake);
 
 		// the type sub-domain always answers BOTTOM regardless of its inputs,
@@ -211,7 +213,7 @@ public class SimpleAbstractDomainTest {
 						new NoOpTypes());
 		SimpleAbstractState<SingleHeapLattice, SingleValueLattice, SingleTypeLattice> state = domain.makeLattice();
 
-		SemanticOracle oracle = domain.makeOracle(state);
+		SemanticOracle oracle = domain.makeOracle(state, null);
 
 		// x does not need rewriting, so the oracle short-circuits without even
 		// consulting the (no-op) heap domain
@@ -236,7 +238,7 @@ public class SimpleAbstractDomainTest {
 						new NoOpValues(),
 						new NoOpTypes());
 		SimpleAbstractState<SingleHeapLattice, SingleValueLattice, SingleTypeLattice> state = domain.makeLattice();
-		SemanticOracle oracle = domain.makeOracle(state);
+		SemanticOracle oracle = domain.makeOracle(state, null);
 
 		ExpressionSet result = oracle.rewrite(new ExpressionSet(x), fake);
 		assertTrue(result.elements().contains(x));

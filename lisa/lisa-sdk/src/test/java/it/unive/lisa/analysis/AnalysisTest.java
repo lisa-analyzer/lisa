@@ -89,7 +89,7 @@ public class AnalysisTest {
 		Identifier x = id(cfg, "x");
 		Statement pp = new NoOp(cfg, LOC);
 		AnalysisState<MarkerAbstractLattice> state = base(ps());
-		AnalysisState<MarkerAbstractLattice> res = analysis().assign(state, x, x, pp);
+		AnalysisState<MarkerAbstractLattice> res = analysis().assign(state, x, x, null, pp);
 		assertTrue(res.getExecutionState().knowsIdentifier(x));
 		assertEquals(new ExpressionSet(x), res.getExecutionExpressions());
 	}
@@ -101,7 +101,7 @@ public class AnalysisTest {
 		Statement pp = new NoOp(cfg, LOC);
 		Skip nonIdentifier = new Skip(LOC);
 		AnalysisState<MarkerAbstractLattice> state = base(ps());
-		AnalysisState<MarkerAbstractLattice> res = analysis().assign(state, nonIdentifier, nonIdentifier, pp);
+		AnalysisState<MarkerAbstractLattice> res = analysis().assign(state, nonIdentifier, nonIdentifier, null, pp);
 		// the oracle rewrites any non-identifier to a fixed "rewritten"
 		// variable, which must be the one that gets assigned
 		Identifier rewritten = new Variable(Untyped.INSTANCE, "rewritten", pp.getLocation());
@@ -117,7 +117,7 @@ public class AnalysisTest {
 		Statement pp = new NoOp(cfg, LOC);
 		AnalysisState<MarkerAbstractLattice> state = base(ps());
 		SymbolicExpression xAsExpression = x;
-		AnalysisState<MarkerAbstractLattice> res = analysis().assign(state, xAsExpression, x, pp);
+		AnalysisState<MarkerAbstractLattice> res = analysis().assign(state, xAsExpression, x, null, pp);
 		assertTrue(res.getExecutionState().knowsIdentifier(x));
 	}
 
@@ -128,7 +128,7 @@ public class AnalysisTest {
 		Statement pp = new NoOp(cfg, LOC);
 		Identifier x = id(cfg, "x");
 		AnalysisState<MarkerAbstractLattice> state = base(ps());
-		AnalysisState<MarkerAbstractLattice> res = analysis().smallStepSemantics(state, x, pp);
+		AnalysisState<MarkerAbstractLattice> res = analysis().smallStepSemantics(state, x, null, pp);
 		assertEquals(new ExpressionSet(x), res.getExecutionExpressions());
 	}
 
@@ -138,7 +138,7 @@ public class AnalysisTest {
 		CFG cfg = cfg();
 		Statement pp = new NoOp(cfg, LOC);
 		AnalysisState<MarkerAbstractLattice> state = base(ps());
-		AnalysisState<MarkerAbstractLattice> res = analysis().assume(state, new Skip(LOC), pp, pp);
+		AnalysisState<MarkerAbstractLattice> res = analysis().assume(state, new Skip(LOC), null, pp, pp);
 		assertTrue(res.getExecution().isBottom());
 	}
 
@@ -149,7 +149,7 @@ public class AnalysisTest {
 		Identifier x = id(cfg, "x");
 		Statement pp = new NoOp(cfg, LOC);
 		AnalysisState<MarkerAbstractLattice> state = base(ps()).withExecutionExpression(x);
-		AnalysisState<MarkerAbstractLattice> res = analysis().assume(state, x, pp, pp);
+		AnalysisState<MarkerAbstractLattice> res = analysis().assume(state, x, null, pp, pp);
 		assertFalse(res.getExecution().isBottom());
 		assertEquals(new ExpressionSet(x), res.getExecutionExpressions());
 	}
@@ -163,7 +163,7 @@ public class AnalysisTest {
 		// the marker oracle answers UNKNOWN for expressions it cannot judge;
 		// satisfies falls back to the domain, which does not override the
 		// default (UNKNOWN) satisfiability check
-		assertEquals(Satisfiability.UNKNOWN, analysis().satisfies(state, new Skip(LOC), pp));
+		assertEquals(Satisfiability.UNKNOWN, analysis().satisfies(state, new Skip(LOC), null, pp));
 	}
 
 	// ------------------------------------------------------------------
@@ -192,7 +192,7 @@ public class AnalysisTest {
 		Statement pp = new NoOp(cfg, LOC);
 		Error err = new Error(VoidType.INSTANCE, pp);
 		AnalysisState<MarkerAbstractLattice> state = base(ps(x));
-		AnalysisState<MarkerAbstractLattice> res = analysis().moveExecutionToError(state, err, pp);
+		AnalysisState<MarkerAbstractLattice> res = analysis().moveExecutionToError(state, err, null, pp);
 		assertTrue(res.getExecution().isBottom());
 		assertEquals(Set.of(err), res.getErrors().getKeys());
 		assertTrue(res.getSmashedErrors().isBottom());
@@ -206,7 +206,7 @@ public class AnalysisTest {
 		Statement pp = new NoOp(cfg, LOC);
 		Error err = new Error(Untyped.INSTANCE, pp);
 		AnalysisState<MarkerAbstractLattice> state = base(ps(x));
-		AnalysisState<MarkerAbstractLattice> res = smashingAnalysis().moveExecutionToError(state, err, pp);
+		AnalysisState<MarkerAbstractLattice> res = smashingAnalysis().moveExecutionToError(state, err, null, pp);
 		assertTrue(res.getExecution().isBottom());
 		assertTrue(res.getErrors().isBottom());
 		assertEquals(Set.of(pp), res.getSmashedErrors().getState(Untyped.INSTANCE).elements);
@@ -219,7 +219,7 @@ public class AnalysisTest {
 		Statement pp = new NoOp(cfg, LOC);
 		Error err = new Error(Untyped.INSTANCE, pp);
 		AnalysisState<MarkerAbstractLattice> bottomExec = base(ps()).bottomExecution();
-		assertSame(bottomExec, analysis().moveExecutionToError(bottomExec, err, pp));
+		assertSame(bottomExec, analysis().moveExecutionToError(bottomExec, err, null, pp));
 	}
 
 	@Test
@@ -230,7 +230,8 @@ public class AnalysisTest {
 		Identifier y = id(cfg, "y");
 		Statement pp = new NoOp(cfg, LOC);
 		Error err = new Error(VoidType.INSTANCE, pp);
-		AnalysisState<MarkerAbstractLattice> res = analysis().moveExecutionToError(base(ps(x)), base(ps(y)), err, pp);
+		AnalysisState<
+				MarkerAbstractLattice> res = analysis().moveExecutionToError(base(ps(x)), base(ps(y)), err, null, pp);
 		assertEquals(Set.of(x), res.getExecutionState().known);
 		assertEquals(Set.of(y), res.getErrors().getState(err).getState().known);
 	}
@@ -244,8 +245,8 @@ public class AnalysisTest {
 		Error err = new Error(VoidType.INSTANCE, pp);
 		AnalysisState<MarkerAbstractLattice> erroneous = base(ps(y));
 		AnalysisState<MarkerAbstractLattice> res = analysis()
-				.moveExecutionToError(erroneous.bottomExecution(), erroneous, err, pp);
-		assertEquals(analysis().moveExecutionToError(erroneous, err, pp), res);
+				.moveExecutionToError(erroneous.bottomExecution(), erroneous, err, null, pp);
+		assertEquals(analysis().moveExecutionToError(erroneous, err, null, pp), res);
 	}
 
 	@Test
@@ -257,7 +258,7 @@ public class AnalysisTest {
 		Error err = new Error(VoidType.INSTANCE, pp);
 		AnalysisState<MarkerAbstractLattice> normal = base(ps(x));
 		AnalysisState<MarkerAbstractLattice> res = analysis()
-				.moveExecutionToError(normal, normal.bottomExecution(), err, pp);
+				.moveExecutionToError(normal, normal.bottomExecution(), err, null, pp);
 		assertEquals(normal, res);
 	}
 
@@ -268,7 +269,8 @@ public class AnalysisTest {
 		Identifier x = id(cfg, "x");
 		Identifier y = id(cfg, "y");
 		Statement pp = new NoOp(cfg, LOC);
-		AnalysisState<MarkerAbstractLattice> res = analysis().moveExecutionToHalting(base(ps(x)), base(ps(y)), pp);
+		AnalysisState<
+				MarkerAbstractLattice> res = analysis().moveExecutionToHalting(base(ps(x)), base(ps(y)), null, pp);
 		assertEquals(Set.of(x), res.getExecutionState().known);
 		assertEquals(Set.of(y), res.getHalt().getState().known);
 	}
@@ -281,7 +283,7 @@ public class AnalysisTest {
 		Identifier y = id(cfg, "y");
 		Statement pp = new NoOp(cfg, LOC);
 		AnalysisState<MarkerAbstractLattice> state = base(ps(x)).withHalt(ps(y));
-		AnalysisState<MarkerAbstractLattice> res = analysis().moveExecutionToHalting(state, pp);
+		AnalysisState<MarkerAbstractLattice> res = analysis().moveExecutionToHalting(state, null, pp);
 		assertTrue(res.getExecution().isBottom());
 		assertEquals(Set.of(x, y), res.getHalt().getState().known);
 	}
@@ -301,7 +303,7 @@ public class AnalysisTest {
 		AnalysisState<MarkerAbstractLattice> state = base(ps()).addError(err, ps(x));
 
 		AnalysisState<MarkerAbstractLattice> res = analysis().moveErrorsToExecution(
-				state, thrower, block, List.of(Untyped.INSTANCE), List.of(), null);
+				state, null, thrower, block, List.of(Untyped.INSTANCE), List.of(), null);
 
 		assertEquals(Set.of(x), res.getExecutionState().known);
 		assertEquals(new ExpressionSet(new Skip(SyntheticLocation.INSTANCE)), res.getExecutionExpressions());
@@ -322,7 +324,7 @@ public class AnalysisTest {
 				.addError(err, psWithExpr(Set.of(x), excValue));
 
 		AnalysisState<MarkerAbstractLattice> res = analysis().moveErrorsToExecution(
-				state, thrower, block, List.of(Untyped.INSTANCE), List.of(), excVar);
+				state, null, thrower, block, List.of(Untyped.INSTANCE), List.of(), excVar);
 
 		assertEquals(Set.of(x, id(cfg, "e")), res.getExecutionState().known);
 		assertEquals(new ExpressionSet(excVar.getIdentifier()), res.getExecutionExpressions());
@@ -344,7 +346,7 @@ public class AnalysisTest {
 		AnalysisState<MarkerAbstractLattice> state = base(ps()).addError(err, ps(x));
 
 		AnalysisState<MarkerAbstractLattice> res = analysis().moveErrorsToExecution(
-				state, thrower, block, List.of(Untyped.INSTANCE), List.of(), excVar);
+				state, null, thrower, block, List.of(Untyped.INSTANCE), List.of(), excVar);
 
 		assertEquals(Set.of(x, id(cfg, "e")), res.getExecutionState().known);
 	}
@@ -360,7 +362,7 @@ public class AnalysisTest {
 		AnalysisState<MarkerAbstractLattice> state = base(ps()).addError(err, ps(x));
 
 		AnalysisState<MarkerAbstractLattice> res = analysis().moveErrorsToExecution(
-				state, thrower, block, List.of(VoidType.INSTANCE), List.of(), null);
+				state, null, thrower, block, List.of(VoidType.INSTANCE), List.of(), null);
 
 		assertTrue(res.isBottom());
 	}
@@ -471,7 +473,7 @@ public class AnalysisTest {
 		AnalysisState<MarkerAbstractLattice> entryState = base(ps());
 		AnalysisState<MarkerAbstractLattice> callres = base(ps()).withExecutionExpression(x);
 
-		AnalysisState<MarkerAbstractLattice> res = analysis().onCallReturn(entryState, callres, call);
+		AnalysisState<MarkerAbstractLattice> res = analysis().onCallReturn(entryState, callres, null, call);
 
 		assertEquals(new ExpressionSet(x), res.getExecutionExpressions());
 	}

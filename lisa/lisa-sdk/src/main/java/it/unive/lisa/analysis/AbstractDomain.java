@@ -23,8 +23,8 @@ public interface AbstractDomain<
 	 * by the analysis itself to query the current state of the analysis.
 	 *
 	 * @param state   the current state of the analysis
-	 * @param context the interprocedural context where the oracle will be
-	 *                    used, that will be exposed through
+	 * @param context the interprocedural context where the oracle will be used,
+	 *                    that will be exposed through
 	 *                    {@link SemanticOracle#getContext()}
 	 * 
 	 * @return a {@link SemanticOracle} instance

@@ -105,6 +105,7 @@ public class ReachabilityTest {
 		public Satisfiability satisfies(
 				MarkerAbstractLattice state,
 				SymbolicExpression expression,
+				ScopeId<?> context,
 				ProgramPoint pp) {
 			if (state.isBottom())
 				return Satisfiability.BOTTOM;

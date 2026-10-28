@@ -684,6 +684,7 @@ public class SubstitutionTest {
 				initial,
 				z,
 				alloc,
+				null,
 				fake);
 
 		// same expectation as testInterferingSubstitution, but now observed as
@@ -728,6 +729,7 @@ public class SubstitutionTest {
 		SimpleAbstractState<TrackingHeapLattice, Collector, Collector> result = domain.smallStepSemantics(
 				initial,
 				alloc,
+				null,
 				fake);
 
 		// same expectation as testResettingSubstitution

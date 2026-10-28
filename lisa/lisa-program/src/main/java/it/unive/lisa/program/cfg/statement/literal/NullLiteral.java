@@ -47,7 +47,8 @@ public class NullLiteral
 			InterproceduralAnalysis<A, D> interprocedural,
 			StatementStore<A> expressions)
 			throws SemanticException {
-		return interprocedural.getAnalysis().smallStepSemantics(entryState, new NullConstant(getLocation()), this);
+		return interprocedural.getAnalysis().smallStepSemantics(entryState, new NullConstant(getLocation()),
+				interprocedural.getCurrentContext(), this);
 	}
 
 }

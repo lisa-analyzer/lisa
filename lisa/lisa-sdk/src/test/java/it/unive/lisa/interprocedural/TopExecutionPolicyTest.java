@@ -43,7 +43,7 @@ public class TopExecutionPolicyTest {
 		OpenCall call = new OpenCall(caller, LOC, CallType.STATIC, null, "foo", VoidType.INSTANCE);
 
 		AnalysisState<TestAbstractState> result = TopExecutionPolicy.INSTANCE.apply(
-				call, state(), analysis(), new ExpressionSet[0]);
+				call, state(), analysis(), null, new ExpressionSet[0]);
 
 		ExpressionSet computed = result.getExecutionExpressions();
 		assertEquals(1, computed.size());
@@ -56,7 +56,7 @@ public class TopExecutionPolicyTest {
 		OpenCall call = new OpenCall(caller, LOC, CallType.STATIC, null, "foo");
 
 		AnalysisState<TestAbstractState> result = TopExecutionPolicy.INSTANCE.apply(
-				call, state(), analysis(), new ExpressionSet[0]);
+				call, state(), analysis(), null, new ExpressionSet[0]);
 
 		ExpressionSet computed = result.getExecutionExpressions();
 		assertEquals(1, computed.size());
@@ -75,7 +75,7 @@ public class TopExecutionPolicyTest {
 		OpenCall call = new OpenCall(caller, LOC, CallType.STATIC, null, "foo");
 
 		AnalysisState<TestAbstractState> result = TopExecutionPolicy.INSTANCE.apply(
-				call, state(), analysis(), new ExpressionSet[0]);
+				call, state(), analysis(), null, new ExpressionSet[0]);
 
 		assertTrue(result.getErrors().getKeys().isEmpty());
 		assertTrue(result.getSmashedErrors().getKeys().isEmpty());

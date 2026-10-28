@@ -140,7 +140,8 @@ public class VariableRef
 			StatementStore<A> expressions)
 			throws SemanticException {
 		SymbolicExpression expr = getIdentifier();
-		return interprocedural.getAnalysis().smallStepSemantics(entryState, expr, this);
+		return interprocedural.getAnalysis().smallStepSemantics(entryState, expr, interprocedural.getCurrentContext(),
+				this);
 	}
 
 	@Override

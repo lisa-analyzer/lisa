@@ -161,10 +161,12 @@ public class TracePartitioning<A extends AbstractLattice<A>,
 
 		PatriciaTrieMap<ExecutionTrace, A> result = state.mkNewFunction(null, false);
 		if (state.isTop() || state.function == null)
-			result = result.put(ExecutionTrace.EMPTY, domain.smallStepSemantics(state.lattice.top(), expression, context, pp));
+			result = result.put(ExecutionTrace.EMPTY,
+					domain.smallStepSemantics(state.lattice.top(), expression, context, pp));
 		else
 			for (Entry<ExecutionTrace, A> trace : state)
-				result = result.put(trace.getKey(), domain.smallStepSemantics(trace.getValue(), expression, context, pp));
+				result = result.put(trace.getKey(),
+						domain.smallStepSemantics(trace.getValue(), expression, context, pp));
 		return new TraceLattice<>(state.lattice, result);
 	}
 
@@ -548,7 +550,8 @@ public class TracePartitioning<A extends AbstractLattice<A>,
 					domain.onErrorToExecution(state.lattice.top(), protectedBlock, context, pp));
 		else
 			for (Entry<ExecutionTrace, A> trace : state)
-				result = result.put(trace.getKey(), domain.onErrorToExecution(trace.getValue(), protectedBlock, context, pp));
+				result = result.put(trace.getKey(),
+						domain.onErrorToExecution(trace.getValue(), protectedBlock, context, pp));
 		return new TraceLattice<>(state.lattice, result);
 	}
 

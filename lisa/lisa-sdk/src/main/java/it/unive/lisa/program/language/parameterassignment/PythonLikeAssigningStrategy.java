@@ -2,10 +2,12 @@ package it.unive.lisa.program.language.parameterassignment;
 
 import it.unive.lisa.analysis.AbstractDomain;
 import it.unive.lisa.analysis.AbstractLattice;
+import it.unive.lisa.analysis.Analysis;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
+import it.unive.lisa.interprocedural.ScopeId;
 import it.unive.lisa.lattices.ExpressionSet;
 import it.unive.lisa.program.cfg.Parameter;
 import it.unive.lisa.program.cfg.statement.Expression;
@@ -98,6 +100,8 @@ public class PythonLikeAssigningStrategy
 					ExpressionSet[] parameters,
 					boolean assignFormals)
 					throws SemanticException {
+		Analysis<A, D> analysis = interprocedural.getAnalysis();
+		ScopeId<A> context = interprocedural.getCurrentContext();
 
 		ExpressionSet[] slots = new ExpressionSet[formals.length];
 		Set<Type>[] slotsTypes = new Set[formals.length];
@@ -113,7 +117,7 @@ public class PythonLikeAssigningStrategy
 				defaults[pos] = callState.getExecutionExpressions();
 				Set<Type> types = new HashSet<>();
 				for (SymbolicExpression e : defaults[pos])
-					types.addAll(interprocedural.getAnalysis().getRuntimeTypesOf(callState, e, call));
+					types.addAll(analysis.getRuntimeTypesOf(callState, e, context, call));
 				defaultTypes[pos] = types;
 			}
 		}
@@ -122,7 +126,7 @@ public class PythonLikeAssigningStrategy
 				formals,
 				actuals,
 				parameters,
-				call.parameterTypes(expressions, interprocedural.getAnalysis()),
+				call.parameterTypes(expressions, analysis, context),
 				defaults,
 				defaultTypes,
 				slots,
@@ -139,7 +143,8 @@ public class PythonLikeAssigningStrategy
 				AnalysisState<A> temp = prepared.bottomExecution();
 				for (SymbolicExpression exp : slots[i])
 					temp = temp
-							.lub(interprocedural.getAnalysis().assign(prepared, formals[i].toSymbolicVariable(), exp,
+							.lub(analysis.assign(prepared, formals[i].toSymbolicVariable(), exp,
+									context,
 									call));
 				prepared = temp;
 			}

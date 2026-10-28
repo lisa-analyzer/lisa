@@ -87,7 +87,7 @@ public class TracePartitioningTest {
 
 		TraceLattice<
 				SimpleAbstractState<Monolith, ValueEnvironment<IntInterval>, TypeEnvironment<TypeSet>>> result = tp
-						.assume(tp.makeLattice(), alwaysTrue(ifCondition), ifCondition, ifTrueBranchTarget);
+						.assume(tp.makeLattice(), alwaysTrue(ifCondition), null, ifCondition, ifTrueBranchTarget);
 
 		ExecutionTrace expected = ExecutionTrace.EMPTY.push(new Branching(ifCondition, true));
 		assertTrue(result.getKeys().contains(expected));
@@ -104,7 +104,7 @@ public class TracePartitioningTest {
 
 		TraceLattice<
 				SimpleAbstractState<Monolith, ValueEnvironment<IntInterval>, TypeEnvironment<TypeSet>>> result = tp
-						.assume(tp.makeLattice(), alwaysTrue(ifCondition), ifCondition, ifFalseBranchTarget);
+						.assume(tp.makeLattice(), alwaysTrue(ifCondition), null, ifCondition, ifFalseBranchTarget);
 
 		ExecutionTrace expected = ExecutionTrace.EMPTY.push(new Branching(ifCondition, false));
 		assertTrue(result.getKeys().contains(expected));
@@ -123,7 +123,7 @@ public class TracePartitioningTest {
 		TraceLattice<
 				SimpleAbstractState<Monolith, ValueEnvironment<IntInterval>, TypeEnvironment<TypeSet>>> result;
 		try {
-			result = tp.assume(tp.makeLattice(), alwaysTrue(ifCondition), ifCondition, ifTrueBranchTarget);
+			result = tp.assume(tp.makeLattice(), alwaysTrue(ifCondition), null, ifCondition, ifTrueBranchTarget);
 		} catch (SemanticException e) {
 			throw new IllegalStateException(e);
 		}
@@ -142,7 +142,7 @@ public class TracePartitioningTest {
 
 		TraceLattice<
 				SimpleAbstractState<Monolith, ValueEnvironment<IntInterval>, TypeEnvironment<TypeSet>>> result = tp
-						.assume(tp.makeLattice(), alwaysTrue(loopCondition), loopCondition, loopBodyTarget);
+						.assume(tp.makeLattice(), alwaysTrue(loopCondition), null, loopCondition, loopBodyTarget);
 
 		ExecutionTrace expected = ExecutionTrace.EMPTY.push(new LoopIteration(loopCondition, 0));
 		assertTrue(result.getKeys().contains(expected));
@@ -170,7 +170,7 @@ public class TracePartitioningTest {
 
 		TraceLattice<
 				SimpleAbstractState<Monolith, ValueEnvironment<IntInterval>, TypeEnvironment<TypeSet>>> result = tp
-						.assume(state, alwaysTrue(loopCondition), loopCondition, loopBodyTarget);
+						.assume(state, alwaysTrue(loopCondition), null, loopCondition, loopBodyTarget);
 
 		ExecutionTrace expected = atIterationTwo.push(new LoopIteration(loopCondition, 3));
 		assertTrue(result.getKeys().contains(expected));
@@ -201,7 +201,7 @@ public class TracePartitioningTest {
 		TraceLattice<
 				SimpleAbstractState<Monolith, ValueEnvironment<IntInterval>, TypeEnvironment<TypeSet>>> result;
 		try {
-			result = tp.assume(state, alwaysTrue(loopCondition), loopCondition, loopBodyTarget);
+			result = tp.assume(state, alwaysTrue(loopCondition), null, loopCondition, loopBodyTarget);
 		} catch (SemanticException e) {
 			throw new IllegalStateException(e);
 		}
@@ -225,7 +225,7 @@ public class TracePartitioningTest {
 
 		TraceLattice<
 				SimpleAbstractState<Monolith, ValueEnvironment<IntInterval>, TypeEnvironment<TypeSet>>> result = tp
-						.assume(tp.makeLattice(), alwaysTrue(loopCondition), loopCondition, loopCondition);
+						.assume(tp.makeLattice(), alwaysTrue(loopCondition), null, loopCondition, loopCondition);
 
 		assertTrue(result.getKeys().contains(ExecutionTrace.EMPTY));
 	}
@@ -243,7 +243,7 @@ public class TracePartitioningTest {
 				SimpleAbstractState<Monolith, ValueEnvironment<IntInterval>, TypeEnvironment<TypeSet>>> bottom = tp
 						.makeLattice().bottom();
 
-		assertTrue(tp.assume(bottom, alwaysTrue(ifCondition), ifCondition, ifTrueBranchTarget).isBottom());
+		assertTrue(tp.assume(bottom, alwaysTrue(ifCondition), null, ifCondition, ifTrueBranchTarget).isBottom());
 	}
 
 	@Test

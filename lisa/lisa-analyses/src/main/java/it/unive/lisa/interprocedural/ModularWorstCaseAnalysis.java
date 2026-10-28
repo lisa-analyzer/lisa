@@ -223,7 +223,7 @@ public class ModularWorstCaseAnalysis<A extends AbstractLattice<A>,
 			ExpressionSet[] parameters,
 			StatementStore<A> expressions)
 			throws SemanticException {
-		return policy.apply(call, entryState, analysis, parameters);
+		return policy.apply(call, entryState, analysis, id, parameters);
 	}
 
 	@Override

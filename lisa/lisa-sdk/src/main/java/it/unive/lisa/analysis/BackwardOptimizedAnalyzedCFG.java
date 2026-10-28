@@ -305,7 +305,7 @@ public class BackwardOptimizedAnalyzedCFG<A extends AbstractLattice<A>, D extend
 						call.getProgram()
 								.getFeatures()
 								.getScopingStrategy()
-								.unscope(call, scope, res, interprocedural.getAnalysis()));
+								.unscope(call, scope, res, interprocedural.getAnalysis(), getId()));
 			}
 			return state;
 		}
