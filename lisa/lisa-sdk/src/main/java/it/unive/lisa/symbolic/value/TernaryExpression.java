@@ -10,7 +10,7 @@ import it.unive.lisa.symbolic.value.operator.ternary.TernaryOperator;
 import it.unive.lisa.type.Type;
 
 /**
- * A bynary expression that applies a {@link TernaryExpression} to three
+ * A ternary expression that applies a {@link TernaryOperator} to three
  * {@link SymbolicExpression}s.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>

@@ -296,8 +296,29 @@ public interface Type {
 
 	/**
 	 * Yields {@code true} if and only if this type is an instance of
+	 * {@link CodeMemberType}.
+	 *
+	 * @return {@code true} if that condition holds
+	 */
+	default boolean isCodeMemberType() {
+		return this instanceof CodeMemberType;
+	}
+
+	/**
+	 * Returns this type casted as a {@link CodeMemberType}, only if
+	 * {@link #isCodeMemberType()} yields {@code true}. Otherwise, this method
+	 * returns {@code null}.
+	 *
+	 * @return this type casted as {@link CodeMemberType}, or {@code null}
+	 */
+	default CodeMemberType asCodeMemberType() {
+		return isCodeMemberType() ? (CodeMemberType) this : null;
+	}
+
+	/**
+	 * Yields {@code true} if and only if this type is an instance of
 	 * {@link ReferenceType}.
-	 * 
+	 *
 	 * @return {@code true} if that condition holds
 	 */
 	default boolean isReferenceType() {

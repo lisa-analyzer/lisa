@@ -6,16 +6,15 @@ import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.ExpressionVisitor;
 import it.unive.lisa.symbolic.SymbolicExpression;
+import it.unive.lisa.symbolic.value.operator.ComparisonOperator;
 import it.unive.lisa.symbolic.value.operator.NegatableOperator;
 import it.unive.lisa.symbolic.value.operator.TypeOperator;
 import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
-import it.unive.lisa.symbolic.value.operator.binary.LogicalAnd;
-import it.unive.lisa.symbolic.value.operator.binary.LogicalOr;
 import it.unive.lisa.symbolic.value.operator.binary.TypeCheck;
 import it.unive.lisa.type.Type;
 
 /**
- * A bynary expression that applies a {@link BinaryOperator} to two
+ * A binary expression that applies a {@link BinaryOperator} to two
  * {@link SymbolicExpression}s.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
@@ -185,6 +184,25 @@ public class BinaryExpression
 	}
 
 	@Override
+	public ValueExpression negate() {
+		if (!(operator instanceof NegatableOperator))
+			return super.negate();
+
+		BinaryOperator opposite = (BinaryOperator) ((NegatableOperator) operator).opposite();
+		if (operator instanceof ComparisonOperator)
+			return new BinaryExpression(getStaticType(), left, right, opposite, getCodeLocation());
+
+		// operator is a LogicalOperator (e.g., && or ||): De Morgan's law
+		// requires negating both operands as well, not just the connective
+		return new BinaryExpression(
+				getStaticType(),
+				((ValueExpression) left).negate(),
+				((ValueExpression) right).negate(),
+				opposite,
+				getCodeLocation());
+	}
+
+	@Override
 	public SymbolicExpression removeTypingExpressions() {
 		if (operator instanceof TypeOperator && !(operator instanceof TypeCheck))
 			return left.removeTypingExpressions();
@@ -209,45 +227,5 @@ public class BinaryExpression
 			return this;
 		return new BinaryExpression(getStaticType(), l, r, operator, getCodeLocation());
 	}
-
-    /**
-     * Computes the logical inversion of this binary expression.
-     * <p>
-     * This method translates the current binary operator to its logical opposite,
-     * provided the operator implements {@link NegatableOperator}.
-     * Furthermore, if the operator is a logical conjunction ({@link LogicalAnd})
-     * or disjunction ({@link LogicalOr}), it recursively applies the inversion
-     * to both the left and right operands, effectively executing De Morgan's laws
-     * down the expression tree.
-     * </p>
-     *
-     * @return a new {@link ValueExpression} representing the inverted logical condition.
-     */
-    @Override
-    public ValueExpression invertCondition() {
-        BinaryOperator oppositeOp = operator instanceof NegatableOperator
-                ? (BinaryOperator) ((NegatableOperator) operator).opposite()
-                : operator;
-
-        if (operator instanceof LogicalAnd || operator instanceof LogicalOr) {
-            ValueExpression invertedLeft = ((ValueExpression) getLeft()).invertCondition();
-            ValueExpression invertedRight = ((ValueExpression) getRight()).invertCondition();
-            return new BinaryExpression(
-                    getStaticType(),
-                    invertedLeft,
-                    invertedRight,
-                    oppositeOp,
-                    getCodeLocation()
-            );
-        } else {
-            return new BinaryExpression(
-                    getStaticType(),
-                    getLeft(),
-                    getRight(),
-                    oppositeOp,
-                    getCodeLocation()
-            );
-        }
-    }
 
 }

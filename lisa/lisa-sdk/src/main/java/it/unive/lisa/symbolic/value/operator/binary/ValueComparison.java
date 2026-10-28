@@ -1,7 +1,6 @@
 package it.unive.lisa.symbolic.value.operator.binary;
 
 import it.unive.lisa.symbolic.value.BinaryExpression;
-import it.unive.lisa.type.BooleanType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.TypeSystem;
 import java.util.Collections;
@@ -17,8 +16,8 @@ import java.util.Set;
  * <br>
  * First argument expression type: any {@link Type}<br>
  * Second argument expression type: any {@link Type}<br>
- * Computed expression type: {@link BooleanType}
- * 
+ * Computed expression type: {@link TypeSystem#getIntegerType()}
+ *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public class ValueComparison

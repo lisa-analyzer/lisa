@@ -197,12 +197,12 @@ public class BackwardAnalyzedCFG<
 			return results.getState(succ);
 
 		// last chance: there is no successor, so it might be an exit point of
-		// the analysis
+		// the analysis, or its followers have to be used instead
 		Statement target = ((Expression) st).getRootStatement();
 		if (getAllExitpoints().contains(target))
 			return exitStates.getState(target);
 
-		return exitStates.lattice.bottom();
+		return lub(followersOf(target), true);
 	}
 
 	/**

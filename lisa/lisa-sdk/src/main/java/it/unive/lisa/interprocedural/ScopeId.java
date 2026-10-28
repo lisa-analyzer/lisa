@@ -1,8 +1,8 @@
 package it.unive.lisa.interprocedural;
 
 import it.unive.lisa.analysis.AbstractLattice;
-import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.fixpoints.CompoundState;
 import it.unive.lisa.program.cfg.statement.call.CFGCall;
 
 /**
@@ -41,6 +41,6 @@ public interface ScopeId<A extends AbstractLattice<A>> {
 	 */
 	ScopeId<A> push(
 			CFGCall c,
-			AnalysisState<A> state);
+			CompoundState<A> state);
 
 }

@@ -16,13 +16,26 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * An implementation of the reaching definition dataflow analysis. <br/>
+ * An implementation of the reaching definitions dataflow analysis. A definition
+ * of an identifier, i.e., an assignment to it happening at a given program
+ * point, reaches another program point if there is a path between the two along
+ * which the identifier is not reassigned. This is a forward, may-style dataflow
+ * analysis, instantiated as a {@link DataflowDomain} over {@link PossibleSet}s
+ * of {@link RD} elements: an assignment to an identifier generates a new
+ * element pairing the identifier with the program point of the assignment,
+ * while every element previously associated with the reassigned identifier is
+ * killed. <br/>
  * <br/>
  * As a dataflow analysis, this domain does not take part in
  * {@link WholeValueAnalysis}, meaning that it will never generate constraints
  * when asked to.
- * 
+ *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ *
+ * @see <a href="https://doi.org/10.1145/512927.512945">Gary A. Kildall. A
+ *          Unified Approach to Global Program Optimization. In Proceedings of
+ *          the 1st Annual ACM SIGACT-SIGPLAN Symposium on Principles of
+ *          Programming Languages (POPL '73), pages 194-206, ACM, 1973.</a>
  */
 public class ReachingDefinitions
 		extends

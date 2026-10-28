@@ -35,7 +35,7 @@ public abstract class OutputCFGDumper<A extends AbstractLattice<A>, D extends Ab
 		implements
 		LiSAOutput {
 
-	private static final Logger LOG = LogManager.getLogger(JSONResults.class);
+	private static final Logger LOG = LogManager.getLogger(OutputCFGDumper.class);
 
 	@Override
 	@SuppressWarnings("unchecked")

@@ -264,7 +264,7 @@ public class ProgramState<A extends AbstractLattice<A>>
 		return new ProgramState<>(
 				state.pushScope(scope, pp),
 				onAllExpressions(this.computedExpressions, scope, pp, true),
-				info);
+				info.pushScope(scope, pp));
 	}
 
 	private static ExpressionSet onAllExpressions(
@@ -292,7 +292,7 @@ public class ProgramState<A extends AbstractLattice<A>>
 		return new ProgramState<>(
 				state.popScope(scope, pp),
 				onAllExpressions(this.computedExpressions, scope, pp, false),
-				info);
+				info.popScope(scope, pp));
 	}
 
 	@Override
@@ -364,14 +364,112 @@ public class ProgramState<A extends AbstractLattice<A>>
 				&& info.lessOrEqual(other.info);
 	}
 
+	/*
+	 * The default implementations of the lattice operations in BaseLattice
+	 * shortcut when one of the operands is top. Since the top elements of this
+	 * class carry the fixpoint information unchanged, and isTop() and
+	 * isBottom() ignore it, such shortcuts would discard the information of the
+	 * other operand. Instead, the operations below only shortcut on trivial
+	 * cases and on bottom states, delegating to the *Aux methods (that also
+	 * combine the information) in all other cases.
+	 */
+
+	@Override
+	public ProgramState<A> lub(
+			ProgramState<A> other)
+			throws SemanticException {
+		if (other == null || other.isBottom() || this == other || this.equals(other))
+			return this;
+		if (this.isBottom())
+			return other;
+		return lubAux(other);
+	}
+
+	@Override
+	public ProgramState<A> upchain(
+			ProgramState<A> other)
+			throws SemanticException {
+		if (other == null || other.isBottom() || this == other || this.equals(other))
+			return this;
+		if (this.isBottom())
+			return other;
+		return upchainAux(other);
+	}
+
+	@Override
+	public ProgramState<A> widening(
+			ProgramState<A> other)
+			throws SemanticException {
+		if (other == null || other.isBottom() || this == other || this.equals(other))
+			return this;
+		if (this.isBottom())
+			return other;
+		return wideningAux(other);
+	}
+
+	@Override
+	public ProgramState<A> glb(
+			ProgramState<A> other)
+			throws SemanticException {
+		if (other == null || this.isBottom() || this == other || this.equals(other))
+			return this;
+		if (other.isBottom())
+			return other;
+		return glbAux(other);
+	}
+
+	@Override
+	public ProgramState<A> downchain(
+			ProgramState<A> other)
+			throws SemanticException {
+		if (other == null || this.isBottom() || this == other || this.equals(other))
+			return this;
+		if (other.isBottom())
+			return other;
+		return downchainAux(other);
+	}
+
+	@Override
+	public ProgramState<A> narrowing(
+			ProgramState<A> other)
+			throws SemanticException {
+		if (other == null || this.isBottom() || this == other || this.equals(other))
+			return this;
+		if (other.isBottom())
+			return other;
+		return narrowingAux(other);
+	}
+
+	@Override
+	public boolean lessOrEqual(
+			ProgramState<A> other)
+			throws SemanticException {
+		if (other == null)
+			return false;
+		if (this == other || this.isBottom() || this.equals(other))
+			return true;
+		if (other.isBottom())
+			return false;
+		return lessOrEqualAux(other);
+	}
+
 	@Override
 	public ProgramState<A> top() {
 		return new ProgramState<>(state.top(), computedExpressions.top(), info);
 	}
 
+	/**
+	 * {@inheritDoc}<br>
+	 * <br>
+	 * Differently from {@link #top()}, the fixpoint information of the returned
+	 * state is also bottom: the state is unreachable, and no fact holds in it.
+	 * Otherwise, a state derived from it (e.g., by the semantics of a
+	 * statement, that sets the computed expressions and makes it no longer
+	 * bottom) would carry the information to the states it is joined with.
+	 */
 	@Override
 	public ProgramState<A> bottom() {
-		return new ProgramState<>(state.bottom(), computedExpressions.bottom(), info);
+		return new ProgramState<>(state.bottom(), computedExpressions.bottom(), info.bottom());
 	}
 
 	@Override

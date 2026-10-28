@@ -2,6 +2,7 @@ package it.unive.lisa.analysis.traces;
 
 import it.unive.lisa.analysis.AbstractDomain;
 import it.unive.lisa.analysis.AbstractLattice;
+import it.unive.lisa.analysis.AnalysisState.Error;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.value.ValueDomain;
@@ -18,17 +19,21 @@ import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.program.cfg.controlFlow.ControlFlowStructure;
 import it.unive.lisa.program.cfg.controlFlow.IfThenElse;
 import it.unive.lisa.program.cfg.controlFlow.Loop;
+import it.unive.lisa.program.cfg.protection.ProtectedBlock;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
+import it.unive.lisa.util.datastructures.trie.PatriciaTrieMap;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * The trace partitioning abstract domain that splits execution traces to
@@ -53,9 +58,10 @@ import java.util.Set;
  *                the domain {@code D}
  * @param <D> the kind of {@link AbstractDomain} that manages the underlying
  *                states
- * 
- * @see <a href=
- *          "https://doi.org/10.1145/1275497.1275501">https://doi.org/10.1145/1275497.1275501</a>
+ *
+ * @see <a href="https://doi.org/10.1145/1275497.1275501">Xavier Rival, Laurent
+ *          Mauborgne. The trace partitioning abstract domain. ACM Transactions
+ *          on Programming Languages and Systems, 29(5), article 26, 2007.</a>
  */
 public class TracePartitioning<A extends AbstractLattice<A>,
 		D extends AbstractDomain<A>>
@@ -132,12 +138,12 @@ public class TracePartitioning<A extends AbstractLattice<A>,
 		if (state.isBottom())
 			return state;
 
-		Map<ExecutionTrace, A> result = state.mkNewFunction(null, false);
+		PatriciaTrieMap<ExecutionTrace, A> result = state.mkNewFunction(null, false);
 		if (state.isTop() || state.function == null)
-			result.put(ExecutionTrace.EMPTY, domain.assign(state.lattice.top(), id, expression, pp));
+			result = result.put(ExecutionTrace.EMPTY, domain.assign(state.lattice.top(), id, expression, pp));
 		else
 			for (Entry<ExecutionTrace, A> trace : state)
-				result.put(trace.getKey(), domain.assign(trace.getValue(), id, expression, pp));
+				result = result.put(trace.getKey(), domain.assign(trace.getValue(), id, expression, pp));
 		return new TraceLattice<>(state.lattice, result);
 	}
 
@@ -150,12 +156,12 @@ public class TracePartitioning<A extends AbstractLattice<A>,
 		if (state.isBottom())
 			return state;
 
-		Map<ExecutionTrace, A> result = state.mkNewFunction(null, false);
+		PatriciaTrieMap<ExecutionTrace, A> result = state.mkNewFunction(null, false);
 		if (state.isTop() || state.function == null)
-			result.put(ExecutionTrace.EMPTY, domain.smallStepSemantics(state.lattice.top(), expression, pp));
+			result = result.put(ExecutionTrace.EMPTY, domain.smallStepSemantics(state.lattice.top(), expression, pp));
 		else
 			for (Entry<ExecutionTrace, A> trace : state)
-				result.put(trace.getKey(), domain.smallStepSemantics(trace.getValue(), expression, pp));
+				result = result.put(trace.getKey(), domain.smallStepSemantics(trace.getValue(), expression, pp));
 		return new TraceLattice<>(state.lattice, result);
 	}
 
@@ -170,12 +176,12 @@ public class TracePartitioning<A extends AbstractLattice<A>,
 			return state;
 
 		ControlFlowStructure struct = src.getCFG().getControlFlowStructureOf(src);
-		Map<ExecutionTrace, A> result = state.mkNewFunction(null, false);
+		PatriciaTrieMap<ExecutionTrace, A> result = state.mkNewFunction(null, false);
 
 		if (state.isTop() || state.function == null) {
 			ExecutionTrace trace = ExecutionTrace.EMPTY;
 			ExecutionTrace nextTrace = generateTraceFor(trace, struct, src, dest);
-			result.put(nextTrace, state.lattice.top());
+			result = result.put(nextTrace, state.lattice.top());
 		} else
 			for (Entry<ExecutionTrace, A> trace : state) {
 				A st = trace.getValue();
@@ -189,7 +195,7 @@ public class TracePartitioning<A extends AbstractLattice<A>,
 				// when we hit one of the limits, more traces can get smashed
 				// into one
 				A prev = result.get(nextTrace);
-				result.put(nextTrace, prev == null ? assume : assume.lub(prev));
+				result = result.put(nextTrace, prev == null ? assume : assume.lub(prev));
 			}
 
 		if (result.isEmpty())
@@ -462,4 +468,112 @@ public class TracePartitioning<A extends AbstractLattice<A>,
 		return callres;
 	}
 
+	@Override
+	public Pair<TraceLattice<A>, TraceLattice<A>> onExecutionToError(
+			TraceLattice<A> remaining,
+			TraceLattice<A> moved,
+			Error error,
+			ProgramPoint pp)
+			throws SemanticException {
+		// the callback is applied trace by trace, pairing the remaining and
+		// moved executions that followed the same trace
+		Map<ExecutionTrace, A> rem = new HashMap<>();
+		if (!remaining.isBottom())
+			if (remaining.isTop() || remaining.function == null)
+				rem.put(ExecutionTrace.EMPTY, remaining.lattice.top());
+			else
+				for (Entry<ExecutionTrace, A> trace : remaining)
+					rem.put(trace.getKey(), trace.getValue());
+		Map<ExecutionTrace, A> mov = new HashMap<>();
+		if (!moved.isBottom())
+			if (moved.isTop() || moved.function == null)
+				mov.put(ExecutionTrace.EMPTY, moved.lattice.top());
+			else
+				for (Entry<ExecutionTrace, A> trace : moved)
+					mov.put(trace.getKey(), trace.getValue());
+		Set<ExecutionTrace> keys = new HashSet<>(rem.keySet());
+		keys.addAll(mov.keySet());
+
+		A bottom = remaining.lattice.bottom();
+		PatriciaTrieMap<ExecutionTrace, A> left = remaining.mkNewFunction(null, false);
+		PatriciaTrieMap<ExecutionTrace, A> right = moved.mkNewFunction(null, false);
+		for (ExecutionTrace trace : keys) {
+			Pair<A, A> res = domain.onExecutionToError(
+					rem.getOrDefault(trace, bottom),
+					mov.getOrDefault(trace, bottom),
+					error,
+					pp);
+			if (rem.containsKey(trace))
+				left = left.put(trace, res.getLeft());
+			if (mov.containsKey(trace))
+				right = right.put(trace, res.getRight());
+		}
+
+		return Pair.of(
+				rem.isEmpty() ? remaining : new TraceLattice<>(remaining.lattice, left),
+				mov.isEmpty() ? moved : new TraceLattice<>(moved.lattice, right));
+	}
+
+	@Override
+	public TraceLattice<A> onErrorToExecution(
+			TraceLattice<A> state,
+			ProtectedBlock protectedBlock,
+			ProgramPoint pp)
+			throws SemanticException {
+		if (state.isBottom())
+			return state;
+
+		PatriciaTrieMap<ExecutionTrace, A> result = state.mkNewFunction(null, false);
+		if (state.isTop() || state.function == null)
+			result = result.put(ExecutionTrace.EMPTY,
+					domain.onErrorToExecution(state.lattice.top(), protectedBlock, pp));
+		else
+			for (Entry<ExecutionTrace, A> trace : state)
+				result = result.put(trace.getKey(), domain.onErrorToExecution(trace.getValue(), protectedBlock, pp));
+		return new TraceLattice<>(state.lattice, result);
+	}
+
+	@Override
+	public Pair<TraceLattice<A>, TraceLattice<A>> onExecutionToHalting(
+			TraceLattice<A> remaining,
+			TraceLattice<A> moved,
+			ProgramPoint pp)
+			throws SemanticException {
+		// the callback is applied trace by trace, pairing the remaining and
+		// moved executions that followed the same trace
+		Map<ExecutionTrace, A> rem = new HashMap<>();
+		if (!remaining.isBottom())
+			if (remaining.isTop() || remaining.function == null)
+				rem.put(ExecutionTrace.EMPTY, remaining.lattice.top());
+			else
+				for (Entry<ExecutionTrace, A> trace : remaining)
+					rem.put(trace.getKey(), trace.getValue());
+		Map<ExecutionTrace, A> mov = new HashMap<>();
+		if (!moved.isBottom())
+			if (moved.isTop() || moved.function == null)
+				mov.put(ExecutionTrace.EMPTY, moved.lattice.top());
+			else
+				for (Entry<ExecutionTrace, A> trace : moved)
+					mov.put(trace.getKey(), trace.getValue());
+		Set<ExecutionTrace> keys = new HashSet<>(rem.keySet());
+		keys.addAll(mov.keySet());
+
+		A bottom = remaining.lattice.bottom();
+		PatriciaTrieMap<ExecutionTrace, A> left = remaining.mkNewFunction(null, false);
+		PatriciaTrieMap<ExecutionTrace, A> right = moved.mkNewFunction(null, false);
+		for (ExecutionTrace trace : keys) {
+			Pair<A, A> res = domain.onExecutionToHalting(
+					rem.getOrDefault(trace, bottom),
+					mov.getOrDefault(trace, bottom),
+					pp);
+			if (rem.containsKey(trace))
+				left = left.put(trace, res.getLeft());
+			if (mov.containsKey(trace))
+				right = right.put(trace, res.getRight());
+		}
+
+		return Pair.of(
+				rem.isEmpty() ? remaining : new TraceLattice<>(remaining.lattice, left),
+				mov.isEmpty() ? moved : new TraceLattice<>(moved.lattice, right));
+	}
 }

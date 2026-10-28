@@ -8,6 +8,7 @@ import it.unive.lisa.lattices.GenericMapLattice;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.util.collections.CollectionsDiffBuilder;
+import it.unive.lisa.util.datastructures.trie.PatriciaTrieMap;
 import it.unive.lisa.util.representation.ObjectRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
 import java.util.Comparator;
@@ -19,7 +20,6 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
-import java.util.stream.Collectors;
 import org.apache.commons.lang3.tuple.Pair;
 
 /**
@@ -66,7 +66,7 @@ public class NonInterferenceEnvironment
 	 */
 	public NonInterferenceEnvironment(
 			NonInterferenceValue domain,
-			Map<Identifier, NonInterferenceValue> function,
+			PatriciaTrieMap<Identifier, NonInterferenceValue> function,
 			GenericMapLattice<ProgramPoint, NonInterferenceValue> guards) {
 		super(domain, function);
 		this.guards = guards;
@@ -122,18 +122,18 @@ public class NonInterferenceEnvironment
 		if (isBottom() || isTop())
 			return this;
 
-		Map<Identifier, NonInterferenceValue> function = mkNewFunction(null, false);
+		PatriciaTrieMap<Identifier, NonInterferenceValue> result = mkNewFunction(null, false);
 		for (Identifier id : getKeys()) {
 			Identifier lifted = lifter.apply(id);
 			if (lifted != null)
-				if (!function.containsKey(lifted))
-					function.put(lifted, getState(id));
+				if (!result.containsKey(lifted))
+					result = result.put(lifted, getState(id));
 				else
-					function.put(lifted, getState(id).lub(function.get(lifted)));
+					result = result.put(lifted, getState(id).lub(result.get(lifted)));
 
 		}
 
-		return new NonInterferenceEnvironment(lattice, function, guards);
+		return new NonInterferenceEnvironment(lattice, result, guards);
 	}
 
 	@Override
@@ -144,8 +144,8 @@ public class NonInterferenceEnvironment
 		if (isTop() || isBottom() || function == null)
 			return this;
 
-		Map<Identifier, NonInterferenceValue> result = mkNewFunction(function, false);
-		result.remove(id);
+		PatriciaTrieMap<Identifier, NonInterferenceValue> result = mkNewFunction(function, false);
+		result = result.remove(id);
 
 		return new NonInterferenceEnvironment(lattice, result, guards);
 	}
@@ -158,9 +158,9 @@ public class NonInterferenceEnvironment
 		if (isTop() || isBottom() || function == null)
 			return this;
 
-		Map<Identifier, NonInterferenceValue> result = mkNewFunction(function, false);
+		PatriciaTrieMap<Identifier, NonInterferenceValue> result = mkNewFunction(function, false);
 		for (Identifier id : ids)
-			result.remove(id);
+			result = result.remove(id);
 
 		return new NonInterferenceEnvironment(lattice, result, guards);
 	}
@@ -173,9 +173,10 @@ public class NonInterferenceEnvironment
 		if (isTop() || isBottom() || function == null)
 			return this;
 
-		Map<Identifier, NonInterferenceValue> result = mkNewFunction(function, false);
-		Set<Identifier> keys = result.keySet().stream().filter(test::test).collect(Collectors.toSet());
-		keys.forEach(result::remove);
+		PatriciaTrieMap<Identifier, NonInterferenceValue> result = mkNewFunction(function, false);
+		for (Identifier id : getKeys())
+			if (test.test(id))
+				result = result.remove(id);
 
 		return new NonInterferenceEnvironment(lattice, result, guards);
 	}
@@ -235,7 +236,7 @@ public class NonInterferenceEnvironment
 	@Override
 	public NonInterferenceEnvironment mk(
 			NonInterferenceValue lattice,
-			Map<Identifier, NonInterferenceValue> function) {
+			PatriciaTrieMap<Identifier, NonInterferenceValue> function) {
 		return new NonInterferenceEnvironment(lattice, function, guards);
 	}
 

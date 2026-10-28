@@ -100,9 +100,16 @@ import java.util.Collections;
 import java.util.Set;
 
 /**
- * A non-relational value domain tracking {@link ConstantValue}s of variables
- * for numeric, character, string and boolean values.
- * 
+ * A non-relational value domain implementing constant propagation and constant
+ * folding over numeric, character, string and boolean values, tracking
+ * {@link ConstantValue}s of variables. Unary, binary and ternary operators are
+ * evaluated concretely, by delegating to their corresponding Java operation
+ * (e.g., addition, {@link String#indexOf(String)},
+ * {@link Character#isLetter(int)}, ...), whenever all of their operands are
+ * themselves constants; {@link ConstantValue#TOP} is returned in every other
+ * case. As a consequence, this domain is exact on constants but, being
+ * non-relational, it cannot track any relation between variables.
+ *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public class ConstantValuePropagation

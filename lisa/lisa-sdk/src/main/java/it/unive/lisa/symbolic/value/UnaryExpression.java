@@ -6,8 +6,6 @@ import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.ExpressionVisitor;
 import it.unive.lisa.symbolic.SymbolicExpression;
-import it.unive.lisa.symbolic.value.operator.NegatableOperator;
-import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
 import it.unive.lisa.symbolic.value.operator.unary.LogicalNegation;
 import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
 import it.unive.lisa.type.Type;
@@ -70,47 +68,25 @@ public class UnaryExpression
 		return operator;
 	}
 
-    /**
-     * Simplifies the expression tree by pushing logical negations downwards and
-     * eliminating them where possible.
-     * <p>
-     * If this unary expression represents a logical negation ({@link LogicalNegation})
-     * applied to an underlying {@link BinaryExpression}, it distributes the negation
-     * by transforming the binary operator into its logical opposite.
-     * It then recursively calls {@code removeNegations()} on the underlying
-     * operands to fully normalize the tree.
-     * If no structural simplification can be made, the original instance is returned
-     * to preserve reference equality and memory efficiency.
-     * </p>
-     *
-     * @return a logically equivalent {@link ValueExpression} with top-level negations
-     * removed or distributed downwards.
-     */
 	@Override
 	public ValueExpression removeNegations() {
-		if (operator instanceof LogicalNegation && expression instanceof BinaryExpression) {
-			ValueExpression left = (ValueExpression) ((BinaryExpression) expression).getLeft();
-			ValueExpression right = (ValueExpression) ((BinaryExpression) expression).getRight();
-			BinaryOperator op = ((BinaryExpression) expression).getOperator();
-			BinaryOperator oppositeOp = op instanceof NegatableOperator
-					? (BinaryOperator) ((NegatableOperator) op).opposite()
-					: op;
+		if (!(operator instanceof LogicalNegation))
+			return this;
 
-            ValueExpression oppositeLeft = left.invertCondition().removeNegations();
-            ValueExpression oppositeRight = right.invertCondition().removeNegations();
+		ValueExpression cleaned = ((ValueExpression) expression).removeNegations();
+		ValueExpression negated = cleaned.negate();
+		if (cleaned == expression && negated.equals(this))
+			// if nothing changed, preserve reference equality
+			return this;
+		return negated;
+	}
 
-			if (op == oppositeOp && left == oppositeLeft && right == oppositeRight)
-				// if nothing changed, preserve reference equality
-				return this;
-			return new BinaryExpression(
-					expression.getStaticType(),
-					oppositeLeft,
-					oppositeRight,
-					oppositeOp,
-					getCodeLocation());
-		}
-
-		return this;
+	@Override
+	public ValueExpression negate() {
+		if (operator instanceof LogicalNegation)
+			// double negation: !(!expression) == expression
+			return (ValueExpression) expression;
+		return super.negate();
 	}
 
 	@Override

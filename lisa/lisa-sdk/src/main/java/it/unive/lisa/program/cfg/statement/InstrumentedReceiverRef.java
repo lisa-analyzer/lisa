@@ -2,8 +2,8 @@ package it.unive.lisa.program.cfg.statement;
 
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
+import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.InstrumentedReceiver;
-import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.Type;
 
 /**
@@ -56,7 +56,7 @@ public class InstrumentedReceiverRef
 	}
 
 	@Override
-	public Variable getVariable() {
+	public Identifier getIdentifier() {
 		InstrumentedReceiver v = new InstrumentedReceiver(getStaticType(), isArray, getAnnotations(), getLocation());
 		return v;
 	}

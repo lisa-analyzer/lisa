@@ -127,4 +127,33 @@ public class BackwardDescendingGLBFixpoint<A extends AbstractLattice<A>, D exten
 		return new ForwardDescendingGLBFixpoint<>();
 	}
 
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + maxGLBs;
+		result = prime * result + ((glbs == null) ? 0 : glbs.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(
+			Object obj) {
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		BackwardDescendingGLBFixpoint<?, ?> other = (BackwardDescendingGLBFixpoint<?, ?>) obj;
+		if (maxGLBs != other.maxGLBs)
+			return false;
+		if (glbs == null) {
+			if (other.glbs != null)
+				return false;
+		} else if (!glbs.equals(other.glbs))
+			return false;
+		return true;
+	}
+
 }

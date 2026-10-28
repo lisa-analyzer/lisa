@@ -1,18 +1,25 @@
 package it.unive.lisa.analysis;
 
+import it.unive.lisa.analysis.AnalysisState.Error;
 import it.unive.lisa.events.EventQueue;
 import it.unive.lisa.lattices.HistoryState;
 import it.unive.lisa.lattices.Satisfiability;
 import it.unive.lisa.program.cfg.ProgramPoint;
+import it.unive.lisa.program.cfg.protection.ProtectedBlock;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
+import org.apache.commons.lang3.tuple.Pair;
 
 /**
- * An abstract domain that tracks the history of fixpoint iterations as a
- * {@link HistoryState}.
- * 
+ * A wrapper {@link AbstractDomain} that pairs an underlying domain {@code D}
+ * with a {@link HistoryState}, recording the sequence of abstract lattice
+ * elements that have been computed for a given program point across the
+ * iterations of a fixpoint computation. This history can be used to inspect the
+ * intermediate states computed during the iterates after the analysis
+ * completes, instead of only being able to inspect the final invariant.
+ *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
- * 
+ *
  * @param <A> the type of {@link AbstractLattice} embedded in this state
  * @param <D> the type of {@link AbstractDomain} that produces instances of
  *                {@code A}
@@ -91,6 +98,47 @@ public class HistoryDomain<
 			ProgramPoint call)
 			throws SemanticException {
 		return new HistoryState<>(domain.onCallReturn(entryState.head(), callres.head(), call));
+	}
+
+	@Override
+	public Pair<HistoryState<A>, HistoryState<A>> onExecutionToError(
+			HistoryState<A> remaining,
+			HistoryState<A> moved,
+			Error error,
+			ProgramPoint pp)
+			throws SemanticException {
+		Pair<A, A> res = domain.onExecutionToError(remaining.head(), moved.head(), error, pp);
+		// these callbacks adjust the current state without performing a
+		// semantic step, so the history is preserved
+		return Pair.of(
+				res.getLeft() == remaining.head() ? remaining : remaining.withHead(res.getLeft()),
+				res.getRight() == moved.head() ? moved : moved.withHead(res.getRight()));
+	}
+
+	@Override
+	public HistoryState<A> onErrorToExecution(
+			HistoryState<A> state,
+			ProtectedBlock protectedBlock,
+			ProgramPoint pp)
+			throws SemanticException {
+		// this callback adjusts the current state without performing a
+		// semantic step, so the history is preserved
+		A head = domain.onErrorToExecution(state.head(), protectedBlock, pp);
+		return head == state.head() ? state : state.withHead(head);
+	}
+
+	@Override
+	public Pair<HistoryState<A>, HistoryState<A>> onExecutionToHalting(
+			HistoryState<A> remaining,
+			HistoryState<A> moved,
+			ProgramPoint pp)
+			throws SemanticException {
+		Pair<A, A> res = domain.onExecutionToHalting(remaining.head(), moved.head(), pp);
+		// these callbacks adjust the current state without performing a
+		// semantic step, so the history is preserved
+		return Pair.of(
+				res.getLeft() == remaining.head() ? remaining : remaining.withHead(res.getLeft()),
+				res.getRight() == moved.head() ? moved : moved.withHead(res.getRight()));
 	}
 
 	@Override

@@ -35,8 +35,9 @@ public interface ExternalSet<T>
 	/**
 	 * Adds to this set all elements contained into {@code other}. This method
 	 * is faster than {@link #addAll(Collection)} since it directly operates on
-	 * the underlying bit set.
-	 * 
+	 * the underlying bit set. If {@code other} is {@code null}, or if the two
+	 * sets are not defined over the same cache, this method has no effect.
+	 *
 	 * @param other the other set
 	 */
 	default void addAll(
@@ -76,10 +77,12 @@ public interface ExternalSet<T>
 	/**
 	 * Determines if this set contains all elements of another if they share the
 	 * same cache. This method is faster than {@link #containsAll(Collection)}
-	 * since it directly operates on the underlying bit set.
-	 * 
+	 * since it directly operates on the underlying bit set. Yields {@code true}
+	 * if {@code other} is this set itself, and {@code false} if {@code other}
+	 * is {@code null} or the two sets are not defined over the same cache.
+	 *
 	 * @param other the other set
-	 * 
+	 *
 	 * @return {@code true} if and only if {@code other} is included into this
 	 *             set
 	 */
@@ -100,10 +103,12 @@ public interface ExternalSet<T>
 
 	/**
 	 * Determines if this set has at least an element in common with another if
-	 * they share the same cache.
-	 * 
+	 * they share the same cache. Yields {@code true} if {@code other} is this
+	 * set itself, and {@code false} if {@code other} is {@code null} or the two
+	 * sets are not defined over the same cache.
+	 *
 	 * @param other the other set
-	 * 
+	 *
 	 * @return true if and only if this set intersects the other
 	 */
 	default boolean intersects(

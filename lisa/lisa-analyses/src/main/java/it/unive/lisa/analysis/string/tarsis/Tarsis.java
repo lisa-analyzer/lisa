@@ -71,10 +71,24 @@ import java.util.SortedSet;
 import org.apache.commons.lang3.tuple.Pair;
 
 /**
- * A class that represent the Tarsis domain for strings, exploiting a
- * {@link RegexAutomaton}.
+ * A class that represents the Tarsis domain for strings, exploiting a
+ * {@link RegexAutomaton} to approximate string values through finite state
+ * automata whose transitions are labeled with entire substrings (the alphabet
+ * is the set of all strings) instead of single characters.
  *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ *
+ * @see <a href="https://doi.org/10.1002/smr.2647">Luca Negrini, Vincenzo
+ *          Arceri, Pietro Ferrara, Agostino Cortesi. Tarsis: An effective
+ *          automata-based abstract domain for string analysis. Journal of
+ *          Software: Evolution and Process, 36(8), 2024.</a>
+ * @see <a href=
+ *          "https://link.springer.com/chapter/10.1007/978-3-030-67067-2_13">
+ *          Luca Negrini, Vincenzo Arceri, Pietro Ferrara, Agostino Cortesi.
+ *          Twinning Automata and Regular Expressions for String Static
+ *          Analysis. In Verification, Model Checking, and Abstract
+ *          Interpretation (VMCAI 2021), LNCS vol. 12597, pages 267-290,
+ *          Springer, 2021.</a>
  */
 public class Tarsis
 		implements

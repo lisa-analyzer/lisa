@@ -1,0 +1,55 @@
+# This file is part of the SV-Witnesses repository as regression test:
+# https://gitlab.com/sosy-lab/benchmarking/sv-witnesses
+#
+# SPDX-FileCopyrightText: 2026 The SV-Witnesses Community
+#
+# SPDX-License-Identifier: Apache-2.0
+---
+- entry_type: "violation_sequence"
+  metadata:
+    creation_time: "2026-09-08T17:36:11Z"
+    format_version: "2.4"
+    producer:
+      name: "GDart"
+      version: "VERSION_PLACEHOLDER"
+    task:
+      input_file_hashes:
+        ./java/common/org/sosy_lab/sv_benchmarks/Verifier.java: "d544c9e74f86b4ed8e692b7b7bcb00ec3901e19f5b0d4740b49e5c3c672031ba"
+        ./java/jpf-regression/ExDarko_false/Main.java: "44faed0b4c09127009615aa7c0699fb1acda5235fdcd1bbcbea867661d450d82"
+      input_files:
+      - "./java/common/org/sosy_lab/sv_benchmarks/Verifier.java"
+      - "./java/jpf-regression/ExDarko_false/Main.java"
+      language: "Java"
+      specification: "CHECK( init(Main.main()), LTL(G assert) )"
+    uuid: "be742527-8e82-4418-9ba2-6cbb857e25a7"
+  content:
+  - segment:
+    - waypoint:
+        type: "function_return"
+        action: "follow"
+        constraint:
+          value: "\\result == 0"
+          format: "ext_java_expression"
+        location:
+          file_name: "./java/jpf-regression/ExDarko_false/Main.java"
+          line: 34
+          column: 43
+  - segment:
+    - waypoint:
+        type: "function_return"
+        action: "follow"
+        constraint:
+          value: "\\result == 0"
+          format: "ext_java_expression"
+        location:
+          file_name: "./java/jpf-regression/ExDarko_false/Main.java"
+          line: 35
+          column: 41
+  - segment:
+    - waypoint:
+        type: "target"
+        action: "follow"
+        location:
+          file_name: "./java/jpf-regression/ExDarko_false/Main.java"
+          line: 48
+          column: 12

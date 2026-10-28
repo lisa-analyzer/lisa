@@ -5,9 +5,12 @@ import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.type.Type;
 
 /**
- * A stack allocation site, that is an allocation site pointing to something
- * that has been allocated in the stack.
- * 
+ * A stack allocation site, that is, an {@link AllocationSite} pointing to
+ * something that has been allocated on the stack, as opposed to
+ * {@link HeapAllocationSite}s. Assigning a stack allocation site to an
+ * identifier behaves as a shallow copy rather than as aliasing (see
+ * {@code AllocationSiteBasedAnalysis.shallowCopy}), reflecting value semantics.
+ *
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
 public class StackAllocationSite
