@@ -5,7 +5,7 @@ import gmp.Mpfr;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
-import it.unive.lisa.analysis.value.ValueDomain;
+import it.unive.lisa.analysis.value.NumericAbstraction;
 import it.unive.lisa.analysis.value.ValueLattice;
 import it.unive.lisa.lattices.Satisfiability;
 import it.unive.lisa.program.SyntheticLocation;
@@ -42,7 +42,7 @@ import org.apache.logging.log4j.Logger;
  */
 public class Apron
 		implements
-		ValueDomain<Apron>,
+		NumericAbstraction<Apron>,
 		ValueLattice<Apron> {
 
 	private static final Logger logger = LogManager.getLogger(Apron.class);
