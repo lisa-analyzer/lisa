@@ -1,16 +1,21 @@
 package it.unive.lisa.lattices.heap.allocations;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import it.unive.lisa.TestParameterProvider;
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.lattices.ExpressionSet;
+import it.unive.lisa.lattices.GenericMapLattice;
 import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.ProgramPoint;
+import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.Untyped;
+import java.util.Set;
 import org.junit.jupiter.api.Test;
 
 public class HeapEnvWithFieldsTest {
@@ -84,6 +89,43 @@ public class HeapEnvWithFieldsTest {
 		HeapEnvWithFields bottom = top.bottom();
 		assertTrue(env.lub(bottom).equals(env) || env.lessOrEqual(env.lub(bottom)));
 		assertTrue(bottom.lub(env).equals(env) || env.lessOrEqual(bottom.lub(env)));
+	}
+
+	private HeapEnvWithFields withFields(
+			HeapEnvWithFields env,
+			ExpressionSet siteFields)
+			throws SemanticException {
+		GenericMapLattice<AllocationSite, ExpressionSet> fields = env.fields.putState(site, siteFields);
+		return new HeapEnvWithFields(env.lattice, env.function, fields);
+	}
+
+	@Test
+	public void wideningKeepsTheFieldsOfBothStates()
+			throws SemanticException {
+		HeapEnvWithFields base = new HeapEnvWithFields().putState(x, new AllocationSites(site));
+		Constant f = new Constant(Untyped.INSTANCE, "f", loc);
+		ExpressionSet siteFields = new ExpressionSet(f);
+		HeapEnvWithFields noFields = withFields(base, new ExpressionSet());
+		HeapEnvWithFields someFields = withFields(base, siteFields);
+
+		HeapEnvWithFields widen = noFields.widening(someFields);
+		assertEquals(siteFields, widen.fields.getState(site));
+		assertTrue(someFields.lessOrEqual(widen));
+	}
+
+	@Test
+	public void narrowingCombinesTheFieldsOfBothStates()
+			throws SemanticException {
+		HeapEnvWithFields base = new HeapEnvWithFields().putState(x, new AllocationSites(site));
+		Constant f = new Constant(Untyped.INSTANCE, "f", loc);
+		Constant g = new Constant(Untyped.INSTANCE, "g", loc);
+		ExpressionSet fg = new ExpressionSet(Set.of(f, g));
+		ExpressionSet onlyF = new ExpressionSet(f);
+		HeapEnvWithFields big = withFields(base, fg);
+		HeapEnvWithFields small = withFields(base, onlyF);
+
+		HeapEnvWithFields narrow = big.narrowing(small);
+		assertEquals(fg.narrowing(onlyF), narrow.fields.getState(site));
 	}
 
 }

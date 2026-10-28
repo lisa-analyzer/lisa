@@ -313,6 +313,22 @@ public class HeapEnvWithFields
 	}
 
 	@Override
+	public HeapEnvWithFields wideningAux(
+			HeapEnvWithFields other)
+			throws SemanticException {
+		HeapEnvWithFields widen = super.wideningAux(other);
+		return new HeapEnvWithFields(widen.lattice, widen.function, fields.widening(other.fields));
+	}
+
+	@Override
+	public HeapEnvWithFields narrowingAux(
+			HeapEnvWithFields other)
+			throws SemanticException {
+		HeapEnvWithFields narrow = super.narrowingAux(other);
+		return new HeapEnvWithFields(narrow.lattice, narrow.function, fields.narrowing(other.fields));
+	}
+
+	@Override
 	public boolean lessOrEqualAux(
 			HeapEnvWithFields other)
 			throws SemanticException {
