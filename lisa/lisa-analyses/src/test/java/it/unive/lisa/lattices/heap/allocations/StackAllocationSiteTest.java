@@ -7,6 +7,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.interprocedural.ScopeId;
+import it.unive.lisa.interprocedural.context.KDepthToken;
 import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.symbolic.value.Variable;
@@ -108,6 +110,16 @@ public class StackAllocationSiteTest {
 		StackAllocationSite a = new StackAllocationSite(Untyped.INSTANCE, "l", false, loc);
 		StackAllocationSite b = new StackAllocationSite(Untyped.INSTANCE, "m", false, loc);
 		assertThrows(SemanticException.class, () -> a.lub(b));
+	}
+
+	@Test
+	public void startingContextsAreDiscarded() {
+		ScopeId<?> ctx = KDepthToken.create(1);
+		StackAllocationSite start = new StackAllocationSite(Untyped.INSTANCE, "l", "f", ctx, false, loc);
+		assertEquals("pp@l[f]", start.getName());
+		assertNull(start.getContext());
+		assertEquals(new StackAllocationSite(Untyped.INSTANCE, "l", "f", false, loc), start);
+		assertEquals(start, start.withContext(ctx));
 	}
 
 }

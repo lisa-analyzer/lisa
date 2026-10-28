@@ -1,5 +1,6 @@
 package it.unive.lisa.lattices.heap.allocations;
 
+import it.unive.lisa.interprocedural.ScopeId;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.HeapLocation;
@@ -25,9 +26,10 @@ public abstract class AllocationSite
 
 	private final String field;
 
+	private final ScopeId<?> context;
+
 	/**
-	 * Builds a strong allocation site from its source code location (without
-	 * field).
+	 * Builds a strong allocation site without field and context.
 	 * 
 	 * @param staticType   the static type of this allocation site
 	 * @param locationName the source code location string representation where
@@ -39,18 +41,16 @@ public abstract class AllocationSite
 			Type staticType,
 			String locationName,
 			CodeLocation location) {
-		this(staticType, locationName, false, location);
+		this(staticType, locationName, (String) null, null, false, location);
 	}
 
 	/**
-	 * Builds an allocation site from its source code location (without field)
-	 * and specifying if it is weak.
+	 * Builds an allocation site without field and context.
 	 * 
 	 * @param staticType   the static type of this allocation site
 	 * @param locationName the source code location string representation where
 	 *                         this allocation site has been allocated
-	 * @param isWeak       boolean value specifying if this allocation site is
-	 *                         weak
+	 * @param isWeak       whether or not this allocation site is weak
 	 * @param location     the code location of the statement that has generated
 	 *                         this expression
 	 */
@@ -59,12 +59,110 @@ public abstract class AllocationSite
 			String locationName,
 			boolean isWeak,
 			CodeLocation location) {
-		this(staticType, locationName, (String) null, isWeak, location);
+		this(staticType, locationName, (String) null, null, isWeak, location);
 	}
 
 	/**
-	 * Builds a strong allocation site from its source code location and its
-	 * field.
+	 * Builds a strong allocation site with the given context.
+	 * 
+	 * @param staticType   the static type of this allocation site
+	 * @param locationName the source code location string representation where
+	 *                         this allocation site has been allocated
+	 * @param context      the interprocedural context where this allocation
+	 *                         site has been allocated (can be {@code null})
+	 * @param location     the code location of the statement that has generated
+	 *                         this expression
+	 */
+	public AllocationSite(
+			Type staticType,
+			String locationName,
+			ScopeId<?> context,
+			CodeLocation location) {
+		this(staticType, locationName, (String) null, context, false, location);
+	}
+
+	/**
+	 * Builds an allocation site with the given context.
+	 * 
+	 * @param staticType   the static type of this allocation site
+	 * @param locationName the source code location string representation where
+	 *                         this allocation site has been allocated
+	 * @param context      the interprocedural context where this allocation
+	 *                         site has been allocated (can be {@code null})
+	 * @param isWeak       whether or not this allocation site is weak
+	 * @param location     the code location of the statement that has generated
+	 *                         this expression
+	 */
+	public AllocationSite(
+			Type staticType,
+			String locationName,
+			ScopeId<?> context,
+			boolean isWeak,
+			CodeLocation location) {
+		this(staticType, locationName, (String) null, context, isWeak, location);
+	}
+
+	/**
+	 * Builds a strong allocation site with the given field.
+	 * 
+	 * @param staticType   the static type of this allocation site
+	 * @param locationName the source code location string representation where
+	 *                         this allocation site has been allocated
+	 * @param field        the name of the field of this allocation site
+	 * @param location     the code location of the statement that has generated
+	 *                         this expression
+	 */
+	public AllocationSite(
+			Type staticType,
+			String locationName,
+			String field,
+			CodeLocation location) {
+		this(staticType, locationName, field, null, false, location);
+	}
+
+	/**
+	 * Builds an allocation site with the given field.
+	 * 
+	 * @param staticType   the static type of this allocation site
+	 * @param locationName the source code location string representation where
+	 *                         this allocation site has been allocated
+	 * @param field        the name of the field of this allocation site
+	 * @param isWeak       whether or not this allocation site is weak
+	 * @param location     the code location of the statement that has generated
+	 *                         this expression
+	 */
+	public AllocationSite(
+			Type staticType,
+			String locationName,
+			String field,
+			boolean isWeak,
+			CodeLocation location) {
+		this(staticType, locationName, field, null, isWeak, location);
+	}
+
+	/**
+	 * Builds a strong allocation site with the given field and context.
+	 * 
+	 * @param staticType   the static type of this allocation site
+	 * @param locationName the source code location string representation where
+	 *                         this allocation site has been allocated
+	 * @param field        the name of the field of this allocation site
+	 * @param context      the interprocedural context where this allocation
+	 *                         site has been allocated (can be {@code null})
+	 * @param location     the code location of the statement that has generated
+	 *                         this expression
+	 */
+	public AllocationSite(
+			Type staticType,
+			String locationName,
+			String field,
+			ScopeId<?> context,
+			CodeLocation location) {
+		this(staticType, locationName, field, context, false, location);
+	}
+
+	/**
+	 * Builds a strong allocation site with the given field.
 	 * 
 	 * @param staticType   the static type of this allocation site
 	 * @param locationName the source code location string representation where
@@ -78,19 +176,17 @@ public abstract class AllocationSite
 			String locationName,
 			SymbolicExpression field,
 			CodeLocation location) {
-		this(staticType, locationName, field == null ? null : field.toString(), false, location);
+		this(staticType, locationName, field == null ? null : field.toString(), null, false, location);
 	}
 
 	/**
-	 * Builds an allocation site from its source code location and its field and
-	 * specifying if it is weak.
+	 * Builds an allocation site with the given field.
 	 * 
 	 * @param staticType   the static type of this allocation site
 	 * @param locationName the source code location string representation where
 	 *                         this allocation site has been allocated
 	 * @param field        the field of this allocation site
-	 * @param isWeak       boolean value specifying if this allocation site is
-	 *                         weak
+	 * @param isWeak       whether or not this allocation site is weak
 	 * @param location     the code location of the statement that has generated
 	 *                         this expression
 	 */
@@ -100,36 +196,68 @@ public abstract class AllocationSite
 			SymbolicExpression field,
 			boolean isWeak,
 			CodeLocation location) {
-		this(staticType, locationName, field == null ? null : field.toString(), isWeak, location);
+		this(staticType, locationName, field == null ? null : field.toString(), null, isWeak, location);
 	}
 
 	/**
-	 * Builds a strong allocation site from its source code location and its
-	 * field.
+	 * Builds a strong allocation site with the given field and context.
 	 * 
 	 * @param staticType   the static type of this allocation site
 	 * @param locationName the source code location string representation where
 	 *                         this allocation site has been allocated
-	 * @param field        the name of field of this allocation site
+	 * @param field        the field of this allocation site
+	 * @param context      the interprocedural context where this allocation
+	 *                         site has been allocated (can be {@code null})
 	 * @param location     the code location of the statement that has generated
 	 *                         this expression
 	 */
 	public AllocationSite(
 			Type staticType,
 			String locationName,
-			String field,
+			SymbolicExpression field,
+			ScopeId<?> context,
 			CodeLocation location) {
-		this(staticType, locationName, field, false, location);
+		this(staticType, locationName, field == null ? null : field.toString(), context, false, location);
 	}
 
 	/**
-	 * Builds an allocation site from its source code location and its field and
-	 * specifying if it is weak.
+	 * Builds an allocation site with the given field and context.
 	 * 
 	 * @param staticType   the static type of this allocation site
 	 * @param locationName the source code location string representation where
 	 *                         this allocation site has been allocated
 	 * @param field        the field of this allocation site
+	 * @param context      the interprocedural context where this allocation
+	 *                         site has been allocated (can be {@code null})
+	 * @param isWeak       whether or not this allocation site is weak
+	 * @param location     the code location of the statement that has generated
+	 *                         this expression
+	 */
+	public AllocationSite(
+			Type staticType,
+			String locationName,
+			SymbolicExpression field,
+			ScopeId<?> context,
+			boolean isWeak,
+			CodeLocation location) {
+		this(staticType, locationName, field == null ? null : field.toString(), context, isWeak, location);
+	}
+
+	/**
+	 * Builds an allocation site from its source code location, its field, and
+	 * the interprocedural context where it has been allocated, specifying if
+	 * it is weak. The context is part of the identity of the allocation site
+	 * (through {@link ScopeId#getHash()}) only if it is not {@code null} and it
+	 * is not a starting id (see {@link ScopeId#isStartingId()}): otherwise, it
+	 * is discarded and the allocation site is equivalent to one built without
+	 * a context.
+	 * 
+	 * @param staticType   the static type of this allocation site
+	 * @param locationName the source code location string representation where
+	 *                         this allocation site has been allocated
+	 * @param field        the field of this allocation site
+	 * @param context      the interprocedural context where this allocation
+	 *                         site has been allocated (can be {@code null})
 	 * @param isWeak       boolean value specifying if this allocation site is
 	 *                         weak
 	 * @param location     the code location of the statement that has generated
@@ -139,11 +267,28 @@ public abstract class AllocationSite
 			Type staticType,
 			String locationName,
 			String field,
+			ScopeId<?> context,
 			boolean isWeak,
 			CodeLocation location) {
-		super(staticType, "pp@" + locationName + (field == null ? "" : "[" + field + "]"), isWeak, location);
+		super(staticType, nameOf(locationName, field, context), isWeak, location);
 		this.locationName = locationName;
-		this.field = field != null ? field.toString() : null;
+		this.field = field;
+		this.context = isQualifying(context) ? context : null;
+	}
+
+	private static boolean isQualifying(
+			ScopeId<?> context) {
+		return context != null && !context.isStartingId();
+	}
+
+	private static String nameOf(
+			String locationName,
+			String field,
+			ScopeId<?> context) {
+		return "pp@"
+				+ locationName
+				+ (isQualifying(context) ? "<" + context.getHash() + ">" : "")
+				+ (field == null ? "" : "[" + field + "]");
 	}
 
 	/**
@@ -166,6 +311,18 @@ public abstract class AllocationSite
 	 */
 	public String getField() {
 		return field;
+	}
+
+	/**
+	 * Yields the interprocedural context where this allocation site has been
+	 * allocated. This is {@code null} if the allocation site is not
+	 * context-sensitive, or if it has been allocated in a starting context
+	 * (see {@link ScopeId#isStartingId()}).
+	 * 
+	 * @return the context (can be {@code null})
+	 */
+	public ScopeId<?> getContext() {
+		return context;
 	}
 
 	/**
@@ -203,5 +360,16 @@ public abstract class AllocationSite
 	 */
 	public abstract AllocationSite withType(
 			Type type);
+
+	/**
+	 * Yields a modified version of this allocation site allocated in the given
+	 * interprocedural context.
+	 * 
+	 * @param context the new context (can be {@code null})
+	 * 
+	 * @return the modified allocation site
+	 */
+	public abstract AllocationSite withContext(
+			ScopeId<?> context);
 
 }
