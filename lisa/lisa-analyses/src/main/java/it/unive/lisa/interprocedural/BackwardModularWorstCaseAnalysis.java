@@ -213,6 +213,11 @@ public class BackwardModularWorstCaseAnalysis<A extends AbstractLattice<A>,
 	}
 
 	@Override
+	public ScopeId<A> getCurrentContext() {
+		return id;
+	}
+
+	@Override
 	public Analysis<A, D> getAnalysis() {
 		return analysis;
 	}

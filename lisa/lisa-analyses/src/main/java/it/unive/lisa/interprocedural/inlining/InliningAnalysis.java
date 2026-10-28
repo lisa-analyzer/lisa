@@ -19,6 +19,7 @@ import it.unive.lisa.interprocedural.InterproceduralAnalysisException;
 import it.unive.lisa.interprocedural.NoEntryPointException;
 import it.unive.lisa.interprocedural.OpenCallPolicy;
 import it.unive.lisa.interprocedural.Recursion;
+import it.unive.lisa.interprocedural.ScopeId;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.interprocedural.events.CFGFixpointEnd;
 import it.unive.lisa.interprocedural.events.CFGFixpointStart;
@@ -339,6 +340,11 @@ public class InliningAnalysis<A extends AbstractLattice<A>,
 	@Override
 	public FixpointResults<A> getFixpointResults() {
 		return results;
+	}
+
+	@Override
+	public ScopeId<A> getCurrentContext() {
+		return token;
 	}
 
 	@Override

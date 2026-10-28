@@ -335,6 +335,11 @@ public class BackwardOptimizedAnalyzedCFG<A extends AbstractLattice<A>, D extend
 		}
 
 		@Override
+		public ScopeId<A> getCurrentContext() {
+			return getId();
+		}
+
+		@Override
 		public boolean needsCallGraph() {
 			// not really needed
 			return false;

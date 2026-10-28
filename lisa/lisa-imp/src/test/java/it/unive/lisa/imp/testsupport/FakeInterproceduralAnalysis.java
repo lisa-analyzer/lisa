@@ -12,6 +12,8 @@ import it.unive.lisa.interprocedural.FixpointResults;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.interprocedural.InterproceduralAnalysisException;
 import it.unive.lisa.interprocedural.OpenCallPolicy;
+import it.unive.lisa.interprocedural.ScopeId;
+import it.unive.lisa.interprocedural.UniqueScope;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.interprocedural.callgraph.CallResolutionException;
 import it.unive.lisa.lattices.ExpressionSet;
@@ -114,6 +116,11 @@ public class FakeInterproceduralAnalysis
 	@Override
 	public FixpointResults<UnitLattice> getFixpointResults() {
 		throw new UnsupportedOperationException("not needed for this test");
+	}
+
+	@Override
+	public ScopeId<UnitLattice> getCurrentContext() {
+		return new UniqueScope<>();
 	}
 
 }

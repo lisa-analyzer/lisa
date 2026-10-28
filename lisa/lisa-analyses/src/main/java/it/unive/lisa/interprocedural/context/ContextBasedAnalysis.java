@@ -474,6 +474,11 @@ public class ContextBasedAnalysis<A extends AbstractLattice<A>,
 	}
 
 	@Override
+	public ScopeId<A> getCurrentContext() {
+		return token;
+	}
+
+	@Override
 	public AnalysisState<A> getAbstractResultOf(
 			CFGCall call,
 			AnalysisState<A> entryState,

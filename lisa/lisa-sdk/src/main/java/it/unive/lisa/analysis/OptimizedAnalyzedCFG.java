@@ -341,6 +341,11 @@ public class OptimizedAnalyzedCFG<A extends AbstractLattice<A>, D extends Abstra
 		}
 
 		@Override
+		public ScopeId<A> getCurrentContext() {
+			return getId();
+		}
+
+		@Override
 		public boolean needsCallGraph() {
 			// not really needed
 			return false;
