@@ -34,12 +34,13 @@ import org.apache.commons.lang3.tuple.Pair;
  * Rival and K. Yi, "Introduction to Static Analysis: An Abstract Interpretation
  * Perspective", Section 8.3.4.<br>
  * <br>
- * Instances built with {@link #FieldSensitivePointBasedHeap(boolean)} can also be context-sensitive,
- * qualifying allocation sites with the interprocedural context where the
- * allocation happens (see {@link AllocationSiteBasedAnalysis}). This only adds
- * precision when used together with a context-sensitive interprocedural
- * analysis (e.g., {@link it.unive.lisa.interprocedural.context.ContextBasedAnalysis}
- * or {@link it.unive.lisa.interprocedural.inlining.InliningAnalysis}).
+ * Instances built with {@link #FieldSensitivePointBasedHeap(boolean)} can also
+ * be context-sensitive, qualifying allocation sites with the interprocedural
+ * context where the allocation happens (see
+ * {@link AllocationSiteBasedAnalysis}). This only adds precision when used
+ * together with a context-sensitive interprocedural analysis (e.g.,
+ * {@link it.unive.lisa.interprocedural.context.ContextBasedAnalysis} or
+ * {@link it.unive.lisa.interprocedural.inlining.InliningAnalysis}).
  *
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  *

@@ -10,8 +10,8 @@ import it.unive.lisa.program.cfg.statement.call.Call.CallType;
 import java.util.List;
 
 /**
- * Utilities for building {@link SemanticOracle}s that expose an
- * interprocedural context, to test context-sensitive heap domains.
+ * Utilities for building {@link SemanticOracle}s that expose an interprocedural
+ * context, to test context-sensitive heap domains.
  */
 final class ContextOracles {
 

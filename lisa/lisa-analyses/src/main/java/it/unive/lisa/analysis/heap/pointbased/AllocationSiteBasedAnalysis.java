@@ -127,8 +127,7 @@ public abstract class AllocationSiteBasedAnalysis<
 	 * 
 	 * @param oracle the oracle of the current evaluation
 	 * 
-	 * @return the context to use for new allocation sites (can be
-	 *             {@code null})
+	 * @return the context to use for new allocation sites (can be {@code null})
 	 */
 	protected ScopeId<?> contextOf(
 			SemanticOracle oracle) {
@@ -277,8 +276,8 @@ public abstract class AllocationSiteBasedAnalysis<
 	 * 
 	 * @param state    the current state of the analysis
 	 * @param location allocation site's location name to be searched
-	 * @param context  the interprocedural context of the allocation sites to
-	 *                     be searched, as returned by
+	 * @param context  the interprocedural context of the allocation sites to be
+	 *                     searched, as returned by
 	 *                     {@link AllocationSite#getContext()} (can be
 	 *                     {@code null})
 	 * 

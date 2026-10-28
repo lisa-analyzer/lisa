@@ -245,12 +245,12 @@ public abstract class AllocationSite
 
 	/**
 	 * Builds an allocation site from its source code location, its field, and
-	 * the interprocedural context where it has been allocated, specifying if
-	 * it is weak. The context is part of the identity of the allocation site
+	 * the interprocedural context where it has been allocated, specifying if it
+	 * is weak. The context is part of the identity of the allocation site
 	 * (through {@link ScopeId#getHash()}) only if it is not {@code null} and it
 	 * is not a starting id (see {@link ScopeId#isStartingId()}): otherwise, it
-	 * is discarded and the allocation site is equivalent to one built without
-	 * a context.
+	 * is discarded and the allocation site is equivalent to one built without a
+	 * context.
 	 * 
 	 * @param staticType   the static type of this allocation site
 	 * @param locationName the source code location string representation where
@@ -316,8 +316,8 @@ public abstract class AllocationSite
 	/**
 	 * Yields the interprocedural context where this allocation site has been
 	 * allocated. This is {@code null} if the allocation site is not
-	 * context-sensitive, or if it has been allocated in a starting context
-	 * (see {@link ScopeId#isStartingId()}).
+	 * context-sensitive, or if it has been allocated in a starting context (see
+	 * {@link ScopeId#isStartingId()}).
 	 * 
 	 * @return the context (can be {@code null})
 	 */

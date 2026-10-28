@@ -297,7 +297,8 @@ public class StackAllocationSite
 	@Override
 	public StackAllocationSite withContext(
 			ScopeId<?> context) {
-		return new StackAllocationSite(getStaticType(), getLocationName(), getField(), context, isWeak(), getCodeLocation());
+		return new StackAllocationSite(getStaticType(), getLocationName(), getField(), context, isWeak(),
+				getCodeLocation());
 	}
 
 }

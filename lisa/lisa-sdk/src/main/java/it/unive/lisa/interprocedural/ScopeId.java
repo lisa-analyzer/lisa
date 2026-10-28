@@ -47,8 +47,8 @@ public interface ScopeId<A extends AbstractLattice<A>> {
 			CompoundState<A> state);
 
 	/**
-	 * Yields a hash of this id, that can be used to identify it in places
-	 * where its full representation would be too long (e.g., names of symbolic
+	 * Yields a hash of this id, that can be used to identify it in places where
+	 * its full representation would be too long (e.g., names of symbolic
 	 * expressions or file names). The hash must be consistent with
 	 * {@link #equals(Object)}, that is, equal ids must have equal hashes, and
 	 * it must be stable across different executions of the analysis.
@@ -70,6 +70,8 @@ public interface ScopeId<A extends AbstractLattice<A>> {
 	 * @param representation the string representation of the id
 	 * 
 	 * @return the hash of the representation
+	 * 
+	 * @throws IllegalStateException if the MD5 algorithm is not available
 	 */
 	static String computeHash(
 			String representation) {

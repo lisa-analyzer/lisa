@@ -298,7 +298,8 @@ public class HeapAllocationSite
 	@Override
 	public HeapAllocationSite withContext(
 			ScopeId<?> context) {
-		return new HeapAllocationSite(getStaticType(), getLocationName(), getField(), context, isWeak(), getCodeLocation());
+		return new HeapAllocationSite(getStaticType(), getLocationName(), getField(), context, isWeak(),
+				getCodeLocation());
 	}
 
 }
