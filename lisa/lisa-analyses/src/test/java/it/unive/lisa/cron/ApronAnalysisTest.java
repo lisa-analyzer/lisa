@@ -68,4 +68,8 @@ public class ApronAnalysisTest
 		conf.programFile = "poly.imp";
 		perform(conf);
 	}
+
+	// no test for Pplite: PPLite yields equivalent but different systems of
+	// constraints from one run to another (e.g., 0 <= x <= 10, y = 3x and
+	// 0 <= y <= 30, y = 3x), so its results cannot be compared as text
 }
