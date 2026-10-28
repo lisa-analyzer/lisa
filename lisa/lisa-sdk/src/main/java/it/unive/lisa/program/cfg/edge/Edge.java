@@ -5,6 +5,7 @@ import it.unive.lisa.analysis.AbstractLattice;
 import it.unive.lisa.analysis.Analysis;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.interprocedural.ScopeId;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.util.datastructures.graph.GraphVisitor;
@@ -111,6 +112,7 @@ public abstract class Edge
 	 * @param state    the {@link AnalysisState} computed at the source of this
 	 *                     edge
 	 * @param analysis the {@link Analysis} that is being executed
+	 * @param context  the interprocedural context where the edge is traversed
 	 * 
 	 * @return the {@link AnalysisState} after traversing this edge
 	 * 
@@ -118,7 +120,8 @@ public abstract class Edge
 	 */
 	public abstract <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> traverseForward(
 			AnalysisState<A> state,
-			Analysis<A, D> analysis)
+			Analysis<A, D> analysis,
+			ScopeId<?> context)
 			throws SemanticException;
 
 	/**
@@ -133,6 +136,7 @@ public abstract class Edge
 	 * @param state    the {@link AnalysisState} computed at the destination of
 	 *                     this edge
 	 * @param analysis the {@link Analysis} that is being executed
+	 * @param context  the interprocedural context where the edge is traversed
 	 * 
 	 * @return the {@link AnalysisState} after traversing this edge
 	 * 
@@ -140,7 +144,8 @@ public abstract class Edge
 	 */
 	public abstract <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> traverseBackwards(
 			AnalysisState<A> state,
-			Analysis<A, D> analysis)
+			Analysis<A, D> analysis,
+			ScopeId<?> context)
 			throws SemanticException;
 
 	@Override

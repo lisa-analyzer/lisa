@@ -268,7 +268,6 @@ public class LiSAConfiguration
 	@Override
 	public String toString() {
 		StringBuilder res = new StringBuilder();
-		res.append("LiSA configuration:");
 		try {
 			for (Field field : LiSAConfiguration.class.getFields())
 				if (!Modifier.isStatic(field.getModifiers())
@@ -278,13 +277,13 @@ public class LiSAConfiguration
 						&& !InterproceduralAnalysis.class.isAssignableFrom(field.getType())) {
 					Object value = field.get(this);
 
-					res.append("\n  ").append(field.getName());
+					res.append("\n").append(field.getName());
 
 					if (Collection.class.isAssignableFrom(field.getType())) {
 						Collection<?> coll = (Collection<?>) value;
 						res.append(" (").append(coll.size()).append(")").append((coll.isEmpty() ? "" : ":"));
 						for (Object element : coll)
-							res.append("\n    ").append(element.getClass().getSimpleName());
+							res.append("\n  ").append(element.getClass().getSimpleName());
 					} else if (WorkingSet.class.isAssignableFrom(field.getType())
 							|| OpenCallPolicy.class.isAssignableFrom(field.getType())
 							|| Fixpoint.class.isAssignableFrom(field.getType()))
@@ -298,7 +297,7 @@ public class LiSAConfiguration
 		} catch (IllegalArgumentException | IllegalAccessException e) {
 			throw new IllegalStateException("Cannot access one of this class' public fields", e);
 		}
-		return res.toString();
+		return res.toString().strip();
 	}
 
 	/**

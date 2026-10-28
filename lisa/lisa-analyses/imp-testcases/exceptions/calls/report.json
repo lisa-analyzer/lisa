@@ -1,21 +1,21 @@
 {
   "warnings" : [ ],
   "notices" : [ ],
-  "files" : [ "report.json", "untyped_B.B(B__this)_-1674709231.graph.json", "untyped_B.B(B__this)_-1675098436.graph.json", "untyped_D.D(D__this)_-1679908799.graph.json", "untyped_D.D(D__this)_-1680794841.graph.json", "untyped_D.D(D__this)_1391713126.graph.json", "untyped_exceptions.assignAfterException(exceptions__this)_-1788012349.graph.json", "untyped_exceptions.catchAfterCall(exceptions__this,_untyped_b)_-1788017247.graph.json", "untyped_exceptions.catchAfterCallChain(exceptions__this,_untyped_b)_-1788012380.graph.json", "untyped_exceptions.intermediate1(exceptions__this,_untyped_b)_-1381827760.graph.json", "untyped_exceptions.intermediate2(exceptions__this,_untyped_b)_-1675007575.graph.json", "untyped_exceptions.intermediate3(exceptions__this,_untyped_b)_2121319924.graph.json", "untyped_exceptions.main(exceptions__this,_untyped_b).graph.json", "untyped_exceptions.thrower(exceptions__this,_untyped_b)_-1381985488.graph.json", "untyped_exceptions.thrower(exceptions__this,_untyped_b)_-1382014070.graph.json", "untyped_exceptions.thrower(exceptions__this,_untyped_b)_-451616917.graph.json", "untyped_exceptions.tryAfterThrow(exceptions__this,_untyped_b)_-1788018177.graph.json", "untyped_exceptions.unconditionalThrow(exceptions__this)_-1381817685.graph.json", "untyped_exceptions.unconditionalThrow(exceptions__this)_-1381830240.graph.json" ],
+  "files" : [ "report.json", "untyped_B.B(B__this)_dbfe05160b1e9f720d14ed0b4754b38c.graph.json", "untyped_B.B(B__this)_fe8c5c47d0f6f6ee588461f91b2b6fab.graph.json", "untyped_D.D(D__this)_20f59036fdc253c41f9ab83b8e4d053a.graph.json", "untyped_D.D(D__this)_8f00926b685ace9d3a6b3024fbe2c196.graph.json", "untyped_D.D(D__this)_ccabb7abbf047c99002317ed2be7cba9.graph.json", "untyped_exceptions.assignAfterException(exceptions__this)_d55fa148ead06619ea323a82232bd631.graph.json", "untyped_exceptions.catchAfterCall(exceptions__this,_untyped_b)_3e4cfd8e92852f90cc0753a499c5279d.graph.json", "untyped_exceptions.catchAfterCallChain(exceptions__this,_untyped_b)_2a8a63a2bf6d9707e6a2fdc8f54da485.graph.json", "untyped_exceptions.intermediate1(exceptions__this,_untyped_b)_12efad9ac1237911f427fc455cda9249.graph.json", "untyped_exceptions.intermediate2(exceptions__this,_untyped_b)_5582373be77927b9fa953db3e40d223f.graph.json", "untyped_exceptions.intermediate3(exceptions__this,_untyped_b)_97c92e4a016700039dcc32b9879ab318.graph.json", "untyped_exceptions.main(exceptions__this,_untyped_b).graph.json", "untyped_exceptions.thrower(exceptions__this,_untyped_b)_3deb464d3a826021c141f7c0e7cd99e1.graph.json", "untyped_exceptions.thrower(exceptions__this,_untyped_b)_54ce04719711d829bd0b63e9a2653dd1.graph.json", "untyped_exceptions.thrower(exceptions__this,_untyped_b)_742e5316172cfd65e1622ab5c4499519.graph.json", "untyped_exceptions.tryAfterThrow(exceptions__this,_untyped_b)_579127ca9c0d03ce9072bc9e52185d11.graph.json", "untyped_exceptions.unconditionalThrow(exceptions__this)_11859241219a199d1652f64ff79532df.graph.json", "untyped_exceptions.unconditionalThrow(exceptions__this)_33372e257017905911cf3a0dfba2f72d.graph.json" ],
   "info" : {
     "cfgs" : "15",
-    "duration" : "73ms",
-    "end" : "2026-01-07T11:13:43.284+01:00",
+    "duration" : "99ms",
+    "end" : "2026-10-28T19:13:06.480+01:00",
     "expressions" : "71",
     "files" : "18",
     "globals" : "0",
     "members" : "15",
     "notices" : "0",
     "programs" : "1",
-    "start" : "2026-01-07T11:13:43.211+01:00",
+    "start" : "2026-10-28T19:13:06.381+01:00",
     "statements" : "37",
     "units" : "6",
-    "version" : "0.1",
+    "version" : "1.0",
     "warnings" : "0"
   },
   "configuration" : {

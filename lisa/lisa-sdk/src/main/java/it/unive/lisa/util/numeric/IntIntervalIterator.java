@@ -1,6 +1,7 @@
 package it.unive.lisa.util.numeric;
 
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 /**
  * The {@link IntInterval} iterator.
@@ -33,8 +34,17 @@ public class IntIntervalIterator
 		return init <= end;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @throws NoSuchElementException if the iteration has no more elements,
+	 *                                    that is, if {@link #hasNext()} returns
+	 *                                    {@code false}
+	 */
 	@Override
 	public Long next() {
+		if (!hasNext())
+			throw new NoSuchElementException();
 		return init++;
 	}
 

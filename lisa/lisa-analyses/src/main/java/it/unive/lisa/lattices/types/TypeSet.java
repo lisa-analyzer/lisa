@@ -9,9 +9,11 @@ import java.util.Collections;
 import java.util.Set;
 
 /**
- * A set of {@link Type}s, representing the inferred runtime types of an
+ * The lattice structure used by
+ * {@link it.unive.lisa.analysis.types.InferredTypes}: an explicit set of
+ * {@link Type}s, representing the inferred runtime types of a
  * {@link SymbolicExpression}.
- * 
+ *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public class TypeSet
@@ -82,7 +84,7 @@ public class TypeSet
 	@Override
 	public Set<Type> getRuntimeTypes() {
 		if (elements == null)
-			Collections.emptySet();
+			return Collections.emptySet();
 		return elements;
 	}
 

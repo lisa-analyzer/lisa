@@ -11,6 +11,8 @@ import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.Variable;
+import it.unive.lisa.util.datastructures.trie.PatriciaTrieMap;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -18,12 +20,19 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
- * A lattice structure for substring relations. The domain is implemented as a
- * {@link FunctionalLattice}, mapping identifiers to string expressions,
- * tracking which string expressions are <i>definitely</i> substring of an
- * identifier.
- * 
- * @author <a href="mailto:vincenzo.arceri@unipr.it>">Vincenzo Arceri</a>
+ * The lattice structure used by
+ * {@link it.unive.lisa.analysis.string.SubstringDomain}. It is implemented as a
+ * {@link FunctionalLattice} mapping identifiers to sets of string expressions
+ * ({@link ExpressionInverseSet}), tracking which string expressions are
+ * <i>definitely</i> substrings of an identifier. Since
+ * {@link ExpressionInverseSet} orders its elements by reverse set inclusion (a
+ * smaller set of candidate expressions is a more precise, i.e., a lower,
+ * lattice element), joining ({@link #lubAux(Substrings)}) and meeting
+ * ({@link #glbAux(Substrings)}) two mappings for the same identifier simply
+ * delegates to the least upper bound and greatest lower bound of the
+ * corresponding {@link ExpressionInverseSet}s.
+ *
+ * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
 public class Substrings
 		extends
@@ -50,7 +59,7 @@ public class Substrings
 	 */
 	public Substrings(
 			ExpressionInverseSet lattice,
-			Map<Identifier, ExpressionInverseSet> function) {
+			PatriciaTrieMap<Identifier, ExpressionInverseSet> function) {
 		super(lattice, function);
 	}
 
@@ -118,7 +127,7 @@ public class Substrings
 	@Override
 	public Substrings mk(
 			ExpressionInverseSet lattice,
-			Map<Identifier, ExpressionInverseSet> function) {
+			PatriciaTrieMap<Identifier, ExpressionInverseSet> function) {
 		return new Substrings(lattice.isBottom() ? lattice.bottom() : lattice.top(), function);
 	}
 
@@ -149,14 +158,16 @@ public class Substrings
 		if (!knowsIdentifier(id))
 			return this;
 
-		Map<Identifier, ExpressionInverseSet> newFunction = mkNewFunction(function, false);
-		newFunction.remove(id);
-		newFunction.replaceAll(
-				(
-						key,
-						value) -> removeFromSet(value, id));
+		PatriciaTrieMap<Identifier, ExpressionInverseSet> result = mkNewFunction(function, false);
+		result = result.remove(id);
+		if (function != null)
+			for (Map.Entry<Identifier, ExpressionInverseSet> entry : function)
+				if (!entry.getKey().equals(id)) {
+					ExpressionInverseSet newSet = removeFromSet(entry.getValue(), id);
+					result = result.put(entry.getKey(), newSet);
+				}
 
-		return mk(lattice, newFunction);
+		return mk(lattice, result);
 	}
 
 	@Override
@@ -167,16 +178,27 @@ public class Substrings
 		if (function == null || function.keySet().isEmpty())
 			return this;
 
-		Map<Identifier, ExpressionInverseSet> newFunction = mkNewFunction(function, false);
-		ids.forEach(id -> {
-			newFunction.remove(id);
-			newFunction.replaceAll(
-					(
-							key,
-							value) -> removeFromSet(value, id));
-		});
+		Collection<Identifier> toForget;
+		if (ids instanceof Collection)
+			toForget = (Collection<Identifier>) ids;
+		else {
+			toForget = new HashSet<>();
+			for (Identifier id : ids)
+				toForget.add(id);
+		}
 
-		return mk(lattice, newFunction);
+		PatriciaTrieMap<Identifier, ExpressionInverseSet> result = mkNewFunction(function, false);
+		for (Identifier id : ids) {
+			result = result.remove(id);
+			if (function != null)
+				for (Map.Entry<Identifier, ExpressionInverseSet> entry : function)
+					if (!toForget.contains(entry.getKey())) {
+						ExpressionInverseSet newSet = removeFromSet(entry.getValue(), id);
+						result = result.put(entry.getKey(), newSet);
+					}
+		}
+
+		return mk(lattice, result);
 	}
 
 	@Override
@@ -243,7 +265,7 @@ public class Substrings
 			Identifier id)
 			throws SemanticException {
 
-		Map<Identifier, ExpressionInverseSet> newFunction = mkNewFunction(function, false);
+		PatriciaTrieMap<Identifier, ExpressionInverseSet> result = mkNewFunction(function, false);
 
 		// Don't add the expressions that contain the key variable (ex: x ->
 		// x,
@@ -259,12 +281,12 @@ public class Substrings
 
 		ExpressionInverseSet newSet = new ExpressionInverseSet(expressionsToAdd);
 
-		if (!(newFunction.get(id) == null))
-			newSet = newSet.glb(newFunction.get(id));
+		if (!(result.get(id) == null))
+			newSet = newSet.glb(result.get(id));
 
-		newFunction.put(id, newSet);
+		result = result.put(id, newSet);
 
-		return mk(lattice, newFunction);
+		return mk(lattice, result);
 	}
 
 	/**
@@ -289,35 +311,38 @@ public class Substrings
 	}
 
 	/**
-	 * First step of assignment, removing obsolete relations.
-	 * 
-	 * @param extracted Expression assigned
-	 * @param id        Expression getting assigned
-	 * 
-	 * @return Copy of the domain, with the holding relations after the
-	 *             assignment.
-	 * 
-	 * @throws SemanticException if an error occurs during the computation
+	 * First step of the semantics of an assignment, removing the relations that
+	 * become obsolete because of it: all relations tracked for {@code id} are
+	 * dropped, unless {@code id} itself appears in {@code extracted} (i.e., the
+	 * assigned expression still depends on the previous value of {@code id}, as
+	 * in {@code id = id + ...}), and every relation mentioning {@code id} on
+	 * the right-hand side is removed from the other entries.
+	 *
+	 * @param extracted the identifiers and expressions extracted from the
+	 *                      right-hand side of the assignment
+	 * @param id        the identifier being assigned
+	 *
+	 * @return a copy of this domain with the obsolete relations removed
 	 */
 	public Substrings remove(
 			Set<SymbolicExpression> extracted,
 			Identifier id) {
-		Map<Identifier, ExpressionInverseSet> newFunction = mkNewFunction(function, false);
+		PatriciaTrieMap<Identifier, ExpressionInverseSet> result = mkNewFunction(function, false);
 
 		// If assignment is similar to x = x + ..., then we keep current
 		// relations to x, otherwise we remove them.
-		if (!extracted.contains(id)) {
-			newFunction.remove(id);
-		}
+		if (!extracted.contains(id))
+			result = result.remove(id);
 
 		// Remove relations containing id from the other entries
-		for (Map.Entry<Identifier, ExpressionInverseSet> entry : newFunction.entrySet()) {
-			ExpressionInverseSet newSet = removeFromSet(entry.getValue(), id);
+		if (function != null)
+			for (Map.Entry<Identifier, ExpressionInverseSet> entry : function)
+				if (!entry.getKey().equals(id)) {
+					ExpressionInverseSet newSet = removeFromSet(entry.getValue(), id);
+					result = result.put(entry.getKey(), newSet);
+				}
 
-			entry.setValue(newSet);
-		}
-
-		return mk(lattice, newFunction);
+		return mk(lattice, result);
 	}
 
 	/*
@@ -334,21 +359,25 @@ public class Substrings
 	}
 
 	/**
-	 * Performs the inter-assignment phase.
-	 * 
-	 * @param assignedId         Variable getting assigned
-	 * @param assignedExpression Expression assigned
-	 * 
-	 * @return Copy of the domain with new relations following the
-	 *             inter-assignment phase
-	 * 
+	 * Performs the inter-assignment phase of the semantics of an assignment
+	 * {@code assignedId = assignedExpression}: every other identifier that was
+	 * already known to have {@code assignedExpression} as one of its substrings
+	 * is also given {@code assignedId} as a (definite) substring, since after
+	 * the assignment the two are known to hold the same value.
+	 *
+	 * @param assignedId         the identifier being assigned
+	 * @param assignedExpression the expression being assigned to
+	 *                               {@code assignedId}
+	 *
+	 * @return a copy of this domain with the new relations added
+	 *
 	 * @throws SemanticException if an error occurs during the computation
 	 */
 	public Substrings interasg(
 			Identifier assignedId,
 			SymbolicExpression assignedExpression)
 			throws SemanticException {
-		Map<Identifier, ExpressionInverseSet> newFunction = mkNewFunction(function, false);
+		PatriciaTrieMap<Identifier, ExpressionInverseSet> result = mkNewFunction(function, false);
 
 		if (!knowsIdentifier(assignedId))
 			return this;
@@ -362,24 +391,26 @@ public class Substrings
 				Set<SymbolicExpression> newRelation = new HashSet<>();
 				newRelation.add(assignedId);
 
-				ExpressionInverseSet newSet = newFunction.get(entry.getKey())
+				ExpressionInverseSet newSet = result.get(entry.getKey())
 						.glb(new ExpressionInverseSet(newRelation));
-				newFunction.put(entry.getKey(), newSet);
+				result = result.put(entry.getKey(), newSet);
 			}
 
 		}
 
-		return mk(lattice, newFunction);
+		return mk(lattice, result);
 	}
 
 	/**
-	 * Performs the closure over an identifier. The method adds to {@code id}
-	 * the expressions found in the variables mapped to {@code id}
-	 * 
+	 * Performs the closure of the substring relations tracked for {@code id}:
+	 * for every other identifier {@code y} that is a known substring of
+	 * {@code id}, the substrings already known for {@code y} are also added as
+	 * substrings of {@code id}, since substring is a transitive relation.
+	 *
 	 * @param id the identifier to perform the closure on
-	 * 
-	 * @return A copy of the domain with the added relations
-	 * 
+	 *
+	 * @return a copy of this domain with the added relations
+	 *
 	 * @throws SemanticException if an error occurs during the computation
 	 */
 	public Substrings closure(
@@ -451,11 +482,12 @@ public class Substrings
 	 */
 	public Substrings clear()
 			throws SemanticException {
-		Map<Identifier, ExpressionInverseSet> newMap = mkNewFunction(function, false);
-
-		newMap.entrySet().removeIf(entry -> entry.getValue().isTop());
-
-		return new Substrings(lattice, newMap);
+		PatriciaTrieMap<Identifier, ExpressionInverseSet> result = mkNewFunction(function, false);
+		if (function != null)
+			for (Map.Entry<Identifier, ExpressionInverseSet> entry : function)
+				if (entry.getValue().isTop())
+					result = result.remove(entry.getKey());
+		return new Substrings(lattice, result);
 	}
 
 	private static boolean appears(

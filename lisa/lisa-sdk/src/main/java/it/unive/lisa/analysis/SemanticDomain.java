@@ -1,10 +1,14 @@
 package it.unive.lisa.analysis;
 
+import it.unive.lisa.analysis.AnalysisState.Error;
 import it.unive.lisa.events.EventQueue;
+import it.unive.lisa.interprocedural.ScopeId;
 import it.unive.lisa.lattices.Satisfiability;
 import it.unive.lisa.program.cfg.ProgramPoint;
+import it.unive.lisa.program.cfg.protection.ProtectedBlock;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
+import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * A domain able to determine how abstract information evolves thanks to the
@@ -31,6 +35,8 @@ public interface SemanticDomain<L extends DomainLattice<L, T>, T, E extends Symb
 	 *                       by this operation
 	 * @param id         the identifier to assign the value to
 	 * @param expression the expression to assign
+	 * @param context    the interprocedural context where this operation is
+	 *                       being evaluated
 	 * @param pp         the program point that where this operation is being
 	 *                       evaluated
 	 * 
@@ -42,6 +48,7 @@ public interface SemanticDomain<L extends DomainLattice<L, T>, T, E extends Symb
 			L state,
 			I id,
 			E expression,
+			ScopeId<?> context,
 			ProgramPoint pp)
 			throws SemanticException;
 
@@ -52,6 +59,8 @@ public interface SemanticDomain<L extends DomainLattice<L, T>, T, E extends Symb
 	 * @param state      the current state of the domain, that will be modified
 	 *                       by this operation
 	 * @param expression the expression whose semantics need to be computed
+	 * @param context    the interprocedural context where this operation is
+	 *                       being evaluated
 	 * @param pp         the program point that where this operation is being
 	 *                       evaluated
 	 * 
@@ -63,6 +72,7 @@ public interface SemanticDomain<L extends DomainLattice<L, T>, T, E extends Symb
 	T smallStepSemantics(
 			L state,
 			E expression,
+			ScopeId<?> context,
 			ProgramPoint pp)
 			throws SemanticException;
 
@@ -75,6 +85,8 @@ public interface SemanticDomain<L extends DomainLattice<L, T>, T, E extends Symb
 	 * @param state      the current state of the domain, that will be modified
 	 *                       by this operation
 	 * @param expression the expression to assume to hold.
+	 * @param context    the interprocedural context where this operation is
+	 *                       being evaluated
 	 * @param src        the program point that where this operation is being
 	 *                       evaluated, corresponding to the one that generated
 	 *                       the given expression
@@ -88,6 +100,7 @@ public interface SemanticDomain<L extends DomainLattice<L, T>, T, E extends Symb
 	T assume(
 			L state,
 			E expression,
+			ScopeId<?> context,
 			ProgramPoint src,
 			ProgramPoint dest)
 			throws SemanticException;
@@ -100,6 +113,8 @@ public interface SemanticDomain<L extends DomainLattice<L, T>, T, E extends Symb
 	 * 
 	 * @param state      the current state of the domain
 	 * @param expression the expression whose satisfiability is to be evaluated
+	 * @param context    the interprocedural context where this operation is
+	 *                       being evaluated
 	 * @param pp         the program point that where this operation is being
 	 *                       evaluated
 	 * 
@@ -116,6 +131,7 @@ public interface SemanticDomain<L extends DomainLattice<L, T>, T, E extends Symb
 	default Satisfiability satisfies(
 			L state,
 			E expression,
+			ScopeId<?> context,
 			ProgramPoint pp)
 			throws SemanticException {
 		return Satisfiability.UNKNOWN;
@@ -143,6 +159,8 @@ public interface SemanticDomain<L extends DomainLattice<L, T>, T, E extends Symb
 	 * 
 	 * @param entryState the state before the call
 	 * @param callres    the state returned by the callee
+	 * @param context    the interprocedural context of the caller, where the
+	 *                       execution returns to
 	 * @param call       the program point corresponding to the call
 	 * 
 	 * @return the state after the call
@@ -152,7 +170,93 @@ public interface SemanticDomain<L extends DomainLattice<L, T>, T, E extends Symb
 	L onCallReturn(
 			L entryState,
 			L callres,
+			ScopeId<?> context,
 			ProgramPoint call)
+			throws SemanticException;
+
+	/**
+	 * Yields the states of this domain after (part of) the normal execution has
+	 * been moved to an error continuation, that is, when an error is raised.
+	 * The move is <i>total</i> if all executions raise the error, and in this
+	 * case {@code remaining} is bottom. Otherwise, the move is <i>partial</i>:
+	 * some executions raise the error ({@code moved}) while others continue
+	 * normally ({@code remaining}). This also happens when returning from a
+	 * call whose callee raised errors, with {@code pp} being the call. This
+	 * method allows the domain to adjust the information that is stored for
+	 * both the normal execution and the error continuation.
+	 * 
+	 * @param remaining the state of the executions that continue normally
+	 *                      (bottom if the move is total)
+	 * @param moved     the state of the executions that raise the error
+	 * @param error     the error continuation that {@code moved} is moved to
+	 * @param context   the interprocedural context where the move happens
+	 * @param pp        the program point where the move happens
+	 * 
+	 * @return the pair containing the updated {@code remaining} (left) and
+	 *             {@code moved} (right) states
+	 * 
+	 * @throws SemanticException if an error occurs during the computation
+	 */
+	Pair<L, L> onExecutionToError(
+			L remaining,
+			L moved,
+			Error error,
+			ScopeId<?> context,
+			ProgramPoint pp)
+			throws SemanticException;
+
+	/**
+	 * Yields the state of this domain after it has been moved from one or more
+	 * error continuations back to the normal execution, that is, when errors
+	 * are caught. The given state is the one resulting from the merge of all
+	 * the caught errors' states, after the caught error has been (possibly)
+	 * assigned to the variable of the handler. This method allows the domain to
+	 * adjust the information that is stored for the normal execution.
+	 * 
+	 * @param state          the state of the caught error continuations being
+	 *                           moved
+	 * @param protectedBlock the block whose errors are being caught
+	 * @param context        the interprocedural context where the move happens
+	 * @param pp             the program point where the move happens
+	 * 
+	 * @return the state to use for the normal execution
+	 * 
+	 * @throws SemanticException if an error occurs during the computation
+	 */
+	L onErrorToExecution(
+			L state,
+			ProtectedBlock protectedBlock,
+			ScopeId<?> context,
+			ProgramPoint pp)
+			throws SemanticException;
+
+	/**
+	 * Yields the states of this domain after (part of) the normal execution has
+	 * been moved to the halting continuation, that is, when the program
+	 * terminates its execution. The move is <i>total</i> if all executions
+	 * halt, and in this case {@code remaining} is bottom. Otherwise, the move
+	 * is <i>partial</i>: some executions halt ({@code moved}) while others
+	 * continue normally ({@code remaining}). This also happens when returning
+	 * from a call whose callee halted, with {@code pp} being the call. This
+	 * method allows the domain to adjust the information that is stored for
+	 * both the normal execution and the halting continuation.
+	 * 
+	 * @param remaining the state of the executions that continue normally
+	 *                      (bottom if the move is total)
+	 * @param moved     the state of the executions that halt
+	 * @param context   the interprocedural context where the move happens
+	 * @param pp        the program point where the move happens
+	 * 
+	 * @return the pair containing the updated {@code remaining} (left) and
+	 *             {@code moved} (right) states
+	 * 
+	 * @throws SemanticException if an error occurs during the computation
+	 */
+	Pair<L, L> onExecutionToHalting(
+			L remaining,
+			L moved,
+			ScopeId<?> context,
+			ProgramPoint pp)
 			throws SemanticException;
 
 	/**

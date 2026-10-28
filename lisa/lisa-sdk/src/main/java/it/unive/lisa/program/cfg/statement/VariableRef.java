@@ -12,6 +12,8 @@ import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.symbolic.SymbolicExpression;
+import it.unive.lisa.symbolic.value.GlobalVariable;
+import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
@@ -115,11 +117,16 @@ public class VariableRef
 	}
 
 	/**
-	 * Yields a {@link Variable} representing the referenced variable.
-	 * 
-	 * @return the expression representing the variable
+	 * Yields the {@link Identifier} that this reference resolves to, and that
+	 * is used as the result of the semantics of this expression. By default,
+	 * this is a {@link Variable} with the name, static type, location, and
+	 * annotations of this reference, but subclasses can override this method to
+	 * resolve the reference to other kinds of identifiers (e.g.,
+	 * {@link GlobalVariable}s), depending on the scoping rules of the language.
+	 *
+	 * @return the identifier the reference resolves to
 	 */
-	public Variable getVariable() {
+	public Identifier getIdentifier() {
 		Variable v = new Variable(getStaticType(), getName(), getLocation());
 		for (Annotation ann : getAnnotations())
 			v.addAnnotation(ann);
@@ -132,8 +139,9 @@ public class VariableRef
 			InterproceduralAnalysis<A, D> interprocedural,
 			StatementStore<A> expressions)
 			throws SemanticException {
-		SymbolicExpression expr = getVariable();
-		return interprocedural.getAnalysis().smallStepSemantics(entryState, expr, this);
+		SymbolicExpression expr = getIdentifier();
+		return interprocedural.getAnalysis().smallStepSemantics(entryState, expr, interprocedural.getCurrentContext(),
+				this);
 	}
 
 	@Override

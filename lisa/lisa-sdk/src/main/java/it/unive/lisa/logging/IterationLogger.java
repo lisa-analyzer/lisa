@@ -209,7 +209,7 @@ public final class IterationLogger {
 			String message,
 			String objects,
 			int size) {
-		return new CountingIterable<>(it, new Counter(logger, level, message, objects, size, 0.025));
+		return new CountingIterable<>(it, new Counter(logger, level, message, objects, size));
 	}
 
 }

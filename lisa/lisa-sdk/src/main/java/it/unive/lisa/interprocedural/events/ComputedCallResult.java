@@ -8,6 +8,7 @@ import it.unive.lisa.interprocedural.ScopeId;
 import it.unive.lisa.lattices.ExpressionSet;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.program.cfg.statement.call.CFGCall;
+import it.unive.lisa.program.cfg.statement.call.Call;
 
 /**
  * An event signaling that the analysis computed the given result for a given
@@ -82,7 +83,10 @@ public class ComputedCallResult<A extends AbstractLattice<A>>
 
 	@Override
 	public ProgramPoint getProgramPoint() {
-		return call.getSource() != null ? call.getSource() : call;
+		Call original = call;
+		while (original.getSource() != null)
+			original = original.getSource();
+		return original;
 	}
 
 	/**

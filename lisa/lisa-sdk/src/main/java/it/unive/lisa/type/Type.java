@@ -296,8 +296,29 @@ public interface Type {
 
 	/**
 	 * Yields {@code true} if and only if this type is an instance of
+	 * {@link CodeMemberType}.
+	 *
+	 * @return {@code true} if that condition holds
+	 */
+	default boolean isCodeMemberType() {
+		return this instanceof CodeMemberType;
+	}
+
+	/**
+	 * Returns this type casted as a {@link CodeMemberType}, only if
+	 * {@link #isCodeMemberType()} yields {@code true}. Otherwise, this method
+	 * returns {@code null}.
+	 *
+	 * @return this type casted as {@link CodeMemberType}, or {@code null}
+	 */
+	default CodeMemberType asCodeMemberType() {
+		return isCodeMemberType() ? (CodeMemberType) this : null;
+	}
+
+	/**
+	 * Yields {@code true} if and only if this type is an instance of
 	 * {@link ReferenceType}.
-	 * 
+	 *
 	 * @return {@code true} if that condition holds
 	 */
 	default boolean isReferenceType() {
@@ -367,7 +388,7 @@ public interface Type {
 	 * default value. The returned expression's semantics function should leave
 	 * a {@link SymbolicExpression} on the stack that can be used as second
 	 * parameter in a
-	 * {@link SemanticDomain#assign(DomainLattice, Identifier, SymbolicExpression, ProgramPoint)}
+	 * {@link SemanticDomain#assign(DomainLattice, Identifier, SymbolicExpression, it.unive.lisa.interprocedural.ScopeId, ProgramPoint)}
 	 * call. Before doing so, the entry state can be arbitrarily manipulated to,
 	 * for instance, define fields or second-level memory regions initialized
 	 * together with the main target of the returned expression (e.g., if the
@@ -395,7 +416,7 @@ public interface Type {
 	 * statically unknown value. The returned expression's semantics function
 	 * should leave a {@link SymbolicExpression} on the stack that can be used
 	 * as second parameter in a
-	 * {@link SemanticDomain#assign(DomainLattice, Identifier, SymbolicExpression, ProgramPoint)}
+	 * {@link SemanticDomain#assign(DomainLattice, Identifier, SymbolicExpression, it.unive.lisa.interprocedural.ScopeId, ProgramPoint)}
 	 * call. Before doing so, the entry state can be arbitrarily manipulated to,
 	 * for instance, define fields or second-level memory regions initialized
 	 * together with the main target of the returned expression (e.g., if the

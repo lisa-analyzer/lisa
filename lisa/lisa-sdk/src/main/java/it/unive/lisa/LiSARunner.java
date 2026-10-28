@@ -163,12 +163,16 @@ public class LiSARunner<A extends AbstractLattice<A>, D extends AbstractDomain<A
 			EventQueue events) {
 		analysis.setEventQueue(events);
 
-		try {
-			callGraph.init(app, events);
-		} catch (CallGraphConstructionException e) {
-			LOG.fatal("Exception while building the call graph for the input program", e);
-			throw new AnalysisSetupException("Exception while building the call graph for the input program", e);
-		}
+		// callGraph can be null here: canAnalyze() only requires one to be
+		// present when the interprocedural analysis declares that it needs
+		// one through needsCallGraph()
+		if (callGraph != null)
+			try {
+				callGraph.init(app, events);
+			} catch (CallGraphConstructionException e) {
+				LOG.fatal("Exception while building the call graph for the input program", e);
+				throw new AnalysisSetupException("Exception while building the call graph for the input program", e);
+			}
 
 		try {
 			interproc.init(app, callGraph, conf.openCallPolicy, events, analysis);

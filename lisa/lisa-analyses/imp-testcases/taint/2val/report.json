@@ -1,85 +1,85 @@
 {
   "warnings" : [ {
-    "message" : "['imp-testcases/taint/taint.imp':15:13] on 'untyped main::main(main* this)': [EXPRESSION] Parameter 1 is possibly tainted"
+    "message" : "['imp-testcases/taint/taint.imp':15:2] on 'untyped main::main(main* this)': [EXPRESSION] Parameter 1 is possibly tainted"
   }, {
-    "message" : "['imp-testcases/taint/taint.imp':22:13] on 'untyped main::main(main* this)': [EXPRESSION] Parameter 1 is possibly tainted"
+    "message" : "['imp-testcases/taint/taint.imp':22:2] on 'untyped main::main(main* this)': [EXPRESSION] Parameter 1 is possibly tainted"
   }, {
-    "message" : "['imp-testcases/taint/taint.imp':27:13] on 'untyped main::main(main* this)': [EXPRESSION] Parameter 1 is possibly tainted"
+    "message" : "['imp-testcases/taint/taint.imp':27:2] on 'untyped main::main(main* this)': [EXPRESSION] Parameter 1 is possibly tainted"
   }, {
-    "message" : "['imp-testcases/taint/taint.imp':29:13] on 'untyped main::main(main* this)': [EXPRESSION] Parameter 1 is possibly tainted"
+    "message" : "['imp-testcases/taint/taint.imp':29:2] on 'untyped main::main(main* this)': [EXPRESSION] Parameter 1 is possibly tainted"
   }, {
-    "message" : "['imp-testcases/taint/taint.imp':35:13] on 'untyped main::main(main* this)': [EXPRESSION] Parameter 1 is possibly tainted"
+    "message" : "['imp-testcases/taint/taint.imp':35:2] on 'untyped main::main(main* this)': [EXPRESSION] Parameter 1 is possibly tainted"
   }, {
-    "message" : "['imp-testcases/taint/taint.imp':37:13] on 'untyped main::main(main* this)': [EXPRESSION] Parameter 1 is possibly tainted"
+    "message" : "['imp-testcases/taint/taint.imp':37:2] on 'untyped main::main(main* this)': [EXPRESSION] Parameter 1 is possibly tainted"
   }, {
-    "message" : "['imp-testcases/taint/taint.imp':39:13] on 'untyped main::main(main* this)': [EXPRESSION] Parameter 1 is possibly tainted"
+    "message" : "['imp-testcases/taint/taint.imp':39:2] on 'untyped main::main(main* this)': [EXPRESSION] Parameter 1 is possibly tainted"
   }, {
-    "message" : "['imp-testcases/taint/taint.imp':41:13] on 'untyped main::main(main* this)': [EXPRESSION] Parameter 1 is possibly tainted"
+    "message" : "['imp-testcases/taint/taint.imp':41:2] on 'untyped main::main(main* this)': [EXPRESSION] Parameter 1 is possibly tainted"
   }, {
-    "message" : "['imp-testcases/taint/taint.imp':43:13] on 'untyped main::main(main* this)': [EXPRESSION] Parameter 1 is possibly tainted"
+    "message" : "['imp-testcases/taint/taint.imp':43:2] on 'untyped main::main(main* this)': [EXPRESSION] Parameter 1 is possibly tainted"
   }, {
-    "message" : "['imp-testcases/taint/taint.imp':47:13] on 'untyped main::main(main* this)': [EXPRESSION] Parameter 1 is possibly tainted"
+    "message" : "['imp-testcases/taint/taint.imp':47:2] on 'untyped main::main(main* this)': [EXPRESSION] Parameter 1 is possibly tainted"
   }, {
-    "message" : "['imp-testcases/taint/taint.imp':49:13] on 'untyped main::main(main* this)': [EXPRESSION] Parameter 1 is possibly tainted"
+    "message" : "['imp-testcases/taint/taint.imp':49:2] on 'untyped main::main(main* this)': [EXPRESSION] Parameter 1 is possibly tainted"
   }, {
-    "message" : "['imp-testcases/taint/taint.imp':51:13] on 'untyped main::main(main* this)': [EXPRESSION] Parameter 1 is possibly tainted"
+    "message" : "['imp-testcases/taint/taint.imp':51:2] on 'untyped main::main(main* this)': [EXPRESSION] Parameter 1 is possibly tainted"
   }, {
-    "message" : "['imp-testcases/taint/taint.imp':55:13] on 'untyped main::main(main* this)': [EXPRESSION] Parameter 1 is possibly tainted"
+    "message" : "['imp-testcases/taint/taint.imp':55:2] on 'untyped main::main(main* this)': [EXPRESSION] Parameter 1 is possibly tainted"
   }, {
-    "message" : "['imp-testcases/taint/taint.imp':57:13] on 'untyped main::main(main* this)': [EXPRESSION] Parameter 1 is possibly tainted"
+    "message" : "['imp-testcases/taint/taint.imp':57:2] on 'untyped main::main(main* this)': [EXPRESSION] Parameter 1 is possibly tainted"
   }, {
-    "message" : "['imp-testcases/taint/taint.imp':59:13] on 'untyped main::main(main* this)': [EXPRESSION] Parameter 1 is possibly tainted"
+    "message" : "['imp-testcases/taint/taint.imp':59:2] on 'untyped main::main(main* this)': [EXPRESSION] Parameter 1 is possibly tainted"
   }, {
-    "message" : "['imp-testcases/taint/taint.imp':61:13] on 'untyped main::main(main* this)': [EXPRESSION] Parameter 1 is possibly tainted"
+    "message" : "['imp-testcases/taint/taint.imp':61:2] on 'untyped main::main(main* this)': [EXPRESSION] Parameter 1 is possibly tainted"
   }, {
-    "message" : "['imp-testcases/taint/taint.imp':63:13] on 'untyped main::main(main* this)': [EXPRESSION] Parameter 1 is possibly tainted"
+    "message" : "['imp-testcases/taint/taint.imp':63:2] on 'untyped main::main(main* this)': [EXPRESSION] Parameter 1 is possibly tainted"
   }, {
-    "message" : "['imp-testcases/taint/taint.imp':65:13] on 'untyped main::main(main* this)': [EXPRESSION] Parameter 1 is possibly tainted"
+    "message" : "['imp-testcases/taint/taint.imp':65:2] on 'untyped main::main(main* this)': [EXPRESSION] Parameter 1 is possibly tainted"
   }, {
-    "message" : "['imp-testcases/taint/taint.imp':67:13] on 'untyped main::main(main* this)': [EXPRESSION] Parameter 1 is possibly tainted"
+    "message" : "['imp-testcases/taint/taint.imp':67:2] on 'untyped main::main(main* this)': [EXPRESSION] Parameter 1 is possibly tainted"
   }, {
-    "message" : "['imp-testcases/taint/taint.imp':69:13] on 'untyped main::main(main* this)': [EXPRESSION] Parameter 1 is possibly tainted"
+    "message" : "['imp-testcases/taint/taint.imp':69:2] on 'untyped main::main(main* this)': [EXPRESSION] Parameter 1 is possibly tainted"
   }, {
-    "message" : "['imp-testcases/taint/taint.imp':71:13] on 'untyped main::main(main* this)': [EXPRESSION] Parameter 1 is possibly tainted"
+    "message" : "['imp-testcases/taint/taint.imp':71:2] on 'untyped main::main(main* this)': [EXPRESSION] Parameter 1 is possibly tainted"
   }, {
-    "message" : "['imp-testcases/taint/taint.imp':73:13] on 'untyped main::main(main* this)': [EXPRESSION] Parameter 1 is possibly tainted"
+    "message" : "['imp-testcases/taint/taint.imp':73:2] on 'untyped main::main(main* this)': [EXPRESSION] Parameter 1 is possibly tainted"
   }, {
-    "message" : "['imp-testcases/taint/taint.imp':75:13] on 'untyped main::main(main* this)': [EXPRESSION] Parameter 1 is possibly tainted"
+    "message" : "['imp-testcases/taint/taint.imp':75:2] on 'untyped main::main(main* this)': [EXPRESSION] Parameter 1 is possibly tainted"
   }, {
-    "message" : "['imp-testcases/taint/taint.imp':77:13] on 'untyped main::main(main* this)': [EXPRESSION] Parameter 1 is possibly tainted"
+    "message" : "['imp-testcases/taint/taint.imp':77:2] on 'untyped main::main(main* this)': [EXPRESSION] Parameter 1 is possibly tainted"
   }, {
-    "message" : "['imp-testcases/taint/taint.imp':79:13] on 'untyped main::main(main* this)': [EXPRESSION] Parameter 1 is possibly tainted"
+    "message" : "['imp-testcases/taint/taint.imp':79:2] on 'untyped main::main(main* this)': [EXPRESSION] Parameter 1 is possibly tainted"
   }, {
-    "message" : "['imp-testcases/taint/taint.imp':81:13] on 'untyped main::main(main* this)': [EXPRESSION] Parameter 1 is possibly tainted"
+    "message" : "['imp-testcases/taint/taint.imp':81:2] on 'untyped main::main(main* this)': [EXPRESSION] Parameter 1 is possibly tainted"
   }, {
-    "message" : "['imp-testcases/taint/taint.imp':85:13] on 'untyped main::main(main* this)': [EXPRESSION] Parameter 1 is possibly tainted"
+    "message" : "['imp-testcases/taint/taint.imp':85:2] on 'untyped main::main(main* this)': [EXPRESSION] Parameter 1 is possibly tainted"
   }, {
-    "message" : "['imp-testcases/taint/taint.imp':87:13] on 'untyped main::main(main* this)': [EXPRESSION] Parameter 1 is possibly tainted"
+    "message" : "['imp-testcases/taint/taint.imp':87:2] on 'untyped main::main(main* this)': [EXPRESSION] Parameter 1 is possibly tainted"
   }, {
-    "message" : "['imp-testcases/taint/taint.imp':89:13] on 'untyped main::main(main* this)': [EXPRESSION] Parameter 1 is possibly tainted"
+    "message" : "['imp-testcases/taint/taint.imp':89:2] on 'untyped main::main(main* this)': [EXPRESSION] Parameter 1 is possibly tainted"
   }, {
-    "message" : "['imp-testcases/taint/taint.imp':91:13] on 'untyped main::main(main* this)': [EXPRESSION] Parameter 1 is possibly tainted"
+    "message" : "['imp-testcases/taint/taint.imp':91:2] on 'untyped main::main(main* this)': [EXPRESSION] Parameter 1 is possibly tainted"
   }, {
-    "message" : "['imp-testcases/taint/taint.imp':93:13] on 'untyped main::main(main* this)': [EXPRESSION] Parameter 1 is possibly tainted"
+    "message" : "['imp-testcases/taint/taint.imp':93:2] on 'untyped main::main(main* this)': [EXPRESSION] Parameter 1 is possibly tainted"
   }, {
-    "message" : "['imp-testcases/taint/taint.imp':95:13] on 'untyped main::main(main* this)': [EXPRESSION] Parameter 1 is possibly tainted"
+    "message" : "['imp-testcases/taint/taint.imp':95:2] on 'untyped main::main(main* this)': [EXPRESSION] Parameter 1 is possibly tainted"
   } ],
   "notices" : [ ],
-  "files" : [ "report.json", "untyped_main.main(main__this).graph.json", "untyped_main.sink(main__this,_untyped_v)_1997455120.graph.json", "untyped_main.sink(main__this,_untyped_v)_1997455151.graph.json", "untyped_main.sink(main__this,_untyped_v)_1997455182.graph.json", "untyped_main.sink(main__this,_untyped_v)_1997455337.graph.json", "untyped_main.sink(main__this,_untyped_v)_1997455368.graph.json", "untyped_main.sink(main__this,_untyped_v)_1997455492.graph.json", "untyped_main.sink(main__this,_untyped_v)_1997455554.graph.json", "untyped_main.sink(main__this,_untyped_v)_1997455616.graph.json", "untyped_main.sink(main__this,_untyped_v)_1997455740.graph.json", "untyped_main.sink(main__this,_untyped_v)_1997455802.graph.json", "untyped_main.sink(main__this,_untyped_v)_1997455864.graph.json", "untyped_main.sink(main__this,_untyped_v)_1997455926.graph.json", "untyped_main.sink(main__this,_untyped_v)_1997455988.graph.json", "untyped_main.sink(main__this,_untyped_v)_1997456050.graph.json", "untyped_main.sink(main__this,_untyped_v)_1997456112.graph.json", "untyped_main.sink(main__this,_untyped_v)_1997456174.graph.json", "untyped_main.sink(main__this,_untyped_v)_1997456236.graph.json", "untyped_main.sink(main__this,_untyped_v)_1997456360.graph.json", "untyped_main.sink(main__this,_untyped_v)_1997456422.graph.json", "untyped_main.sink(main__this,_untyped_v)_1997456484.graph.json", "untyped_main.sink(main__this,_untyped_v)_1997456546.graph.json", "untyped_main.sink(main__this,_untyped_v)_1997456608.graph.json", "untyped_main.sink(main__this,_untyped_v)_1997456670.graph.json", "untyped_main.sink(main__this,_untyped_v)_1997456732.graph.json", "untyped_main.sink(main__this,_untyped_v)_1997456794.graph.json", "untyped_main.sink(main__this,_untyped_v)_1997456856.graph.json", "untyped_main.sink(main__this,_untyped_v)_1997456918.graph.json", "untyped_main.sink(main__this,_untyped_v)_1997456980.graph.json", "untyped_main.sink(main__this,_untyped_v)_1997457042.graph.json", "untyped_main.sink(main__this,_untyped_v)_1997457104.graph.json", "untyped_main.sink(main__this,_untyped_v)_1997457166.graph.json", "untyped_main.sink(main__this,_untyped_v)_1997457228.graph.json", "untyped_main.sink(main__this,_untyped_v)_1997457290.graph.json", "untyped_main.sink(main__this,_untyped_v)_1997457352.graph.json", "untyped_main.sink(main__this,_untyped_v)_1997457414.graph.json", "untyped_main.sink(main__this,_untyped_v)_1997457476.graph.json", "untyped_main.sink(main__this,_untyped_v)_1997457538.graph.json", "untyped_main.sink(main__this,_untyped_v)_1997457600.graph.json", "untyped_main.source(main__this)_1997461041.graph.json", "untyped_main.source(main__this)_1997463738.graph.json" ],
+  "files" : [ "report.json", "untyped_main.main(main__this).graph.json", "untyped_main.sink(main__this,_untyped_v)_0253422ce5492ca5a7e8e36590ea7be5.graph.json", "untyped_main.sink(main__this,_untyped_v)_0be5c51efd8923410ba5a198ad9497a5.graph.json", "untyped_main.sink(main__this,_untyped_v)_1bfbeec71492810636c8e914ad375666.graph.json", "untyped_main.sink(main__this,_untyped_v)_1dc5560439f4e957faa32b3411b456a6.graph.json", "untyped_main.sink(main__this,_untyped_v)_21ef710d50969fb4cfb58bf800c72577.graph.json", "untyped_main.sink(main__this,_untyped_v)_2c7e90c854dd7ad44c654ca2e18c6102.graph.json", "untyped_main.sink(main__this,_untyped_v)_2f7ea9e521a2c17bd8eb7338e7e36f7c.graph.json", "untyped_main.sink(main__this,_untyped_v)_35800b6fd24d3993de21297decc4440e.graph.json", "untyped_main.sink(main__this,_untyped_v)_3947cc24b52172d01bfa326bca279626.graph.json", "untyped_main.sink(main__this,_untyped_v)_41aa1a7cb6cb5979cd3337150322c3ab.graph.json", "untyped_main.sink(main__this,_untyped_v)_49ad8dbc1e00f50f5dc635c7876ed5f0.graph.json", "untyped_main.sink(main__this,_untyped_v)_5efd94b59409a283642b8efa204dcfe4.graph.json", "untyped_main.sink(main__this,_untyped_v)_613bfb3ef1b5c59637fa7970d1980f79.graph.json", "untyped_main.sink(main__this,_untyped_v)_61f964c9b7232afd3a84de25ed295756.graph.json", "untyped_main.sink(main__this,_untyped_v)_754386758b2647798eb171d126407950.graph.json", "untyped_main.sink(main__this,_untyped_v)_7669f5d074c418f8499d86b0448ef1a6.graph.json", "untyped_main.sink(main__this,_untyped_v)_7754152cfa775a07c8bb54a5e9758b1f.graph.json", "untyped_main.sink(main__this,_untyped_v)_7db1682d3ffd7f3c58c6e16cc07c3c13.graph.json", "untyped_main.sink(main__this,_untyped_v)_84c3d043a446d3740ca80aa1eca575e1.graph.json", "untyped_main.sink(main__this,_untyped_v)_86fe87d247cb303c9bf147aba3bb1ef7.graph.json", "untyped_main.sink(main__this,_untyped_v)_90cf1a612287f186b620bc5e42c36ffa.graph.json", "untyped_main.sink(main__this,_untyped_v)_91d6aff563c0b641c1ba27102a9fbcb1.graph.json", "untyped_main.sink(main__this,_untyped_v)_931f60d2d0c2e91403636e79fce8f11f.graph.json", "untyped_main.sink(main__this,_untyped_v)_95174ca0ddf59f9e6a0868112ba5bd65.graph.json", "untyped_main.sink(main__this,_untyped_v)_9fb5c1eb0051bd6b58c4451610afe8b7.graph.json", "untyped_main.sink(main__this,_untyped_v)_a19a4ba5eb6cad8e4284d6bb4f8a49ff.graph.json", "untyped_main.sink(main__this,_untyped_v)_a70fe60b1bc82b8898da208300788753.graph.json", "untyped_main.sink(main__this,_untyped_v)_af954f71b32d86d0c33c44fb1e5be1f8.graph.json", "untyped_main.sink(main__this,_untyped_v)_b0972ef2037ae1059be4f8799a9a89f8.graph.json", "untyped_main.sink(main__this,_untyped_v)_b534172d2fc0ec6f5d79affb8a019052.graph.json", "untyped_main.sink(main__this,_untyped_v)_b60cbfbacd09aef6fa2db251b66f59b9.graph.json", "untyped_main.sink(main__this,_untyped_v)_bce9d855b2736ea96b802e40d8db62e3.graph.json", "untyped_main.sink(main__this,_untyped_v)_d3153567bd6347a89776400a6910be46.graph.json", "untyped_main.sink(main__this,_untyped_v)_d3a57fda4e7cb4e65e5838a31400610f.graph.json", "untyped_main.sink(main__this,_untyped_v)_d47979e7156970173c0f062cac818153.graph.json", "untyped_main.sink(main__this,_untyped_v)_d66ff6d69233f5083d948060f81d7deb.graph.json", "untyped_main.sink(main__this,_untyped_v)_e95194950a5e9cdb91a2a487ebaffd71.graph.json", "untyped_main.sink(main__this,_untyped_v)_ea9a4d6c12b952cc4f46f3a2c7fa8d27.graph.json", "untyped_main.source(main__this)_5a24bca4d40d28d6c455fe8be569fc22.graph.json", "untyped_main.source(main__this)_ccb9f438ee3e7c35734ed90bf471e869.graph.json" ],
   "info" : {
     "cfgs" : "3",
-    "duration" : "107ms",
-    "end" : "2026-01-07T11:13:44.396+01:00",
+    "duration" : "121ms",
+    "end" : "2026-10-28T19:13:07.603+01:00",
     "expressions" : "237",
     "files" : "41",
     "globals" : "0",
     "members" : "3",
     "notices" : "0",
     "programs" : "1",
-    "start" : "2026-01-07T11:13:44.289+01:00",
+    "start" : "2026-10-28T19:13:07.482+01:00",
     "statements" : "79",
     "units" : "1",
-    "version" : "0.1",
+    "version" : "1.0",
     "warnings" : "32"
   },
   "configuration" : {

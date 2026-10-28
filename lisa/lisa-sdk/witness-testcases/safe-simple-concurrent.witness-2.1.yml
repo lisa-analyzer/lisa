@@ -1,0 +1,84 @@
+# This file is part of the SV-Witnesses repository as regression test:
+# https://gitlab.com/sosy-lab/benchmarking/sv-witnesses
+#
+# SPDX-FileCopyrightText: 2025 The SV-Witnesses Community
+#
+# SPDX-License-Identifier: Apache-2.0
+
+- entry_type: invariant_set
+  metadata:
+    format_version: "2.1"
+    uuid: "c66c3ee7-e0de-4bae-87f0-fd48fc7b961d"
+    creation_time: "2025-10-04T10:29:38+01:00"
+    producer:
+      name: "Handcrafted"
+      version: "Inspired by: https://arxiv.org/pdf/2411.16612"
+    task:
+      input_files:
+        - "./safe-simple-concurrent.c"
+      input_file_hashes:
+        "./safe-simple-concurrent.c": "939597023a4e5fc2915fcd9721261a49829641867ef067a9c88542826aefde8d"
+      specification: "G ! call(reach_error())"
+      data_model: "ILP32"
+      language: "C"
+  content:
+    - invariant:
+        type: location_invariant
+        location:
+          line: 20
+          file_name: "./safe-simple-concurrent.c"
+        value: "(ghost != 0) || (used == 0)"
+        format: c_expression
+- entry_type: ghost_instrumentation
+  metadata:
+    format_version: "2.1"
+    uuid: "c66c3ee7-e0de-4bae-87f0-fd48fc7b961d"
+    creation_time: "2025-10-04T10:29:38+01:00"
+    producer:
+      name: "Handcrafted"
+      version: "Inspired by: https://arxiv.org/pdf/2411.16612"
+    task:
+      input_files:
+        - "./safe-simple-concurrent.c"
+      input_file_hashes:
+        "./safe-simple-concurrent.c": "939597023a4e5fc2915fcd9721261a49829641867ef067a9c88542826aefde8d"
+      specification: "G ! call(reach_error())"
+      data_model: "ILP32"
+      language: "C"
+  content:
+    ghost_variables:
+      - name: ghost
+        type: int
+        scope: global
+        initial:
+          value: "0"
+          format: c_expression
+    ghost_updates:
+      - location:
+          line: 20
+          file_name: "./safe-simple-concurrent.c"
+        updates:
+          - variable: ghost
+            value: "1"
+            format: c_expression
+      - location:
+          line: 22
+          file_name: "./safe-simple-concurrent.c"
+        updates:
+          - variable: ghost
+            value: "0"
+            format: c_expression
+      - location:
+          line: 9
+          file_name: "./safe-simple-concurrent.c"
+        updates:
+          - variable: ghost
+            value: "1"
+            format: c_expression
+      - location:
+          line: 12
+          file_name: "./safe-simple-concurrent.c"
+        updates:
+          - variable: ghost
+            value: "0"
+            format: c_expression

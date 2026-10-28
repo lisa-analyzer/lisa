@@ -10,14 +10,13 @@ import it.unive.lisa.lattices.FunctionalLattice;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.util.collections.CollectionsDiffBuilder;
+import it.unive.lisa.util.datastructures.trie.PatriciaTrieMap;
 import java.util.Comparator;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
-import java.util.stream.Collectors;
 import org.apache.commons.lang3.tuple.Pair;
 
 /**
@@ -65,7 +64,7 @@ public abstract class Environment<L extends Lattice<L>,
 	 */
 	public Environment(
 			L domain,
-			Map<Identifier, L> function) {
+			PatriciaTrieMap<Identifier, L> function) {
 		super(domain, function);
 	}
 
@@ -120,18 +119,18 @@ public abstract class Environment<L extends Lattice<L>,
 		if (isBottom() || isTop())
 			return (E) this;
 
-		Map<Identifier, L> function = mkNewFunction(null, false);
+		PatriciaTrieMap<Identifier, L> result = mkNewFunction(null, false);
 		for (Identifier id : getKeys()) {
 			Identifier lifted = lifter.apply(id);
 			if (lifted != null)
-				if (!function.containsKey(lifted))
-					function.put(lifted, getState(id));
+				if (!result.containsKey(lifted))
+					result = result.put(lifted, getState(id));
 				else
-					function.put(lifted, getState(id).lub(function.get(lifted)));
+					result = result.put(lifted, getState(id).lub(result.get(lifted)));
 
 		}
 
-		return mk(lattice, function);
+		return mk(lattice, result);
 	}
 
 	@Override
@@ -143,8 +142,8 @@ public abstract class Environment<L extends Lattice<L>,
 		if (isTop() || isBottom() || function == null)
 			return (E) this;
 
-		Map<Identifier, L> result = mkNewFunction(function, false);
-		result.remove(id);
+		PatriciaTrieMap<Identifier, L> result = mkNewFunction(function, false);
+		result = result.remove(id);
 
 		return mk(lattice, result);
 	}
@@ -158,9 +157,9 @@ public abstract class Environment<L extends Lattice<L>,
 		if (isTop() || isBottom() || function == null)
 			return (E) this;
 
-		Map<Identifier, L> result = mkNewFunction(function, false);
+		PatriciaTrieMap<Identifier, L> result = mkNewFunction(function, false);
 		for (Identifier id : ids)
-			result.remove(id);
+			result = result.remove(id);
 
 		return mk(lattice, result);
 	}
@@ -174,9 +173,10 @@ public abstract class Environment<L extends Lattice<L>,
 		if (isTop() || isBottom() || function == null)
 			return (E) this;
 
-		Map<Identifier, L> result = mkNewFunction(function, false);
-		Set<Identifier> keys = result.keySet().stream().filter(test::test).collect(Collectors.toSet());
-		keys.forEach(result::remove);
+		PatriciaTrieMap<Identifier, L> result = mkNewFunction(function, false);
+		for (Identifier id : getKeys())
+			if (test.test(id))
+				result = result.remove(id);
 
 		return mk(lattice, result);
 	}

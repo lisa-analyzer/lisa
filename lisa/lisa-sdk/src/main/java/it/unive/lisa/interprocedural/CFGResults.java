@@ -6,9 +6,9 @@ import it.unive.lisa.analysis.AnalyzedCFG;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.lattices.FunctionalLattice;
+import it.unive.lisa.util.datastructures.trie.PatriciaTrieMap;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Map;
 import org.apache.commons.lang3.tuple.Pair;
 
 /**
@@ -39,7 +39,7 @@ public class CFGResults<
 
 	private CFGResults(
 			AnalyzedCFG<A> lattice,
-			Map<ScopeId<A>, AnalyzedCFG<A>> function) {
+			PatriciaTrieMap<ScopeId<A>, AnalyzedCFG<A>> function) {
 		super(lattice, function);
 	}
 
@@ -76,14 +76,14 @@ public class CFGResults<
 		if (function == null) {
 			// no previous result
 			function = mkNewFunction(null, false);
-			function.put(token, result);
+			function = function.put(token, result);
 			return Pair.of(false, result);
 		}
 
 		AnalyzedCFG<A> previousResult = function.get(token);
 		if (previousResult == null) {
 			// no previous result
-			function.put(token, result);
+			function = function.put(token, result);
 			return Pair.of(false, result);
 		} else if (previousResult.lessOrEqual(result)) {
 			// previous is smaller than result
@@ -92,7 +92,7 @@ public class CFGResults<
 				return Pair.of(false, previousResult);
 			else {
 				// result is bigger, store that instead
-				function.put(token, result);
+				function = function.put(token, result);
 				return Pair.of(true, result);
 			}
 		} else if (result.lessOrEqual(previousResult)) {
@@ -101,7 +101,7 @@ public class CFGResults<
 		} else {
 			// result and previous are not comparable
 			AnalyzedCFG<A> lub = previousResult.lub(result);
-			function.put(token, lub);
+			function = function.put(token, lub);
 			return Pair.of(true, lub);
 		}
 	}
@@ -156,7 +156,7 @@ public class CFGResults<
 	@Override
 	public CFGResults<A> mk(
 			AnalyzedCFG<A> lattice,
-			Map<ScopeId<A>, AnalyzedCFG<A>> function) {
+			PatriciaTrieMap<ScopeId<A>, AnalyzedCFG<A>> function) {
 		return new CFGResults<>(lattice, function);
 	}
 

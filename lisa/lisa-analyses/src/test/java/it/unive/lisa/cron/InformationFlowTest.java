@@ -117,10 +117,10 @@ public class InformationFlowTest
 													TypeSet>>> post = result
 															.getAnalysisStateAfter(call.getParameters()[i]);
 									SemanticOracle oracle = tool.getAnalysis().domain
-											.makeOracle(post.getExecutionState());
+											.makeOracle(post.getExecutionState(), null);
 
 									for (SymbolicExpression e : tool.getAnalysis()
-											.rewrite(post, post.getExecutionExpressions(), node)) {
+											.rewrite(post, post.getExecutionExpressions(), null, node)) {
 										L stack = domain
 												.eval(post.getExecutionState().valueState, (ValueExpression) e, node,
 														oracle);
@@ -210,13 +210,13 @@ public class InformationFlowTest
 					var postL = result.getAnalysisStateAfter(assign.getLeft());
 					var postR = result.getAnalysisStateAfter(assign.getRight());
 					NonInterference domain = (NonInterference) tool.getAnalysis().domain.valueDomain;
-					SemanticOracle oracleL = tool.getAnalysis().domain.makeOracle(postL.getExecutionState());
-					SemanticOracle oracleR = tool.getAnalysis().domain.makeOracle(postR.getExecutionState());
+					SemanticOracle oracleL = tool.getAnalysis().domain.makeOracle(postL.getExecutionState(), null);
+					SemanticOracle oracleR = tool.getAnalysis().domain.makeOracle(postR.getExecutionState(), null);
 
 					for (SymbolicExpression l : tool.getAnalysis()
-							.rewrite(postL, postL.getExecutionExpressions(), assign))
+							.rewrite(postL, postL.getExecutionExpressions(), null, assign))
 						for (SymbolicExpression r : tool.getAnalysis()
-								.rewrite(postR, postR.getExecutionExpressions(), assign)) {
+								.rewrite(postR, postR.getExecutionExpressions(), null, assign)) {
 							NonInterferenceValue ll = domain
 									.eval(postL.getExecutionState().valueState, (ValueExpression) l, assign.getLeft(),
 											oracleL);

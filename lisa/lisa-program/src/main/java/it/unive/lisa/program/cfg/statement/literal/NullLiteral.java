@@ -34,13 +34,21 @@ public class NullLiteral
 		super(cfg, location, null, NullType.INSTANCE);
 	}
 
+	/**
+	 * {@inheritDoc}<br>
+	 * <br>
+	 * Unlike other literals, this one evaluates to a {@link NullConstant}
+	 * instead of a generic constant, since {@code null} is represented as an
+	 * explicit heap expression rather than a plain value.
+	 */
 	@Override
 	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> forwardSemantics(
 			AnalysisState<A> entryState,
 			InterproceduralAnalysis<A, D> interprocedural,
 			StatementStore<A> expressions)
 			throws SemanticException {
-		return interprocedural.getAnalysis().smallStepSemantics(entryState, new NullConstant(getLocation()), this);
+		return interprocedural.getAnalysis().smallStepSemantics(entryState, new NullConstant(getLocation()),
+				interprocedural.getCurrentContext(), this);
 	}
 
 }

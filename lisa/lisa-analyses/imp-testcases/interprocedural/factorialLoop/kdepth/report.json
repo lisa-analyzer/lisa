@@ -1,21 +1,21 @@
 {
   "warnings" : [ ],
   "notices" : [ ],
-  "files" : [ "report.json", "untyped_factorialLoop.factorialLoop(factorialLoop__this,_untyped_n)_-1303134381.graph.json", "untyped_factorialLoop.factorialLoopAux1(factorialLoop__this,_untyped_n)_1249376116.graph.json", "untyped_factorialLoop.factorialLoopAux2(factorialLoop__this,_untyped_n)_-1227177876.graph.json", "untyped_factorialLoop.main(factorialLoop__this,_untyped_a).graph.json" ],
+  "files" : [ "report.json", "untyped_factorialLoop.factorialLoop(factorialLoop__this,_untyped_n)_2474d6007168316af8ca82b3ebcfa93f.graph.json", "untyped_factorialLoop.factorialLoopAux1(factorialLoop__this,_untyped_n)_77c1184d94215329deabdfcf96aa9472.graph.json", "untyped_factorialLoop.factorialLoopAux2(factorialLoop__this,_untyped_n)_d44e3d35b67fa70e1fd21a7ece4d1ffb.graph.json", "untyped_factorialLoop.main(factorialLoop__this,_untyped_a).graph.json" ],
   "info" : {
     "cfgs" : "4",
-    "duration" : "16ms",
-    "end" : "2026-01-07T11:13:50.158+01:00",
+    "duration" : "17ms",
+    "end" : "2026-10-28T19:13:14.109+01:00",
     "expressions" : "40",
     "files" : "4",
     "globals" : "0",
     "members" : "4",
     "notices" : "0",
     "programs" : "1",
-    "start" : "2026-01-07T11:13:50.142+01:00",
+    "start" : "2026-10-28T19:13:14.092+01:00",
     "statements" : "14",
     "units" : "1",
-    "version" : "0.1",
+    "version" : "1.0",
     "warnings" : "0"
   },
   "configuration" : {

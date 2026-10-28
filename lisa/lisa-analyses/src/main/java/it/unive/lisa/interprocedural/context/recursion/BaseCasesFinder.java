@@ -10,8 +10,10 @@ import it.unive.lisa.conf.FixpointConfiguration;
 import it.unive.lisa.events.EventQueue;
 import it.unive.lisa.interprocedural.InterproceduralAnalysisException;
 import it.unive.lisa.interprocedural.OpenCallPolicy;
+import it.unive.lisa.interprocedural.Recursion;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.interprocedural.context.ContextBasedAnalysis;
+import it.unive.lisa.interprocedural.context.KDepthToken;
 import it.unive.lisa.lattices.ExpressionSet;
 import it.unive.lisa.program.Application;
 import it.unive.lisa.program.cfg.CFG;
@@ -133,7 +135,7 @@ public class BaseCasesFinder<A extends AbstractLattice<A>,
 
 		// we reset the analysis at the point where the starting call can be
 		// evaluated
-		token = recursion.getInvocationToken();
+		token = (KDepthToken<A>) recursion.getInvocationToken();
 		Expression[] actuals = start.getParameters();
 		ExpressionSet[] params = new ExpressionSet[actuals.length];
 		for (int i = 0; i < params.length; i++)

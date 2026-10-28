@@ -20,18 +20,25 @@ import java.util.Map.Entry;
 /**
  * The substring relational abstract domain (see {@link SubstringDomain})
  * enriched with string constant propagation. This domain tracks the Cartesian
- * product between {@link Substrings} and {@link StringConstant}. This domain
- * follows the one defined
- * <a href="https://link.springer.com/chapter/10.1007/978-3-030-94583-1_2">in
- * this paper</a>.<br/>
+ * product between {@link Substrings} (substring relations between expressions)
+ * and {@link StringConstant} (known constant values), letting the two
+ * components refine one another: knowing that an expression is constant
+ * strengthens the substring relations that can be inferred for it, and vice
+ * versa.<br/>
  * <br/>
  * This domain does not take part in the
  * {@link it.unive.lisa.analysis.combination.constraints.WholeValueAnalysis},
  * meaning that it will not produce constraints for any expression.
- * 
+ *
  * @author <a href="mailto:michele.martelli1@studenti.unipr.it">Michele
  *             Martelli</a>
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
+ *
+ * @see <a href="https://link.springer.com/chapter/10.1007/978-3-030-94583-1_2">
+ *          Vincenzo Arceri, Martina Olliaro, Agostino Cortesi, Pietro Ferrara.
+ *          Relational String Abstract Domains. In Verification, Model Checking,
+ *          and Abstract Interpretation (VMCAI 2022), LNCS vol. 13182, Springer,
+ *          2022.</a>
  */
 public class SubstringDomainWithConstants
 		implements

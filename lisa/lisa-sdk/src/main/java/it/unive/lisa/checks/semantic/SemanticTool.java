@@ -7,12 +7,15 @@ import it.unive.lisa.analysis.Analysis;
 import it.unive.lisa.analysis.AnalyzedCFG;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
+import it.unive.lisa.analysis.reachability.Reachability;
+import it.unive.lisa.analysis.reachability.ReachabilityStatus;
 import it.unive.lisa.conf.LiSAConfiguration;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.interprocedural.callgraph.CallResolutionException;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeMember;
 import it.unive.lisa.program.cfg.statement.Expression;
+import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
 import it.unive.lisa.util.file.FileManager;
@@ -38,6 +41,8 @@ public class SemanticTool<A extends AbstractLattice<A>, D extends AbstractDomain
 	private final CallGraph callgraph;
 
 	private final Analysis<A, D> analysis;
+
+	private Reachability<A, D> reachability;
 
 	/**
 	 * Builds the tool, storing the given results.
@@ -180,10 +185,81 @@ public class SemanticTool<A extends AbstractLattice<A>, D extends AbstractDomain
 			Analysis<A, D> analysis = new Analysis(
 					getConfiguration().analysis,
 					getConfiguration().shouldSmashError);
-			return callgraph.resolve(call, call.parameterTypes(store, analysis), null);
+			return callgraph.resolve(call, call.parameterTypes(store, analysis, result.getId()), null);
 		} catch (CallResolutionException e) {
 			return null;
 		}
+	}
+
+	/**
+	 * Yields the reachability of the given statement within the given result,
+	 * that is, considering only the executions analyzed in the context of the
+	 * result (see
+	 * {@link Reachability#getReachability(AnalyzedCFG, Statement)}). The
+	 * reachability is computed lazily from the results stored in this tool, and
+	 * it is shared among all the checks using this tool.
+	 * 
+	 * @param result the result containing the statement
+	 * @param st     the statement
+	 * 
+	 * @return the reachability of the statement
+	 * 
+	 * @throws SemanticException if something goes wrong during the computation
+	 */
+	public ReachabilityStatus getReachability(
+			AnalyzedCFG<A> result,
+			Statement st)
+			throws SemanticException {
+		return getReachabilityAlgorithm().getReachability(result, st);
+	}
+
+	/**
+	 * Yields the reachability of the given statement, considering all the
+	 * results of its cfg (see {@link Reachability#getReachability(Statement)}).
+	 * The reachability is computed lazily from the results stored in this tool,
+	 * and it is shared among all the checks using this tool.
+	 * 
+	 * @param st the statement
+	 * 
+	 * @return the reachability of the statement
+	 * 
+	 * @throws SemanticException if something goes wrong during the computation
+	 */
+	public ReachabilityStatus getReachability(
+			Statement st)
+			throws SemanticException {
+		return getReachabilityAlgorithm().getReachability(st);
+	}
+
+	/**
+	 * Yields the reachability of the entry of the given result (see
+	 * {@link Reachability#getEntryReachability(AnalyzedCFG)}). The reachability
+	 * is computed lazily from the results stored in this tool, and it is shared
+	 * among all the checks using this tool.
+	 * 
+	 * @param result the result
+	 * 
+	 * @return the reachability of the entry of the result
+	 * 
+	 * @throws SemanticException if something goes wrong during the computation
+	 */
+	public ReachabilityStatus getEntryReachability(
+			AnalyzedCFG<A> result)
+			throws SemanticException {
+		return getReachabilityAlgorithm().getEntryReachability(result);
+	}
+
+	private synchronized Reachability<A, D> getReachabilityAlgorithm() {
+		if (reachability == null) {
+			// we use an analysis without events, as the queries are not
+			// part of the fixpoint computation
+			@SuppressWarnings({ "rawtypes", "unchecked" })
+			Analysis<A, D> quiet = new Analysis(
+					getConfiguration().analysis,
+					getConfiguration().shouldSmashError);
+			reachability = new Reachability<>(results, callgraph, quiet);
+		}
+		return reachability;
 	}
 
 }

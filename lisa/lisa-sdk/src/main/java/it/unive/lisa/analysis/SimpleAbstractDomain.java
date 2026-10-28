@@ -1,5 +1,6 @@
 package it.unive.lisa.analysis;
 
+import it.unive.lisa.analysis.AnalysisState.Error;
 import it.unive.lisa.analysis.combination.constraints.WholeValueAnalysis;
 import it.unive.lisa.analysis.events.DomainAssignEnd;
 import it.unive.lisa.analysis.events.DomainAssignStart;
@@ -21,10 +22,12 @@ import it.unive.lisa.analysis.type.TypeLattice;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.analysis.value.ValueLattice;
 import it.unive.lisa.events.EventQueue;
+import it.unive.lisa.interprocedural.ScopeId;
 import it.unive.lisa.lattices.ExpressionSet;
 import it.unive.lisa.lattices.Satisfiability;
 import it.unive.lisa.lattices.SimpleAbstractState;
 import it.unive.lisa.program.cfg.ProgramPoint;
+import it.unive.lisa.program.cfg.protection.ProtectedBlock;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.MemoryAllocation;
 import it.unive.lisa.symbolic.value.BinaryExpression;
@@ -237,9 +240,10 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLatti
 			SimpleAbstractState<H, V, T> state,
 			Identifier id,
 			SymbolicExpression expression,
+			ScopeId<?> context,
 			ProgramPoint pp)
 			throws SemanticException {
-		MutableOracle mo = new MutableOracle(state);
+		MutableOracle mo = new MutableOracle(state, context);
 
 		if (events != null)
 			events.post(new DomainAssignStart<>(getClass(), state, id, expression));
@@ -346,9 +350,10 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLatti
 	public SimpleAbstractState<H, V, T> smallStepSemantics(
 			SimpleAbstractState<H, V, T> state,
 			SymbolicExpression expression,
+			ScopeId<?> context,
 			ProgramPoint pp)
 			throws SemanticException {
-		MutableOracle mo = new MutableOracle(state);
+		MutableOracle mo = new MutableOracle(state, context);
 
 		if (events != null)
 			events.post(new DomainSmallStepStart<>(getClass(), state, expression));
@@ -463,10 +468,11 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLatti
 	public SimpleAbstractState<H, V, T> assume(
 			SimpleAbstractState<H, V, T> state,
 			SymbolicExpression expression,
+			ScopeId<?> context,
 			ProgramPoint src,
 			ProgramPoint dest)
 			throws SemanticException {
-		MutableOracle mo = new MutableOracle(state);
+		MutableOracle mo = new MutableOracle(state, context);
 
 		if (events != null)
 			events.post(new DomainAssumeStart<>(getClass(), state, expression));
@@ -614,9 +620,10 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLatti
 	public Satisfiability satisfies(
 			SimpleAbstractState<H, V, T> state,
 			SymbolicExpression expression,
+			ScopeId<?> context,
 			ProgramPoint pp)
 			throws SemanticException {
-		MutableOracle mo = new MutableOracle(state);
+		MutableOracle mo = new MutableOracle(state, context);
 
 		if (events != null)
 			events.post(new DomainSatisfiesStart<>(getClass(), state, expression));
@@ -756,6 +763,7 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLatti
 	public SimpleAbstractState<H, V, T> onCallReturn(
 			SimpleAbstractState<H, V, T> entryState,
 			SimpleAbstractState<H, V, T> callres,
+			ScopeId<?> context,
 			ProgramPoint call)
 			throws SemanticException {
 		H h = heapDomain.onCallReturn(
@@ -776,9 +784,72 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLatti
 	}
 
 	@Override
+	public Pair<SimpleAbstractState<H, V, T>, SimpleAbstractState<H, V, T>> onExecutionToError(
+			SimpleAbstractState<H, V, T> remaining,
+			SimpleAbstractState<H, V, T> moved,
+			Error error,
+			ScopeId<?> context,
+			ProgramPoint pp)
+			throws SemanticException {
+		Pair<H, H> h = heapDomain.onExecutionToError(remaining.heapState, moved.heapState, error, pp);
+		Pair<V, V> v = valueDomain.onExecutionToError(remaining.valueState, moved.valueState, error, pp);
+		Pair<T, T> t = typeDomain.onExecutionToError(remaining.typeState, moved.typeState, error, pp);
+		return Pair.of(
+				h.getLeft() == remaining.heapState
+						&& v.getLeft() == remaining.valueState
+						&& t.getLeft() == remaining.typeState
+								? remaining
+								: new SimpleAbstractState<>(h.getLeft(), v.getLeft(), t.getLeft()),
+				h.getRight() == moved.heapState
+						&& v.getRight() == moved.valueState
+						&& t.getRight() == moved.typeState
+								? moved
+								: new SimpleAbstractState<>(h.getRight(), v.getRight(), t.getRight()));
+	}
+
+	@Override
+	public SimpleAbstractState<H, V, T> onErrorToExecution(
+			SimpleAbstractState<H, V, T> state,
+			ProtectedBlock protectedBlock,
+			ScopeId<?> context,
+			ProgramPoint pp)
+			throws SemanticException {
+		H h = heapDomain.onErrorToExecution(state.heapState, protectedBlock, pp);
+		V v = valueDomain.onErrorToExecution(state.valueState, protectedBlock, pp);
+		T t = typeDomain.onErrorToExecution(state.typeState, protectedBlock, pp);
+		if (h == state.heapState && v == state.valueState && t == state.typeState)
+			return state;
+		return new SimpleAbstractState<>(h, v, t);
+	}
+
+	@Override
+	public Pair<SimpleAbstractState<H, V, T>, SimpleAbstractState<H, V, T>> onExecutionToHalting(
+			SimpleAbstractState<H, V, T> remaining,
+			SimpleAbstractState<H, V, T> moved,
+			ScopeId<?> context,
+			ProgramPoint pp)
+			throws SemanticException {
+		Pair<H, H> h = heapDomain.onExecutionToHalting(remaining.heapState, moved.heapState, pp);
+		Pair<V, V> v = valueDomain.onExecutionToHalting(remaining.valueState, moved.valueState, pp);
+		Pair<T, T> t = typeDomain.onExecutionToHalting(remaining.typeState, moved.typeState, pp);
+		return Pair.of(
+				h.getLeft() == remaining.heapState
+						&& v.getLeft() == remaining.valueState
+						&& t.getLeft() == remaining.typeState
+								? remaining
+								: new SimpleAbstractState<>(h.getLeft(), v.getLeft(), t.getLeft()),
+				h.getRight() == moved.heapState
+						&& v.getRight() == moved.valueState
+						&& t.getRight() == moved.typeState
+								? moved
+								: new SimpleAbstractState<>(h.getRight(), v.getRight(), t.getRight()));
+	}
+
+	@Override
 	public SemanticOracle makeOracle(
-			SimpleAbstractState<H, V, T> state) {
-		return new MutableOracle(state);
+			SimpleAbstractState<H, V, T> state,
+			ScopeId<?> context) {
+		return new MutableOracle(state, context);
 	}
 
 	/**
@@ -810,20 +881,33 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLatti
 		public T type;
 
 		/**
+		 * The interprocedural context where this oracle is used.
+		 */
+		private final ScopeId<?> context;
+
+		/**
 		 * Builds the oracle.
 		 * 
-		 * @param state the state to use as a starting point for this oracle
+		 * @param state   the state to use as a starting point for this oracle
+		 * @param context the interprocedural context where this oracle is used
 		 */
 		public MutableOracle(
-				SimpleAbstractState<H, V, T> state) {
+				SimpleAbstractState<H, V, T> state,
+				ScopeId<?> context) {
 			this.heap = state.heapState;
 			this.value = state.valueState;
 			this.type = state.typeState;
+			this.context = context;
 		}
 
 		@Override
 		public EventQueue getEventQueue() {
 			return events;
+		}
+
+		@Override
+		public ScopeId<?> getContext() {
+			return context;
 		}
 
 		@Override
