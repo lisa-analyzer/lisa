@@ -54,12 +54,14 @@ public class CallStackId<A extends AbstractLattice<A>>
 	}
 
 	private String computeHash() {
-		// equality considers both the calls and their entry states, so both
-		// must be part of the hash
-		StringBuilder sb = new StringBuilder();
-		for (Pair<CFGCall, AnalysisState<A>> call : calls)
-			sb.append(call.getLeft().getLocation()).append('\n').append(call.getRight()).append('\n');
-		return ScopeId.computeHash(sb.toString());
+		// the hash only depends on the call stack, and not on the entry
+		// states: since calls are inlined, the call stack already identifies
+		// the context, and including states would make the hash change
+		// whenever they do (e.g., at each iteration of a loop containing the
+		// call), possibly preventing the analysis from terminating when the
+		// hash is used to name abstractions (e.g., allocation sites). Equal
+		// ids still have equal hashes, as equality also compares the states
+		return ScopeId.computeHash(toString());
 	}
 
 	/**
