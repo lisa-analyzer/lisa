@@ -696,14 +696,16 @@ public class EqualityContractVerificationTest {
 		for (@SuppressWarnings("rawtypes")
 		Class<? extends ScopeId> token : scanner.getSubTypesOf(ScopeId.class))
 			if (token == KDepthToken.class)
-				// k is just a bound on the maximum length, it does not matter
-				verify(token, verifier -> verifier.withIgnoredFields("k"));
+				// k is just a bound on the maximum length, it does not matter,
+				// while the hash is derived from the calls
+				verify(token, verifier -> verifier.withIgnoredFields("k", "hash"));
 			else if (token == UniqueScope.class)
 				verify(token, Warning.INHERITED_DIRECTLY_FROM_OBJECT);
 			else if (token == CallStackId.class) {
+				// the hash is derived from the calls
 				verify(
 						token,
-						verifier -> verifier.withPrefabValues(
+						verifier -> verifier.withIgnoredFields("hash").withPrefabValues(
 								Pair.class,
 								Pair.of(cc1,
 										new Analysis<>(DefaultConfiguration.defaultAbstractDomain()).makeLattice()),

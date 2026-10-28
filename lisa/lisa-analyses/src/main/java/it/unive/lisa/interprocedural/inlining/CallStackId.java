@@ -27,8 +27,11 @@ public class CallStackId<A extends AbstractLattice<A>>
 
 	private final List<Pair<CFGCall, AnalysisState<A>>> calls;
 
+	private final String hash;
+
 	private CallStackId() {
 		this.calls = Collections.emptyList();
+		this.hash = computeHash();
 	}
 
 	private CallStackId(
@@ -38,6 +41,7 @@ public class CallStackId<A extends AbstractLattice<A>>
 		this.calls = new ArrayList<>(source.calls.size() + 1);
 		source.calls.forEach(this.calls::add);
 		this.calls.add(Pair.of(newToken, state));
+		this.hash = computeHash();
 	}
 
 	private CallStackId(
@@ -46,6 +50,16 @@ public class CallStackId<A extends AbstractLattice<A>>
 		this.calls = new ArrayList<>(source.calls.size() - toPop);
 		for (int i = 0; i < source.calls.size() - toPop; i++)
 			this.calls.add(source.calls.get(i));
+		this.hash = computeHash();
+	}
+
+	private String computeHash() {
+		// equality considers both the calls and their entry states, so both
+		// must be part of the hash
+		StringBuilder sb = new StringBuilder();
+		for (Pair<CFGCall, AnalysisState<A>> call : calls)
+			sb.append(call.getLeft().getLocation()).append('\n').append(call.getRight()).append('\n');
+		return ScopeId.computeHash(sb.toString());
 	}
 
 	/**
@@ -159,8 +173,7 @@ public class CallStackId<A extends AbstractLattice<A>>
 			for (Pair<CFGCall, AnalysisState<A>> call : calls)
 				// we use the hashcode of the location as the hashcode of the
 				// call is based on the ones of its targets, and a CFG hashcode
-				// is not consistent between executions - this is a problem as
-				// this object's hashcode is used as suffix in some filenames
+				// is not consistent between executions
 				result = prime * result + call.getLeft().getLocation().hashCode();
 		return result;
 	}
@@ -173,6 +186,11 @@ public class CallStackId<A extends AbstractLattice<A>>
 	@Override
 	public boolean isStartingId() {
 		return calls.isEmpty();
+	}
+
+	@Override
+	public String getHash() {
+		return hash;
 	}
 
 	@Override

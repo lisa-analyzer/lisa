@@ -12,6 +12,7 @@ import it.unive.lisa.analysis.nonrelational.type.TypeEnvironment;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
 import it.unive.lisa.imp.IMPFrontend;
 import it.unive.lisa.imp.ParsingException;
+import it.unive.lisa.interprocedural.ScopeId;
 import it.unive.lisa.lattices.ExpressionSet;
 import it.unive.lisa.lattices.SimpleAbstractState;
 import it.unive.lisa.lattices.heap.Monolith;
@@ -149,6 +150,33 @@ public class KDepthTokenTest {
 				.push(mkCall(2), mkCompoundState());
 
 		assertNotEquals(a, b);
+	}
+
+	@Test
+	public void hashIsConsistentWithEquality() {
+		var narrow = KDepthToken
+				.<SimpleAbstractState<Monolith, ValueEnvironment<IntInterval>, TypeEnvironment<TypeSet>>>create(
+						1)
+				.push(mkCall(7), mkCompoundState());
+		var wide = KDepthToken
+				.<SimpleAbstractState<Monolith, ValueEnvironment<IntInterval>, TypeEnvironment<TypeSet>>>create(
+						5)
+				.push(mkCall(7), mkCompoundState());
+		var other = KDepthToken
+				.<SimpleAbstractState<Monolith, ValueEnvironment<IntInterval>, TypeEnvironment<TypeSet>>>create(
+						5)
+				.push(mkCall(8), mkCompoundState());
+
+		assertEquals(narrow.getHash(), wide.getHash());
+		assertNotEquals(narrow.getHash(), other.getHash());
+		assertEquals(KDepthToken.create(3).getHash(), KDepthToken.create(0).getHash());
+	}
+
+	@Test
+	public void hashIsStableAcrossExecutions() {
+		// md5 of "<empty>"
+		assertEquals("eb5f5da91de44083d423fe942c39ec56", KDepthToken.create(3).getHash());
+		assertEquals("d41d8cd98f00b204e9800998ecf8427e", ScopeId.computeHash(""));
 	}
 
 	@Test
