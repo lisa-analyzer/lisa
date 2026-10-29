@@ -14,7 +14,8 @@ import it.unive.lisa.type.Type;
  * <li>{@link #condition(Statement, SymbolicExpression)}: the violation happens
  * if a condition holds after a given statement;</li>
  * <li>{@link #error()} and {@link #error(Type)}: the violation happens if the
- * statement moves the execution to an error continuation.</li>
+ * post-state of the statement contains an error continuation (i.e., an error
+ * raised by the statement, or propagated to it without being caught).</li>
  * </ul>
  * {@link WarningVerifier}s are not required to support all kinds of
  * violations, and should yield {@link VerificationOutcome#POSSIBLE} for the
@@ -53,9 +54,10 @@ public abstract class Violation {
 	}
 
 	/**
-	 * Builds a {@link Violation} that happens whenever the statement on which
-	 * the warning is issued moves the execution to an error continuation,
-	 * regardless of the type of the error.
+	 * Builds a {@link Violation} that happens whenever the post-state of the
+	 * statement on which the warning is issued contains an error continuation
+	 * (i.e., an error raised by the statement, or propagated to it without
+	 * being caught), regardless of the type of the error.
 	 *
 	 * @return the violation
 	 */
@@ -64,9 +66,10 @@ public abstract class Violation {
 	}
 
 	/**
-	 * Builds a {@link Violation} that happens whenever the statement on which
-	 * the warning is issued moves the execution to an error continuation for
-	 * an error whose type is a subtype of the given one.
+	 * Builds a {@link Violation} that happens whenever the post-state of the
+	 * statement on which the warning is issued contains an error continuation
+	 * (i.e., an error raised by the statement, or propagated to it without
+	 * being caught) for an error whose type is a subtype of the given one.
 	 *
 	 * @param type the type of the errors causing the violation
 	 *

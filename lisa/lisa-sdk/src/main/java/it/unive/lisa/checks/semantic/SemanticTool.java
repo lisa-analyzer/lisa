@@ -7,8 +7,6 @@ import it.unive.lisa.analysis.Analysis;
 import it.unive.lisa.analysis.AnalyzedCFG;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
-import it.unive.lisa.analysis.reachability.Reachability;
-import it.unive.lisa.analysis.reachability.ReachabilityStatus;
 import it.unive.lisa.checks.verification.VerificationOutcome;
 import it.unive.lisa.checks.verification.VerificationResult;
 import it.unive.lisa.checks.verification.Violation;
@@ -24,6 +22,7 @@ import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
 import it.unive.lisa.util.file.FileManager;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 
 /**
@@ -45,8 +44,6 @@ public class SemanticTool<A extends AbstractLattice<A>, D extends AbstractDomain
 	private final CallGraph callgraph;
 
 	private final Analysis<A, D> analysis;
-
-	private Reachability<A, D> reachability;
 
 	private WarningVerifier<A, D> verifier;
 
@@ -104,6 +101,16 @@ public class SemanticTool<A extends AbstractLattice<A>, D extends AbstractDomain
 	public Collection<AnalyzedCFG<A>> getResultOf(
 			CFG cfg) {
 		return results.get(cfg);
+	}
+
+	/**
+	 * Yields all the analysis results stored in this tool, grouped by
+	 * {@link CFG}.
+	 * 
+	 * @return an unmodifiable view of the results
+	 */
+	public Map<CFG, Collection<AnalyzedCFG<A>>> getResults() {
+		return Collections.unmodifiableMap(results);
 	}
 
 	/**
@@ -198,64 +205,6 @@ public class SemanticTool<A extends AbstractLattice<A>, D extends AbstractDomain
 	}
 
 	/**
-	 * Yields the reachability of the given statement within the given result,
-	 * that is, considering only the executions analyzed in the context of the
-	 * result (see
-	 * {@link Reachability#getReachability(AnalyzedCFG, Statement)}). The
-	 * reachability is computed lazily from the results stored in this tool, and
-	 * it is shared among all the checks using this tool.
-	 * 
-	 * @param result the result containing the statement
-	 * @param st     the statement
-	 * 
-	 * @return the reachability of the statement
-	 * 
-	 * @throws SemanticException if something goes wrong during the computation
-	 */
-	public ReachabilityStatus getReachability(
-			AnalyzedCFG<A> result,
-			Statement st)
-			throws SemanticException {
-		return getReachabilityAlgorithm().getReachability(result, st);
-	}
-
-	/**
-	 * Yields the reachability of the given statement, considering all the
-	 * results of its cfg (see {@link Reachability#getReachability(Statement)}).
-	 * The reachability is computed lazily from the results stored in this tool,
-	 * and it is shared among all the checks using this tool.
-	 * 
-	 * @param st the statement
-	 * 
-	 * @return the reachability of the statement
-	 * 
-	 * @throws SemanticException if something goes wrong during the computation
-	 */
-	public ReachabilityStatus getReachability(
-			Statement st)
-			throws SemanticException {
-		return getReachabilityAlgorithm().getReachability(st);
-	}
-
-	/**
-	 * Yields the reachability of the entry of the given result (see
-	 * {@link Reachability#getEntryReachability(AnalyzedCFG)}). The reachability
-	 * is computed lazily from the results stored in this tool, and it is shared
-	 * among all the checks using this tool.
-	 * 
-	 * @param result the result
-	 * 
-	 * @return the reachability of the entry of the result
-	 * 
-	 * @throws SemanticException if something goes wrong during the computation
-	 */
-	public ReachabilityStatus getEntryReachability(
-			AnalyzedCFG<A> result)
-			throws SemanticException {
-		return getReachabilityAlgorithm().getEntryReachability(result);
-	}
-
-	/**
 	 * Verifies whether the given violation can happen at the given statement,
 	 * considering only the executions analyzed in the context of the given
 	 * result. The verification is delegated to the {@link WarningVerifier}
@@ -328,19 +277,6 @@ public class SemanticTool<A extends AbstractLattice<A>, D extends AbstractDomain
 			verifier = candidate;
 		}
 		return verifier;
-	}
-
-	private synchronized Reachability<A, D> getReachabilityAlgorithm() {
-		if (reachability == null) {
-			// we use an analysis without events, as the queries are not
-			// part of the fixpoint computation
-			@SuppressWarnings({ "rawtypes", "unchecked" })
-			Analysis<A, D> quiet = new Analysis(
-					getConfiguration().analysis,
-					getConfiguration().shouldSmashError);
-			reachability = new Reachability<>(results, callgraph, quiet);
-		}
-		return reachability;
 	}
 
 }

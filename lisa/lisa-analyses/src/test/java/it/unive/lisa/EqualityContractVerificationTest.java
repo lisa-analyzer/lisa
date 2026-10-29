@@ -21,6 +21,9 @@ import it.unive.lisa.analysis.informationFlow.NonInterference;
 import it.unive.lisa.analysis.numeric.Interval;
 import it.unive.lisa.analysis.numeric.Sign;
 import it.unive.lisa.analysis.symbols.Symbol;
+import it.unive.lisa.checks.verification.ConditionViolation;
+import it.unive.lisa.checks.verification.ErrorViolation;
+import it.unive.lisa.checks.verification.VerificationResult;
 import it.unive.lisa.conf.FixpointConfiguration;
 import it.unive.lisa.conf.LiSAConfiguration;
 import it.unive.lisa.cron.CronConfiguration;
@@ -509,7 +512,8 @@ public class EqualityContractVerificationTest {
 	public void testTypes() {
 		Reflections scanner = mkReflections();
 		for (Class<? extends Type> type : scanner.getSubTypesOf(Type.class))
-			if (!type.getName().contains("BaseCallGraphTest"))
+			// testing classes are skipped
+			if (!type.getName().contains("Test"))
 				// type token is the only one with an eclipse-like equals
 				verify(
 						type,
@@ -686,6 +690,13 @@ public class EqualityContractVerificationTest {
 	}
 
 	@Test
+	public void testVerification() {
+		verify(ConditionViolation.class);
+		verify(ErrorViolation.class);
+		verify(VerificationResult.class);
+	}
+
+	@Test
 	public void testInterproceduralObjects() {
 		verify(CallGraphEdge.class);
 		verify(CallGraphNode.class, verifier -> verifier.withIgnoredFields("graph"));
@@ -695,7 +706,10 @@ public class EqualityContractVerificationTest {
 		Reflections scanner = mkReflections();
 		for (@SuppressWarnings("rawtypes")
 		Class<? extends ScopeId> token : scanner.getSubTypesOf(ScopeId.class))
-			if (token == KDepthToken.class)
+			if (token.getName().contains("Test"))
+				// testing classes are skipped
+				continue;
+			else if (token == KDepthToken.class)
 				// k is just a bound on the maximum length, it does not matter,
 				// while the hash is derived from the calls
 				verify(token, verifier -> verifier.withIgnoredFields("k", "hash"));

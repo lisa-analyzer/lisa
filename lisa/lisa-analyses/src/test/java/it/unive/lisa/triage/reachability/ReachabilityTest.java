@@ -1,8 +1,8 @@
-package it.unive.lisa.analysis.reachability;
+package it.unive.lisa.triage.reachability;
 
-import static it.unive.lisa.analysis.reachability.ReachabilityStatus.POSSIBLY_REACHABLE;
-import static it.unive.lisa.analysis.reachability.ReachabilityStatus.REACHABLE;
-import static it.unive.lisa.analysis.reachability.ReachabilityStatus.UNREACHABLE;
+import static it.unive.lisa.triage.reachability.ReachabilityStatus.POSSIBLY_REACHABLE;
+import static it.unive.lisa.triage.reachability.ReachabilityStatus.REACHABLE;
+import static it.unive.lisa.triage.reachability.ReachabilityStatus.UNREACHABLE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import it.unive.lisa.TestCallGraph;
@@ -12,10 +12,15 @@ import it.unive.lisa.analysis.Analysis;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.AnalysisState.Error;
 import it.unive.lisa.analysis.AnalyzedCFG;
-import it.unive.lisa.analysis.MarkerAbstractDomain;
-import it.unive.lisa.analysis.MarkerAbstractLattice;
+import it.unive.lisa.analysis.TestMarkerAbstractDomain;
+import it.unive.lisa.analysis.TestMarkerAbstractLattice;
 import it.unive.lisa.analysis.ProgramState;
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.util.file.FileManager;
+import it.unive.lisa.conf.LiSAConfiguration;
+import it.unive.lisa.checks.verification.Violation;
+import it.unive.lisa.checks.verification.VerificationResult;
+import it.unive.lisa.checks.semantic.SemanticTool;
 import it.unive.lisa.interprocedural.ScopeId;
 import it.unive.lisa.interprocedural.UniqueScope;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
@@ -63,7 +68,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 /**
- * Tests for {@link Reachability}. Each test builds the cfgs and the results of
+ * Tests for {@link Reachability} and {@link ReachabilityVerifier}. Each test builds the cfgs and the results of
  * the fixpoint by hand, choosing the post-state of each statement, and then
  * queries the reachability of the statements. Conditions are evaluated by
  * {@link Domain}, where the state of a guard records whether the condition
@@ -86,7 +91,7 @@ public class ReachabilityTest {
 
 	private Program program;
 
-	private Map<CFG, Collection<AnalyzedCFG<MarkerAbstractLattice>>> results;
+	private Map<CFG, Collection<AnalyzedCFG<TestMarkerAbstractLattice>>> results;
 
 	private Collection<CFGCall> calls;
 
@@ -99,11 +104,11 @@ public class ReachabilityTest {
 	 */
 	private static class Domain
 			extends
-			MarkerAbstractDomain {
+			TestMarkerAbstractDomain {
 
 		@Override
 		public Satisfiability satisfies(
-				MarkerAbstractLattice state,
+				TestMarkerAbstractLattice state,
 				SymbolicExpression expression,
 				ScopeId<?> context,
 				ProgramPoint pp) {
@@ -174,7 +179,7 @@ public class ReachabilityTest {
 	 */
 	private static class CallStack
 			implements
-			ScopeId<MarkerAbstractLattice> {
+			ScopeId<TestMarkerAbstractLattice> {
 
 		private final List<CFGCall> stack;
 
@@ -184,7 +189,7 @@ public class ReachabilityTest {
 		}
 
 		@Override
-		public ScopeId<MarkerAbstractLattice> startingId() {
+		public ScopeId<TestMarkerAbstractLattice> startingId() {
 			return new CallStack(List.of());
 		}
 
@@ -194,9 +199,9 @@ public class ReachabilityTest {
 		}
 
 		@Override
-		public ScopeId<MarkerAbstractLattice> push(
+		public ScopeId<TestMarkerAbstractLattice> push(
 				CFGCall c,
-				CompoundState<MarkerAbstractLattice> state) {
+				CompoundState<TestMarkerAbstractLattice> state) {
 			List<CFGCall> pushed = new ArrayList<>(stack);
 			pushed.add(c);
 			return new CallStack(pushed);
@@ -225,7 +230,7 @@ public class ReachabilityTest {
 	 */
 	private static class StateStack
 			implements
-			ScopeId<MarkerAbstractLattice> {
+			ScopeId<TestMarkerAbstractLattice> {
 
 		private final List<Object> stack;
 
@@ -235,7 +240,7 @@ public class ReachabilityTest {
 		}
 
 		@Override
-		public ScopeId<MarkerAbstractLattice> startingId() {
+		public ScopeId<TestMarkerAbstractLattice> startingId() {
 			return new StateStack(List.of());
 		}
 
@@ -245,9 +250,9 @@ public class ReachabilityTest {
 		}
 
 		@Override
-		public ScopeId<MarkerAbstractLattice> push(
+		public ScopeId<TestMarkerAbstractLattice> push(
 				CFGCall c,
-				CompoundState<MarkerAbstractLattice> state) {
+				CompoundState<TestMarkerAbstractLattice> state) {
 			List<Object> pushed = new ArrayList<>(stack);
 			pushed.add(c);
 			pushed.add(state.postState);
@@ -364,25 +369,25 @@ public class ReachabilityTest {
 				.addProtectionBlock(new ProtectionBlock(block, List.of(catches), null, null, null));
 	}
 
-	private static ProgramState<MarkerAbstractLattice> program(
+	private static ProgramState<TestMarkerAbstractLattice> program(
 			Identifier... known) {
-		return new ProgramState<>(new MarkerAbstractLattice(new HashSet<>(Set.of(known))), new ExpressionSet());
+		return new ProgramState<>(new TestMarkerAbstractLattice(new HashSet<>(Set.of(known))), new ExpressionSet());
 	}
 
-	private static AnalysisState<MarkerAbstractLattice> state(
-			ProgramState<MarkerAbstractLattice> execution) {
+	private static AnalysisState<TestMarkerAbstractLattice> state(
+			ProgramState<TestMarkerAbstractLattice> execution) {
 		return new AnalysisState<>(execution).bottom().withExecution(execution);
 	}
 
-	private static AnalysisState<MarkerAbstractLattice> ok() {
+	private static AnalysisState<TestMarkerAbstractLattice> ok() {
 		return state(program());
 	}
 
-	private static AnalysisState<MarkerAbstractLattice> dead() {
+	private static AnalysisState<TestMarkerAbstractLattice> dead() {
 		return ok().bottom();
 	}
 
-	private static AnalysisState<MarkerAbstractLattice> guard(
+	private static AnalysisState<TestMarkerAbstractLattice> guard(
 			boolean mayHold,
 			boolean mayFail) {
 		Set<Identifier> known = new HashSet<>();
@@ -390,24 +395,24 @@ public class ReachabilityTest {
 			known.add(MAY_HOLD);
 		if (mayFail)
 			known.add(MAY_FAIL);
-		return state(new ProgramState<>(new MarkerAbstractLattice(known), new ExpressionSet(CONDITION)));
+		return state(new ProgramState<>(new TestMarkerAbstractLattice(known), new ExpressionSet(CONDITION)));
 	}
 
-	private static AnalysisState<MarkerAbstractLattice> knowing(
+	private static AnalysisState<TestMarkerAbstractLattice> knowing(
 			Identifier... known) {
 		return state(program(known));
 	}
 
-	private static AnalysisState<MarkerAbstractLattice> raising(
-			AnalysisState<MarkerAbstractLattice> state,
+	private static AnalysisState<TestMarkerAbstractLattice> raising(
+			AnalysisState<TestMarkerAbstractLattice> state,
 			Type type,
 			Statement thrower)
 			throws SemanticException {
 		return state.addError(new Error(type, thrower), program());
 	}
 
-	private static AnalysisState<MarkerAbstractLattice> halting(
-			AnalysisState<MarkerAbstractLattice> state) {
+	private static AnalysisState<TestMarkerAbstractLattice> halting(
+			AnalysisState<TestMarkerAbstractLattice> state) {
 		return state.withHalt(program());
 	}
 
@@ -416,35 +421,35 @@ public class ReachabilityTest {
 	 * specified in {@code posts} (given as statement-state pairs) are
 	 * {@link #ok()}.
 	 */
-	private AnalyzedCFG<MarkerAbstractLattice> result(
+	private AnalyzedCFG<TestMarkerAbstractLattice> result(
 			CFG cfg,
-			ScopeId<MarkerAbstractLattice> id,
+			ScopeId<TestMarkerAbstractLattice> id,
 			Object... posts) {
 		return result(cfg, id, ok(), posts);
 	}
 
-	private AnalyzedCFG<MarkerAbstractLattice> result(
+	private AnalyzedCFG<TestMarkerAbstractLattice> result(
 			CFG cfg,
-			ScopeId<MarkerAbstractLattice> id,
-			AnalysisState<MarkerAbstractLattice> entry,
+			ScopeId<TestMarkerAbstractLattice> id,
+			AnalysisState<TestMarkerAbstractLattice> entry,
 			Object... posts) {
-		Map<Statement, AnalysisState<MarkerAbstractLattice>> post = new HashMap<>();
+		Map<Statement, AnalysisState<TestMarkerAbstractLattice>> post = new HashMap<>();
 		for (Statement st : cfg.getNodes())
 			post.put(st, ok());
 		for (int i = 0; i < posts.length; i += 2) {
 			@SuppressWarnings("unchecked")
-			AnalysisState<MarkerAbstractLattice> state = (AnalysisState<MarkerAbstractLattice>) posts[i + 1];
+			AnalysisState<TestMarkerAbstractLattice> state = (AnalysisState<TestMarkerAbstractLattice>) posts[i + 1];
 			post.put((Statement) posts[i], state);
 		}
-		Map<Statement, AnalysisState<MarkerAbstractLattice>> entries = new HashMap<>();
+		Map<Statement, AnalysisState<TestMarkerAbstractLattice>> entries = new HashMap<>();
 		for (Statement st : cfg.getEntrypoints())
 			entries.put(st, entry);
-		AnalyzedCFG<MarkerAbstractLattice> res = new AnalyzedCFG<>(cfg, id, ok(), entries, post);
+		AnalyzedCFG<TestMarkerAbstractLattice> res = new AnalyzedCFG<>(cfg, id, ok(), entries, post);
 		results.computeIfAbsent(cfg, c -> new ArrayList<>()).add(res);
 		return res;
 	}
 
-	private Reachability<MarkerAbstractLattice, Domain> reachability()
+	private Reachability<TestMarkerAbstractLattice, Domain> reachability()
 			throws CallGraphConstructionException {
 		CallGraph callgraph = new TestCallGraph();
 		callgraph.init(new Application(program), null);
@@ -454,8 +459,8 @@ public class ReachabilityTest {
 	}
 
 	private static void check(
-			Reachability<MarkerAbstractLattice, Domain> reach,
-			AnalyzedCFG<MarkerAbstractLattice> result,
+			Reachability<TestMarkerAbstractLattice, Domain> reach,
+			AnalyzedCFG<TestMarkerAbstractLattice> result,
 			Object... expected)
 			throws SemanticException {
 		for (int i = 0; i < expected.length; i += 2) {
@@ -471,7 +476,7 @@ public class ReachabilityTest {
 		CFG main = cfg("main", true);
 		Statement a = node(main, true), b = node(main), c = node(main);
 		seq(a, b, c);
-		AnalyzedCFG<MarkerAbstractLattice> res = result(main, new CallStack(List.of()));
+		AnalyzedCFG<TestMarkerAbstractLattice> res = result(main, new CallStack(List.of()));
 
 		check(reachability(), res, a, REACHABLE, b, REACHABLE, c, REACHABLE);
 	}
@@ -484,7 +489,7 @@ public class ReachabilityTest {
 		branch(g, t, f);
 		seq(t, join);
 		seq(f, join);
-		AnalyzedCFG<MarkerAbstractLattice> res = result(main, new CallStack(List.of()), g, guard(true, true));
+		AnalyzedCFG<TestMarkerAbstractLattice> res = result(main, new CallStack(List.of()), g, guard(true, true));
 
 		check(reachability(), res, g, REACHABLE, t, POSSIBLY_REACHABLE, f, POSSIBLY_REACHABLE, join, REACHABLE);
 	}
@@ -499,7 +504,7 @@ public class ReachabilityTest {
 		branch(g, t, f);
 		seq(t, join);
 		seq(f, join);
-		AnalyzedCFG<MarkerAbstractLattice> res = result(main, new CallStack(List.of()), g, guard(true, false));
+		AnalyzedCFG<TestMarkerAbstractLattice> res = result(main, new CallStack(List.of()), g, guard(true, false));
 
 		check(reachability(), res, t, REACHABLE, f, UNREACHABLE, join, REACHABLE);
 	}
@@ -518,7 +523,7 @@ public class ReachabilityTest {
 		branch(g2, t2, f2);
 		seq(t2, end);
 		seq(f2, end);
-		AnalyzedCFG<MarkerAbstractLattice> res = result(main, new CallStack(List.of()),
+		AnalyzedCFG<TestMarkerAbstractLattice> res = result(main, new CallStack(List.of()),
 				g1, guard(true, true), g2, guard(true, true));
 
 		check(reachability(), res, t1, POSSIBLY_REACHABLE, f1, POSSIBLY_REACHABLE, g2, REACHABLE, t2,
@@ -538,7 +543,7 @@ public class ReachabilityTest {
 		branch(g2, body, end);
 		seq(body, g2);
 		loop(g2, end, body);
-		AnalyzedCFG<MarkerAbstractLattice> res = result(main, new CallStack(List.of()),
+		AnalyzedCFG<TestMarkerAbstractLattice> res = result(main, new CallStack(List.of()),
 				g1, guard(true, true),
 				t1, knowing(MAY_HOLD),
 				f1, knowing(MAY_HOLD),
@@ -553,7 +558,7 @@ public class ReachabilityTest {
 		CFG main = cfg("main", true);
 		Statement a = node(main, true), b = node(main), c = node(main);
 		seq(a, b, c);
-		AnalyzedCFG<MarkerAbstractLattice> res = result(main, new CallStack(List.of()), b, dead(), c, dead());
+		AnalyzedCFG<TestMarkerAbstractLattice> res = result(main, new CallStack(List.of()), b, dead(), c, dead());
 
 		check(reachability(), res, a, REACHABLE, b, UNREACHABLE, c, UNREACHABLE);
 	}
@@ -565,7 +570,7 @@ public class ReachabilityTest {
 		Statement g = node(main, true), ret = node(main), a = node(main), b = node(main);
 		branch(g, ret, a);
 		seq(a, b);
-		AnalyzedCFG<MarkerAbstractLattice> res = result(main, new CallStack(List.of()), g, guard(true, true));
+		AnalyzedCFG<TestMarkerAbstractLattice> res = result(main, new CallStack(List.of()), g, guard(true, true));
 
 		check(reachability(), res, g, REACHABLE, ret, POSSIBLY_REACHABLE, a, POSSIBLY_REACHABLE, b,
 				POSSIBLY_REACHABLE);
@@ -577,7 +582,7 @@ public class ReachabilityTest {
 		CFG main = cfg("main", true);
 		Statement sometimes = node(main, true), a = node(main), always = node(main), b = node(main);
 		seq(sometimes, a, always, b);
-		AnalyzedCFG<MarkerAbstractLattice> res = result(main, new CallStack(List.of()),
+		AnalyzedCFG<TestMarkerAbstractLattice> res = result(main, new CallStack(List.of()),
 				sometimes, raising(ok(), A, sometimes),
 				// b's post-state is not bottom, but no normal execution
 				// leaves always
@@ -598,7 +603,7 @@ public class ReachabilityTest {
 		Statement handler = node(main);
 		ProtectedBlock block = tryBlock(ret, ret, ret);
 		protection(block, catchBlock(block, handler, A));
-		AnalyzedCFG<MarkerAbstractLattice> res = result(main, new CallStack(List.of()),
+		AnalyzedCFG<TestMarkerAbstractLattice> res = result(main, new CallStack(List.of()),
 				ret, raising(dead(), A, inner));
 
 		check(reachability(), res, ret, REACHABLE, handler, REACHABLE);
@@ -617,7 +622,7 @@ public class ReachabilityTest {
 		protection(first, catchBlock(first, handler1, A));
 		ProtectedBlock second = tryBlock(always, next, always, next);
 		protection(second, catchBlock(second, handler2, A));
-		AnalyzedCFG<MarkerAbstractLattice> res = result(main, new CallStack(List.of()),
+		AnalyzedCFG<TestMarkerAbstractLattice> res = result(main, new CallStack(List.of()),
 				sometimes, raising(ok(), A, sometimes),
 				always, raising(dead(), A, always));
 
@@ -634,7 +639,7 @@ public class ReachabilityTest {
 		seq(thrower, next);
 		ProtectedBlock block = tryBlock(thrower, thrower, thrower);
 		protection(block, catchBlock(block, handler, A));
-		AnalyzedCFG<MarkerAbstractLattice> res = result(main, new CallStack(List.of()),
+		AnalyzedCFG<TestMarkerAbstractLattice> res = result(main, new CallStack(List.of()),
 				thrower, raising(dead(), B, thrower));
 
 		check(reachability(), res, handler, REACHABLE, next, UNREACHABLE);
@@ -648,7 +653,7 @@ public class ReachabilityTest {
 		seq(thrower, next);
 		ProtectedBlock block = tryBlock(thrower, thrower, thrower);
 		protection(block, catchBlock(block, handler, B));
-		AnalyzedCFG<MarkerAbstractLattice> res = result(main, new CallStack(List.of()),
+		AnalyzedCFG<TestMarkerAbstractLattice> res = result(main, new CallStack(List.of()),
 				thrower, raising(ok(), C, thrower));
 
 		check(reachability(), res, handler, UNREACHABLE, next, POSSIBLY_REACHABLE);
@@ -669,7 +674,7 @@ public class ReachabilityTest {
 		protection(inner, catchBlock(inner, innerHandler, A));
 		ProtectedBlock outer = tryBlock(start, innerHandler, start, thrower, otherHandler, innerHandler);
 		protection(outer, catchBlock(outer, outerHandler, A));
-		AnalyzedCFG<MarkerAbstractLattice> res = result(main, new CallStack(List.of()),
+		AnalyzedCFG<TestMarkerAbstractLattice> res = result(main, new CallStack(List.of()),
 				thrower, raising(dead(), B, thrower));
 
 		check(reachability(), res, innerHandler, REACHABLE, outerHandler, UNREACHABLE, otherHandler, UNREACHABLE);
@@ -689,7 +694,7 @@ public class ReachabilityTest {
 		seq(handlerB, join);
 		ProtectedBlock block = tryBlock(throwsB, throwsC, throwsB, throwsC);
 		protection(block, catchBlock(block, handlerA, A), catchBlock(block, handlerB, B));
-		AnalyzedCFG<MarkerAbstractLattice> res = result(main, new CallStack(List.of()),
+		AnalyzedCFG<TestMarkerAbstractLattice> res = result(main, new CallStack(List.of()),
 				throwsB, raising(dead(), B, throwsB));
 		check(reachability(), res, handlerB, REACHABLE, handlerA, UNREACHABLE, throwsC, UNREACHABLE);
 
@@ -706,7 +711,7 @@ public class ReachabilityTest {
 		seq(thrower, next);
 		ProtectedBlock block = tryBlock(thrower, thrower, thrower);
 		protection(block, catchBlock(block, handler, A));
-		AnalyzedCFG<MarkerAbstractLattice> res = result(main, new CallStack(List.of()),
+		AnalyzedCFG<TestMarkerAbstractLattice> res = result(main, new CallStack(List.of()),
 				thrower, ok().addSmashedError(new Error(A, thrower), program()));
 
 		check(reachability(), res, handler, POSSIBLY_REACHABLE, next, POSSIBLY_REACHABLE);
@@ -722,7 +727,7 @@ public class ReachabilityTest {
 		seq(thrower, next);
 		ProtectedBlock block = tryBlock(thrower, thrower, thrower);
 		protection(block, catchBlock(block, handler, A));
-		AnalyzedCFG<MarkerAbstractLattice> res = result(main, new CallStack(List.of()),
+		AnalyzedCFG<TestMarkerAbstractLattice> res = result(main, new CallStack(List.of()),
 				thrower, raising(ok(), A, thrower), handler, dead());
 
 		check(reachability(), res, handler, UNREACHABLE, next, POSSIBLY_REACHABLE);
@@ -734,7 +739,7 @@ public class ReachabilityTest {
 		CFG main = cfg("main", true);
 		Statement sometimes = node(main, true), a = node(main), always = node(main), b = node(main);
 		seq(sometimes, a, always, b);
-		AnalyzedCFG<MarkerAbstractLattice> res = result(main, new CallStack(List.of()),
+		AnalyzedCFG<TestMarkerAbstractLattice> res = result(main, new CallStack(List.of()),
 				sometimes, halting(ok()),
 				a, halting(ok()),
 				always, halting(dead()),
@@ -750,7 +755,7 @@ public class ReachabilityTest {
 		CFG main = cfg("main", true);
 		Statement a = node(main, true), b = node(main), c = node(main);
 		seq(a, b, c);
-		AnalyzedCFG<MarkerAbstractLattice> res = result(main, new CallStack(List.of()), halting(ok()),
+		AnalyzedCFG<TestMarkerAbstractLattice> res = result(main, new CallStack(List.of()), halting(ok()),
 				a, halting(ok()),
 				b, halting(ok()),
 				c, halting(ok()));
@@ -773,7 +778,7 @@ public class ReachabilityTest {
 		CFGCall haltingCall = call(main, halts, false);
 		Statement b = node(main);
 		seq(safeCall, a, haltingCall, b);
-		AnalyzedCFG<MarkerAbstractLattice> res = result(main, new CallStack(List.of()), halting(ok()),
+		AnalyzedCFG<TestMarkerAbstractLattice> res = result(main, new CallStack(List.of()), halting(ok()),
 				safeCall, halting(ok()),
 				a, halting(ok()),
 				haltingCall, halting(ok()),
@@ -795,7 +800,7 @@ public class ReachabilityTest {
 		loop(g, after, body);
 
 		// the guard initially holds
-		AnalyzedCFG<MarkerAbstractLattice> res = result(main, new CallStack(List.of()),
+		AnalyzedCFG<TestMarkerAbstractLattice> res = result(main, new CallStack(List.of()),
 				init, knowing(MAY_HOLD), g, guard(true, true));
 		check(reachability(), res, g, REACHABLE, body, REACHABLE, after, REACHABLE);
 
@@ -822,7 +827,7 @@ public class ReachabilityTest {
 		branch(inc, ret, g);
 		seq(brk, after);
 		loop(g, after, inner, brk, inc, ret);
-		AnalyzedCFG<MarkerAbstractLattice> res = result(main, new CallStack(List.of()),
+		AnalyzedCFG<TestMarkerAbstractLattice> res = result(main, new CallStack(List.of()),
 				init, knowing(MAY_HOLD),
 				g, guard(true, true),
 				inner, guard(true, true),
@@ -842,7 +847,7 @@ public class ReachabilityTest {
 		branch(g, body, after);
 		seq(body, g);
 		loop(g, after, body);
-		AnalyzedCFG<MarkerAbstractLattice> res = result(main, new CallStack(List.of()),
+		AnalyzedCFG<TestMarkerAbstractLattice> res = result(main, new CallStack(List.of()),
 				init, knowing(MAY_HOLD), g, guard(true, false));
 
 		// executions that never leave the loop still execute what precedes it
@@ -859,7 +864,7 @@ public class ReachabilityTest {
 		branch(g, t, f);
 		CFGCall synthetic = new CFGCall(main, (SourceCodeLocation) t.getLocation(), CallType.STATIC, "test", "x",
 				List.of());
-		AnalyzedCFG<MarkerAbstractLattice> res = result(main, new CallStack(List.of()), g, guard(true, true));
+		AnalyzedCFG<TestMarkerAbstractLattice> res = result(main, new CallStack(List.of()), g, guard(true, true));
 
 		check(reachability(), res, synthetic, POSSIBLY_REACHABLE);
 	}
@@ -879,9 +884,9 @@ public class ReachabilityTest {
 		calls.add(synthetic);
 		CallStack start = new CallStack(List.of());
 		result(main, start);
-		AnalyzedCFG<MarkerAbstractLattice> res = result(callee, start.push(synthetic, null));
+		AnalyzedCFG<TestMarkerAbstractLattice> res = result(callee, start.push(synthetic, null));
 
-		Reachability<MarkerAbstractLattice, Domain> reach = reachability();
+		Reachability<TestMarkerAbstractLattice, Domain> reach = reachability();
 		assertEquals(REACHABLE, reach.getEntryReachability(res));
 		assertEquals(REACHABLE, reach.getReachability(body));
 	}
@@ -910,17 +915,17 @@ public class ReachabilityTest {
 		branch(g2, c3, c4);
 		seq(c3, c4, end);
 		CallStack start = new CallStack(List.of());
-		AnalyzedCFG<MarkerAbstractLattice> res = result(main, start,
+		AnalyzedCFG<TestMarkerAbstractLattice> res = result(main, start,
 				g1, guard(true, true), g2, guard(false, true));
 
-		AnalyzedCFG<MarkerAbstractLattice> always1 = result(always, start.push(c1, null));
-		AnalyzedCFG<MarkerAbstractLattice> always4 = result(always, start.push(c4, null));
-		AnalyzedCFG<MarkerAbstractLattice> sometimes2 = result(sometimes, start.push(c2, null));
-		AnalyzedCFG<MarkerAbstractLattice> never3 = result(never, start.push(c3, null));
+		AnalyzedCFG<TestMarkerAbstractLattice> always1 = result(always, start.push(c1, null));
+		AnalyzedCFG<TestMarkerAbstractLattice> always4 = result(always, start.push(c4, null));
+		AnalyzedCFG<TestMarkerAbstractLattice> sometimes2 = result(sometimes, start.push(c2, null));
+		AnalyzedCFG<TestMarkerAbstractLattice> never3 = result(never, start.push(c3, null));
 		// no call site leads to this context
-		AnalyzedCFG<MarkerAbstractLattice> unlinked = result(always, start.push(c2, null));
+		AnalyzedCFG<TestMarkerAbstractLattice> unlinked = result(always, start.push(c2, null));
 
-		Reachability<MarkerAbstractLattice, Domain> reach = reachability();
+		Reachability<TestMarkerAbstractLattice, Domain> reach = reachability();
 		check(reach, res, c1, REACHABLE, c2, POSSIBLY_REACHABLE, c3, UNREACHABLE, c4, REACHABLE);
 		assertEquals(REACHABLE, reach.getEntryReachability(res));
 		assertEquals(REACHABLE, reach.getEntryReachability(always1));
@@ -953,11 +958,11 @@ public class ReachabilityTest {
 		seq(toLeaf, end);
 		CallStack start = new CallStack(List.of());
 		result(main, start);
-		ScopeId<MarkerAbstractLattice> middleId = start.push(toMiddle, null);
+		ScopeId<TestMarkerAbstractLattice> middleId = start.push(toMiddle, null);
 		result(middle, middleId, g, guard(true, true));
-		AnalyzedCFG<MarkerAbstractLattice> leafRes = result(leaf, middleId.push(toLeaf, null));
+		AnalyzedCFG<TestMarkerAbstractLattice> leafRes = result(leaf, middleId.push(toLeaf, null));
 
-		Reachability<MarkerAbstractLattice, Domain> reach = reachability();
+		Reachability<TestMarkerAbstractLattice, Domain> reach = reachability();
 		assertEquals(POSSIBLY_REACHABLE, reach.getEntryReachability(leafRes));
 		assertEquals(POSSIBLY_REACHABLE, reach.getReachability(leafBody));
 	}
@@ -966,7 +971,7 @@ public class ReachabilityTest {
 	public void recursion()
 			throws Exception {
 		// with a single scope, recursive calls are linked to the same result
-		ScopeId<MarkerAbstractLattice> unique = new UniqueScope<>();
+		ScopeId<TestMarkerAbstractLattice> unique = new UniqueScope<>();
 		CFG main = cfg("main", true);
 		CFG rec = cfg("rec", false);
 		CFG orphan = cfg("orphan", false);
@@ -979,10 +984,10 @@ public class ReachabilityTest {
 		CFGCall orphanSelf = call(orphan, orphan, false);
 		seq(o, orphanSelf);
 		result(main, unique);
-		AnalyzedCFG<MarkerAbstractLattice> recRes = result(rec, unique, g, guard(true, true));
-		AnalyzedCFG<MarkerAbstractLattice> orphanRes = result(orphan, unique);
+		AnalyzedCFG<TestMarkerAbstractLattice> recRes = result(rec, unique, g, guard(true, true));
+		AnalyzedCFG<TestMarkerAbstractLattice> orphanRes = result(orphan, unique);
 
-		Reachability<MarkerAbstractLattice, Domain> reach = reachability();
+		Reachability<TestMarkerAbstractLattice, Domain> reach = reachability();
 		assertEquals(REACHABLE, reach.getEntryReachability(recRes));
 		check(reach, recRes, g, REACHABLE, self, POSSIBLY_REACHABLE, base, POSSIBLY_REACHABLE);
 		// orphan is only called by itself
@@ -997,10 +1002,10 @@ public class ReachabilityTest {
 		CFG other = cfg("other", false);
 		Statement m = node(main, true);
 		Statement o = node(other, true);
-		AnalyzedCFG<MarkerAbstractLattice> mainRes = result(main, new CallStack(List.of()));
-		AnalyzedCFG<MarkerAbstractLattice> otherRes = result(other, new CallStack(List.of()));
+		AnalyzedCFG<TestMarkerAbstractLattice> mainRes = result(main, new CallStack(List.of()));
+		AnalyzedCFG<TestMarkerAbstractLattice> otherRes = result(other, new CallStack(List.of()));
 
-		Reachability<MarkerAbstractLattice, Domain> reach = reachability();
+		Reachability<TestMarkerAbstractLattice, Domain> reach = reachability();
 		check(reach, mainRes, m, REACHABLE);
 		// not an entrypoint, and with no call sites
 		check(reach, otherRes, o, POSSIBLY_REACHABLE);
@@ -1019,14 +1024,14 @@ public class ReachabilityTest {
 		main.addNode(call, true);
 		calls.add(call);
 		StateStack start = new StateStack(List.of());
-		result(main, start, param, state(new ProgramState<>(new MarkerAbstractLattice(Set.of(MAY_HOLD)),
+		result(main, start, param, state(new ProgramState<>(new TestMarkerAbstractLattice(Set.of(MAY_HOLD)),
 				new ExpressionSet(CONDITION))));
-		AnalyzedCFG<MarkerAbstractLattice> linked = result(callee,
+		AnalyzedCFG<TestMarkerAbstractLattice> linked = result(callee,
 				start.push(call, CompoundState.of(knowing(MAY_HOLD), null)));
-		AnalyzedCFG<MarkerAbstractLattice> unlinked = result(callee,
+		AnalyzedCFG<TestMarkerAbstractLattice> unlinked = result(callee,
 				start.push(call, CompoundState.of(ok(), null)));
 
-		Reachability<MarkerAbstractLattice, Domain> reach = reachability();
+		Reachability<TestMarkerAbstractLattice, Domain> reach = reachability();
 		assertEquals(REACHABLE, reach.getEntryReachability(linked));
 		assertEquals(POSSIBLY_REACHABLE, reach.getEntryReachability(unlinked));
 		assertEquals(REACHABLE, reach.getReachability(body));
@@ -1048,11 +1053,109 @@ public class ReachabilityTest {
 		Identifier x = new VariableRef(main, a.getLocation(), "x").getIdentifier();
 		StateStack start = new StateStack(List.of());
 		result(main, start, a, knowing(x));
-		AnalyzedCFG<MarkerAbstractLattice> linked = result(callee,
+		AnalyzedCFG<TestMarkerAbstractLattice> linked = result(callee,
 				start.push(call, CompoundState.of(ok(), null)));
 
-		Reachability<MarkerAbstractLattice, Domain> reach = reachability();
+		Reachability<TestMarkerAbstractLattice, Domain> reach = reachability();
 		assertEquals(REACHABLE, reach.getEntryReachability(linked));
 		assertEquals(REACHABLE, reach.getReachability(body));
+	}
+
+	private ReachabilityVerifier<TestMarkerAbstractLattice, Domain> verifier()
+			throws Exception {
+		CallGraph callgraph = new TestCallGraph();
+		callgraph.init(new Application(program), null);
+		for (CFGCall call : calls)
+			callgraph.registerCall(call);
+		LiSAConfiguration conf = new LiSAConfiguration();
+		conf.analysis = new Domain();
+		SemanticTool<TestMarkerAbstractLattice, Domain> tool = new SemanticTool<>(
+				conf,
+				new FileManager("reachability-test"),
+				results,
+				callgraph,
+				new Analysis<>(new Domain()));
+		ReachabilityVerifier<TestMarkerAbstractLattice, Domain> verifier = new ReachabilityVerifier<>();
+		verifier.init(tool);
+		return verifier;
+	}
+
+	@Test
+	public void verifyReach()
+			throws Exception {
+		CFG main = cfg("main", true);
+		Statement g1 = node(main, true), t1 = node(main), f1 = node(main), g2 = node(main), t2 = node(main),
+				f2 = node(main), end = node(main);
+		branch(g1, t1, f1);
+		seq(t1, g2);
+		seq(f1, g2);
+		branch(g2, t2, f2);
+		seq(t2, end);
+		seq(f2, end);
+		AnalyzedCFG<TestMarkerAbstractLattice> res = result(main, new CallStack(List.of()),
+				g1, guard(true, false), g2, guard(true, true));
+
+		ReachabilityVerifier<TestMarkerAbstractLattice, Domain> verifier = verifier();
+		assertEquals(VerificationResult.CONFIRMED, verifier.verify(res, t1, Violation.reach()));
+		assertEquals(VerificationResult.REFUTED, verifier.verify(res, f1, Violation.reach()));
+		assertEquals(VerificationResult.POSSIBLE, verifier.verify(res, t2, Violation.reach()));
+		assertEquals(VerificationResult.CONFIRMED, verifier.verify(res, end, Violation.reach()));
+	}
+
+	@Test
+	public void verifyCondition()
+			throws Exception {
+		CFG main = cfg("main", true);
+		Statement g = node(main, true), t = node(main), f = node(main), holds = node(main), fails = node(main),
+				unknown = node(main), dead = node(main);
+		branch(g, t, f);
+		seq(t, holds);
+		seq(f, dead);
+		seq(holds, fails);
+		seq(fails, unknown);
+		AnalyzedCFG<TestMarkerAbstractLattice> res = result(main, new CallStack(List.of()),
+				g, guard(true, false),
+				holds, guard(true, false),
+				fails, guard(false, true),
+				unknown, guard(true, true),
+				dead, guard(true, false));
+
+		ReachabilityVerifier<TestMarkerAbstractLattice, Domain> verifier = verifier();
+		assertEquals(VerificationResult.CONFIRMED,
+				verifier.verify(res, unknown, Violation.condition(holds, CONDITION)));
+		assertEquals(VerificationResult.REFUTED,
+				verifier.verify(res, unknown, Violation.condition(fails, CONDITION)));
+		assertEquals(VerificationResult.POSSIBLE,
+				verifier.verify(res, unknown, Violation.condition(unknown, CONDITION)));
+		// the condition holds, but where it is evaluated is unreachable
+		assertEquals(VerificationResult.REFUTED,
+				verifier.verify(res, dead, Violation.condition(dead, CONDITION)));
+	}
+
+	@Test
+	public void verifyError()
+			throws Exception {
+		CFG always = cfg("always", true);
+		Statement a = node(always, true);
+		AnalyzedCFG<TestMarkerAbstractLattice> res1 = result(always, new CallStack(List.of()),
+				a, raising(dead(), B, a));
+
+		CFG sometimes = cfg("sometimes", true);
+		Statement s = node(sometimes, true);
+		AnalyzedCFG<TestMarkerAbstractLattice> res2 = result(sometimes, new CallStack(List.of()),
+				s, raising(ok(), B, s));
+
+		CFG never = cfg("never", true);
+		Statement n = node(never, true);
+		AnalyzedCFG<TestMarkerAbstractLattice> res3 = result(never, new CallStack(List.of()));
+
+		ReachabilityVerifier<TestMarkerAbstractLattice, Domain> verifier = verifier();
+		assertEquals(VerificationResult.CONFIRMED, verifier.verify(res1, a, Violation.error()));
+		assertEquals(VerificationResult.CONFIRMED, verifier.verify(res1, a, Violation.error(A)));
+		assertEquals(VerificationResult.CONFIRMED, verifier.verify(res1, a, Violation.error(B)));
+		assertEquals(VerificationResult.REFUTED, verifier.verify(res1, a, Violation.error(C)));
+		assertEquals(VerificationResult.POSSIBLE, verifier.verify(res2, s, Violation.error(B)));
+		assertEquals(VerificationResult.REFUTED, verifier.verify(res2, s, Violation.error(C)));
+		assertEquals(VerificationResult.REFUTED, verifier.verify(res3, n, Violation.error()));
 	}
 }

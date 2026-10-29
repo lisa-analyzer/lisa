@@ -1,4 +1,4 @@
-package it.unive.lisa.analysis.reachability;
+package it.unive.lisa.triage.reachability;
 
 import it.unive.lisa.analysis.AbstractDomain;
 import it.unive.lisa.analysis.AbstractLattice;

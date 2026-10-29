@@ -1,4 +1,4 @@
-package it.unive.lisa.analysis.reachability;
+package it.unive.lisa.triage.reachability;
 
 /**
  * The reachability of a program point, as computed by {@link Reachability}.

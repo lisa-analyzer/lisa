@@ -1,4 +1,4 @@
-package it.unive.lisa.analysis.reachability;
+package it.unive.lisa.triage.reachability;
 
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.util.datastructures.graph.BaseGraph;

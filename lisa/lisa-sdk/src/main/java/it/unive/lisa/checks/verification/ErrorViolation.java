@@ -4,10 +4,12 @@ import it.unive.lisa.type.Type;
 import java.util.Objects;
 
 /**
- * A {@link Violation} that happens whenever the statement on which the warning
- * is issued moves the execution to an error continuation, optionally only for
- * errors whose type is a subtype of a given one. Instances of this class can be
- * obtained through {@link Violation#error()} and {@link Violation#error(Type)}.
+ * A {@link Violation} that happens whenever the post-state of the statement on
+ * which the warning is issued contains an error continuation (i.e., an error
+ * raised by the statement, or propagated to it without being caught),
+ * optionally only for errors whose type is a subtype of a given one. Instances
+ * of this class can be obtained through {@link Violation#error()} and
+ * {@link Violation#error(Type)}.
  *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
