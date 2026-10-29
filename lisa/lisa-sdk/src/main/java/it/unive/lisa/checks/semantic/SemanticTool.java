@@ -9,6 +9,10 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.reachability.Reachability;
 import it.unive.lisa.analysis.reachability.ReachabilityStatus;
+import it.unive.lisa.checks.verification.VerificationOutcome;
+import it.unive.lisa.checks.verification.VerificationResult;
+import it.unive.lisa.checks.verification.Violation;
+import it.unive.lisa.checks.verification.WarningVerifier;
 import it.unive.lisa.conf.LiSAConfiguration;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.interprocedural.callgraph.CallResolutionException;
@@ -43,6 +47,8 @@ public class SemanticTool<A extends AbstractLattice<A>, D extends AbstractDomain
 	private final Analysis<A, D> analysis;
 
 	private Reachability<A, D> reachability;
+
+	private WarningVerifier<A, D> verifier;
 
 	/**
 	 * Builds the tool, storing the given results.
@@ -247,6 +253,81 @@ public class SemanticTool<A extends AbstractLattice<A>, D extends AbstractDomain
 			AnalyzedCFG<A> result)
 			throws SemanticException {
 		return getReachabilityAlgorithm().getEntryReachability(result);
+	}
+
+	/**
+	 * Verifies whether the given violation can happen at the given statement,
+	 * considering only the executions analyzed in the context of the given
+	 * result. The verification is delegated to the {@link WarningVerifier}
+	 * selected in the configuration of the analysis
+	 * ({@link LiSAConfiguration#warningVerifier}), that is initialized with
+	 * this tool the first time this method is invoked. If no verifier has been
+	 * selected, all violations are deemed possible.
+	 * 
+	 * @param result    the result containing the statement
+	 * @param st        the statement on which the warning would be issued
+	 * @param violation the violation to verify
+	 * 
+	 * @return the result of the verification
+	 * 
+	 * @throws SemanticException if something goes wrong during the
+	 *                               verification
+	 */
+	public VerificationResult verify(
+			AnalyzedCFG<A> result,
+			Statement st,
+			Violation violation)
+			throws SemanticException {
+		WarningVerifier<A, D> verifier = getVerifier();
+		if (verifier == null)
+			return VerificationResult.POSSIBLE;
+		return verifier.verify(result, st, violation);
+	}
+
+	/**
+	 * Verifies whether the given violation can happen at the given statement,
+	 * considering all the results of its cfg (see
+	 * {@link #verify(AnalyzedCFG, Statement, Violation)}). The results of the
+	 * single verifications are combined through
+	 * {@link VerificationResult#lub(VerificationResult)}: the violation is
+	 * confirmed if it is confirmed in at least one of the results, and it is
+	 * refuted only if it is refuted in all of them.
+	 * 
+	 * @param st        the statement on which the warning would be issued
+	 * @param violation the violation to verify
+	 * 
+	 * @return the result of the verification
+	 * 
+	 * @throws SemanticException if something goes wrong during the
+	 *                               verification
+	 */
+	public VerificationResult verify(
+			Statement st,
+			Violation violation)
+			throws SemanticException {
+		if (getVerifier() == null)
+			return VerificationResult.POSSIBLE;
+
+		Collection<AnalyzedCFG<A>> res = results.get(st.getCFG());
+		VerificationResult outcome = VerificationResult.REFUTED;
+		if (res != null)
+			for (AnalyzedCFG<A> result : res) {
+				outcome = outcome.lub(verify(result, st, violation));
+				if (outcome.getOutcome() == VerificationOutcome.CONFIRMED)
+					break;
+			}
+		return outcome;
+	}
+
+	@SuppressWarnings("unchecked")
+	private synchronized WarningVerifier<A, D> getVerifier()
+			throws SemanticException {
+		if (verifier == null && getConfiguration().warningVerifier != null) {
+			WarningVerifier<A, D> candidate = (WarningVerifier<A, D>) getConfiguration().warningVerifier;
+			candidate.init(this);
+			verifier = candidate;
+		}
+		return verifier;
 	}
 
 	private synchronized Reachability<A, D> getReachabilityAlgorithm() {

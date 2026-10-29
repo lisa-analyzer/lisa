@@ -7,6 +7,8 @@ import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.ProgramState;
 import it.unive.lisa.checks.semantic.SemanticCheck;
 import it.unive.lisa.checks.syntactic.SyntacticCheck;
+import it.unive.lisa.checks.verification.Violation;
+import it.unive.lisa.checks.verification.WarningVerifier;
 import it.unive.lisa.events.EventListener;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.interprocedural.OpenCallPolicy;
@@ -106,6 +108,14 @@ public class LiSAConfiguration
 	 * {@code null}.
 	 */
 	public AbstractDomain<?> analysis;
+
+	/**
+	 * The {@link WarningVerifier} instance used by {@link SemanticCheck}s to
+	 * verify candidate {@link Violation}s before issuing warnings. If no value
+	 * is set for this field, all violations are deemed possible. Defaults to
+	 * {@code null}.
+	 */
+	public WarningVerifier<?, ?> warningVerifier;
 
 	/**
 	 * The collection of {@link LiSAOutput}s to produce at the end of the
@@ -274,7 +284,8 @@ public class LiSAConfiguration
 						// we skip the semantic configuration
 						&& !AbstractDomain.class.isAssignableFrom(field.getType())
 						&& !CallGraph.class.isAssignableFrom(field.getType())
-						&& !InterproceduralAnalysis.class.isAssignableFrom(field.getType())) {
+						&& !InterproceduralAnalysis.class.isAssignableFrom(field.getType())
+						&& !WarningVerifier.class.isAssignableFrom(field.getType())) {
 					Object value = field.get(this);
 
 					res.append("\n").append(field.getName());
@@ -303,7 +314,8 @@ public class LiSAConfiguration
 	/**
 	 * Converts this configuration to a property bag, that is, a map from keys
 	 * (fields of this class) to values (their values). {@link #analysis},
-	 * {@link #callGraph}, and {@link #interproceduralAnalysis} are omitted.
+	 * {@link #callGraph}, {@link #interproceduralAnalysis}, and
+	 * {@link #warningVerifier} are omitted.
 	 * 
 	 * @return the property bag
 	 */
@@ -315,7 +327,8 @@ public class LiSAConfiguration
 						// we skip the semantic configuration
 						&& !AbstractDomain.class.isAssignableFrom(field.getType())
 						&& !CallGraph.class.isAssignableFrom(field.getType())
-						&& !InterproceduralAnalysis.class.isAssignableFrom(field.getType())) {
+						&& !InterproceduralAnalysis.class.isAssignableFrom(field.getType())
+						&& !WarningVerifier.class.isAssignableFrom(field.getType())) {
 					Object value = field.get(this);
 
 					String key = field.getName();
