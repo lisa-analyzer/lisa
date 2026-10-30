@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import it.unive.lisa.TestParameterProvider;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
+import it.unive.lisa.interprocedural.ScopeId;
 import it.unive.lisa.lattices.ExpressionSet;
 import it.unive.lisa.lattices.heap.allocations.AllocationSite;
 import it.unive.lisa.lattices.heap.allocations.HeapAllocationSite;
@@ -93,6 +94,58 @@ public class FieldSensitivePointBasedHeapTest {
 		assertEquals(
 				it.unive.lisa.lattices.heap.allocations.NullAllocationSite.INSTANCE,
 				rewritten.elements.iterator().next());
+	}
+
+	@Test
+	public void strongUpdatesAreDecidedPerContext()
+			throws SemanticException {
+		ScopeId<?> ctx1 = ContextOracles.context(1);
+		ScopeId<?> ctx2 = ContextOracles.context(2);
+		FieldSensitivePointBasedHeap sensitive = new FieldSensitivePointBasedHeap(true);
+		HeapAllocationSite existing = new HeapAllocationSite(
+				Untyped.INSTANCE, loc.getCodeLocation(), ctx1, false, loc);
+		HeapEnvWithFields state = sensitive.store(
+				sensitive.makeLattice(), new Variable(Untyped.INSTANCE, "x", loc), existing);
+		MemoryAllocation alloc = new MemoryAllocation(Untyped.INSTANCE, loc);
+
+		// same location, different context: this is a fresh object
+		HeapLocation other = (HeapLocation) sensitive
+				.rewriteMemoryAllocation(alloc, state, pp, ContextOracles.oracle(ctx2)).elements.iterator().next();
+		assertFalse(other.isWeak());
+
+		// same location and context: the site must become weak
+		HeapLocation same = (HeapLocation) sensitive
+				.rewriteMemoryAllocation(alloc, state, pp, ContextOracles.oracle(ctx1)).elements.iterator().next();
+		assertTrue(same.isWeak());
+
+		// a context-insensitive heap only considers the location
+		HeapLocation insensitive = (HeapLocation) heap
+				.rewriteMemoryAllocation(alloc, heap.store(heap.makeLattice(), new Variable(Untyped.INSTANCE, "x", loc),
+						new HeapAllocationSite(Untyped.INSTANCE, loc.getCodeLocation(), false, loc)),
+						pp, ContextOracles.oracle(ctx2)).elements.iterator().next();
+		assertTrue(insensitive.isWeak());
+	}
+
+	@Test
+	public void fieldsInheritTheContextOfTheReceiver()
+			throws SemanticException {
+		ScopeId<?> ctx1 = ContextOracles.context(1);
+		FieldSensitivePointBasedHeap sensitive = new FieldSensitivePointBasedHeap(true);
+		HeapAllocationSite receiver = new HeapAllocationSite(Untyped.INSTANCE, "l", ctx1, false, loc);
+		Variable field = new Variable(Untyped.INSTANCE, "f", loc);
+		AccessChild access = new AccessChild(Untyped.INSTANCE, new Variable(Untyped.INSTANCE, "x", loc), field, loc);
+
+		ExpressionSet rewritten = sensitive.rewriteAccessChild(
+				access,
+				new ExpressionSet(receiver),
+				new ExpressionSet(field),
+				sensitive.makeLattice(),
+				pp,
+				ContextOracles.oracle(ContextOracles.context(2)));
+		assertEquals(1, rewritten.size());
+		AllocationSite site = (AllocationSite) rewritten.elements.iterator().next();
+		assertEquals(ctx1, site.getContext());
+		assertEquals("pp@l<" + ctx1.getHash() + ">[f]", site.getName());
 	}
 
 }

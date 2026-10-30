@@ -2,6 +2,8 @@ package it.unive.lisa.analysis.heap.pointbased;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import it.unive.lisa.TestParameterProvider;
@@ -10,6 +12,8 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.heap.HeapDomain.HeapReplacement;
 import it.unive.lisa.analysis.nonrelational.heap.HeapEnvironment;
+import it.unive.lisa.interprocedural.ScopeId;
+import it.unive.lisa.interprocedural.context.KDepthToken;
 import it.unive.lisa.lattices.ExpressionSet;
 import it.unive.lisa.lattices.Satisfiability;
 import it.unive.lisa.lattices.heap.allocations.AllocationSite;
@@ -799,7 +803,7 @@ public class PointBasedHeapTest {
 		StackAllocationSite site = new StackAllocationSite(untyped, "stack@src", true, loc1);
 		List<HeapReplacement> replacements = new ArrayList<>();
 
-		HeapEnvironment<AllocationSites> result = heap.shallowCopy(topHeap, x, site, replacements);
+		HeapEnvironment<AllocationSites> result = heap.shallowCopy(topHeap, x, site, null, replacements);
 
 		AllocationSites xSites = result.getState(x);
 		assertEquals(1, xSites.size());
@@ -928,6 +932,75 @@ public class PointBasedHeapTest {
 		HeapDereference deref = new HeapDereference(untyped, x, loc1);
 		ExpressionSet rewrittenDeref = heap.rewrite(multiTarget, deref, pp1, fakeOracle);
 		assertEquals(2, rewrittenDeref.elements().size());
+	}
+
+	@Test
+	public void contextSensitiveAllocationsAreQualifiedByTheContext()
+			throws SemanticException {
+		ScopeId<?> ctx1 = ContextOracles.context(1);
+		ScopeId<?> ctx2 = ContextOracles.context(2);
+		PointBasedHeap sensitive = new PointBasedHeap(true);
+		MemoryAllocation alloc = new MemoryAllocation(untyped, loc1);
+
+		AllocationSite site1 = (AllocationSite) sensitive
+				.rewrite(topHeap, alloc, pp1, ContextOracles.oracle(ctx1)).elements.iterator().next();
+		AllocationSite site2 = (AllocationSite) sensitive
+				.rewrite(topHeap, alloc, pp1, ContextOracles.oracle(ctx2)).elements.iterator().next();
+
+		assertEquals(ctx1, site1.getContext());
+		assertEquals(ctx2, site2.getContext());
+		assertEquals("pp@" + loc1.getCodeLocation() + "<" + ctx1.getHash() + ">", site1.getName());
+		assertNotEquals(site1, site2);
+		assertTrue(sensitive.isContextSensitive());
+	}
+
+	@Test
+	public void contextInsensitiveAllocationsIgnoreTheContext()
+			throws SemanticException {
+		MemoryAllocation alloc = new MemoryAllocation(untyped, loc1);
+		AllocationSite site = (AllocationSite) heap
+				.rewrite(topHeap, alloc, pp1, ContextOracles.oracle(ContextOracles.context(1))).elements
+						.iterator().next();
+		assertNull(site.getContext());
+		assertEquals(alloc1, site);
+		assertFalse(heap.isContextSensitive());
+	}
+
+	@Test
+	public void startingContextsDoNotQualifyAllocations()
+			throws SemanticException {
+		MemoryAllocation alloc = new MemoryAllocation(untyped, loc1);
+		AllocationSite site = (AllocationSite) new PointBasedHeap(true)
+				.rewrite(topHeap, alloc, pp1, ContextOracles.oracle(KDepthToken.create(1))).elements
+						.iterator().next();
+		assertNull(site.getContext());
+		assertEquals(alloc1, site);
+	}
+
+	@Test
+	public void childrenInheritTheContextOfTheReceiver()
+			throws SemanticException {
+		ScopeId<?> ctx1 = ContextOracles.context(1);
+		ScopeId<?> ctx2 = ContextOracles.context(2);
+		PointBasedHeap sensitive = new PointBasedHeap(true);
+		AllocationSite receiver = new HeapAllocationSite(untyped, loc1.getCodeLocation(), ctx1, true, loc1);
+		Variable field = new Variable(untyped, "f", loc1);
+		AccessChild access = new AccessChild(untyped, x, field, loc2);
+
+		ExpressionSet result = sensitive.rewriteAccessChild(
+				access,
+				new ExpressionSet(new MemoryPointer(untyped, receiver, loc1)),
+				new ExpressionSet(field),
+				topHeap,
+				pp2,
+				// the access happens in a different context than the
+				// allocation of the receiver
+				ContextOracles.oracle(ctx2));
+
+		assertEquals(1, result.size());
+		AllocationSite child = (AllocationSite) result.elements.iterator().next();
+		assertEquals(ctx1, child.getContext());
+		assertEquals(receiver.getLocationName(), child.getLocationName());
 	}
 
 }

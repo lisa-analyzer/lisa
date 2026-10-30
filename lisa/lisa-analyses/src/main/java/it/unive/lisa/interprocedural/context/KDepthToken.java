@@ -30,10 +30,14 @@ public class KDepthToken<A extends AbstractLattice<A>>
 
 	private final int k;
 
+	private final String hash;
+
 	private KDepthToken(
 			int k) {
 		this.k = k;
 		this.calls = Collections.emptyList();
+		// k is ignored by equality, so the hash only depends on the calls
+		this.hash = ScopeId.computeHash(toString());
 	}
 
 	private KDepthToken(
@@ -45,6 +49,7 @@ public class KDepthToken<A extends AbstractLattice<A>>
 		if (k == 0) {
 			// k = 0 -> insensitive
 			this.calls = source.calls;
+			this.hash = source.hash;
 			return;
 		}
 
@@ -60,6 +65,7 @@ public class KDepthToken<A extends AbstractLattice<A>>
 			source.calls.stream().skip(oldlen - k + 1).forEach(this.calls::add);
 			this.calls.add(newToken);
 		}
+		this.hash = ScopeId.computeHash(toString());
 	}
 
 	/**
@@ -116,8 +122,7 @@ public class KDepthToken<A extends AbstractLattice<A>>
 			for (CFGCall call : calls)
 				// we use the hashcode of the location as the hashcode of the
 				// call is based on the ones of its targets, and a CFG hashcode
-				// is not consistent between executions - this is a problem as
-				// this object's hashcode is used as suffix in some filenames
+				// is not consistent between executions
 				result = prime * result + call.getLocation().hashCode();
 		return result;
 	}
@@ -130,6 +135,11 @@ public class KDepthToken<A extends AbstractLattice<A>>
 	@Override
 	public boolean isStartingId() {
 		return calls.isEmpty();
+	}
+
+	@Override
+	public String getHash() {
+		return hash;
 	}
 
 	@Override

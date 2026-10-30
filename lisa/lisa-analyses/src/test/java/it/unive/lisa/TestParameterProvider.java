@@ -294,6 +294,11 @@ public class TestParameterProvider {
 		}
 
 		@Override
+		public ScopeId<?> getContext() {
+			return null;
+		}
+
+		@Override
 		public Set<Type> getRuntimeTypesOf(
 				SymbolicExpression e,
 				ProgramPoint pp)
@@ -508,6 +513,7 @@ public class TestParameterProvider {
 						.smallStepSemantics(
 								entryState,
 								new Variable(Untyped.INSTANCE, "fake", new SourceCodeLocation("unknown", 0, 0)),
+								null,
 								expr);
 			}
 

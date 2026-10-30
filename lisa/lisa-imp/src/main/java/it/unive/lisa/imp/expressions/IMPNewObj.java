@@ -7,6 +7,7 @@ import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
+import it.unive.lisa.interprocedural.ScopeId;
 import it.unive.lisa.lattices.ExpressionSet;
 import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.cfg.CFG;
@@ -86,6 +87,7 @@ public class IMPNewObj
 			ExpressionSet[] params,
 			StatementStore<A> expressions)
 			throws SemanticException {
+		ScopeId<A> context = interprocedural.getCurrentContext();
 		Analysis<A, D> analysis = interprocedural.getAnalysis();
 		Type staticType = getStaticType();
 		Type type = staticType.isReferenceType() ? staticType.asReferenceType().getInnerType() : staticType;
@@ -95,7 +97,7 @@ public class IMPNewObj
 		HeapReference ref = new HeapReference(reftype, creation, getLocation());
 
 		// we start by allocating the memory region
-		AnalysisState<A> allocated = analysis.smallStepSemantics(state, creation, this);
+		AnalysisState<A> allocated = analysis.smallStepSemantics(state, creation, context, this);
 
 		// we need to add the receiver to the parameters of the constructor call
 		InstrumentedReceiverRef paramThis = new InstrumentedReceiverRef(getCFG(), getLocation(), false, reftype);
@@ -108,7 +110,7 @@ public class IMPNewObj
 		// we store a reference to the newly created region in the receiver
 		AnalysisState<A> tmp = state.bottomExecution();
 		for (SymbolicExpression rec : callstate.getExecutionExpressions())
-			tmp = tmp.lub(analysis.assign(callstate, rec, ref, paramThis));
+			tmp = tmp.lub(analysis.assign(callstate, rec, ref, context, paramThis));
 		// we store the approximation of the receiver in the sub-expressions
 		expressions.put(paramThis, tmp);
 

@@ -105,6 +105,7 @@ public class ReachabilityTest {
 		public Satisfiability satisfies(
 				MarkerAbstractLattice state,
 				SymbolicExpression expression,
+				ScopeId<?> context,
 				ProgramPoint pp) {
 			if (state.isBottom())
 				return Satisfiability.BOTTOM;
@@ -211,6 +212,11 @@ public class ReachabilityTest {
 				Object obj) {
 			return obj instanceof CallStack && stack.equals(((CallStack) obj).stack);
 		}
+
+		@Override
+		public String getHash() {
+			return ScopeId.computeHash(stack.toString());
+		}
 	}
 
 	/**
@@ -257,6 +263,11 @@ public class ReachabilityTest {
 		public boolean equals(
 				Object obj) {
 			return obj instanceof StateStack && stack.equals(((StateStack) obj).stack);
+		}
+
+		@Override
+		public String getHash() {
+			return ScopeId.computeHash(stack.toString());
 		}
 	}
 

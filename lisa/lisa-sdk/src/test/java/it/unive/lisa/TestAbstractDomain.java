@@ -6,6 +6,7 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.events.EventQueue;
+import it.unive.lisa.interprocedural.ScopeId;
 import it.unive.lisa.lattices.ExpressionSet;
 import it.unive.lisa.lattices.Satisfiability;
 import it.unive.lisa.program.cfg.ProgramPoint;
@@ -29,6 +30,7 @@ public class TestAbstractDomain
 			TestAbstractState state,
 			Identifier id,
 			SymbolicExpression expression,
+			ScopeId<?> context,
 			ProgramPoint pp)
 			throws SemanticException {
 		return state;
@@ -38,6 +40,7 @@ public class TestAbstractDomain
 	public TestAbstractState smallStepSemantics(
 			TestAbstractState state,
 			SymbolicExpression expression,
+			ScopeId<?> context,
 			ProgramPoint pp)
 			throws SemanticException {
 		return state;
@@ -47,6 +50,7 @@ public class TestAbstractDomain
 	public TestAbstractState assume(
 			TestAbstractState state,
 			SymbolicExpression expression,
+			ScopeId<?> context,
 			ProgramPoint src,
 			ProgramPoint dest)
 			throws SemanticException {
@@ -55,7 +59,8 @@ public class TestAbstractDomain
 
 	@Override
 	public SemanticOracle makeOracle(
-			TestAbstractState state) {
+			TestAbstractState state,
+			ScopeId<?> context) {
 		return new TestOracle();
 	}
 
@@ -70,6 +75,11 @@ public class TestAbstractDomain
 
 		@Override
 		public EventQueue getEventQueue() {
+			return null;
+		}
+
+		@Override
+		public ScopeId<?> getContext() {
 			return null;
 		}
 
@@ -160,6 +170,7 @@ public class TestAbstractDomain
 	public TestAbstractState onCallReturn(
 			TestAbstractState entryState,
 			TestAbstractState callres,
+			ScopeId<?> context,
 			ProgramPoint call)
 			throws SemanticException {
 		return callres;
@@ -170,6 +181,7 @@ public class TestAbstractDomain
 			TestAbstractState remaining,
 			TestAbstractState moved,
 			Error error,
+			ScopeId<?> context,
 			ProgramPoint pp)
 			throws SemanticException {
 		return Pair.of(remaining, moved);
@@ -179,6 +191,7 @@ public class TestAbstractDomain
 	public TestAbstractState onErrorToExecution(
 			TestAbstractState state,
 			ProtectedBlock protectedBlock,
+			ScopeId<?> context,
 			ProgramPoint pp)
 			throws SemanticException {
 		return state;
@@ -188,6 +201,7 @@ public class TestAbstractDomain
 	public Pair<TestAbstractState, TestAbstractState> onExecutionToHalting(
 			TestAbstractState remaining,
 			TestAbstractState moved,
+			ScopeId<?> context,
 			ProgramPoint pp)
 			throws SemanticException {
 		return Pair.of(remaining, moved);

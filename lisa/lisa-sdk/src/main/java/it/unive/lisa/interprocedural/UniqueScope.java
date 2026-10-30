@@ -16,6 +16,9 @@ public class UniqueScope<A extends AbstractLattice<A>>
 		implements
 		ScopeId<A> {
 
+	// all unique scopes are equal, so they share the same hash
+	private static final String HASH = ScopeId.computeHash(UniqueScope.class.getName());
+
 	@Override
 	public ScopeId<A> startingId() {
 		return this;
@@ -31,6 +34,11 @@ public class UniqueScope<A extends AbstractLattice<A>>
 	@Override
 	public boolean isStartingId() {
 		return true;
+	}
+
+	@Override
+	public String getHash() {
+		return HASH;
 	}
 
 }

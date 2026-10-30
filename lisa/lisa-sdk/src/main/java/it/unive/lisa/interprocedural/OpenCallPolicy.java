@@ -27,6 +27,7 @@ public interface OpenCallPolicy {
 	 * @param call       the {@link OpenCall} under evaluation
 	 * @param entryState the state when the call is executed
 	 * @param analysis   the analysis that is being executed
+	 * @param context    the interprocedural context where the call is evaluated
 	 * @param params     the symbolic expressions representing the computed
 	 *                       values of the parameters of the call
 	 * 
@@ -39,6 +40,7 @@ public interface OpenCallPolicy {
 			OpenCall call,
 			AnalysisState<A> entryState,
 			Analysis<A, D> analysis,
+			ScopeId<?> context,
 			ExpressionSet[] params)
 			throws SemanticException;
 

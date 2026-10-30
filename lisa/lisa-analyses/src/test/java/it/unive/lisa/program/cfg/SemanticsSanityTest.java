@@ -181,7 +181,7 @@ public class SemanticsSanityTest {
 				if (instance instanceof SemanticDomain) {
 					SemanticDomain dom = (SemanticDomain) instance;
 					DomainLattice l = (DomainLattice) dom.makeLattice().bottom();
-					res = dom.assign(l, v, arg, TestParameterProvider.provideParam(null, ProgramPoint.class));
+					res = dom.assign(l, v, arg, null, TestParameterProvider.provideParam(null, ProgramPoint.class));
 				} else {
 					SemanticComponent dom = (SemanticComponent) instance;
 					DomainLattice l = (DomainLattice) dom.makeLattice().bottom();

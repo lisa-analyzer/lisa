@@ -2,6 +2,7 @@ package it.unive.lisa.analysis;
 
 import it.unive.lisa.analysis.AnalysisState.Error;
 import it.unive.lisa.events.EventQueue;
+import it.unive.lisa.interprocedural.ScopeId;
 import it.unive.lisa.lattices.HistoryState;
 import it.unive.lisa.lattices.Satisfiability;
 import it.unive.lisa.program.cfg.ProgramPoint;
@@ -53,37 +54,41 @@ public class HistoryDomain<
 			HistoryState<A> state,
 			Identifier id,
 			SymbolicExpression expression,
+			ScopeId<?> context,
 			ProgramPoint pp)
 			throws SemanticException {
-		return new HistoryState<>(domain.assign(state.head(), id, expression, pp));
+		return new HistoryState<>(domain.assign(state.head(), id, expression, context, pp));
 	}
 
 	@Override
 	public HistoryState<A> smallStepSemantics(
 			HistoryState<A> state,
 			SymbolicExpression expression,
+			ScopeId<?> context,
 			ProgramPoint pp)
 			throws SemanticException {
-		return new HistoryState<>(domain.smallStepSemantics(state.head(), expression, pp));
+		return new HistoryState<>(domain.smallStepSemantics(state.head(), expression, context, pp));
 	}
 
 	@Override
 	public HistoryState<A> assume(
 			HistoryState<A> state,
 			SymbolicExpression expression,
+			ScopeId<?> context,
 			ProgramPoint src,
 			ProgramPoint dest)
 			throws SemanticException {
-		return new HistoryState<>(domain.assume(state.head(), expression, src, dest));
+		return new HistoryState<>(domain.assume(state.head(), expression, context, src, dest));
 	}
 
 	@Override
 	public Satisfiability satisfies(
 			HistoryState<A> state,
 			SymbolicExpression expression,
+			ScopeId<?> context,
 			ProgramPoint pp)
 			throws SemanticException {
-		return domain.satisfies(state.head(), expression, pp);
+		return domain.satisfies(state.head(), expression, context, pp);
 	}
 
 	@Override
@@ -95,9 +100,10 @@ public class HistoryDomain<
 	public HistoryState<A> onCallReturn(
 			HistoryState<A> entryState,
 			HistoryState<A> callres,
+			ScopeId<?> context,
 			ProgramPoint call)
 			throws SemanticException {
-		return new HistoryState<>(domain.onCallReturn(entryState.head(), callres.head(), call));
+		return new HistoryState<>(domain.onCallReturn(entryState.head(), callres.head(), context, call));
 	}
 
 	@Override
@@ -105,9 +111,10 @@ public class HistoryDomain<
 			HistoryState<A> remaining,
 			HistoryState<A> moved,
 			Error error,
+			ScopeId<?> context,
 			ProgramPoint pp)
 			throws SemanticException {
-		Pair<A, A> res = domain.onExecutionToError(remaining.head(), moved.head(), error, pp);
+		Pair<A, A> res = domain.onExecutionToError(remaining.head(), moved.head(), error, context, pp);
 		// these callbacks adjust the current state without performing a
 		// semantic step, so the history is preserved
 		return Pair.of(
@@ -119,11 +126,12 @@ public class HistoryDomain<
 	public HistoryState<A> onErrorToExecution(
 			HistoryState<A> state,
 			ProtectedBlock protectedBlock,
+			ScopeId<?> context,
 			ProgramPoint pp)
 			throws SemanticException {
 		// this callback adjusts the current state without performing a
 		// semantic step, so the history is preserved
-		A head = domain.onErrorToExecution(state.head(), protectedBlock, pp);
+		A head = domain.onErrorToExecution(state.head(), protectedBlock, context, pp);
 		return head == state.head() ? state : state.withHead(head);
 	}
 
@@ -131,9 +139,10 @@ public class HistoryDomain<
 	public Pair<HistoryState<A>, HistoryState<A>> onExecutionToHalting(
 			HistoryState<A> remaining,
 			HistoryState<A> moved,
+			ScopeId<?> context,
 			ProgramPoint pp)
 			throws SemanticException {
-		Pair<A, A> res = domain.onExecutionToHalting(remaining.head(), moved.head(), pp);
+		Pair<A, A> res = domain.onExecutionToHalting(remaining.head(), moved.head(), context, pp);
 		// these callbacks adjust the current state without performing a
 		// semantic step, so the history is preserved
 		return Pair.of(
@@ -143,7 +152,8 @@ public class HistoryDomain<
 
 	@Override
 	public SemanticOracle makeOracle(
-			HistoryState<A> state) {
-		return domain.makeOracle(state.head());
+			HistoryState<A> state,
+			ScopeId<?> context) {
+		return domain.makeOracle(state.head(), context);
 	}
 }

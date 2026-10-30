@@ -228,8 +228,8 @@ public class SubstitutionTest {
 	 * over a substitution) and the {@link SimpleAbstractDomain} integration
 	 * tests below (which instead observe the {@link Collector}s produced as a
 	 * side effect of
-	 * {@link SimpleAbstractDomain#assign(Object, Identifier, SymbolicExpression, ProgramPoint)}/
-	 * {@link SimpleAbstractDomain#smallStepSemantics(Object, SymbolicExpression, ProgramPoint)}).
+	 * {@link SimpleAbstractDomain#assign(Object, Identifier, SymbolicExpression, it.unive.lisa.interprocedural.ScopeId, ProgramPoint)}/
+	 * {@link SimpleAbstractDomain#smallStepSemantics(Object, SymbolicExpression, it.unive.lisa.interprocedural.ScopeId, ProgramPoint)}).
 	 */
 	private void assertContents(
 			Collector c,
@@ -655,7 +655,7 @@ public class SubstitutionTest {
 	/**
 	 * Integration test for {@link SimpleAbstractDomain}'s private
 	 * {@code applySubstitution} method (invoked from
-	 * {@link SimpleAbstractDomain#assign(Object, Identifier, SymbolicExpression, ProgramPoint)}
+	 * {@link SimpleAbstractDomain#assign(Object, Identifier, SymbolicExpression, it.unive.lisa.interprocedural.ScopeId, ProgramPoint)}
 	 * whenever the assigned expression needs heap rewriting): it must apply the
 	 * exact same substitution sequence, in the exact same order, to both the
 	 * type and the value domain. This exercises the single-rewritten-expression
@@ -684,6 +684,7 @@ public class SubstitutionTest {
 				initial,
 				z,
 				alloc,
+				null,
 				fake);
 
 		// same expectation as testInterferingSubstitution, but now observed as
@@ -703,7 +704,7 @@ public class SubstitutionTest {
 	 * from the very same post-substitution baseline and the results are lubbed
 	 * together, so the type and value domains must still end up reflecting
 	 * exactly the applied substitution. This uses
-	 * {@link SimpleAbstractDomain#smallStepSemantics(Object, SymbolicExpression, ProgramPoint)}
+	 * {@link SimpleAbstractDomain#smallStepSemantics(Object, SymbolicExpression, it.unive.lisa.interprocedural.ScopeId, ProgramPoint)}
 	 * instead of {@code assign} to also cover that transformer.
 	 */
 	@Test
@@ -728,6 +729,7 @@ public class SubstitutionTest {
 		SimpleAbstractState<TrackingHeapLattice, Collector, Collector> result = domain.smallStepSemantics(
 				initial,
 				alloc,
+				null,
 				fake);
 
 		// same expectation as testResettingSubstitution

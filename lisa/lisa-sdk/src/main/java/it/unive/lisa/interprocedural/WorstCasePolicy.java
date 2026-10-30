@@ -41,16 +41,17 @@ public class WorstCasePolicy
 			OpenCall call,
 			AnalysisState<A> entryState,
 			Analysis<A, D> analysis,
+			ScopeId<?> context,
 			ExpressionSet[] params)
 			throws SemanticException {
 		AnalysisState<A> poststate = entryState.topExecution();
 
 		AnalysisState<A> result;
 		if (call.getStaticType().isVoidType())
-			result = analysis.smallStepSemantics(poststate, new Skip(call.getLocation()), call);
+			result = analysis.smallStepSemantics(poststate, new Skip(call.getLocation()), context, call);
 		else {
 			Identifier var = call.getMetaVariable();
-			result = analysis.smallStepSemantics(poststate, var, call);
+			result = analysis.smallStepSemantics(poststate, var, context, call);
 		}
 
 		Map<Error, ProgramState<A>> errors = new HashMap<>();

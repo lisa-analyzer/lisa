@@ -1,0 +1,42 @@
+{
+  "warnings" : [ ],
+  "notices" : [ ],
+  "files" : [ "report.json", "untyped_A.A(A__this,_untyped_x).graph.json", "untyped_A.A(A__this,_untyped_x)_03c2784745ccdcbd27faa968c9492656.graph.json", "untyped_A.A(A__this,_untyped_x)_0ba72fc85f3d7259ba091eabfe961c8c.graph.json", "untyped_A.A(A__this,_untyped_x)_7fc96bc41475f97a4d5f8e2c0d11a735.graph.json", "untyped_A.A(A__this,_untyped_x)_cd0549e55463755204691987f08d1164.graph.json", "untyped_A.A(A__this,_untyped_x)_f1a2c1d50a1302077e56365e5293a670.graph.json", "untyped_F.loop(F__this).graph.json", "untyped_F.main(F__this).graph.json", "untyped_F.make(F__this,_untyped_x).graph.json", "untyped_F.make(F__this,_untyped_x)_263cfe2c84f02a08fca8cb96e529faf2.graph.json", "untyped_F.make(F__this,_untyped_x)_653f8c828f84312470c79d82f357062c.graph.json", "untyped_F.make(F__this,_untyped_x)_a6165481b5e5fbbc67192245f5a903ac.graph.json", "untyped_F.make(F__this,_untyped_x)_d10f05cc725de64cf8e385147638f993.graph.json" ],
+  "info" : {
+    "cfgs" : "4",
+    "duration" : "157ms",
+    "end" : "2026-10-28T19:57:45.230+01:00",
+    "expressions" : "43",
+    "files" : "13",
+    "globals" : "1",
+    "members" : "4",
+    "notices" : "0",
+    "programs" : "1",
+    "start" : "2026-10-28T19:57:45.073+01:00",
+    "statements" : "17",
+    "units" : "2",
+    "version" : "1.0",
+    "warnings" : "0"
+  },
+  "configuration" : {
+    "asynchronousListeners" : "",
+    "backwardDescendingFixpoint" : "unset",
+    "backwardFixpoint" : "BackwardAscendingFixpoint",
+    "dumpForcesUnwinding" : "false",
+    "fixpointWorkingSet" : "OrderBasedWorkingSet",
+    "forwardDescendingFixpoint" : "unset",
+    "forwardFixpoint" : "ForwardAscendingFixpoint",
+    "glbThreshold" : "5",
+    "hotspots" : "unset",
+    "openCallPolicy" : "TopExecutionPolicy",
+    "outputs" : "JSONReportDumper, JSONResults",
+    "recursionWideningThreshold" : "5",
+    "semanticChecks" : "",
+    "shouldSmashError" : "unset",
+    "synchronousListeners" : "",
+    "syntacticChecks" : "",
+    "useWideningPoints" : "true",
+    "wideningThreshold" : "5",
+    "workdir" : "test-outputs/heap/context/pp-field-ctx-inlining"
+  }
+}

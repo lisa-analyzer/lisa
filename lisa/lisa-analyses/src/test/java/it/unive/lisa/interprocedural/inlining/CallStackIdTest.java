@@ -156,4 +156,26 @@ public class CallStackIdTest {
 		assertTrue(id.startingId().isStartingId());
 	}
 
+	@Test
+	public void hashIsConsistentWithEquality() {
+		var a = emptyId().push(mkCall(1), mkCompoundState());
+		var b = emptyId().push(mkCall(1), mkCompoundState());
+		assertEquals(a, b);
+		assertEquals(a.getHash(), b.getHash());
+
+		// same calls, different states: the ids differ, but the hash only
+		// depends on the call stack
+		var state = mkState().bottom();
+		var c = emptyId().push(mkCall(1), CompoundState.of(state, new StatementStore<>(state)));
+		assertNotEquals(a, c);
+		assertEquals(a.getHash(), c.getHash());
+
+		// different calls give different hashes
+		assertNotEquals(a.getHash(), emptyId().push(mkCall(2), mkCompoundState()).getHash());
+
+		// popping yields the same hash of the equal id
+		assertEquals(emptyId().getHash(), a.pop(1).getHash());
+		assertEquals(a.getHash(), a.push(mkCall(2), mkCompoundState()).pop(1).getHash());
+	}
+
 }

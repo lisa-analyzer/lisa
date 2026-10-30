@@ -47,7 +47,7 @@ public class WorstCasePolicyTest {
 		OpenCall call = new OpenCall(caller, LOC, CallType.STATIC, null, "foo", VoidType.INSTANCE);
 
 		AnalysisState<TestAbstractState> result = WorstCasePolicy.INSTANCE.apply(
-				call, state(), analysis(null), new ExpressionSet[0]);
+				call, state(), analysis(null), null, new ExpressionSet[0]);
 
 		ExpressionSet computed = result.getExecutionExpressions();
 		assertEquals(1, computed.size());
@@ -60,7 +60,7 @@ public class WorstCasePolicyTest {
 		OpenCall call = new OpenCall(caller, LOC, CallType.STATIC, null, "foo");
 
 		AnalysisState<TestAbstractState> result = WorstCasePolicy.INSTANCE.apply(
-				call, state(), analysis(null), new ExpressionSet[0]);
+				call, state(), analysis(null), null, new ExpressionSet[0]);
 
 		ExpressionSet computed = result.getExecutionExpressions();
 		assertEquals(1, computed.size());
@@ -73,7 +73,7 @@ public class WorstCasePolicyTest {
 		OpenCall call = new OpenCall(caller, LOC, CallType.STATIC, null, "foo");
 
 		AnalysisState<TestAbstractState> result = WorstCasePolicy.INSTANCE.apply(
-				call, state(), analysis(null), new ExpressionSet[0]);
+				call, state(), analysis(null), null, new ExpressionSet[0]);
 
 		assertTrue(result.getErrors().getKeys().isEmpty());
 		assertTrue(result.getSmashedErrors().getKeys().isEmpty());
@@ -88,7 +88,7 @@ public class WorstCasePolicyTest {
 		OpenCall call = new OpenCall(caller, LOC, CallType.STATIC, null, "foo");
 
 		AnalysisState<TestAbstractState> result = WorstCasePolicy.INSTANCE.apply(
-				call, state(), analysis(null), new ExpressionSet[0]);
+				call, state(), analysis(null), null, new ExpressionSet[0]);
 
 		assertEquals(Set.of(new Error(errorType, call)), result.getErrors().getKeys());
 		assertTrue(result.getSmashedErrors().getKeys().isEmpty());
@@ -102,7 +102,7 @@ public class WorstCasePolicyTest {
 		OpenCall call = new OpenCall(caller, LOC, CallType.STATIC, null, "foo");
 
 		AnalysisState<TestAbstractState> result = WorstCasePolicy.INSTANCE.apply(
-				call, state(), analysis(t -> t == errorType), new ExpressionSet[0]);
+				call, state(), analysis(t -> t == errorType), null, new ExpressionSet[0]);
 
 		assertTrue(result.getErrors().getKeys().isEmpty());
 		assertEquals(Set.of(errorType), result.getSmashedErrors().getKeys());
@@ -130,7 +130,7 @@ public class WorstCasePolicyTest {
 		call.setSource(intermediate);
 
 		AnalysisState<TestAbstractState> result = WorstCasePolicy.INSTANCE.apply(
-				call, state(), analysis(t -> t == smashed), new ExpressionSet[0]);
+				call, state(), analysis(t -> t == smashed), null, new ExpressionSet[0]);
 
 		assertEquals(Set.of(new Error(notSmashed, root)), result.getErrors().getKeys());
 		assertEquals(Set.of(root), result.getSmashedErrors().getState(smashed).elements());

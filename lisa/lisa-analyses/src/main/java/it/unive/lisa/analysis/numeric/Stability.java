@@ -48,7 +48,7 @@ import java.util.Set;
  * {@link ValueDomain} {@code aux} and a {@link ValueEnvironment} {@code trends}
  * of {@link Trend} instances, representing per-variable trends. Queries are
  * carried over by the
- * {@link SemanticDomain#satisfies(DomainLattice, SymbolicExpression, ProgramPoint)}
+ * {@link SemanticDomain#satisfies(DomainLattice, SymbolicExpression, it.unive.lisa.interprocedural.ScopeId, ProgramPoint)}
  * operator invoked on {@code aux}. <br/>
  * <br/>
  * This analysis takes part in the {@link WholeValueAnalysis} by only exploiting

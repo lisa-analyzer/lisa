@@ -56,8 +56,8 @@ public class HistoryDomainTest {
 			throws SemanticException {
 		HistoryState<
 				SimpleAbstractState<Monolith, ValueEnvironment<SignLattice>, TypeEnvironment<TypeSet>>> result = domain
-						.assign(initial(), x, five, pp);
-		assertEquals(inner.assign(inner.makeLattice(), x, five, pp), result.head());
+						.assign(initial(), x, five, null, pp);
+		assertEquals(inner.assign(inner.makeLattice(), x, five, null, pp), result.head());
 	}
 
 	@Test
@@ -68,7 +68,7 @@ public class HistoryDomainTest {
 				TypeEnvironment<TypeSet>>> withHistory = initial().upchainAux(initial());
 		HistoryState<
 				SimpleAbstractState<Monolith, ValueEnvironment<SignLattice>, TypeEnvironment<TypeSet>>> result = domain
-						.assign(withHistory, x, five, pp);
+						.assign(withHistory, x, five, null, pp);
 
 		int count = 0;
 		for (@SuppressWarnings("unused")
@@ -82,8 +82,8 @@ public class HistoryDomainTest {
 			throws SemanticException {
 		HistoryState<
 				SimpleAbstractState<Monolith, ValueEnvironment<SignLattice>, TypeEnvironment<TypeSet>>> result = domain
-						.smallStepSemantics(initial(), five, pp);
-		assertEquals(inner.smallStepSemantics(inner.makeLattice(), five, pp), result.head());
+						.smallStepSemantics(initial(), five, null, pp);
+		assertEquals(inner.smallStepSemantics(inner.makeLattice(), five, null, pp), result.head());
 	}
 
 	@Test
@@ -91,14 +91,14 @@ public class HistoryDomainTest {
 			throws SemanticException {
 		HistoryState<
 				SimpleAbstractState<Monolith, ValueEnvironment<SignLattice>, TypeEnvironment<TypeSet>>> result = domain
-						.assume(initial(), five, pp, pp);
-		assertEquals(inner.assume(inner.makeLattice(), five, pp, pp), result.head());
+						.assume(initial(), five, null, pp, pp);
+		assertEquals(inner.assume(inner.makeLattice(), five, null, pp, pp), result.head());
 	}
 
 	@Test
 	public void satisfiesDelegatesDirectlyToTheUnderlyingDomain()
 			throws SemanticException {
-		assertEquals(inner.satisfies(inner.makeLattice(), five, pp), domain.satisfies(initial(), five, pp));
+		assertEquals(inner.satisfies(inner.makeLattice(), five, null, pp), domain.satisfies(initial(), five, null, pp));
 	}
 
 	@Test
@@ -106,13 +106,13 @@ public class HistoryDomainTest {
 			throws SemanticException {
 		HistoryState<
 				SimpleAbstractState<Monolith, ValueEnvironment<SignLattice>, TypeEnvironment<TypeSet>>> result = domain
-						.onCallReturn(initial(), initial(), pp);
-		assertEquals(inner.onCallReturn(inner.makeLattice(), inner.makeLattice(), pp), result.head());
+						.onCallReturn(initial(), initial(), null, pp);
+		assertEquals(inner.onCallReturn(inner.makeLattice(), inner.makeLattice(), null, pp), result.head());
 	}
 
 	@Test
 	public void makeOracleDelegatesToTheUnderlyingDomain() {
-		assertTrue(domain.makeOracle(initial()) != null);
+		assertTrue(domain.makeOracle(initial(), null) != null);
 	}
 
 }

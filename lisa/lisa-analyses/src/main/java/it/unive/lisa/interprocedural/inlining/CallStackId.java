@@ -27,8 +27,11 @@ public class CallStackId<A extends AbstractLattice<A>>
 
 	private final List<Pair<CFGCall, AnalysisState<A>>> calls;
 
+	private final String hash;
+
 	private CallStackId() {
 		this.calls = Collections.emptyList();
+		this.hash = computeHash();
 	}
 
 	private CallStackId(
@@ -38,6 +41,7 @@ public class CallStackId<A extends AbstractLattice<A>>
 		this.calls = new ArrayList<>(source.calls.size() + 1);
 		source.calls.forEach(this.calls::add);
 		this.calls.add(Pair.of(newToken, state));
+		this.hash = computeHash();
 	}
 
 	private CallStackId(
@@ -46,6 +50,18 @@ public class CallStackId<A extends AbstractLattice<A>>
 		this.calls = new ArrayList<>(source.calls.size() - toPop);
 		for (int i = 0; i < source.calls.size() - toPop; i++)
 			this.calls.add(source.calls.get(i));
+		this.hash = computeHash();
+	}
+
+	private String computeHash() {
+		// the hash only depends on the call stack, and not on the entry
+		// states: since calls are inlined, the call stack already identifies
+		// the context, and including states would make the hash change
+		// whenever they do (e.g., at each iteration of a loop containing the
+		// call), possibly preventing the analysis from terminating when the
+		// hash is used to name abstractions (e.g., allocation sites). Equal
+		// ids still have equal hashes, as equality also compares the states
+		return ScopeId.computeHash(toString());
 	}
 
 	/**
@@ -159,8 +175,7 @@ public class CallStackId<A extends AbstractLattice<A>>
 			for (Pair<CFGCall, AnalysisState<A>> call : calls)
 				// we use the hashcode of the location as the hashcode of the
 				// call is based on the ones of its targets, and a CFG hashcode
-				// is not consistent between executions - this is a problem as
-				// this object's hashcode is used as suffix in some filenames
+				// is not consistent between executions
 				result = prime * result + call.getLeft().getLocation().hashCode();
 		return result;
 	}
@@ -173,6 +188,11 @@ public class CallStackId<A extends AbstractLattice<A>>
 	@Override
 	public boolean isStartingId() {
 		return calls.isEmpty();
+	}
+
+	@Override
+	public String getHash() {
+		return hash;
 	}
 
 	@Override

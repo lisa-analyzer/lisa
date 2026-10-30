@@ -401,7 +401,7 @@ public class Reachability<A extends AbstractLattice<A>, D extends AbstractDomain
 		for (Expression e : call.getParameters())
 			store.put(e, result.getAnalysisStateAfter(e));
 		try {
-			return callgraph.resolve(call, call.parameterTypes(store, analysis), null);
+			return callgraph.resolve(call, call.parameterTypes(store, analysis, result.getId()), null);
 		} catch (CallResolutionException e) {
 			return null;
 		}
@@ -479,11 +479,11 @@ public class Reachability<A extends AbstractLattice<A>, D extends AbstractDomain
 					if (edge.isErrorHandling())
 						continue;
 					Statement dest = edge.getDestination();
-					if (post.get(dest).isBottom() || !isFeasible(edge, state, conditions))
+					if (post.get(dest).isBottom() || !isFeasible(edge, state, conditions, result.getId()))
 						continue;
 					ReachabilityGraph.Node t = target(dest, st, nodes, firsts, loops);
 					graph.connect(node, t);
-					if (first != null && isFeasible(edge, firstState, conditions))
+					if (first != null && isFeasible(edge, firstState, conditions, result.getId()))
 						graph.connect(first, t);
 				}
 			}
@@ -579,7 +579,7 @@ public class Reachability<A extends AbstractLattice<A>, D extends AbstractDomain
 		for (Statement pred : result.predecessorsOf(guard))
 			if (!loop.contains(pred))
 				state = state.lub(ForwardCFGFixpoint.traverseEdge(result.getEdgeConnecting(pred, guard),
-						post.get(pred), result, analysis, null));
+						post.get(pred), result, analysis, result.getId(), null));
 		return state;
 	}
 
@@ -596,14 +596,15 @@ public class Reachability<A extends AbstractLattice<A>, D extends AbstractDomain
 			state = state.lub(result.getAnalysisStateBefore(node));
 		for (Statement pred : result.predecessorsOf(node))
 			state = state.lub(ForwardCFGFixpoint.traverseEdge(result.getEdgeConnecting(pred, node),
-					result.getAnalysisStateAfter(pred), result, analysis, null));
+					result.getAnalysisStateAfter(pred), result, analysis, result.getId(), null));
 		return state;
 	}
 
 	private boolean isFeasible(
 			Edge edge,
 			AnalysisState<A> state,
-			Collection<SymbolicExpression> conditions)
+			Collection<SymbolicExpression> conditions,
+			ScopeId<A> context)
 			throws SemanticException {
 		boolean trueEdge = edge instanceof TrueEdge;
 		if (!trueEdge && !(edge instanceof FalseEdge))
@@ -614,7 +615,7 @@ public class Reachability<A extends AbstractLattice<A>, D extends AbstractDomain
 			return true;
 
 		for (SymbolicExpression condition : conditions) {
-			Satisfiability sat = analysis.satisfies(state, condition, edge.getSource());
+			Satisfiability sat = analysis.satisfies(state, condition, context, edge.getSource());
 			if (sat == Satisfiability.BOTTOM)
 				continue;
 			if (trueEdge ? sat != Satisfiability.NOT_SATISFIED : sat != Satisfiability.SATISFIED)

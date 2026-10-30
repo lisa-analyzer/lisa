@@ -81,6 +81,7 @@ public class Cast
 								right,
 								target.castIsConversion() ? TypeConv.INSTANCE : TypeCast.INSTANCE,
 								getLocation()),
+						interprocedural.getCurrentContext(),
 						this);
 	}
 

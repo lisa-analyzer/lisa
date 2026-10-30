@@ -1,0 +1,33 @@
+class A {
+	v;
+
+	~A(x) {
+		this.v = x;
+	}
+}
+
+class F {
+
+	make(x) {
+		def o = new A(x);
+		return o;
+	}
+
+	main() {
+		def a = this.make(1);
+		def b = this.make(2);
+		a.v = 10;
+		b.v = 20;
+		def r = a.v;
+	}
+
+	loop() {
+		def i = 0;
+		def c = this.make(0);
+		while (i < 10) {
+			c = this.make(i);
+			c.v = i;
+			i = i + 1;
+		}
+	}
+}

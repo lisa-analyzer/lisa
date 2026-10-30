@@ -185,7 +185,7 @@ public class SemanticTool<A extends AbstractLattice<A>, D extends AbstractDomain
 			Analysis<A, D> analysis = new Analysis(
 					getConfiguration().analysis,
 					getConfiguration().shouldSmashError);
-			return callgraph.resolve(call, call.parameterTypes(store, analysis), null);
+			return callgraph.resolve(call, call.parameterTypes(store, analysis, result.getId()), null);
 		} catch (CallResolutionException e) {
 			return null;
 		}

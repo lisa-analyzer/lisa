@@ -3,6 +3,7 @@ package it.unive.lisa.analysis;
 import it.unive.lisa.analysis.AnalysisState.Error;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.events.EventQueue;
+import it.unive.lisa.interprocedural.ScopeId;
 import it.unive.lisa.lattices.ExpressionSet;
 import it.unive.lisa.lattices.Satisfiability;
 import it.unive.lisa.program.cfg.ProgramPoint;
@@ -24,7 +25,7 @@ import org.apache.commons.lang3.tuple.Pair;
  * A minimal, hand-rolled {@link AbstractDomain} over
  * {@link MarkerAbstractLattice} used by tests in this package to exercise
  * {@link Analysis} without resorting to a mocking framework.
- * {@link #assign(MarkerAbstractLattice, Identifier, SymbolicExpression, ProgramPoint)}
+ * {@link #assign(MarkerAbstractLattice, Identifier, SymbolicExpression, ScopeId, ProgramPoint)}
  * actually records that the assigned identifier is now known, so that tests can
  * observe the effect of an assignment on the wrapped state; {@link #assume} is
  * unsatisfiable exactly when the given expression is a {@link Skip} (an
@@ -42,6 +43,7 @@ public class MarkerAbstractDomain
 			MarkerAbstractLattice state,
 			Identifier id,
 			SymbolicExpression expression,
+			ScopeId<?> context,
 			ProgramPoint pp) {
 		Set<Identifier> known = new HashSet<>(state.known);
 		known.add(id);
@@ -52,6 +54,7 @@ public class MarkerAbstractDomain
 	public MarkerAbstractLattice smallStepSemantics(
 			MarkerAbstractLattice state,
 			SymbolicExpression expression,
+			ScopeId<?> context,
 			ProgramPoint pp) {
 		return state;
 	}
@@ -60,6 +63,7 @@ public class MarkerAbstractDomain
 	public MarkerAbstractLattice assume(
 			MarkerAbstractLattice state,
 			SymbolicExpression expression,
+			ScopeId<?> context,
 			ProgramPoint src,
 			ProgramPoint dest) {
 		return expression instanceof Skip ? state.bottom() : state;
@@ -67,7 +71,8 @@ public class MarkerAbstractDomain
 
 	@Override
 	public SemanticOracle makeOracle(
-			MarkerAbstractLattice state) {
+			MarkerAbstractLattice state,
+			ScopeId<?> context) {
 		return new MarkerOracle();
 	}
 
@@ -80,6 +85,7 @@ public class MarkerAbstractDomain
 	public MarkerAbstractLattice onCallReturn(
 			MarkerAbstractLattice entryState,
 			MarkerAbstractLattice callres,
+			ScopeId<?> context,
 			ProgramPoint call) {
 		return callres;
 	}
@@ -89,6 +95,7 @@ public class MarkerAbstractDomain
 			MarkerAbstractLattice remaining,
 			MarkerAbstractLattice moved,
 			Error error,
+			ScopeId<?> context,
 			ProgramPoint pp) {
 		return Pair.of(remaining, moved);
 	}
@@ -97,6 +104,7 @@ public class MarkerAbstractDomain
 	public MarkerAbstractLattice onErrorToExecution(
 			MarkerAbstractLattice state,
 			ProtectedBlock protectedBlock,
+			ScopeId<?> context,
 			ProgramPoint pp) {
 		return state;
 	}
@@ -105,6 +113,7 @@ public class MarkerAbstractDomain
 	public Pair<MarkerAbstractLattice, MarkerAbstractLattice> onExecutionToHalting(
 			MarkerAbstractLattice remaining,
 			MarkerAbstractLattice moved,
+			ScopeId<?> context,
 			ProgramPoint pp) {
 		return Pair.of(remaining, moved);
 	}
@@ -124,6 +133,11 @@ public class MarkerAbstractDomain
 
 		@Override
 		public EventQueue getEventQueue() {
+			return null;
+		}
+
+		@Override
+		public ScopeId<?> getContext() {
 			return null;
 		}
 

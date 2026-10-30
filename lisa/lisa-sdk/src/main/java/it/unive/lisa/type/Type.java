@@ -388,7 +388,7 @@ public interface Type {
 	 * default value. The returned expression's semantics function should leave
 	 * a {@link SymbolicExpression} on the stack that can be used as second
 	 * parameter in a
-	 * {@link SemanticDomain#assign(DomainLattice, Identifier, SymbolicExpression, ProgramPoint)}
+	 * {@link SemanticDomain#assign(DomainLattice, Identifier, SymbolicExpression, it.unive.lisa.interprocedural.ScopeId, ProgramPoint)}
 	 * call. Before doing so, the entry state can be arbitrarily manipulated to,
 	 * for instance, define fields or second-level memory regions initialized
 	 * together with the main target of the returned expression (e.g., if the
@@ -416,7 +416,7 @@ public interface Type {
 	 * statically unknown value. The returned expression's semantics function
 	 * should leave a {@link SymbolicExpression} on the stack that can be used
 	 * as second parameter in a
-	 * {@link SemanticDomain#assign(DomainLattice, Identifier, SymbolicExpression, ProgramPoint)}
+	 * {@link SemanticDomain#assign(DomainLattice, Identifier, SymbolicExpression, it.unive.lisa.interprocedural.ScopeId, ProgramPoint)}
 	 * call. Before doing so, the entry state can be arbitrarily manipulated to,
 	 * for instance, define fields or second-level memory regions initialized
 	 * together with the main target of the returned expression (e.g., if the

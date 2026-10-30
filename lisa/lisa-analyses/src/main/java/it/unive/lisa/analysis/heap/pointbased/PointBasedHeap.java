@@ -9,7 +9,15 @@ import it.unive.lisa.lattices.heap.allocations.AllocationSites;
  * distinguish objects and arrays by their allocation site, and not by the
  * fields or elements stored inside them. The implementation follows X. Rival
  * and K. Yi, "Introduction to Static Analysis: An Abstract Interpretation
- * Perspective", Section 8.3.4.
+ * Perspective", Section 8.3.4.<br>
+ * <br>
+ * Instances built with {@link #PointBasedHeap(boolean)} can also be
+ * context-sensitive, qualifying allocation sites with the interprocedural
+ * context where the allocation happens (see
+ * {@link AllocationSiteBasedAnalysis}). This only adds precision when used
+ * together with a context-sensitive interprocedural analysis (e.g.,
+ * {@link it.unive.lisa.interprocedural.context.ContextBasedAnalysis} or
+ * {@link it.unive.lisa.interprocedural.inlining.InliningAnalysis}).
  *
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  *
@@ -20,6 +28,25 @@ import it.unive.lisa.lattices.heap.allocations.AllocationSites;
 public class PointBasedHeap
 		extends
 		AllocationSiteBasedAnalysis<HeapEnvironment<AllocationSites>> {
+
+	/**
+	 * Builds a context-insensitive, field-insensitive heap domain.
+	 */
+	public PointBasedHeap() {
+		super();
+	}
+
+	/**
+	 * Builds a field-insensitive heap domain.
+	 * 
+	 * @param contextSensitive whether or not allocation sites should be
+	 *                             qualified by the interprocedural context
+	 *                             where the allocation happens
+	 */
+	public PointBasedHeap(
+			boolean contextSensitive) {
+		super(contextSensitive);
+	}
 
 	@Override
 	public HeapEnvironment<AllocationSites> makeLattice() {

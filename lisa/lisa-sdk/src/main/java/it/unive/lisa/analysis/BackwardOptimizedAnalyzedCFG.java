@@ -305,7 +305,7 @@ public class BackwardOptimizedAnalyzedCFG<A extends AbstractLattice<A>, D extend
 						call.getProgram()
 								.getFeatures()
 								.getScopingStrategy()
-								.unscope(call, scope, res, interprocedural.getAnalysis()));
+								.unscope(call, scope, res, interprocedural.getAnalysis(), getId()));
 			}
 			return state;
 		}
@@ -332,6 +332,11 @@ public class BackwardOptimizedAnalyzedCFG<A extends AbstractLattice<A>, D extend
 		@Override
 		public FixpointResults<A> getFixpointResults() {
 			return interprocedural.getFixpointResults();
+		}
+
+		@Override
+		public ScopeId<A> getCurrentContext() {
+			return getId();
 		}
 
 		@Override

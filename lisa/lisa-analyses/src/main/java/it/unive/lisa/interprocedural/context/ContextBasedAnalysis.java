@@ -474,6 +474,11 @@ public class ContextBasedAnalysis<A extends AbstractLattice<A>,
 	}
 
 	@Override
+	public ScopeId<A> getCurrentContext() {
+		return token;
+	}
+
+	@Override
 	public AnalysisState<A> getAbstractResultOf(
 			CFGCall call,
 			AnalysisState<A> entryState,
@@ -566,9 +571,9 @@ public class ContextBasedAnalysis<A extends AbstractLattice<A>,
 
 			// save the resulting state
 			ScopingStrategy strategy = call.getProgram().getFeatures().getScopingStrategy();
-			AnalysisState<A> callres = strategy.unscope(call, scope, exitState, analysis);
+			AnalysisState<A> callres = strategy.unscope(call, scope, exitState, analysis, callerToken);
 			callres = analysis.transferThrowers(callres, call, cfg);
-			callres = analysis.onCallReturn(entryState, callres, call);
+			callres = analysis.onCallReturn(entryState, callres, callerToken, call);
 			result = result.lub(callres);
 		}
 

@@ -75,7 +75,7 @@ public abstract class OutputCFGDumper<A extends AbstractLattice<A>, D extends Ab
 				SerializableGraph graph = result.toSerializableGraph(labeler);
 				String filename = cfg.getDescriptor().getFullSignatureWithParNames();
 				if (!result.getId().isStartingId())
-					filename += "_" + result.getId().hashCode();
+					filename += "_" + result.getId().getHash();
 
 				try {
 					dump(fileManager, graph, filename);

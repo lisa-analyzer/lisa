@@ -7,6 +7,7 @@ import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
+import it.unive.lisa.interprocedural.ScopeId;
 import it.unive.lisa.program.ClassUnit;
 import it.unive.lisa.program.CompilationUnit;
 import it.unive.lisa.program.Global;
@@ -124,12 +125,13 @@ public class AccessInstanceGlobal
 			SymbolicExpression expr,
 			StatementStore<A> expressions)
 			throws SemanticException {
+		ScopeId<A> context = interprocedural.getCurrentContext();
 		CodeLocation loc = getLocation();
 		Analysis<A, D> analysis = interprocedural.getAnalysis();
 
 		AnalysisState<A> result = state.bottomExecution();
 		boolean atLeastOne = false;
-		Set<Type> types = analysis.getRuntimeTypesOf(state, expr, this);
+		Set<Type> types = analysis.getRuntimeTypesOf(state, expr, context, this);
 
 		for (Type recType : types)
 			if (recType.isPointerType()) {
@@ -149,7 +151,7 @@ public class AccessInstanceGlobal
 						if (global != null) {
 							GlobalVariable var = global.toSymbolicVariable(loc);
 							AccessChild access = new AccessChild(var.getStaticType(), container, var, loc);
-							result = result.lub(analysis.smallStepSemantics(state, access, this));
+							result = result.lub(analysis.smallStepSemantics(state, access, context, this));
 							atLeastOne = true;
 							break;
 						}
@@ -172,7 +174,7 @@ public class AccessInstanceGlobal
 		GlobalVariable var = new GlobalVariable(Untyped.INSTANCE, target, new Annotations(), getLocation());
 		HeapDereference container = new HeapDereference(rectype, expr, getLocation());
 		AccessChild access = new AccessChild(Untyped.INSTANCE, container, var, getLocation());
-		return analysis.smallStepSemantics(state, access, this);
+		return analysis.smallStepSemantics(state, access, context, this);
 	}
 
 }

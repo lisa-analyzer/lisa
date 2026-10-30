@@ -5,6 +5,7 @@ import it.unive.lisa.analysis.AnalysisState.Error;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.events.EventQueue;
+import it.unive.lisa.interprocedural.ScopeId;
 import it.unive.lisa.lattices.Satisfiability;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.program.cfg.protection.ProtectedBlock;
@@ -51,6 +52,7 @@ public class RecordingDomain
 			UnitLattice state,
 			Identifier id,
 			SymbolicExpression expression,
+			ScopeId<?> context,
 			ProgramPoint pp)
 			throws SemanticException {
 		assignCalls.add(expression);
@@ -61,6 +63,7 @@ public class RecordingDomain
 	public UnitLattice smallStepSemantics(
 			UnitLattice state,
 			SymbolicExpression expression,
+			ScopeId<?> context,
 			ProgramPoint pp)
 			throws SemanticException {
 		smallStepCalls.add(expression);
@@ -71,6 +74,7 @@ public class RecordingDomain
 	public UnitLattice assume(
 			UnitLattice state,
 			SymbolicExpression expression,
+			ScopeId<?> context,
 			ProgramPoint src,
 			ProgramPoint dest)
 			throws SemanticException {
@@ -86,6 +90,7 @@ public class RecordingDomain
 	public UnitLattice onCallReturn(
 			UnitLattice entryState,
 			UnitLattice callres,
+			ScopeId<?> context,
 			ProgramPoint call)
 			throws SemanticException {
 		return entryState;
@@ -96,6 +101,7 @@ public class RecordingDomain
 			UnitLattice remaining,
 			UnitLattice moved,
 			Error error,
+			ScopeId<?> context,
 			ProgramPoint pp)
 			throws SemanticException {
 		return Pair.of(remaining, moved);
@@ -105,6 +111,7 @@ public class RecordingDomain
 	public UnitLattice onErrorToExecution(
 			UnitLattice state,
 			ProtectedBlock protectedBlock,
+			ScopeId<?> context,
 			ProgramPoint pp)
 			throws SemanticException {
 		return state;
@@ -114,6 +121,7 @@ public class RecordingDomain
 	public Pair<UnitLattice, UnitLattice> onExecutionToHalting(
 			UnitLattice remaining,
 			UnitLattice moved,
+			ScopeId<?> context,
 			ProgramPoint pp)
 			throws SemanticException {
 		return Pair.of(remaining, moved);
@@ -126,11 +134,17 @@ public class RecordingDomain
 
 	@Override
 	public SemanticOracle makeOracle(
-			UnitLattice state) {
+			UnitLattice state,
+			ScopeId<?> context) {
 		return new SemanticOracle() {
 
 			@Override
 			public EventQueue getEventQueue() {
+				return null;
+			}
+
+			@Override
+			public ScopeId<?> getContext() {
 				return null;
 			}
 

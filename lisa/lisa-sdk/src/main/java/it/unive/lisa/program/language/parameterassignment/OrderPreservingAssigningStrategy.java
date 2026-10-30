@@ -74,6 +74,7 @@ public class OrderPreservingAssigningStrategy
 				for (SymbolicExpression exp : parameters[i])
 					temp = temp
 							.lub(interprocedural.getAnalysis().assign(prepared, formals[i].toSymbolicVariable(), exp,
+									interprocedural.getCurrentContext(),
 									call));
 				prepared = temp;
 			}
