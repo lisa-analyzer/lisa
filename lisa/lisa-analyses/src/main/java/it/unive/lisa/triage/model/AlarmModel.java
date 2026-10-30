@@ -1,0 +1,270 @@
+package it.unive.lisa.triage.model;
+
+import it.unive.lisa.analysis.AnalyzedCFG;
+import it.unive.lisa.program.cfg.statement.Statement;
+import it.unive.lisa.symbolic.SymbolicExpression;
+import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.triage.encoding.SortPolicy;
+import it.unive.lisa.triage.inputs.InputSource;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+/**
+ * A model of the executions of a cfg (in a given context) that might lead to
+ * the violation of a property, built by {@link AlarmModelBuilder}. The model
+ * is a control-flow automaton whose locations are the beginnings of the nodes
+ * of the cfg that can reach the node where the property is checked (the
+ * <i>bad location</i>), and whose edges carry the symbolic transitions
+ * extracted from the results of the analysis. The model contains:
+ * <ul>
+ * <li>the locations ({@link #getLocations()}) and their transitions
+ * ({@link #getTransitions(Statement)}, restricted to edges between
+ * locations);</li>
+ * <li>the initial locations ({@link #getInitialLocations()}), where the
+ * executions start in a state satisfying the initial constraints
+ * ({@link #getInitialConstraints()});</li>
+ * <li>the bad location and the ways of violating the property there
+ * ({@link #getBadCases()});</li>
+ * <li>the invariants computed by the analysis at each location, as
+ * constraints ({@link #getSeeds(Statement)});</li>
+ * <li>the identifiers used in the model, with the sorts to encode them, the
+ * fresh values used in the transitions, and the sources of the parameters of
+ * the cfg.</li>
+ * </ul>
+ * A model is <i>confirmable</i> if its initial states correspond to the
+ * beginning of the program, so that an execution of the model reaching the bad
+ * location corresponds to an execution of the program.
+ *
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ */
+public class AlarmModel {
+
+	private final AnalyzedCFG<?> result;
+
+	private final Statement badLocation;
+
+	private final Set<Statement> locations;
+
+	private final Set<Statement> initial;
+
+	private final Map<Statement, NodeTransitions> transitions;
+
+	private final Set<SymbolicExpression> initialConstraints;
+
+	private final List<BadCase> badCases;
+
+	private final Map<Statement, Set<SymbolicExpression>> seeds;
+
+	private final Set<Identifier> vocabulary;
+
+	private final SortPolicy sorts;
+
+	private final Map<String, FreshValue> freshValues;
+
+	private final Map<Identifier, InputSource> parameters;
+
+	private final boolean confirmable;
+
+	/**
+	 * Builds the model.
+	 *
+	 * @param result             the analysis result the model is built from
+	 * @param badLocation        the bad location
+	 * @param locations          the locations
+	 * @param initial            the initial locations
+	 * @param transitions        the transitions of each location
+	 * @param initialConstraints the constraints that hold in the initial
+	 *                               states
+	 * @param badCases           the ways of violating the property at the
+	 *                               bad location
+	 * @param seeds              the invariants of each reachable location
+	 *                               (unreachable locations are not in the
+	 *                               map)
+	 * @param vocabulary         the identifiers used in the model
+	 * @param sorts              the policy deciding the sorts of identifiers
+	 * @param freshValues        the fresh values used in the model, by name
+	 * @param parameters         the sources of the parameters of the cfg
+	 * @param confirmable        whether or not the model is confirmable
+	 */
+	public AlarmModel(
+			AnalyzedCFG<?> result,
+			Statement badLocation,
+			Set<Statement> locations,
+			Set<Statement> initial,
+			Map<Statement, NodeTransitions> transitions,
+			Set<SymbolicExpression> initialConstraints,
+			List<BadCase> badCases,
+			Map<Statement, Set<SymbolicExpression>> seeds,
+			Set<Identifier> vocabulary,
+			SortPolicy sorts,
+			Map<String, FreshValue> freshValues,
+			Map<Identifier, InputSource> parameters,
+			boolean confirmable) {
+		this.result = result;
+		this.badLocation = badLocation;
+		this.locations = Collections.unmodifiableSet(locations);
+		this.initial = Collections.unmodifiableSet(initial);
+		this.transitions = Collections.unmodifiableMap(transitions);
+		this.initialConstraints = Collections.unmodifiableSet(initialConstraints);
+		this.badCases = Collections.unmodifiableList(badCases);
+		this.seeds = Collections.unmodifiableMap(seeds);
+		this.vocabulary = Collections.unmodifiableSet(vocabulary);
+		this.sorts = sorts;
+		this.freshValues = Collections.unmodifiableMap(freshValues);
+		this.parameters = Collections.unmodifiableMap(parameters);
+		this.confirmable = confirmable;
+	}
+
+	/**
+	 * Yields the analysis result the model is built from.
+	 *
+	 * @return the result
+	 */
+	public AnalyzedCFG<?> getResult() {
+		return result;
+	}
+
+	/**
+	 * Yields the bad location, that is, the node where the property is
+	 * checked.
+	 *
+	 * @return the bad location
+	 */
+	public Statement getBadLocation() {
+		return badLocation;
+	}
+
+	/**
+	 * Yields the locations of the model.
+	 *
+	 * @return the locations
+	 */
+	public Set<Statement> getLocations() {
+		return locations;
+	}
+
+	/**
+	 * Yields the initial locations of the model.
+	 *
+	 * @return the initial locations
+	 */
+	public Set<Statement> getInitialLocations() {
+		return initial;
+	}
+
+	/**
+	 * Yields all the transitions extracted for the given location.
+	 *
+	 * @param location the location
+	 *
+	 * @return the transitions, or {@code null} if the given node is not a
+	 *             location of the model
+	 */
+	public NodeTransitions getNodeTransitions(
+			Statement location) {
+		return transitions.get(location);
+	}
+
+	/**
+	 * Yields the transitions from the given location to other locations of
+	 * the model.
+	 *
+	 * @param location the location
+	 *
+	 * @return the transitions
+	 */
+	public List<EdgeTransition> getTransitions(
+			Statement location) {
+		NodeTransitions tr = transitions.get(location);
+		List<EdgeTransition> result = new ArrayList<>();
+		if (tr != null)
+			for (EdgeTransition e : tr.getOutgoing())
+				if (locations.contains(e.getEdge().getDestination()))
+					result.add(e);
+		return result;
+	}
+
+	/**
+	 * Yields the constraints that hold in the initial states.
+	 *
+	 * @return the constraints
+	 */
+	public Set<SymbolicExpression> getInitialConstraints() {
+		return initialConstraints;
+	}
+
+	/**
+	 * Yields the ways of violating the property at the bad location. An empty
+	 * list means that the property cannot be violated.
+	 *
+	 * @return the bad cases
+	 */
+	public List<BadCase> getBadCases() {
+		return badCases;
+	}
+
+	/**
+	 * Yields the invariant computed by the analysis at the given location, as
+	 * a set of constraints.
+	 *
+	 * @param location the location
+	 *
+	 * @return the constraints, or {@code null} if the analysis deemed the
+	 *             location unreachable
+	 */
+	public Set<SymbolicExpression> getSeeds(
+			Statement location) {
+		return seeds.get(location);
+	}
+
+	/**
+	 * Yields the identifiers used in the model, excluding fresh values.
+	 *
+	 * @return the identifiers
+	 */
+	public Set<Identifier> getVocabulary() {
+		return vocabulary;
+	}
+
+	/**
+	 * Yields the policy deciding the sorts used to encode the identifiers and
+	 * the fresh values of the model.
+	 *
+	 * @return the policy
+	 */
+	public SortPolicy getSorts() {
+		return sorts;
+	}
+
+	/**
+	 * Yields the fresh values used in the model, indexed by name.
+	 *
+	 * @return the fresh values
+	 */
+	public Map<String, FreshValue> getFreshValues() {
+		return freshValues;
+	}
+
+	/**
+	 * Yields the parameters of the cfg, mapped to their sources: their values
+	 * in the initial states are inputs of the executions.
+	 *
+	 * @return the parameters
+	 */
+	public Map<Identifier, InputSource> getParameters() {
+		return parameters;
+	}
+
+	/**
+	 * Yields {@code true} if the initial states of this model correspond to
+	 * the beginning of the program.
+	 *
+	 * @return whether or not this model is confirmable
+	 */
+	public boolean isConfirmable() {
+		return confirmable;
+	}
+}

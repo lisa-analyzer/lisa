@@ -70,6 +70,16 @@ public class TransitionExtractor<A extends AbstractLattice<A>, D extends Abstrac
 	}
 
 	/**
+	 * Yields the analysis (with no events) used to compute the states before
+	 * the nodes.
+	 *
+	 * @return the analysis
+	 */
+	public Analysis<A, D> getAnalysis() {
+		return analysis;
+	}
+
+	/**
 	 * Yields the result whose nodes are replayed.
 	 *
 	 * @return the result
