@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,8 +44,9 @@ import java.util.Set;
  * ({@link Projection}) of the cube through the case of the transition taken
  * in the model. An obligation at level {@code 0} contains initial states, so
  * the chain of obligations from it to the bad location is a counterexample.
- * Blocked cubes are generalized by dropping literals, and their negation is
- * added as a lemma.<br>
+ * Blocked cubes are first reduced to the union of the unsat cores of the
+ * queries that blocked them (with no additional query), then generalized by
+ * dropping literals, and their negation is added as a lemma.<br>
  * <br>
  * Once every violation at level {@code k} is blocked, lemmas are propagated
  * to the next levels. If a level is left without lemmas of its own, two
@@ -116,6 +118,10 @@ public class PdrEngine {
 	private int queries = 0;
 
 	private int maxQueries = Integer.MAX_VALUE;
+
+	private long deadline = Long.MAX_VALUE;
+
+	private long literalNames = 0;
 
 	private List<Obligation> counterexample;
 
@@ -213,7 +219,7 @@ public class PdrEngine {
 	/**
 	 * Runs the engine until a counterexample or an inductive invariant is
 	 * found, or every violation within {@code maxLevel} steps has been
-	 * blocked.
+	 * blocked, with no time limit.
 	 *
 	 * @param maxLevel   the maximum level to reach
 	 * @param maxQueries the maximum number of queries to issue
@@ -226,7 +232,31 @@ public class PdrEngine {
 			int maxLevel,
 			int maxQueries)
 			throws SemanticException {
+		return run(maxLevel, maxQueries, 0);
+	}
+
+	/**
+	 * Runs the engine until a counterexample or an inductive invariant is
+	 * found, or every violation within {@code maxLevel} steps has been
+	 * blocked. The time limit is checked before each query: a single query
+	 * is bounded by the timeout of the solver.
+	 *
+	 * @param maxLevel   the maximum level to reach
+	 * @param maxQueries the maximum number of queries to issue
+	 * @param maxMillis  the maximum time to spend, in milliseconds
+	 *                       ({@code 0} or negative means no limit)
+	 *
+	 * @return the outcome
+	 *
+	 * @throws SemanticException if an expression cannot be encoded
+	 */
+	public Status run(
+			int maxLevel,
+			int maxQueries,
+			long maxMillis)
+			throws SemanticException {
 		this.maxQueries = maxQueries;
+		this.deadline = maxMillis > 0 ? System.nanoTime() + maxMillis * 1_000_000 : Long.MAX_VALUE;
 		try {
 			// violations in the initial states
 			Obligation bad = badObligation(0);
@@ -312,14 +342,15 @@ public class PdrEngine {
 			if (res == SmtResult.UNSAT)
 				continue;
 
-			Obligation pred = predecessor(o.getLocation(), o.getCube(), o.getLevel(), o);
+			Set<SymbolicExpression> core = new HashSet<>();
+			Obligation pred = predecessor(o.getLocation(), o.getCube(), o.getLevel(), o, core);
 			if (pred != null) {
 				queue.add(pred);
 				queue.add(o);
 				continue;
 			}
 
-			Cube cube = generalize(o.getLocation(), o.getCube(), o.getLevel());
+			Cube cube = generalize(o.getLocation(), o.getCube().restrict(core), o.getLevel());
 			frames.add(o.getLocation(), cube.negate(), o.getLevel());
 			// the same states might still reach the bad location in more steps
 			if (o.getLevel() < frames.depth())
@@ -335,17 +366,20 @@ public class PdrEngine {
 	 * transition), or the projection of the cube on a state of
 	 * {@code F_{level-1}} at another location that reaches the cube in one
 	 * transition. Yields {@code null} if there is none (the cube is blocked
-	 * at the given level).
+	 * at the given level): in that case, if {@code core} is not {@code null},
+	 * it is filled with literals of the cube that are enough to block it (the
+	 * union of the unsat cores of the queries).
 	 */
 	private Obligation predecessor(
 			Statement location,
 			Cube cube,
 			int level,
-			Obligation parent)
+			Obligation parent,
+			Set<SymbolicExpression> core)
 			throws SemanticException,
 			Stop {
 		if (model.getInitialLocations().contains(location)) {
-			if (check(frame(location, 0), cube.at(unrolling, 0, CUBE)) == SmtResult.SAT) {
+			if (check(List.of(frame(location, 0)), cube, 0, core) == SmtResult.SAT) {
 				// no step is taken: the obligation refines its parent
 				Obligation init = new Obligation(location, cube, 0, parent, null, Collections.emptyMap(), true,
 						point(), created++);
@@ -362,11 +396,12 @@ public class PdrEngine {
 			for (int i = 0; i < cases.size(); i++) {
 				Term pre = frame(src, level - 1);
 				Term trans = unrolling.transition(0, e, i);
-				Term post = cube.at(unrolling, 1, CUBE);
+				// encoded as a whole only to compute its exactness
+				cube.at(unrolling, 1, CUBE);
 				String caseKey = unrolling.caseKey(0, e, i);
 				String cubeKey = "cond@1" + CUBE;
 				boolean exact = unrolling.isExact(caseKey) && unrolling.isExact(cubeKey);
-				if (check(pre, trans, post) == SmtResult.SAT) {
+				if (check(List.of(pre, trans), cube, 1, core) == SmtResult.SAT) {
 					SymbolicCase c = cases.get(i);
 					List<SymbolicExpression> lits = new ArrayList<>(c.getPathCondition());
 					for (SymbolicExpression lit : cube.getLiterals())
@@ -395,8 +430,9 @@ public class PdrEngine {
 	}
 
 	/**
-	 * Drops literals from a cube blocked at the given level, as long as the
-	 * result is still blocked.
+	 * Drops literals from a cube blocked at the given level (already reduced
+	 * to the unsat cores of the queries blocking it), as long as the result
+	 * is still blocked.
 	 */
 	private Cube generalize(
 			Statement location,
@@ -407,7 +443,7 @@ public class PdrEngine {
 		Cube current = cube;
 		for (SymbolicExpression lit : cube.getLiterals()) {
 			Cube candidate = current.without(lit);
-			if (predecessor(location, candidate, level, null) == null)
+			if (predecessor(location, candidate, level, null, null) == null)
 				current = candidate;
 		}
 		return current;
@@ -477,8 +513,7 @@ public class PdrEngine {
 	private SmtResult check(
 			Term... terms)
 			throws Stop {
-		if (queries >= maxQueries)
-			throw new Stop(Status.BUDGET_EXHAUSTED);
+		budget();
 		queries++;
 		solver.push();
 		for (Term t : terms)
@@ -489,6 +524,60 @@ public class PdrEngine {
 			throw new Stop(Status.UNKNOWN);
 		}
 		return res;
+	}
+
+	/**
+	 * Checks the conjunction of the given terms and of the given cube at the
+	 * given step, like {@link #check(Term...)}. If {@code core} is not
+	 * {@code null}, the literals of the cube are asserted as named terms, and
+	 * if the result is {@link SmtResult#UNSAT} the literals in the unsat core
+	 * are added to {@code core}.
+	 */
+	private SmtResult check(
+			List<Term> background,
+			Cube cube,
+			int step,
+			Set<SymbolicExpression> core)
+			throws SemanticException,
+			Stop {
+		if (core == null) {
+			List<Term> terms = new ArrayList<>(background);
+			terms.add(cube.at(unrolling, step, CUBE));
+			return check(terms.toArray(Term[]::new));
+		}
+		Map<String, SymbolicExpression> names = new LinkedHashMap<>();
+		Map<String, Term> terms = new LinkedHashMap<>();
+		for (SymbolicExpression lit : cube.getLiterals()) {
+			// names must be unique: they might survive pops
+			String name = "lit!" + (literalNames++);
+			names.put(name, lit);
+			terms.put(name, unrolling.condition(lit, step, CUBE));
+		}
+		budget();
+		queries++;
+		solver.push();
+		for (Term t : background)
+			solver.assertTerm(t);
+		for (Map.Entry<String, Term> t : terms.entrySet())
+			solver.assertNamed(t.getKey(), t.getValue());
+		SmtResult res = solver.check();
+		if (res == SmtResult.UNKNOWN) {
+			solver.pop();
+			throw new Stop(Status.UNKNOWN);
+		}
+		if (res == SmtResult.UNSAT)
+			for (String name : solver.getUnsatCore()) {
+				SymbolicExpression lit = names.get(name);
+				if (lit != null)
+					core.add(lit);
+			}
+		return res;
+	}
+
+	private void budget()
+			throws Stop {
+		if (queries >= maxQueries || System.nanoTime() > deadline)
+			throw new Stop(Status.BUDGET_EXHAUSTED);
 	}
 
 	/**

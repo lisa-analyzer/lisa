@@ -66,6 +66,21 @@ public final class Cube {
 	}
 
 	/**
+	 * Yields the cube made of the literals of this one that are in the given
+	 * set, that represents a superset of the states of this one.
+	 *
+	 * @param keep the literals to keep
+	 *
+	 * @return the cube
+	 */
+	public Cube restrict(
+			Set<SymbolicExpression> keep) {
+		Set<SymbolicExpression> result = new LinkedHashSet<>(literals);
+		result.retainAll(keep);
+		return new Cube(result);
+	}
+
+	/**
 	 * Yields the conjunction of the literals of this cube, as a single
 	 * expression.
 	 *

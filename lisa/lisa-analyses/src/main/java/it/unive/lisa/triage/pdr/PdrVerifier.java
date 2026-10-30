@@ -65,9 +65,16 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 	 */
 	public static final int DEFAULT_MAX_QUERIES = 10_000;
 
+	/**
+	 * The default maximum time per candidate violation, in milliseconds.
+	 */
+	public static final long DEFAULT_MAX_MILLIS = 60_000;
+
 	private final int maxLevel;
 
 	private final int maxQueries;
+
+	private final long maxMillis;
 
 	private final Supplier<SmtSolver> solvers;
 
@@ -80,7 +87,8 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 	 * {@link SmtLibProcessSolver}).
 	 */
 	public PdrVerifier() {
-		this(DEFAULT_MAX_LEVEL, DEFAULT_MAX_QUERIES, SmtLibProcessSolver::z3, SymbolicStore.DEFAULT_MAX_CASES);
+		this(DEFAULT_MAX_LEVEL, DEFAULT_MAX_QUERIES, DEFAULT_MAX_MILLIS, SmtLibProcessSolver::z3,
+				SymbolicStore.DEFAULT_MAX_CASES);
 	}
 
 	/**
@@ -88,6 +96,9 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 	 *
 	 * @param maxLevel   the maximum level of frames
 	 * @param maxQueries the maximum number of queries per candidate violation
+	 * @param maxMillis  the maximum time per candidate violation, in
+	 *                       milliseconds ({@code 0} or negative means no
+	 *                       limit)
 	 * @param solvers    the supplier of the solvers to use (one per candidate
 	 *                       violation)
 	 * @param maxCases   the maximum number of cases of each transition of
@@ -96,10 +107,12 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 	public PdrVerifier(
 			int maxLevel,
 			int maxQueries,
+			long maxMillis,
 			Supplier<SmtSolver> solvers,
 			int maxCases) {
 		this.maxLevel = maxLevel;
 		this.maxQueries = maxQueries;
+		this.maxMillis = maxMillis;
 		this.solvers = solvers;
 		this.maxCases = maxCases;
 	}
@@ -131,7 +144,7 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 
 		try (SmtSolver s = solver) {
 			PdrEngine engine = new PdrEngine(model, s);
-			PdrEngine.Status status = engine.run(maxLevel, maxQueries);
+			PdrEngine.Status status = engine.run(maxLevel, maxQueries, maxMillis);
 			switch (status) {
 			case SAFE:
 				return new VerificationResult(VerificationOutcome.REFUTED,

@@ -197,6 +197,16 @@ public class PdrEngineTest {
 	}
 
 	@Test
+	public void budgetsAreEnforced() throws SemanticException {
+		AlarmModel model = model("widening", "w = 1");
+		try (SmtSolver s = SmtLibProcessSolver.z3()) {
+			PdrEngine engine = new PdrEngine(model, s);
+			assertEquals(PdrEngine.Status.BUDGET_EXHAUSTED, engine.run(20, 10));
+			assertEquals(10, engine.getQueries());
+		}
+	}
+
+	@Test
 	public void infeasibleViolationIsBlocked() throws SemanticException {
 		AlarmModel model = model("bounded", "w = 1");
 		try (SmtSolver s = SmtLibProcessSolver.z3()) {
