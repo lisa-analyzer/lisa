@@ -194,9 +194,27 @@ public class PdrEngine {
 	public PdrEngine(
 			AlarmModel model,
 			SmtSolver solver) {
+		this(model, solver, false);
+	}
+
+	/**
+	 * Builds the engine.
+	 *
+	 * @param model  the model to check
+	 * @param solver the solver to use, that is not closed by the engine
+	 * @param strict whether or not to encode the model in strict mode (see
+	 *                   {@link Unrolling#Unrolling(AlarmModel, SmtSolver, boolean)}):
+	 *                   in strict mode, counterexamples use only values
+	 *                   that are computed precisely, but the absence of
+	 *                   counterexamples does not prove anything
+	 */
+	public PdrEngine(
+			AlarmModel model,
+			SmtSolver solver,
+			boolean strict) {
 		this.model = model;
 		this.solver = solver;
-		this.unrolling = new Unrolling(model, solver);
+		this.unrolling = new Unrolling(model, solver, strict);
 		this.types = model.getBadLocation().getProgram().getTypes();
 		for (Statement loc : model.getLocations())
 			for (EdgeTransition e : model.getTransitions(loc))
@@ -399,8 +417,8 @@ public class PdrEngine {
 			Cube cube = new Cube(lits);
 			Term query = cube.at(unrolling, 0, CUBE);
 			String key = "cond@0" + CUBE;
-			boolean exact = unrolling.isExact(key);
 			if (check(frame(bad, level), query) == SmtResult.SAT) {
+				boolean exact = unrolling.isExact(key, solver);
 				Map<FreshValue, String> values = freshValues(cube.getLiterals(), key);
 				Cube projected = project(cube.getLiterals(), values);
 				exact &= Projection.freshValues(projected.getLiterals()).isEmpty();
@@ -492,12 +510,14 @@ public class PdrEngine {
 			for (int i = 0; i < cases.size(); i++) {
 				Term pre = frame(src, level - 1);
 				Term trans = unrolling.transition(0, e, i);
-				// encoded as a whole only to compute its exactness
-				cube.at(unrolling, 1, CUBE);
 				String caseKey = unrolling.caseKey(0, e, i);
 				String cubeKey = "cond@1" + CUBE;
-				boolean exact = unrolling.isExact(caseKey) && unrolling.isExact(cubeKey);
 				if (check(List.of(pre, trans), cube, 1, core) == SmtResult.SAT) {
+					// the cube is encoded as a whole (literals might have
+					// been encoded one by one) to compute its exactness in
+					// the model
+					cube.at(unrolling, 1, CUBE);
+					boolean exact = unrolling.isExact(caseKey, solver) && unrolling.isExact(cubeKey, solver);
 					SymbolicCase c = cases.get(i);
 					List<SymbolicExpression> lits = new ArrayList<>(c.getPathCondition());
 					for (SymbolicExpression lit : cube.getLiterals())

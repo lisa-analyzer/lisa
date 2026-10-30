@@ -17,11 +17,13 @@ import it.unive.lisa.triage.model.AlarmModel;
 import it.unive.lisa.triage.model.AlarmModelBuilder;
 import it.unive.lisa.triage.model.InputValue;
 import it.unive.lisa.triage.model.SymbolicStore;
+import it.unive.lisa.triage.reachability.ReachabilityVerifier;
 import it.unive.lisa.triage.smt.SmtException;
 import it.unive.lisa.triage.smt.SmtLibProcessSolver;
 import it.unive.lisa.triage.smt.SmtSolver;
 import it.unive.lisa.triage.smt.SmtSolverUnavailableException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
@@ -33,8 +35,10 @@ import java.util.function.Supplier;
  * yields:
  * <ul>
  * <li>{@link VerificationOutcome#REFUTED} if the statement is unreachable or
- * the violation cannot happen according to the analysis, or if an inductive
- * invariant excluding the violation is found;</li>
+ * the violation cannot happen according to the analysis (first checked
+ * through a {@link ReachabilityVerifier}, that queries the abstract states
+ * directly, and then through the invariants exported as constraints), or if
+ * an inductive invariant excluding the violation is found;</li>
  * <li>{@link VerificationOutcome#CONFIRMED} if a counterexample is found, all
  * of its steps are encoded exactly, and the model starts from the beginning
  * of the program: the reproducing inputs are the values of the parameters in
@@ -85,6 +89,12 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 	private PdrEngine.Generalization generalization = PdrEngine.Generalization.BOTH;
 
 	private boolean seeding = true;
+
+	private boolean fixpointCheck = true;
+
+	private Map<String, Integer> statistics = Map.of();
+
+	private boolean inexact;
 
 	/**
 	 * Builds the verifier, with default budgets, using z3 (as configured in
@@ -150,6 +160,34 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 		return this;
 	}
 
+	/**
+	 * Yields the statistics of the engine on the last candidate violation
+	 * that reached it: the number of queries ({@code queries}), the number of
+	 * frames ({@code level}), and the number of generalizations proposed by
+	 * the domain ({@code proposals}) and used ({@code accepted}). Violations
+	 * decided before running the engine yield an empty map.
+	 *
+	 * @return the statistics
+	 */
+	public Map<String, Integer> getLastStatistics() {
+		return statistics;
+	}
+
+	/**
+	 * Sets whether or not to check the candidate violation against the
+	 * results of the analysis through a {@link ReachabilityVerifier} before
+	 * building its model (default: {@code true}).
+	 *
+	 * @param fixpointCheck whether or not to check the results first
+	 *
+	 * @return this verifier
+	 */
+	public PdrVerifier<A, D> withFixpointCheck(
+			boolean fixpointCheck) {
+		this.fixpointCheck = fixpointCheck;
+		return this;
+	}
+
 	@Override
 	public void init(
 			SemanticTool<A, D> tool) {
@@ -162,12 +200,44 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 			Statement st,
 			Violation violation)
 			throws SemanticException {
+		statistics = Map.of();
+		if (fixpointCheck) {
+			ReachabilityVerifier<A, D> reachability = new ReachabilityVerifier<>();
+			reachability.init(tool);
+			VerificationResult res = reachability.verify(result, st, violation);
+			if (res.getOutcome() == VerificationOutcome.REFUTED)
+				return new VerificationResult(VerificationOutcome.REFUTED,
+						"refuted by the results of the analysis"
+								+ (res.getExplanation() == null ? "" : ": " + res.getExplanation()));
+		}
 		AlarmModel model = AlarmModelBuilder.build(tool, result, st, violation, maxCases);
 		if (model.getSeeds(model.getBadLocation()) == null)
 			return new VerificationResult(VerificationOutcome.REFUTED, "the statement is unreachable");
 		if (model.getBadCases().isEmpty())
 			return new VerificationResult(VerificationOutcome.REFUTED, "the violation cannot happen");
 
+		inexact = false;
+		VerificationResult res = search(model, result, false);
+		if (inexact) {
+			// look for a counterexample where all values are computed
+			// precisely: since the strict encoding under-approximates the
+			// executions, only its counterexamples are meaningful
+			Map<String, Integer> first = statistics;
+			VerificationResult strict = search(model, result, true);
+			Map<String, Integer> merged = new HashMap<>(first);
+			merged.merge("queries", statistics.getOrDefault("queries", 0), Integer::sum);
+			statistics = merged;
+			if (strict.getOutcome() == VerificationOutcome.CONFIRMED)
+				return strict;
+		}
+		return res;
+	}
+
+	private VerificationResult search(
+			AlarmModel model,
+			AnalyzedCFG<A> result,
+			boolean strict)
+			throws SemanticException {
 		SmtSolver solver;
 		try {
 			solver = solvers.get();
@@ -176,11 +246,13 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 		}
 
 		try (SmtSolver s = solver) {
-			PdrEngine engine = new PdrEngine(model, s);
+			PdrEngine engine = new PdrEngine(model, s, strict);
 			engine.setGeneralization(generalization);
 			engine.setSeeding(seeding);
 			engine.setAbstraction(new DomainAbstraction<>(tool.getAnalysis(), result));
 			PdrEngine.Status status = engine.run(maxLevel, maxQueries, maxMillis);
+			statistics = Map.of("queries", engine.getQueries(), "level", engine.getFrames().depth(), "proposals",
+					engine.getProposals(), "accepted", engine.getAcceptedProposals());
 			switch (status) {
 			case SAFE:
 				return new VerificationResult(VerificationOutcome.REFUTED,
@@ -204,7 +276,7 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 		}
 	}
 
-	private static VerificationResult counterexample(
+	private VerificationResult counterexample(
 			AlarmModel model,
 			List<Obligation> cex) {
 		ReproducingInputs inputs = new ReproducingInputs(model.getResult().getId());
@@ -228,9 +300,11 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 		}
 
 		String path = "violation reached in " + (trace.size() - 1) + " steps through " + trace;
-		if (!exact)
+		if (!exact) {
+			inexact = true;
 			return new VerificationResult(VerificationOutcome.POSSIBLE,
 					path + ", relying on values that are not computed precisely");
+		}
 		if (!model.isConfirmable())
 			return new VerificationResult(VerificationOutcome.POSSIBLE,
 					path + ", from states that are not the initial ones of the program");

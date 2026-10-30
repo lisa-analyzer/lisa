@@ -61,6 +61,10 @@ public class Unrolling {
 
 	private final Map<String, Boolean> exactness;
 
+	private final Map<String, List<Term>> guards = new HashMap<>();
+
+	private final boolean strict;
+
 	private final Map<String, Set<FreshValue>> inputs;
 
 	private final Map<EdgeTransition, Integer> edgeIds;
@@ -78,6 +82,27 @@ public class Unrolling {
 	public Unrolling(
 			AlarmModel model,
 			SmtSolver solver) {
+		this(model, solver, false);
+	}
+
+	/**
+	 * Builds the unrolling, declaring the {@link ValueSort} datatype in the
+	 * given solver. In strict mode, transitions, bad cases, and conditions
+	 * also require the values they use to have the sorts that make their
+	 * encoding precise (e.g., operands of arithmetic operations must be
+	 * integers): the encoding then under-approximates the executions of the
+	 * model, and every execution it admits is encoded precisely (except for
+	 * summaries, see {@link #isExact(String)}).
+	 *
+	 * @param model  the model to encode
+	 * @param solver the solver where constants are declared
+	 * @param strict whether or not to encode in strict mode
+	 */
+	public Unrolling(
+			AlarmModel model,
+			SmtSolver solver,
+			boolean strict) {
+		this.strict = strict;
 		this.model = model;
 		this.solver = solver;
 		this.index = new HashMap<>();
@@ -209,12 +234,29 @@ public class Unrolling {
 			return var(id, step);
 		}
 
+		private final List<Term> guards = new ArrayList<>();
+
 		@Override
 		public Term fresh(
 				Sort sort,
 				SymbolicExpression origin) {
 			exact = false;
 			return Unrolling.this.constant("$havoc#" + (Unrolling.this.fresh++), sort);
+		}
+
+		@Override
+		public Term fresh(
+				Sort sort,
+				SymbolicExpression origin,
+				Term guard) {
+			guards.add(guard);
+			return Unrolling.this.constant("$havoc#" + (Unrolling.this.fresh++), sort);
+		}
+
+		@Override
+		public void exactOnlyIf(
+				Term guard) {
+			guards.add(guard);
 		}
 
 	}
@@ -277,6 +319,34 @@ public class Unrolling {
 	public boolean isExact(
 			String key) {
 		return exactness.getOrDefault(key, false);
+	}
+
+	/**
+	 * Yields {@code true} if the encoding with the given key is exact in the
+	 * current model of the given solver, that must have just answered
+	 * {@link it.unive.lisa.triage.smt.SmtResult#SAT}: the encoding must be
+	 * exact (see {@link #isExact(String)}), except for values that are
+	 * imprecise only under some condition (e.g., arithmetic over values that
+	 * are not integers), provided that none of these conditions holds in the
+	 * model.
+	 *
+	 * @param key    the key
+	 * @param solver the solver
+	 *
+	 * @return whether or not the encoding is exact in the model
+	 */
+	public boolean isExact(
+			String key,
+			SmtSolver solver) {
+		if (!isExact(key))
+			return false;
+		List<Term> conditions = guards.getOrDefault(key, List.of());
+		if (conditions.isEmpty())
+			return true;
+		for (String value : solver.getValues(conditions).values())
+			if (!value.equals("true"))
+				return false;
+		return true;
 	}
 
 	/**
@@ -416,9 +486,15 @@ public class Unrolling {
 		StepSymbols symbols = new StepSymbols(step, key.substring(key.indexOf('#')));
 		ExpressionEncoder encoder = new ExpressionEncoder(model.getSorts(), symbols);
 		List<Term> cases = new ArrayList<>();
-		for (SymbolicCase c : edge.getStore().getCases())
-			cases.add(encodeCase(c, step, encoder));
+		List<Term> precise = new ArrayList<>();
+		for (SymbolicCase c : edge.getStore().getCases()) {
+			int from = symbols.guards.size();
+			Term ct = encodeCase(c, step, encoder);
+			cases.add(strictly(ct, symbols, from));
+			precise.add(preciseCase(ct, symbols, from));
+		}
 		exactness.put(key, symbols.exact);
+		guards.put(key, List.of(Term.or(precise.toArray(Term[]::new))));
 		inputs.put(key, symbols.used);
 		return Term.and(
 				at(step, edge.getEdge().getSource()),
@@ -442,6 +518,40 @@ public class Unrolling {
 			else if (!c.isUnconstrained(id))
 				conj.add(Term.eq(post, var(id, step)));
 		}
+		return Term.and(conj.toArray(Term[]::new));
+	}
+
+	/**
+	 * In strict mode, conjoins to the given term the conditions recorded by
+	 * the given symbols (from the given index) under which its encoding is
+	 * precise.
+	 */
+	private Term strictly(
+			Term term,
+			StepSymbols symbols,
+			int from) {
+		if (!strict || symbols.guards.size() == from)
+			return term;
+		List<Term> conj = new ArrayList<>();
+		conj.add(term);
+		conj.addAll(symbols.guards.subList(from, symbols.guards.size()));
+		return Term.and(conj.toArray(Term[]::new));
+	}
+
+	/**
+	 * Yields the condition under which the given case holds and is encoded
+	 * precisely, that is, the case and the conditions recorded by the given
+	 * symbols (from the given index) hold. Used for encodings that are
+	 * disjunctions of cases: they are precise in a model if one of the cases
+	 * that hold is precise.
+	 */
+	private static Term preciseCase(
+			Term term,
+			StepSymbols symbols,
+			int from) {
+		List<Term> conj = new ArrayList<>();
+		conj.add(term);
+		conj.addAll(symbols.guards.subList(from, symbols.guards.size()));
 		return Term.and(conj.toArray(Term[]::new));
 	}
 
@@ -498,8 +608,9 @@ public class Unrolling {
 		String key = caseKey(step, edge, index);
 		StepSymbols symbols = new StepSymbols(step, key.substring(key.indexOf('#')));
 		ExpressionEncoder encoder = new ExpressionEncoder(model.getSorts(), symbols);
-		Term c = encodeCase(cases(edge).get(index), step, encoder);
+		Term c = strictly(encodeCase(cases(edge).get(index), step, encoder), symbols, 0);
 		exactness.put(key, symbols.exact);
+		guards.put(key, symbols.guards);
 		inputs.put(key, symbols.used);
 		return Term.and(
 				at(step, edge.getEdge().getSource()),
@@ -530,9 +641,11 @@ public class Unrolling {
 			String tag)
 			throws SemanticException {
 		StepSymbols symbols = new StepSymbols(step, tag);
-		Term result = new ExpressionEncoder(model.getSorts(), symbols).encodeCondition(condition);
+		Term result = strictly(new ExpressionEncoder(model.getSorts(), symbols).encodeCondition(condition), symbols,
+				0);
 		String key = "cond@" + step + tag;
 		exactness.put(key, symbols.exact);
+		guards.put(key, symbols.guards);
 		inputs.put(key, symbols.used);
 		return result;
 	}
@@ -554,15 +667,20 @@ public class Unrolling {
 		StepSymbols symbols = new StepSymbols(step, key.substring(key.indexOf('#')));
 		ExpressionEncoder encoder = new ExpressionEncoder(model.getSorts(), symbols);
 		List<Term> cases = new ArrayList<>();
+		List<Term> precise = new ArrayList<>();
 		for (BadCase c : model.getBadCases()) {
+			int from = symbols.guards.size();
 			List<Term> conj = new ArrayList<>();
 			for (SymbolicExpression cond : c.getPathCondition())
 				conj.add(encoder.encodeCondition(cond));
 			if (c.getViolation() != null)
 				conj.add(encoder.encodeCondition(c.getViolation()));
-			cases.add(Term.and(conj.toArray(Term[]::new)));
+			Term ct = Term.and(conj.toArray(Term[]::new));
+			cases.add(strictly(ct, symbols, from));
+			precise.add(preciseCase(ct, symbols, from));
 		}
 		exactness.put(key, symbols.exact);
+		guards.put(key, List.of(Term.or(precise.toArray(Term[]::new))));
 		inputs.put(key, symbols.used);
 		return Term.and(at(step, model.getBadLocation()), Term.or(cases.toArray(Term[]::new)));
 	}

@@ -28,6 +28,7 @@ import it.unive.lisa.symbolic.value.operator.binary.StringEndsWith;
 import it.unive.lisa.symbolic.value.operator.binary.StringEquals;
 import it.unive.lisa.symbolic.value.operator.binary.StringEqualsIgnoreCase;
 import it.unive.lisa.symbolic.value.operator.binary.StringIsPrefixOf;
+import it.unive.lisa.symbolic.value.operator.binary.StringIsSubstringOf;
 import it.unive.lisa.symbolic.value.operator.binary.StringIsSuffixOf;
 import it.unive.lisa.symbolic.value.operator.binary.StringMatches;
 import it.unive.lisa.symbolic.value.operator.binary.StringStartsWith;
@@ -108,7 +109,8 @@ public class BooleanPowerset
 						|| operator == StringMatches.INSTANCE
 						|| operator == StringStartsWith.INSTANCE
 						|| operator == StringIsPrefixOf.INSTANCE
-						|| operator == StringIsSuffixOf.INSTANCE)) {
+						|| operator == StringIsSuffixOf.INSTANCE
+						|| operator == StringIsSubstringOf.INSTANCE)) {
 			Set<BinaryExpression> constraints = oracle.constraints(this, expression, pp);
 			return generate(constraints, pp, oracle);
 		}

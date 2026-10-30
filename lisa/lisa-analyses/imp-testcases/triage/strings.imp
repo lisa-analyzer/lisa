@@ -1,0 +1,146 @@
+// Triage benchmark, string programs (analyzed with a string domain).
+// Conventions as in numeric.imp.
+class strings {
+
+	bug_streq(x) {
+		if (streq(x, "secret"))
+			this.bug();
+	}
+
+	bug_contains(x) {
+		if (strcon(x, "ab") && strlen(x) == 3)
+			this.bug();
+	}
+
+	bug_concat(x) {
+		def s = strcat("pre", x);
+		if (streq(s, "prefix"))
+			this.bug();
+	}
+
+	safe_prefix(x) {
+		def s = strcat("ab", x);
+		if (!strstarts(s, "ab"))
+			this.bug();
+	}
+
+	safe_length(x) {
+		def s = strcat(x, "abc");
+		if (strlen(s) < 3)
+			this.bug();
+	}
+
+	safe_loop_prefix() {
+		def s = "a";
+		def i = 0;
+		while (i < 10) {
+			s = strcat(s, "b");
+			i = i + 1;
+		}
+		if (!strstarts(s, "a"))
+			this.bug();
+	}
+
+	safe_loop_contains(n) {
+		def s = "ab";
+		def i = 0;
+		while (i < n) {
+			s = strcat("x", s);
+			i = i + 1;
+		}
+		if (!strcon(s, "ab"))
+			this.bug();
+	}
+
+	safe_loop_input() {
+		def s = "id:";
+		def i = 0;
+		while (i < 3) {
+			s = strcat(s, this.read());
+			i = i + 1;
+		}
+		if (!strstarts(s, "id:"))
+			this.bug();
+	}
+
+	safe_loop_suffix(n) {
+		def s = "end";
+		def i = 0;
+		while (i < n) {
+			s = strcat(this.read(), s);
+			i = i + 1;
+		}
+		if (!strends(s, "end"))
+			this.bug();
+	}
+
+	safe_loop_chars(n) {
+		def s = "a";
+		def i = 0;
+		while (i < n) {
+			s = strcat(s, "b");
+			i = i + 1;
+		}
+		if (strcon(s, "c"))
+			this.bug();
+	}
+
+	safe_loop_brackets(n) {
+		def s = "<";
+		def i = 0;
+		while (i < n) {
+			s = strcat(s, "x");
+			i = i + 1;
+		}
+		def t = strcat(s, ">");
+		if (!strstarts(t, "<") || !strends(t, ">"))
+			this.bug();
+	}
+
+	safe_loop_length(n) {
+		def s = "";
+		def i = 0;
+		while (i < n) {
+			s = strcat(s, "ab");
+			i = i + 1;
+		}
+		if (strlen(s) != 2 * i)
+			this.bug();
+	}
+
+	safe_input_prefix() {
+		def s = this.read();
+		if (strstarts(s, "ab")) {
+			def t = strcat(s, "!");
+			if (!strstarts(t, "a"))
+				this.bug();
+		}
+	}
+
+	bug_loop_suffix(n) {
+		def s = "x";
+		def i = 0;
+		while (i < n) {
+			s = strcat(s, "y");
+			i = i + 1;
+		}
+		if (streq(s, "xyyy"))
+			this.bug();
+	}
+
+	bug_index(x) {
+		if (strindex(x, "z") == 2)
+			this.bug();
+	}
+
+	bug_loop_input() {
+		def s = "";
+		def i = 0;
+		while (i < 2) {
+			s = strcat(s, this.read());
+			i = i + 1;
+		}
+		if (streq(s, "abcd"))
+			this.bug();
+	}
+}

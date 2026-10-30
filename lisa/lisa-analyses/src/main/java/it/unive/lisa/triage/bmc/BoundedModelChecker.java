@@ -72,6 +72,8 @@ public class BoundedModelChecker<A extends AbstractLattice<A>, D extends Abstrac
 
 	private SemanticTool<A, D> tool;
 
+	private boolean inexact;
+
 	/**
 	 * Builds the verifier, unrolling {@link #DEFAULT_BOUND} steps with z3 (see
 	 * {@link SmtLibProcessSolver#z3()}).
@@ -116,6 +118,22 @@ public class BoundedModelChecker<A extends AbstractLattice<A>, D extends Abstrac
 		if (model.getBadCases().isEmpty())
 			return new VerificationResult(VerificationOutcome.REFUTED, "the violation cannot happen");
 
+		inexact = false;
+		VerificationResult res = search(model, false);
+		if (inexact) {
+			// look for a counterexample where all values are computed
+			// precisely
+			VerificationResult strict = search(model, true);
+			if (strict.getOutcome() == VerificationOutcome.CONFIRMED)
+				return strict;
+		}
+		return res;
+	}
+
+	private VerificationResult search(
+			AlarmModel model,
+			boolean strict)
+			throws SemanticException {
 		SmtSolver solver;
 		try {
 			solver = solvers.get();
@@ -124,7 +142,7 @@ public class BoundedModelChecker<A extends AbstractLattice<A>, D extends Abstrac
 		}
 
 		try (SmtSolver s = solver) {
-			Unrolling unrolling = new Unrolling(model, s);
+			Unrolling unrolling = new Unrolling(model, s, strict);
 			s.assertTerm(unrolling.initial());
 			s.assertTerm(unrolling.invariants(0));
 			for (int k = 0; k <= bound; k++) {
@@ -220,17 +238,19 @@ public class BoundedModelChecker<A extends AbstractLattice<A>, D extends Abstrac
 			for (EdgeTransition edge : model.getTransitions(trace.get(t)))
 				if (edge.getEdge().getDestination() == trace.get(t + 1)) {
 					String key = unrolling.edgeKey(t, edge);
-					exact &= unrolling.isExact(key);
+					exact &= unrolling.isExact(key, solver);
 					collectInputs(unrolling, key, solver, inputs);
 				}
 		String badKey = unrolling.badKey(length);
-		exact &= unrolling.isExact(badKey);
+		exact &= unrolling.isExact(badKey, solver);
 		collectInputs(unrolling, badKey, solver, inputs);
 
 		String path = "violation reached in " + length + " steps through " + trace;
-		if (!exact)
+		if (!exact) {
+			inexact = true;
 			return new VerificationResult(VerificationOutcome.POSSIBLE,
 					path + ", relying on values that are not computed precisely");
+		}
 		if (!model.isConfirmable())
 			return new VerificationResult(VerificationOutcome.POSSIBLE,
 					path + ", from states that are not the initial ones of the program");

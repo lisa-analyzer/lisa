@@ -104,6 +104,9 @@ tasks.register('cron', Test) {
 		includeTestsMatching 'it.unive.lisa.cron.*'
 	}
 
+	// runs the full triage benchmark (see TriageBenchmarkTest)
+	systemProperty "lisa.triage.full", System.getProperty("lisa.triage.full", "false")
+
 	testLogging {
 		showStandardStreams = false
 		events "failed"

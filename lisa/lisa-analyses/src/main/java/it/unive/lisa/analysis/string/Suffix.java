@@ -29,6 +29,7 @@ import it.unive.lisa.symbolic.value.operator.binary.StringEqualsIgnoreCase;
 import it.unive.lisa.symbolic.value.operator.binary.StringIndexOf;
 import it.unive.lisa.symbolic.value.operator.binary.StringIndexOfChar;
 import it.unive.lisa.symbolic.value.operator.binary.StringIsPrefixOf;
+import it.unive.lisa.symbolic.value.operator.binary.StringIsSubstringOf;
 import it.unive.lisa.symbolic.value.operator.binary.StringIsSuffixOf;
 import it.unive.lisa.symbolic.value.operator.binary.StringLastIndexOf;
 import it.unive.lisa.symbolic.value.operator.binary.StringLastIndexOfChar;
@@ -157,6 +158,17 @@ public class Suffix
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
+		if (expression.getOperator() == StringIsSubstringOf.INSTANCE)
+			// the left string is a substring of the right one iff the right
+			// one contains the left one
+			return satisfiesBinaryExpression(
+					new BinaryExpression(expression.getStaticType(), expression.getRight(), expression.getLeft(),
+							StringContains.INSTANCE, expression.getCodeLocation()),
+					right,
+					left,
+					pp,
+					oracle);
+
 		if (left.isTop() || right.isTop())
 			return Satisfiability.UNKNOWN;
 
@@ -331,7 +343,8 @@ public class Suffix
 					|| operator == StringMatches.INSTANCE
 					|| operator == StringStartsWith.INSTANCE
 					|| operator == StringIsPrefixOf.INSTANCE
-					|| operator == StringIsSuffixOf.INSTANCE) {
+					|| operator == StringIsSuffixOf.INSTANCE
+					|| operator == StringIsSubstringOf.INSTANCE) {
 				Satisfiability sat = satisfies(state, e, pp, oracle);
 				if (sat == Satisfiability.SATISFIED)
 					return ValueDomain.makeEqConstraint(pp.getProgram().getTypes().getBooleanType(), true, e, pp);

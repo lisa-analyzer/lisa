@@ -65,6 +65,7 @@ import it.unive.lisa.symbolic.value.operator.binary.StringEndsWith;
 import it.unive.lisa.symbolic.value.operator.binary.StringEquals;
 import it.unive.lisa.symbolic.value.operator.binary.StringIndexOf;
 import it.unive.lisa.symbolic.value.operator.binary.StringIsPrefixOf;
+import it.unive.lisa.symbolic.value.operator.binary.StringIsSubstringOf;
 import it.unive.lisa.symbolic.value.operator.binary.StringIsSuffixOf;
 import it.unive.lisa.symbolic.value.operator.binary.StringStartsWith;
 import it.unive.lisa.symbolic.value.operator.binary.StringSubstringToEnd;
@@ -229,8 +230,15 @@ public class ExpressionEncoder
 		Term converted = null;
 		if (sort.equals(ValueSort.SORT))
 			converted = ValueSort.wrap(term);
-		else if (term.getSort().equals(ValueSort.SORT))
-			converted = ValueSort.unwrap(term, sort);
+		else if (term.getSort().equals(ValueSort.SORT)) {
+			Term guard = ValueSort.is(term, sort);
+			if (guard != null) {
+				// values built with another constructor are read as
+				// unspecified (but consistent) values of the sort
+				converted = ValueSort.unwrap(term, sort);
+				symbols.exactOnlyIf(guard);
+			}
+		}
 		return converted != null ? converted : symbols.fresh(sort, origin);
 	}
 
@@ -419,6 +427,8 @@ public class ExpressionEncoder
 			return Term.app("str.prefixof", Sort.BOOL, str(left, expression), str(right, expression));
 		if (op instanceof StringIsSuffixOf)
 			return Term.app("str.suffixof", Sort.BOOL, str(left, expression), str(right, expression));
+		if (op instanceof StringIsSubstringOf)
+			return Term.app("str.contains", Sort.BOOL, str(right, expression), str(left, expression));
 		if (op instanceof StringEquals)
 			return Term.eq(str(left, expression), str(right, expression));
 		if (op instanceof StringIndexOf)
@@ -527,11 +537,13 @@ public class ExpressionEncoder
 		List<Term> ints = new ArrayList<>(operands.size());
 		List<Term> guards = new ArrayList<>();
 		for (Term t : operands) {
-			ints.add(coerce(t, Sort.INT, expression));
+			// the guard on the result covers non-integer operands
+			ints.add(t.getSort().equals(ValueSort.SORT) ? ValueSort.unwrap(t, Sort.INT) : t);
 			if (t.getSort().equals(ValueSort.SORT))
 				guards.add(ValueSort.is(t, Sort.INT));
 		}
 
+		Term guard = Term.and(guards.toArray(Term[]::new));
 		Term result = op.apply(ints);
 		Integer bits = expression instanceof BinaryExpression
 				? BIT_WIDTHS.get(((BinaryExpression) expression).getOperator().getClass())
@@ -541,10 +553,7 @@ public class ExpressionEncoder
 
 		if (!values)
 			return result;
-		return Term.ite(
-				Term.and(guards.toArray(Term[]::new)),
-				ValueSort.wrap(result),
-				symbols.fresh(ValueSort.SORT, expression));
+		return Term.ite(guard, ValueSort.wrap(result), symbols.fresh(ValueSort.SORT, expression, guard));
 	}
 
 	private static Term neg(

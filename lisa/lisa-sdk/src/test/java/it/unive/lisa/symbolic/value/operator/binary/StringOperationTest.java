@@ -43,6 +43,7 @@ public class StringOperationTest {
 			new Case(StringEndsWith.INSTANCE, "strends", ts -> BOOL),
 			new Case(StringStartsWith.INSTANCE, "strstarts", ts -> BOOL),
 			new Case(StringIsPrefixOf.INSTANCE, "strisprefix", ts -> BOOL),
+			new Case(StringIsSubstringOf.INSTANCE, "strissubstring", ts -> BOOL),
 			new Case(StringIsSuffixOf.INSTANCE, "strisuffix", ts -> BOOL),
 			new Case(StringEquals.INSTANCE, "strcmp", ts -> BOOL),
 			new Case(StringEqualsIgnoreCase.INSTANCE, "stricmp", ts -> BOOL),

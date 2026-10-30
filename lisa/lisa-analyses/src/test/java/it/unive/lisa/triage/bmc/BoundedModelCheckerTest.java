@@ -77,6 +77,12 @@ public class BoundedModelCheckerTest {
 			+ "      w = 1;\n"
 			+ "    return w;\n"
 			+ "  }\n"
+			+ "  linear(x, y) {\n"
+			+ "    def w = 0;\n"
+			+ "    if (x + y == 10 && x - y == 4)\n"
+			+ "      w = 1;\n"
+			+ "    return w;\n"
+			+ "  }\n"
 			+ "  loop() {\n"
 			+ "    def i = 0;\n"
 			+ "    def w = 0;\n"
@@ -224,6 +230,16 @@ public class BoundedModelCheckerTest {
 		z3.waitFor();
 		assertEquals(List.of("unsat", "unsat", "unsat", "sat"), List.of(output.trim().split("\\s+")),
 				output + "\n" + script);
+	}
+
+	@Test
+	public void untypedArithmeticIsConfirmed() throws SemanticException {
+		// x and y are untyped: the first counterexample might use values
+		// that are not integers, but a precise one is then searched for
+		VerificationResult result = verify("linear", "w = 1", Violation.reach());
+		assertEquals(VerificationOutcome.CONFIRMED, result.getOutcome(), result.toString());
+		assertEquals("7", valueOf(result, "parameter x of"));
+		assertEquals("3", valueOf(result, "parameter y of"));
 	}
 
 	@Test

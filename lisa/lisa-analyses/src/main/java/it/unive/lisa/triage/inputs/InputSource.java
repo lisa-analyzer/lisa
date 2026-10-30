@@ -44,6 +44,15 @@ public class InputSource {
 		CALL_RESULT,
 
 		/**
+		 * The value returned by a call that might target code of the
+		 * program, whose result is unknown only because the analysis did not
+		 * compute it precisely (e.g., because calls are analyzed modularly).
+		 * This is not a genuine input: the value is determined by the code
+		 * of the callee.
+		 */
+		IMPRECISE_CALL_RESULT,
+
+		/**
 		 * Any other unknown value introduced by the semantics of the program.
 		 */
 		UNKNOWN;

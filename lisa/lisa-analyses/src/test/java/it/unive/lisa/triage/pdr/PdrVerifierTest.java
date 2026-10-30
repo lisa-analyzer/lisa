@@ -79,6 +79,22 @@ public class PdrVerifierTest {
 			+ "        w = 1;\n"
 			+ "    return w;\n"
 			+ "  }\n"
+			+ "  inc(x) {\n"
+			+ "    return x + 1;\n"
+			+ "  }\n"
+			+ "  summarized(x) {\n"
+			+ "    def y = this.inc(x);\n"
+			+ "    def w = 0;\n"
+			+ "    if (y == x)\n"
+			+ "      w = 1;\n"
+			+ "    return w;\n"
+			+ "  }\n"
+			+ "  linear(x, y) {\n"
+			+ "    def w = 0;\n"
+			+ "    if (x + y == 10 && x - y == 4)\n"
+			+ "      w = 1;\n"
+			+ "    return w;\n"
+			+ "  }\n"
 			+ "  loop() {\n"
 			+ "    def i = 0;\n"
 			+ "    def w = 0;\n"
@@ -195,6 +211,24 @@ public class PdrVerifierTest {
 		VerificationResult result = verify("open", "w = 1", Violation.reach());
 		assertEquals(VerificationOutcome.CONFIRMED, result.getOutcome(), result.toString());
 		assertEquals("3", valueOf(result, "return of"));
+	}
+
+	@Test
+	public void callsToProgramCodeAreNotInputs() throws SemanticException {
+		// inc is analyzed modularly: its result is unknown, but it is not an
+		// input, so no counterexample through it can be confirmed
+		VerificationResult result = verify("summarized", "w = 1", Violation.reach());
+		assertEquals(VerificationOutcome.POSSIBLE, result.getOutcome(), result.toString());
+	}
+
+	@Test
+	public void untypedArithmeticIsConfirmed() throws SemanticException {
+		// x and y are untyped: the first counterexample might use values
+		// that are not integers, but a precise one is then searched for
+		VerificationResult result = verify("linear", "w = 1", Violation.reach());
+		assertEquals(VerificationOutcome.CONFIRMED, result.getOutcome(), result.toString());
+		assertEquals("7", valueOf(result, "parameter x of"));
+		assertEquals("3", valueOf(result, "parameter y of"));
 	}
 
 	@Test

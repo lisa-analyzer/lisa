@@ -34,6 +34,7 @@ import it.unive.lisa.symbolic.value.operator.binary.StringEqualsIgnoreCase;
 import it.unive.lisa.symbolic.value.operator.binary.StringIndexOf;
 import it.unive.lisa.symbolic.value.operator.binary.StringIndexOfChar;
 import it.unive.lisa.symbolic.value.operator.binary.StringIsPrefixOf;
+import it.unive.lisa.symbolic.value.operator.binary.StringIsSubstringOf;
 import it.unive.lisa.symbolic.value.operator.binary.StringIsSuffixOf;
 import it.unive.lisa.symbolic.value.operator.binary.StringLastIndexOf;
 import it.unive.lisa.symbolic.value.operator.binary.StringLastIndexOfChar;
@@ -464,6 +465,17 @@ public class CharInclusion
 			CI right,
 			ProgramPoint pp,
 			SemanticOracle oracle) {
+		if (expression.getOperator() == StringIsSubstringOf.INSTANCE)
+			// the left string is a substring of the right one iff the right
+			// one contains the left one
+			return satisfiesBinaryExpression(
+					new BinaryExpression(expression.getStaticType(), expression.getRight(), expression.getLeft(),
+							StringContains.INSTANCE, expression.getCodeLocation()),
+					right,
+					left,
+					pp,
+					oracle);
+
 		if (left.isTop() || right.isTop())
 			return Satisfiability.UNKNOWN;
 
@@ -706,7 +718,8 @@ public class CharInclusion
 					|| operator == StringMatches.INSTANCE
 					|| operator == StringStartsWith.INSTANCE
 					|| operator == StringIsPrefixOf.INSTANCE
-					|| operator == StringIsSuffixOf.INSTANCE) {
+					|| operator == StringIsSuffixOf.INSTANCE
+					|| operator == StringIsSubstringOf.INSTANCE) {
 				Satisfiability sat = satisfies(state, e, pp, oracle);
 				if (sat == Satisfiability.SATISFIED)
 					return ValueDomain.makeEqConstraint(booleanType, true, e, pp);
@@ -797,6 +810,8 @@ public class CharInclusion
 			return null;
 		Set<BinaryExpression> constr = new HashSet<>();
 		StringType stringType = pp.getProgram().getTypes().getStringType();
+		// constraints have the form constant OP expression: each certainly
+		// contained character is a substring of the value of e
 		for (Character c : value.certainlyContained) {
 			constr.add(
 					new BinaryExpression(
@@ -806,7 +821,7 @@ public class CharInclusion
 									String.valueOf(c),
 									pp.getLocation()),
 							e,
-							StringContains.INSTANCE,
+							StringIsSubstringOf.INSTANCE,
 							pp.getLocation()));
 		}
 		return constr;
@@ -820,20 +835,41 @@ public class CharInclusion
 		if (constraints == null)
 			return bottom();
 
-		CI acc = CI.BOTTOM;
-		for (BinaryExpression expr : constraints)
-			if (expr.getOperator() instanceof ComparisonEq
-					&& expr.getLeft() instanceof Constant
-					&& ((Constant) expr.getLeft()).getValue() instanceof String)
-				return new CI(((Constant) expr.getLeft()).getValue().toString());
-			else if ((expr.getOperator() instanceof StringStartsWith
-					|| expr.getOperator() instanceof StringContains
-					|| expr.getOperator() instanceof StringEndsWith)
-					&& expr.getLeft() instanceof Constant
-					&& ((Constant) expr.getLeft()).getValue() instanceof String)
-				acc = acc.lub(new CI(((Constant) expr.getLeft()).getValue().toString()));
+		// constraints have the form constant OP expression, and hold together
+		Set<Character> certainly = new TreeSet<>();
+		Set<Character> maybe = null;
+		for (BinaryExpression expr : constraints) {
+			if (!(expr.getLeft() instanceof Constant) || !(((Constant) expr.getLeft()).getValue() instanceof String))
+				continue;
+			String str = ((Constant) expr.getLeft()).getValue().toString();
+			Set<Character> chars = str.chars()
+					.mapToObj(c -> (char) c)
+					.collect(Collectors.toCollection(TreeSet::new));
+			BinaryOperator op = expr.getOperator();
+			if (op instanceof ComparisonEq || op instanceof StringEquals)
+				return new CI(str);
+			else if (op instanceof StringIsPrefixOf
+					|| op instanceof StringIsSubstringOf
+					|| op instanceof StringIsSuffixOf)
+				// the constant is part of the value: its characters are
+				// certainly contained
+				certainly.addAll(chars);
+			else if (op instanceof StringStartsWith
+					|| op instanceof StringContains
+					|| op instanceof StringEndsWith)
+				// the value is part of the constant: it can only contain
+				// characters of the constant
+				if (maybe == null)
+					maybe = new TreeSet<>(chars);
+				else
+					maybe.retainAll(chars);
+		}
 
-		return acc;
+		if (maybe != null && !maybe.containsAll(certainly))
+			return CI.BOTTOM;
+		if (certainly.isEmpty() && maybe == null)
+			return CI.TOP;
+		return new CI(certainly, maybe);
 	}
 
 }

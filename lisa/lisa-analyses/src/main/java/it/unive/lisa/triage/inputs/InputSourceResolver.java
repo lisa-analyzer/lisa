@@ -19,6 +19,7 @@ import it.unive.lisa.util.datastructures.graph.GraphVisitor;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -38,7 +39,11 @@ import java.util.stream.Collectors;
  * if the call targets {@link NativeCFG}s (where frontends usually model
  * library methods that return unknown values), the source is described
  * through the signature of the native cfgs, otherwise (e.g., for calls that
- * cannot be resolved) through the name of the call's target;</li>
+ * cannot be resolved) through the name of the call's target; if the call
+ * might target a cfg of the program (according to the call graph, or since
+ * a cfg has the name of the call's target), its result is not a genuine
+ * input, but an imprecision of the analysis
+ * ({@link InputSource.Kind#IMPRECISE_CALL_RESULT});</li>
  * <li>any other unknown value is described through the program point that
  * introduces it.</li>
  * </ul>
@@ -57,6 +62,10 @@ public class InputSourceResolver {
 	private final Map<CodeLocation, Call> calls;
 
 	private final Map<CodeLocation, Collection<NativeCFG>> natives;
+
+	private final Set<CodeLocation> implemented;
+
+	private final Set<String> cfgNames;
 
 	/**
 	 * Builds the resolver for the program whose results are stored in the
@@ -84,6 +93,8 @@ public class InputSourceResolver {
 		this.parameterOwners = new HashMap<>();
 		this.calls = new HashMap<>();
 		this.natives = new HashMap<>();
+		this.implemented = new HashSet<>();
+		this.cfgNames = new HashSet<>();
 
 		GraphVisitor<CFG, Statement, Edge, Void> visitor = new GraphVisitor<>() {
 
@@ -100,6 +111,7 @@ public class InputSourceResolver {
 		};
 
 		for (CFG cfg : cfgs) {
+			cfgNames.add(cfg.getDescriptor().getName());
 			for (Parameter formal : cfg.getDescriptor().getFormals()) {
 				parameters.putIfAbsent(formal.getLocation(), formal);
 				parameterOwners.putIfAbsent(formal.getLocation(), cfg);
@@ -114,6 +126,9 @@ public class InputSourceResolver {
 				if (cm instanceof NativeCFG)
 					for (Call call : callgraph.getCallSites(cm))
 						natives.computeIfAbsent(call.getLocation(), l -> new TreeSet<>(BY_SIGNATURE)).add((NativeCFG) cm);
+				else if (cm instanceof CFG)
+					for (Call call : callgraph.getCallSites(cm))
+						implemented.add(call.getLocation());
 			}
 	}
 
@@ -154,6 +169,9 @@ public class InputSourceResolver {
 							.collect(Collectors.joining(" or ")));
 
 		Call call = calls.get(location);
+		if (call != null && (implemented.contains(location) || cfgNames.contains(call.getTargetName())))
+			return new InputSource(InputSource.Kind.IMPRECISE_CALL_RESULT, location, value.getStaticType(),
+					constraints, "return of " + call.getFullTargetName());
 		if (call != null)
 			return new InputSource(InputSource.Kind.CALL_RESULT, location, value.getStaticType(), constraints,
 					"return of " + call.getFullTargetName());

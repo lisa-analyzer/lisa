@@ -42,7 +42,8 @@ public class FreshValueFactory {
 	 * Yields a fresh value for the given unknown value, introduced at the
 	 * given program point: an {@link InputValue} if the unknown value comes
 	 * from the program, or a {@link SummaryValue} if it is a
-	 * {@link SummaryMarker}.
+	 * {@link SummaryMarker} or the result of a call that is not a genuine
+	 * input ({@link InputSource.Kind#IMPRECISE_CALL_RESULT}).
 	 *
 	 * @param value the unknown value
 	 * @param pp    the program point where the value is introduced (can be
@@ -55,7 +56,10 @@ public class FreshValueFactory {
 			ProgramPoint pp) {
 		if (value instanceof SummaryMarker)
 			return summary(value.getStaticType(), ((SummaryMarker) value).getReason(), value.getCodeLocation());
-		InputValue input = new InputValue(resolver.resolve(value, pp), next++);
+		InputSource source = resolver.resolve(value, pp);
+		if (source.getKind() == InputSource.Kind.IMPRECISE_CALL_RESULT)
+			return summary(value.getStaticType(), "imprecise " + source.getDescription(), value.getCodeLocation());
+		InputValue input = new InputValue(source, next++);
 		values.put(input.getName(), input);
 		return input;
 	}
