@@ -587,6 +587,35 @@ public class Reachability<A extends AbstractLattice<A>, D extends AbstractDomain
 			AnalyzedCFG<A> result,
 			Statement node)
 			throws SemanticException {
+		return preStateOf(result, node, analysis);
+	}
+
+	/**
+	 * Yields the state before the given node of the given result, as computed
+	 * by forward fixpoints: the join of the post-states of the predecessors of
+	 * the node, after traversing the edges reaching it (and of the entry state,
+	 * if the node is an entrypoint). This differs from
+	 * {@link AnalyzedCFG#getAnalysisStateBefore(Statement)}, that only joins
+	 * the post-states of the predecessors, without traversing the edges.
+	 *
+	 * @param <A>      the type of {@link AbstractLattice} produced by the
+	 *                     domain {@code D}
+	 * @param <D>      the type of {@link AbstractDomain} ran during the
+	 *                     analysis
+	 * @param result   the result containing the node
+	 * @param node     the node, that must be a root statement of the cfg
+	 * @param analysis the analysis used to traverse the edges, that should
+	 *                     not post events
+	 *
+	 * @return the state before the node
+	 *
+	 * @throws SemanticException if something goes wrong during the computation
+	 */
+	public static <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> preStateOf(
+			AnalyzedCFG<A> result,
+			Statement node,
+			Analysis<A, D> analysis)
+			throws SemanticException {
 		// the entry state computed by forward fixpoints, that traverse the
 		// edges reaching the node (see ForwardFixpoint#getEntryState), while
 		// AnalyzedCFG#getAnalysisStateBefore only joins the post-states of

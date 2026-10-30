@@ -506,17 +506,17 @@ public class ExpressionEncoder
 	 * Encodes an arithmetic operation over integers. If all the operands are
 	 * integers, the result is an integer. If some operands are values, the
 	 * result is a value that is the integer result if all operands are integer
-	 * values, and unconstrained otherwise. Any other combination of sorts, or
-	 * a non-integral result type, yields a fresh constant.
+	 * values, and unconstrained otherwise (e.g., if some operand is a floating
+	 * point number). Any other combination of sorts yields a fresh constant.
+	 * The static type of the expression is not used to decide whether the
+	 * operation is over integers, since frontends might use a common
+	 * supertype of all the possible runtime types of the operands.
 	 */
 	private Term arithmetic(
 			ValueExpression expression,
 			List<Term> operands,
 			Function<List<Term>, Term> op) {
 		Type type = expression.getStaticType();
-		if (type.isNumericType() && !type.asNumericType().isIntegral())
-			return havoc(expression);
-
 		boolean values = false;
 		for (Term t : operands)
 			if (t.getSort().equals(ValueSort.SORT))
