@@ -77,8 +77,8 @@ import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Statement;
-import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.program.cfg.statement.call.Call.CallType;
+import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
 import it.unive.lisa.program.cfg.statement.evaluation.EvaluationOrder;
 import it.unive.lisa.program.cfg.statement.evaluation.LeftToRightEvaluation;
@@ -104,6 +104,10 @@ import it.unive.lisa.symbolic.value.operator.ternary.StringReplace;
 import it.unive.lisa.symbolic.value.operator.ternary.TernaryOperator;
 import it.unive.lisa.symbolic.value.operator.unary.LogicalNegation;
 import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
+import it.unive.lisa.triage.inputs.InputSourceResolver;
+import it.unive.lisa.triage.model.FreshValueFactory;
+import it.unive.lisa.triage.model.ReplayDomain;
+import it.unive.lisa.triage.model.SymbolicStore;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
 import it.unive.lisa.util.datastructures.graph.GraphVisitor;
@@ -748,8 +752,16 @@ public class TestParameterProvider {
 			return (R) new Bricks();
 		if (param == BoundedStringSet.class)
 			return (R) new BoundedStringSet();
-		if (root == TracePartitioning.class || root == Analysis.class || root == HistoryDomain.class)
+		if (root == TracePartitioning.class || root == Analysis.class || root == HistoryDomain.class
+				|| root == ReplayDomain.class && param == AbstractDomain.class)
 			return (R) DefaultConfiguration.defaultAbstractDomain();
+		if (param == FreshValueFactory.class)
+			return (R) new FreshValueFactory(new InputSourceResolver(List.of(), null));
+		if (root == ReplayDomain.class && param == int.class)
+			return (R) Integer.valueOf(SymbolicStore.DEFAULT_MAX_CASES);
+		if (param == SymbolicStore.class)
+			return (R) SymbolicStore.identity(new FreshValueFactory(new InputSourceResolver(List.of(), null)),
+					SymbolicStore.DEFAULT_MAX_CASES);
 		if (param == ValueDomain[].class)
 			return (R) new ValueDomain[] { new NoOpValues() };
 

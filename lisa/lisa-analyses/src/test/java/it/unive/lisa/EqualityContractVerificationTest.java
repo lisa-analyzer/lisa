@@ -121,6 +121,8 @@ import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.HeapLocation;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.triage.inputs.InputSource;
+import it.unive.lisa.triage.model.SymbolicCase;
+import it.unive.lisa.triage.model.SymbolicStore;
 import it.unive.lisa.triage.smt.Sort;
 import it.unive.lisa.triage.smt.Term;
 import it.unive.lisa.type.Type;
@@ -704,6 +706,10 @@ public class EqualityContractVerificationTest {
 		verify(ReproducingInput.class);
 		verify(Sort.class);
 		verify(InputSource.class);
+		verify(SymbolicCase.class);
+		// the factory of fresh values and the bound on cases do not affect
+		// the represented transition
+		verify(SymbolicStore.class, verifier -> verifier.withIgnoredFields("factory", "maxCases"));
 		verify(Term.class, verifier -> verifier.withPrefabValues(Sort.class, Sort.INT, Sort.BOOL));
 	}
 
