@@ -120,6 +120,7 @@ import it.unive.lisa.program.type.Int32Type;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.HeapLocation;
 import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.triage.inputs.InputSource;
 import it.unive.lisa.triage.smt.Sort;
 import it.unive.lisa.triage.smt.Term;
 import it.unive.lisa.type.Type;
@@ -702,6 +703,7 @@ public class EqualityContractVerificationTest {
 		verify(VerificationResult.class);
 		verify(ReproducingInput.class);
 		verify(Sort.class);
+		verify(InputSource.class);
 		verify(Term.class, verifier -> verifier.withPrefabValues(Sort.class, Sort.INT, Sort.BOOL));
 	}
 
