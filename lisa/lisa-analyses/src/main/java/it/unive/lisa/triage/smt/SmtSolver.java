@@ -28,6 +28,16 @@ public interface SmtSolver
 			String name);
 
 	/**
+	 * Declares the given algebraic datatype, so that its terms can be used.
+	 *
+	 * @param datatype the datatype to declare
+	 *
+	 * @return the sort of the terms of the datatype
+	 */
+	Sort declareDatatype(
+			Datatype datatype);
+
+	/**
 	 * Declares a new constant with the given name and sort.
 	 *
 	 * @param name the name of the constant

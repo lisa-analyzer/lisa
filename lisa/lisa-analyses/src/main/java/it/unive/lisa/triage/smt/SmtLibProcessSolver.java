@@ -275,6 +275,13 @@ public class SmtLibProcessSolver
 	}
 
 	@Override
+	public Sort declareDatatype(
+			Datatype datatype) {
+		command(datatype.toSmtLibDeclaration());
+		return datatype.getSort();
+	}
+
+	@Override
 	public Term declare(
 			String name,
 			Sort sort) {
