@@ -26,6 +26,7 @@ public class SmtLibScript
 	public SmtLibScript() {
 		command("(set-option :produce-models true)");
 		command("(set-option :produce-unsat-cores true)");
+		command("(set-option :global-declarations true)");
 		command("(set-logic ALL)");
 	}
 

@@ -130,8 +130,6 @@ public class BoundedModelChecker<A extends AbstractLattice<A>, D extends Abstrac
 			s.assertTerm(unrolling.initial());
 			s.assertTerm(unrolling.invariants(0));
 			for (int k = 0; k <= bound; k++) {
-				// the encoding declares constants: it must happen outside of
-				// the scope that is popped
 				Term bad = unrolling.bad(k);
 				s.push();
 				s.assertTerm(bad);

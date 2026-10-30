@@ -480,7 +480,7 @@ public class Unrolling {
 	 *
 	 * @return the input values
 	 */
-	static List<InputValue> inputsOf(
+	public static List<InputValue> inputsOf(
 			Set<FreshValue> values) {
 		List<InputValue> result = new ArrayList<>();
 		for (FreshValue v : values)

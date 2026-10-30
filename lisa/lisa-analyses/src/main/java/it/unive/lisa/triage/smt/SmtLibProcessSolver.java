@@ -244,6 +244,7 @@ public class SmtLibProcessSolver
 			command("(set-option :print-success true)");
 			command("(set-option :produce-models true)");
 			command("(set-option :produce-unsat-cores true)");
+			command("(set-option :global-declarations true)");
 			for (String init : initialization)
 				command(init);
 			command("(set-logic ALL)");

@@ -77,6 +77,19 @@ public class SmtLibProcessSolverTest {
 	}
 
 	@Test
+	public void declarationsSurvivePop() {
+		onEachSolver(s -> {
+			s.push();
+			Term x = s.declare("x", Sort.INT);
+			s.assertTerm(Term.app("<", Sort.BOOL, x, Term.integer(0)));
+			s.pop();
+			// x is still declared, while the assertion is gone
+			s.assertTerm(Term.app(">", Sort.BOOL, x, Term.integer(0)));
+			assertEquals(SmtResult.SAT, s.check());
+		});
+	}
+
+	@Test
 	public void stringsAndBitVectors() {
 		onEachSolver(s -> {
 			Term str = s.declare("s", Sort.STRING);

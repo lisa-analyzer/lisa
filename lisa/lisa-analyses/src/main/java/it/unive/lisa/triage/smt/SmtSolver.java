@@ -70,8 +70,9 @@ public interface SmtSolver
 			Term term);
 
 	/**
-	 * Opens a new scope. Declarations and assertions made in the scope are
-	 * discarded when the scope is closed through {@link #pop()}.
+	 * Opens a new scope. Assertions made in the scope are discarded when the
+	 * scope is closed through {@link #pop()}, while declarations (of sorts,
+	 * datatypes, and constants) are global, and survive it.
 	 */
 	void push();
 

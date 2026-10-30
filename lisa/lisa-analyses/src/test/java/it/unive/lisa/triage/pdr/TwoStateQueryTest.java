@@ -115,8 +115,6 @@ public class TwoStateQueryTest {
 			Lemma lemma,
 			Cube cube)
 			throws SemanticException {
-		// encoding declares constants: it must happen outside of the scope
-		// that is popped
 		Statement src = edge.getEdge().getSource();
 		List<Term> query = List.of(u.at(0, src), u.seeds(src, 0),
 				lemma == null ? Term.TRUE : lemma.at(u, 0), u.transition(0, edge), cube.at(u, 1));

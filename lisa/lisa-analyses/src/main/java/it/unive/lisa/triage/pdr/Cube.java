@@ -2,23 +2,31 @@ package it.unive.lisa.triage.pdr;
 
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.triage.bmc.Unrolling;
+import it.unive.lisa.triage.encoding.ValueSort;
+import it.unive.lisa.triage.smt.SExpression;
+import it.unive.lisa.triage.smt.SmtException;
 import it.unive.lisa.triage.smt.SmtSolver;
 import it.unive.lisa.triage.smt.Term;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 /**
- * A cube of property-directed reachability: a conjunction of literals
- * {@code id = value}, where each value is a term in SMT-LIB syntax as printed
- * by a solver in a model. Cubes describe (sets of) states that must be
- * blocked; once blocked at a location, the cube yields the lemma
- * {@link #negate()}. Generalization drops literals through
- * {@link #without(Identifier)}. The empty cube is {@code true}.
+ * A cube of property-directed reachability: a conjunction of literals, one
+ * per identifier, each being either {@code id = value}, where the value is a
+ * term in SMT-LIB syntax as printed by a solver in a model, or (for
+ * identifiers encoded as {@link ValueSort values}) a test on the constructor
+ * of {@code id}. Cubes describe (sets of) states that must be blocked; once
+ * blocked at a location, the cube yields the lemma {@link #negate()}.
+ * Generalization drops literals through {@link #without(Identifier)}, and
+ * weakens equalities to constructor tests through
+ * {@link #weaken(Identifier)}. The empty cube is {@code true}.
  *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
@@ -26,14 +34,32 @@ public final class Cube {
 
 	private final Map<Identifier, String> literals;
 
+	private final Map<Identifier, String> constructors;
+
 	/**
-	 * Builds the cube.
+	 * Builds a cube made of equalities.
 	 *
 	 * @param literals the value of each identifier, in SMT-LIB syntax
 	 */
 	public Cube(
 			Map<Identifier, String> literals) {
+		this(literals, Map.of());
+	}
+
+	/**
+	 * Builds the cube.
+	 *
+	 * @param literals     the value of each identifier constrained by an
+	 *                         equality, in SMT-LIB syntax
+	 * @param constructors the constructor of each identifier constrained by a
+	 *                         constructor test (that must not be constrained
+	 *                         by an equality)
+	 */
+	public Cube(
+			Map<Identifier, String> literals,
+			Map<Identifier, String> constructors) {
 		this.literals = Collections.unmodifiableMap(new LinkedHashMap<>(literals));
+		this.constructors = Collections.unmodifiableMap(new LinkedHashMap<>(constructors));
 	}
 
 	/**
@@ -67,12 +93,32 @@ public final class Cube {
 	}
 
 	/**
-	 * Yields the literals of this cube.
+	 * Yields the equalities of this cube.
 	 *
 	 * @return the value of each identifier, in SMT-LIB syntax
 	 */
 	public Map<Identifier, String> getLiterals() {
 		return literals;
+	}
+
+	/**
+	 * Yields the constructor tests of this cube.
+	 *
+	 * @return the constructor of each identifier
+	 */
+	public Map<Identifier, String> getConstructors() {
+		return constructors;
+	}
+
+	/**
+	 * Yields the identifiers constrained by this cube.
+	 *
+	 * @return the identifiers
+	 */
+	public Set<Identifier> getIdentifiers() {
+		Set<Identifier> result = new LinkedHashSet<>(literals.keySet());
+		result.addAll(constructors.keySet());
+		return result;
 	}
 
 	/**
@@ -85,9 +131,46 @@ public final class Cube {
 	 */
 	public Cube without(
 			Identifier id) {
-		Map<Identifier, String> result = new LinkedHashMap<>(literals);
-		result.remove(id);
-		return new Cube(result);
+		Map<Identifier, String> lits = new LinkedHashMap<>(literals);
+		lits.remove(id);
+		Map<Identifier, String> cons = new LinkedHashMap<>(constructors);
+		cons.remove(id);
+		return new Cube(lits, cons);
+	}
+
+	/**
+	 * Yields the cube obtained by replacing the equality of the given
+	 * identifier with a test on the constructor of its value, that represents
+	 * a superset of the states of this one. This is possible only if the
+	 * value is a non-nullary constructor application of {@link ValueSort}
+	 * (e.g., {@code (Value.String "a")} is weakened to the test for
+	 * {@code Value.String}).
+	 *
+	 * @param id the identifier
+	 *
+	 * @return the cube, or {@code null} if the equality cannot be weakened
+	 */
+	public Cube weaken(
+			Identifier id) {
+		String value = literals.get(id);
+		if (value == null)
+			return null;
+		SExpression parsed;
+		try {
+			parsed = SExpression.parse(value);
+		} catch (SmtException e) {
+			return null;
+		}
+		if (parsed.isAtom() || parsed.getChildren().isEmpty() || !parsed.getChildren().get(0).isAtom())
+			return null;
+		String head = parsed.getChildren().get(0).getAtom();
+		if (!ValueSort.DATATYPE.getConstructors().containsKey(head))
+			return null;
+		Map<Identifier, String> lits = new LinkedHashMap<>(literals);
+		lits.remove(id);
+		Map<Identifier, String> cons = new LinkedHashMap<>(constructors);
+		cons.put(id, head);
+		return new Cube(lits, cons);
 	}
 
 	/**
@@ -107,6 +190,8 @@ public final class Cube {
 			Term var = unrolling.var(e.getKey(), step);
 			conj.add(Term.eq(var, Term.value(e.getValue(), var.getSort())));
 		}
+		for (Map.Entry<Identifier, String> e : constructors.entrySet())
+			conj.add(ValueSort.DATATYPE.test(e.getValue(), unrolling.var(e.getKey(), step)));
 		return Term.and(conj.toArray(Term[]::new));
 	}
 
@@ -121,7 +206,7 @@ public final class Cube {
 
 	@Override
 	public int hashCode() {
-		return Objects.hashCode(literals);
+		return Objects.hash(literals, constructors);
 	}
 
 	@Override
@@ -131,12 +216,20 @@ public final class Cube {
 			return true;
 		if (obj == null || getClass() != obj.getClass())
 			return false;
-		return Objects.equals(literals, ((Cube) obj).literals);
+		Cube other = (Cube) obj;
+		return Objects.equals(literals, other.literals) && Objects.equals(constructors, other.constructors);
 	}
 
 	@Override
 	public String toString() {
-		return literals.isEmpty() ? "true" : literals.toString();
+		if (literals.isEmpty() && constructors.isEmpty())
+			return "true";
+		StringBuilder sb = new StringBuilder("{");
+		for (Map.Entry<Identifier, String> e : literals.entrySet())
+			sb.append(sb.length() > 1 ? ", " : "").append(e.getKey()).append("=").append(e.getValue());
+		for (Map.Entry<Identifier, String> e : constructors.entrySet())
+			sb.append(sb.length() > 1 ? ", " : "").append(e.getKey()).append(" is ").append(e.getValue());
+		return sb.append("}").toString();
 	}
 
 	/**
