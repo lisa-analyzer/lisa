@@ -82,6 +82,10 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 
 	private SemanticTool<A, D> tool;
 
+	private PdrEngine.Generalization generalization = PdrEngine.Generalization.BOTH;
+
+	private boolean seeding = true;
+
 	/**
 	 * Builds the verifier, with default budgets, using z3 (as configured in
 	 * {@link SmtLibProcessSolver}).
@@ -117,6 +121,35 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 		this.maxCases = maxCases;
 	}
 
+	/**
+	 * Sets the strategy to generalize blocked cubes (default:
+	 * {@link PdrEngine.Generalization#BOTH}, where the domain of the analysis
+	 * proposes generalizations through a {@link DomainAbstraction}).
+	 *
+	 * @param generalization the strategy
+	 *
+	 * @return this verifier
+	 */
+	public PdrVerifier<A, D> withGeneralization(
+			PdrEngine.Generalization generalization) {
+		this.generalization = generalization;
+		return this;
+	}
+
+	/**
+	 * Sets whether or not frames include the invariants computed by the
+	 * analysis (default: {@code true}).
+	 *
+	 * @param seeding whether or not to use the invariants
+	 *
+	 * @return this verifier
+	 */
+	public PdrVerifier<A, D> withSeeding(
+			boolean seeding) {
+		this.seeding = seeding;
+		return this;
+	}
+
 	@Override
 	public void init(
 			SemanticTool<A, D> tool) {
@@ -144,6 +177,9 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 
 		try (SmtSolver s = solver) {
 			PdrEngine engine = new PdrEngine(model, s);
+			engine.setGeneralization(generalization);
+			engine.setSeeding(seeding);
+			engine.setAbstraction(new DomainAbstraction<>(tool.getAnalysis(), result));
 			PdrEngine.Status status = engine.run(maxLevel, maxQueries, maxMillis);
 			switch (status) {
 			case SAFE:

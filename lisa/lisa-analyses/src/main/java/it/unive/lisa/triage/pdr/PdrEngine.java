@@ -95,7 +95,47 @@ public class PdrEngine {
 		BUDGET_EXHAUSTED
 	}
 
+	/**
+	 * The strategies to generalize blocked cubes.
+	 */
+	public enum Generalization {
+		/**
+		 * Blocked cubes are not generalized.
+		 */
+		NONE,
+
+		/**
+		 * Blocked cubes are reduced to the unsat cores of the queries that
+		 * blocked them, and then literals are dropped while the cube stays
+		 * blocked.
+		 */
+		LITERALS,
+
+		/**
+		 * Blocked cubes are replaced by the proposal of the
+		 * {@link CubeAbstraction}, if it is still blocked.
+		 */
+		DOMAIN,
+
+		/**
+		 * Blocked cubes are reduced to the unsat cores, replaced by the
+		 * proposal of the {@link CubeAbstraction} if it is still blocked,
+		 * and then literals are dropped.
+		 */
+		BOTH
+	}
+
 	private static final String CUBE = "#cube";
+
+	private Generalization generalization = Generalization.BOTH;
+
+	private CubeAbstraction abstraction;
+
+	private boolean seeding = true;
+
+	private int proposals = 0;
+
+	private int accepted = 0;
 
 	private final AlarmModel model;
 
@@ -164,6 +204,62 @@ public class PdrEngine {
 		for (Identifier id : model.getVocabulary())
 			if (!(id instanceof FreshValue))
 				state.add(id);
+	}
+
+	/**
+	 * Sets the strategy to generalize blocked cubes (default:
+	 * {@link Generalization#BOTH}).
+	 *
+	 * @param generalization the strategy
+	 */
+	public void setGeneralization(
+			Generalization generalization) {
+		this.generalization = generalization;
+	}
+
+	/**
+	 * Sets the abstraction proposing generalizations of blocked cubes, used
+	 * by {@link Generalization#DOMAIN} and {@link Generalization#BOTH}
+	 * (default: none).
+	 *
+	 * @param abstraction the abstraction, or {@code null}
+	 */
+	public void setAbstraction(
+			CubeAbstraction abstraction) {
+		this.abstraction = abstraction;
+	}
+
+	/**
+	 * Sets whether or not frames include the invariants computed by the
+	 * analysis (default: {@code true}). Without them, the engine behaves as
+	 * plain property-directed reachability.
+	 *
+	 * @param seeding whether or not to use the invariants
+	 */
+	public void setSeeding(
+			boolean seeding) {
+		this.seeding = seeding;
+	}
+
+	/**
+	 * Yields the number of generalizations proposed by the
+	 * {@link CubeAbstraction} so far.
+	 *
+	 * @return the number of proposals
+	 */
+	public int getProposals() {
+		return proposals;
+	}
+
+	/**
+	 * Yields the number of generalizations proposed by the
+	 * {@link CubeAbstraction} that have been used, since they were still
+	 * blocked.
+	 *
+	 * @return the number of accepted proposals
+	 */
+	public int getAcceptedProposals() {
+		return accepted;
 	}
 
 	/**
@@ -350,7 +446,7 @@ public class PdrEngine {
 				continue;
 			}
 
-			Cube cube = generalize(o.getLocation(), o.getCube().restrict(core), o.getLevel());
+			Cube cube = generalize(o.getLocation(), o.getCube(), core, o.getLevel());
 			frames.add(o.getLocation(), cube.negate(), o.getLevel());
 			// the same states might still reach the bad location in more steps
 			if (o.getLevel() < frames.depth())
@@ -430,18 +526,34 @@ public class PdrEngine {
 	}
 
 	/**
-	 * Drops literals from a cube blocked at the given level (already reduced
-	 * to the unsat cores of the queries blocking it), as long as the result
-	 * is still blocked.
+	 * Generalizes a cube blocked at the given level, according to the
+	 * configured {@link Generalization}, given the union of the unsat cores
+	 * of the queries that blocked it.
 	 */
 	private Cube generalize(
 			Statement location,
 			Cube cube,
+			Set<SymbolicExpression> core,
 			int level)
 			throws SemanticException,
 			Stop {
-		Cube current = cube;
-		for (SymbolicExpression lit : cube.getLiterals()) {
+		if (generalization == Generalization.NONE)
+			return cube;
+		Cube current = generalization == Generalization.DOMAIN ? cube : cube.restrict(core);
+		if (abstraction != null
+				&& (generalization == Generalization.DOMAIN || generalization == Generalization.BOTH)) {
+			Cube proposal = abstraction.abstractCube(location, current);
+			if (proposal != null && !proposal.equals(current)) {
+				proposals++;
+				if (predecessor(location, proposal, level, null, null) == null) {
+					accepted++;
+					current = proposal;
+				}
+			}
+		}
+		if (generalization == Generalization.DOMAIN)
+			return current;
+		for (SymbolicExpression lit : current.getLiterals()) {
 			Cube candidate = current.without(lit);
 			if (predecessor(location, candidate, level, null, null) == null)
 				current = candidate;
@@ -497,7 +609,8 @@ public class PdrEngine {
 			return Term.and(unrolling.at(0, location), unrolling.initial());
 		List<Term> conj = new ArrayList<>();
 		conj.add(unrolling.at(0, location));
-		conj.add(unrolling.seeds(location, 0));
+		if (seeding)
+			conj.add(unrolling.seeds(location, 0));
 		for (Lemma lemma : frames.frame(location, level))
 			conj.add(lemma.at(unrolling, 0));
 		return Term.and(conj.toArray(Term[]::new));

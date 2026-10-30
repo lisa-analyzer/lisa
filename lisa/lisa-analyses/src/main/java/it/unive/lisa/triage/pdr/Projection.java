@@ -5,6 +5,7 @@ import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.NullConstant;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
+import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.TernaryExpression;
 import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.symbolic.value.operator.binary.LogicalAnd;
@@ -95,6 +96,40 @@ public final class Projection {
 			freshValues(((TernaryExpression) e).getLeft(), result);
 			freshValues(((TernaryExpression) e).getMiddle(), result);
 			freshValues(((TernaryExpression) e).getRight(), result);
+		}
+	}
+
+	/**
+	 * Yields the identifiers occurring in the given expressions, excluding
+	 * fresh values.
+	 *
+	 * @param expressions the expressions
+	 *
+	 * @return the identifiers
+	 */
+	public static Set<Identifier> identifiers(
+			Collection<SymbolicExpression> expressions) {
+		Set<Identifier> result = new LinkedHashSet<>();
+		for (SymbolicExpression e : expressions)
+			identifiers(e, result);
+		return result;
+	}
+
+	private static void identifiers(
+			SymbolicExpression e,
+			Set<Identifier> result) {
+		if (e instanceof Identifier) {
+			if (!(e instanceof FreshValue))
+				result.add((Identifier) e);
+		} else if (e instanceof UnaryExpression)
+			identifiers(((UnaryExpression) e).getExpression(), result);
+		else if (e instanceof BinaryExpression) {
+			identifiers(((BinaryExpression) e).getLeft(), result);
+			identifiers(((BinaryExpression) e).getRight(), result);
+		} else if (e instanceof TernaryExpression) {
+			identifiers(((TernaryExpression) e).getLeft(), result);
+			identifiers(((TernaryExpression) e).getMiddle(), result);
+			identifiers(((TernaryExpression) e).getRight(), result);
 		}
 	}
 

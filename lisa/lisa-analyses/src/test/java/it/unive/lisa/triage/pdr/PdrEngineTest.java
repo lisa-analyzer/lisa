@@ -18,6 +18,14 @@ import it.unive.lisa.checks.verification.Violation;
 import it.unive.lisa.imp.IMPFrontend;
 import it.unive.lisa.interprocedural.ReturnTopPolicy;
 import it.unive.lisa.program.Program;
+import it.unive.lisa.program.SyntheticLocation;
+import it.unive.lisa.program.type.BoolType;
+import it.unive.lisa.program.type.Int32Type;
+import it.unive.lisa.symbolic.value.BinaryExpression;
+import it.unive.lisa.symbolic.value.Constant;
+import it.unive.lisa.symbolic.value.operator.binary.ComparisonGt;
+import it.unive.lisa.symbolic.value.operator.binary.ComparisonLe;
+import it.unive.lisa.symbolic.value.operator.binary.ComparisonLt;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.symbolic.value.Identifier;
@@ -77,6 +85,15 @@ public class PdrEngineTest {
 			+ "        w = 1;\n"
 			+ "    return w;\n"
 			+ "  }\n"
+			+ "  bigloop() {\n"
+			+ "    def i = 0;\n"
+			+ "    def w = 0;\n"
+			+ "    while (i < 1000)\n"
+			+ "      i = i + 1;\n"
+			+ "    if (i > 1000)\n"
+			+ "      w = 1;\n"
+			+ "    return w;\n"
+			+ "  }\n"
 			+ "  bounded(x) {\n"
 			+ "    def w = 0;\n"
 			+ "    if (x > 10)\n"
@@ -129,6 +146,79 @@ public class PdrEngineTest {
 		SemanticTool t = tool;
 		AnalyzedCFG result = (AnalyzedCFG) t.getResultOf(cfg).iterator().next();
 		return AlarmModelBuilder.build(t, result, st, Violation.reach(), SymbolicStore.DEFAULT_MAX_CASES);
+	}
+
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private static PdrEngine engine(
+			String name,
+			String statement,
+			SmtSolver solver,
+			PdrEngine.Generalization generalization,
+			boolean seeding)
+			throws SemanticException {
+		CFG cfg = program.getAllCFGs().stream().filter(c -> c.getDescriptor().getName().equals(name)).findFirst()
+				.get();
+		AnalyzedCFG result = (AnalyzedCFG) tool.getResultOf(cfg).iterator().next();
+		PdrEngine engine = new PdrEngine(model(name, statement), solver);
+		engine.setGeneralization(generalization);
+		engine.setSeeding(seeding);
+		engine.setAbstraction(new DomainAbstraction(tool.getAnalysis(), result));
+		return engine;
+	}
+
+	@Test
+	public void ablation() throws SemanticException {
+		// program, statement, whether the violation is real
+		Object[][] cases = {
+				{ "shallow", "y = 1", true },
+				{ "open", "w = 1", true },
+				{ "loop", "w = 1", true },
+				{ "relational", "w = 1", false },
+				{ "widening", "w = 1", false },
+				{ "bounded", "w = 1", false },
+				{ "bigloop", "w = 1", false } };
+		for (PdrEngine.Generalization g : PdrEngine.Generalization.values())
+			for (boolean seeding : new boolean[] { true, false })
+				for (Object[] c : cases)
+					try (SmtSolver s = SmtLibProcessSolver.z3()) {
+						PdrEngine engine = engine((String) c[0], (String) c[1], s, g, seeding);
+						PdrEngine.Status status = engine.run(20, 2000);
+						if ((boolean) c[2])
+							assertTrue(status != PdrEngine.Status.SAFE && status != PdrEngine.Status.BLOCKED,
+									c[0] + " " + g + " " + seeding + ": " + status);
+						else
+							assertTrue(status != PdrEngine.Status.COUNTEREXAMPLE,
+									c[0] + " " + g + " " + seeding + ": " + status);
+					}
+	}
+
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@Test
+	public void domainProposals() throws SemanticException {
+		// at the loop guard, intervals know that 0 <= i: assuming i > 1 gives
+		// the interval [2, +inf], that becomes the proposal 2 <= i
+		CFG cfg = program.getAllCFGs().stream().filter(c -> c.getDescriptor().getName().equals("loop"))
+				.findFirst().get();
+		AnalyzedCFG result = (AnalyzedCFG) tool.getResultOf(cfg).iterator().next();
+		AlarmModel model = model("loop", "w = 1");
+		Identifier i = find(model, "i");
+		Statement guard = cfg.getNodes().stream().filter(n -> n.toString().contains("<(i, 3)")).findFirst().get();
+		DomainAbstraction abs = new DomainAbstraction(tool.getAnalysis(), result);
+		Cube cube = new Cube(List.of(new BinaryExpression(BoolType.INSTANCE, i,
+				new Constant(Int32Type.INSTANCE, 1, SyntheticLocation.INSTANCE), ComparisonGt.INSTANCE,
+				SyntheticLocation.INSTANCE)));
+		Cube proposal = abs.abstractCube(guard, cube);
+		assertNotNull(proposal);
+		assertTrue(proposal.getLiterals().stream().anyMatch(c -> c instanceof BinaryExpression
+				&& ((BinaryExpression) c).getOperator() == ComparisonLe.INSTANCE
+				&& ((Constant) ((BinaryExpression) c).getLeft()).getValue().equals(2)
+				&& ((BinaryExpression) c).getRight().equals(i)), proposal.toString());
+
+		// a cube that contradicts the invariant has no proposal
+		Cube negative = new Cube(List.of(new BinaryExpression(BoolType.INSTANCE, i,
+				new Constant(Int32Type.INSTANCE, 0, SyntheticLocation.INSTANCE), ComparisonLt.INSTANCE,
+				SyntheticLocation.INSTANCE)));
+		assertNull(abs.abstractCube(guard, negative));
 	}
 
 	private static Identifier find(
