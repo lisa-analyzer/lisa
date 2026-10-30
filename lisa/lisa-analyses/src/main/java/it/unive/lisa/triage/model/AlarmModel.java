@@ -267,4 +267,64 @@ public class AlarmModel {
 	public boolean isConfirmable() {
 		return confirmable;
 	}
+
+	/**
+	 * Yields a human-readable description of this model, listing its
+	 * vocabulary, initial states, locations (with their invariants and
+	 * transitions), and bad cases. This is meant for debugging purposes.
+	 *
+	 * @return the description
+	 */
+	public String dump() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("model of ").append(result.getDescriptor().getFullSignature()).append(" in ")
+				.append(result.getId()).append(confirmable ? " (confirmable)" : " (not confirmable)").append("\n");
+		sb.append("bad location: ").append(badLocation).append(" at ").append(badLocation.getLocation())
+				.append("\n");
+
+		sb.append("vocabulary:\n");
+		for (Identifier id : vocabulary) {
+			sb.append("  ").append(id).append(": ").append(sorts.sortOf(id).toSmtLib());
+			InputSource source = parameters.get(id);
+			if (source != null)
+				sb.append(" (").append(source.getDescription()).append(")");
+			sb.append("\n");
+		}
+		if (!freshValues.isEmpty()) {
+			sb.append("fresh values:\n");
+			for (Map.Entry<String, FreshValue> fresh : freshValues.entrySet())
+				sb.append("  ").append(fresh.getKey()).append(": ")
+						.append(fresh.getValue() instanceof InputValue
+								? ((InputValue) fresh.getValue()).getSource().getDescription()
+								: "summary of " + ((SummaryValue) fresh.getValue()).getReason())
+						.append("\n");
+		}
+
+		sb.append("initial locations: ").append(initial).append("\n");
+		sb.append("initial constraints: ").append(initialConstraints).append("\n");
+
+		List<Statement> sorted = new ArrayList<>(locations);
+		sorted.sort((l, r) -> l.getLocation().compareTo(r.getLocation()));
+		for (Statement loc : sorted) {
+			sb.append("location ").append(loc).append(" at ").append(loc.getLocation());
+			if (loc == badLocation)
+				sb.append(" [bad]");
+			if (initial.contains(loc))
+				sb.append(" [initial]");
+			sb.append("\n");
+			Set<SymbolicExpression> inv = seeds.get(loc);
+			sb.append("  invariant: ").append(inv == null ? "unreachable" : inv).append("\n");
+			for (EdgeTransition edge : getTransitions(loc)) {
+				sb.append("  -> ").append(edge.getEdge().getDestination()).append(" (")
+						.append(edge.getEdge().getClass().getSimpleName()).append(")\n");
+				for (SymbolicCase c : edge.getStore().getCases())
+					sb.append("     | ").append(c).append("\n");
+			}
+		}
+
+		sb.append("bad cases:\n");
+		for (BadCase bad : badCases)
+			sb.append("  | ").append(bad).append("\n");
+		return sb.toString();
+	}
 }

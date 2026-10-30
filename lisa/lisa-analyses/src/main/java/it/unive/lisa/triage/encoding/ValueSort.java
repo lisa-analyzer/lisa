@@ -2,6 +2,8 @@ package it.unive.lisa.triage.encoding;
 
 import it.unive.lisa.triage.smt.Datatype;
 import it.unive.lisa.triage.smt.Datatype.Field;
+import it.unive.lisa.triage.smt.SExpression;
+import it.unive.lisa.triage.smt.SmtException;
 import it.unive.lisa.triage.smt.Sort;
 import it.unive.lisa.triage.smt.Term;
 import java.util.LinkedHashMap;
@@ -167,5 +169,43 @@ public final class ValueSort {
 		if (sort.equals(Sort.STRING))
 			return DATATYPE.test(STRING, value);
 		return null;
+	}
+
+	/**
+	 * Yields a human-readable representation of the given value, as returned
+	 * by a solver in SMT-LIB syntax (e.g., {@code (Value.Int (- 3))} becomes
+	 * {@code -3}, and {@code Value.Null} becomes {@code null}). Values that
+	 * are not recognized are returned unchanged.
+	 *
+	 * @param smtlib the value, in SMT-LIB syntax
+	 *
+	 * @return the readable representation
+	 */
+	public static String display(
+			String smtlib) {
+		try {
+			return display(SExpression.parse(smtlib));
+		} catch (SmtException e) {
+			return smtlib;
+		}
+	}
+
+	private static String display(
+			SExpression value) {
+		if (value.isAtom())
+			return value.getAtom().equals(NULL) ? "null" : value.getAtom();
+		List<SExpression> children = value.getChildren();
+		if (children.size() == 2 && children.get(0).isAtom()) {
+			String head = children.get(0).getAtom();
+			if (head.equals("-"))
+				return "-" + display(children.get(1));
+			if (head.equals(INT) || head.equals(BOOL) || head.equals(STRING))
+				return display(children.get(1));
+			if (head.equals(REF))
+				return "ref#" + display(children.get(1));
+			if (head.equals(OPAQUE))
+				return "opaque#" + display(children.get(1));
+		}
+		return value.toString();
 	}
 }
