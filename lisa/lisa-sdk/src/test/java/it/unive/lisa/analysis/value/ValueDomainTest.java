@@ -99,7 +99,11 @@ public class ValueDomainTest {
 		Set<BinaryExpression> constraints = ValueDomain.makeRangeConstraints(
 				Untyped.INSTANCE, 0, null, x, pp());
 		assertEquals(1, constraints.size());
-		assertSame(ComparisonGe.INSTANCE, constraints.iterator().next().getOperator());
+		// 0 <= x
+		BinaryExpression c = constraints.iterator().next();
+		assertSame(ComparisonLe.INSTANCE, c.getOperator());
+		assertEquals(0, ((Constant) c.getLeft()).getValue());
+		assertSame(x, c.getRight());
 	}
 
 	@Test
@@ -108,7 +112,11 @@ public class ValueDomainTest {
 		Set<BinaryExpression> constraints = ValueDomain.makeRangeConstraints(
 				Untyped.INSTANCE, null, 10, x, pp());
 		assertEquals(1, constraints.size());
-		assertSame(ComparisonLe.INSTANCE, constraints.iterator().next().getOperator());
+		// 10 >= x
+		BinaryExpression c = constraints.iterator().next();
+		assertSame(ComparisonGe.INSTANCE, c.getOperator());
+		assertEquals(10, ((Constant) c.getLeft()).getValue());
+		assertSame(x, c.getRight());
 	}
 
 	@Test
@@ -119,10 +127,16 @@ public class ValueDomainTest {
 		assertEquals(2, constraints.size());
 		assertEquals(
 				1,
-				constraints.stream().filter(c -> c.getOperator() == ComparisonGe.INSTANCE).count());
+				constraints.stream()
+						.filter(c -> c.getOperator() == ComparisonLe.INSTANCE
+								&& ((Constant) c.getLeft()).getValue().equals(0))
+						.count());
 		assertEquals(
 				1,
-				constraints.stream().filter(c -> c.getOperator() == ComparisonLe.INSTANCE).count());
+				constraints.stream()
+						.filter(c -> c.getOperator() == ComparisonGe.INSTANCE
+								&& ((Constant) c.getLeft()).getValue().equals(10))
+						.count());
 	}
 
 	/**
