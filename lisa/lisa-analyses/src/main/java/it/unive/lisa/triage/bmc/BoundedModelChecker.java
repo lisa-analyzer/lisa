@@ -5,15 +5,13 @@ import it.unive.lisa.analysis.AbstractLattice;
 import it.unive.lisa.analysis.AnalyzedCFG;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.checks.semantic.SemanticTool;
-import it.unive.lisa.checks.verification.ReproducingInput;
 import it.unive.lisa.checks.verification.VerificationOutcome;
 import it.unive.lisa.checks.verification.VerificationResult;
 import it.unive.lisa.checks.verification.Violation;
 import it.unive.lisa.checks.verification.WarningVerifier;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.symbolic.value.Identifier;
-import it.unive.lisa.triage.encoding.ValueSort;
-import it.unive.lisa.triage.inputs.InputSource;
+import it.unive.lisa.triage.inputs.ReproducingInputs;
 import it.unive.lisa.triage.model.AlarmModel;
 import it.unive.lisa.triage.model.AlarmModelBuilder;
 import it.unive.lisa.triage.model.EdgeTransition;
@@ -209,26 +207,25 @@ public class BoundedModelChecker<A extends AbstractLattice<A>, D extends Abstrac
 			trace.add(unrolling.locationAt(Integer.parseInt(pcValues.get(pc))));
 
 		boolean exact = true;
-		List<ReproducingInput> inputs = new ArrayList<>();
-		Map<InputSource, Integer> occurrences = new HashMap<>();
+		ReproducingInputs inputs = new ReproducingInputs(model.getResult().getId());
 
 		Map<Term, Identifier> params = new HashMap<>();
 		for (Identifier id : model.getParameters().keySet())
 			params.put(unrolling.var(id, 0), id);
 		if (!params.isEmpty())
 			for (Map.Entry<Term, String> v : solver.getValues(new ArrayList<>(params.keySet())).entrySet())
-				addInput(model, model.getParameters().get(params.get(v.getKey())), v.getValue(), inputs, occurrences);
+				inputs.add(model.getParameters().get(params.get(v.getKey())), v.getValue());
 
 		for (int t = 0; t < length; t++)
 			for (EdgeTransition edge : model.getTransitions(trace.get(t)))
 				if (edge.getEdge().getDestination() == trace.get(t + 1)) {
 					String key = unrolling.edgeKey(t, edge);
 					exact &= unrolling.isExact(key);
-					collectInputs(unrolling, key, solver, inputs, occurrences);
+					collectInputs(unrolling, key, solver, inputs);
 				}
 		String badKey = unrolling.badKey(length);
 		exact &= unrolling.isExact(badKey);
-		collectInputs(unrolling, badKey, solver, inputs, occurrences);
+		collectInputs(unrolling, badKey, solver, inputs);
 
 		String path = "violation reached in " + length + " steps through " + trace;
 		if (!exact)
@@ -238,15 +235,14 @@ public class BoundedModelChecker<A extends AbstractLattice<A>, D extends Abstrac
 			return new VerificationResult(VerificationOutcome.POSSIBLE,
 					path + ", from states that are not the initial ones of the program");
 		return new VerificationResult(VerificationOutcome.CONFIRMED,
-				path + " (not yet certified by execution)", inputs);
+				path + " (not yet certified by execution)", inputs.get());
 	}
 
 	private static void collectInputs(
 			Unrolling unrolling,
 			String key,
 			SmtSolver solver,
-			List<ReproducingInput> inputs,
-			Map<InputSource, Integer> occurrences) {
+			ReproducingInputs inputs) {
 		List<InputValue> values = Unrolling.inputsOf(unrolling.getFreshValues(key));
 		if (values.isEmpty())
 			return;
@@ -255,16 +251,6 @@ public class BoundedModelChecker<A extends AbstractLattice<A>, D extends Abstrac
 			terms.add(unrolling.freshConstant(v, key));
 		Map<Term, String> model = solver.getValues(terms);
 		for (int i = 0; i < values.size(); i++)
-			addInput(unrolling.getModel(), values.get(i).getSource(), model.get(terms.get(i)), inputs, occurrences);
-	}
-
-	private static void addInput(
-			AlarmModel model,
-			InputSource source,
-			String value,
-			List<ReproducingInput> inputs,
-			Map<InputSource, Integer> occurrences) {
-		int occurrence = occurrences.merge(source, 1, Integer::sum) - 1;
-		inputs.add(source.toReproducingInput(model.getResult().getId(), occurrence, ValueSort.display(value)));
+			inputs.add(values.get(i).getSource(), model.get(terms.get(i)));
 	}
 }

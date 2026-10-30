@@ -276,8 +276,10 @@ public class PdrEngine {
 			boolean exact = unrolling.isExact(key);
 			if (check(frame(bad, level), query) == SmtResult.SAT) {
 				Map<FreshValue, String> values = freshValues(cube.getLiterals(), key);
-				Obligation o = new Obligation(bad, project(cube.getLiterals(), values), level, null, null,
-						inputs(values), exact, point(), created++);
+				Cube projected = project(cube.getLiterals(), values);
+				exact &= Projection.freshValues(projected.getLiterals()).isEmpty();
+				Obligation o = new Obligation(bad, projected, level, null, null, inputs(values), exact, point(),
+						created++);
 				solver.pop();
 				return o;
 			}
@@ -378,8 +380,11 @@ public class PdrEngine {
 					// every input of the case, even if not in the cube, is
 					// needed to reproduce the transition
 					Map<FreshValue, String> caseInputs = freshValues(unrolling.getFreshValues(caseKey), caseKey);
-					Obligation pred = new Obligation(src, project(lits, all), level - 1, parent, e,
-							inputs(caseInputs), exact, point(), created++);
+					Cube projected = project(lits, all);
+					// values that could not be projected are left unconstrained
+					exact &= Projection.freshValues(projected.getLiterals()).isEmpty();
+					Obligation pred = new Obligation(src, projected, level - 1, parent, e, inputs(caseInputs),
+							exact, point(), created++);
 					solver.pop();
 					return pred;
 				}
