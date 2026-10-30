@@ -168,6 +168,22 @@ public final class Term {
 	}
 
 	/**
+	 * Builds a term from a value of the given sort, in SMT-LIB syntax, as
+	 * printed by a solver in a model (e.g., {@code (- 3)} or
+	 * {@code (Value.Int 5)}).
+	 *
+	 * @param smtlib the value
+	 * @param sort   the sort of the value
+	 *
+	 * @return the term
+	 */
+	public static Term value(
+			String smtlib,
+			Sort sort) {
+		return new Term(smtlib, sort);
+	}
+
+	/**
 	 * Builds the application of the given function to the given arguments.
 	 *
 	 * @param function the function symbol (or indexed identifier, such as

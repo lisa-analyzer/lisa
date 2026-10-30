@@ -123,6 +123,7 @@ import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.triage.inputs.InputSource;
 import it.unive.lisa.triage.model.SymbolicCase;
 import it.unive.lisa.triage.model.SymbolicStore;
+import it.unive.lisa.triage.pdr.Cube;
 import it.unive.lisa.triage.smt.Sort;
 import it.unive.lisa.triage.smt.Term;
 import it.unive.lisa.type.Type;
@@ -711,6 +712,8 @@ public class EqualityContractVerificationTest {
 		// the represented transition
 		verify(SymbolicStore.class, verifier -> verifier.withIgnoredFields("factory", "maxCases"));
 		verify(Term.class, verifier -> verifier.withPrefabValues(Sort.class, Sort.INT, Sort.BOOL));
+		verify(Cube.class);
+		verify(Cube.Blocked.class);
 	}
 
 	@Test

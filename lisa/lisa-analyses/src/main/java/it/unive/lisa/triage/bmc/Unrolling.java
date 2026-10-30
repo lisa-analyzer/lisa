@@ -155,7 +155,16 @@ public class Unrolling {
 		return constant(id.getName() + "@" + step, model.getSorts().sortOf(id));
 	}
 
-	private Term at(
+	/**
+	 * Yields the condition stating that the program counter is at the given
+	 * location at the given step.
+	 *
+	 * @param step     the step
+	 * @param location the location
+	 *
+	 * @return the condition
+	 */
+	public Term at(
 			int step,
 			Statement location) {
 		return Term.eq(pc(step), Term.integer(index.get(location)));
@@ -319,19 +328,48 @@ public class Unrolling {
 		List<Term> conj = new ArrayList<>();
 		ExpressionEncoder encoder = new ExpressionEncoder(model.getSorts(), new StepSymbols(step, "#inv"));
 		for (Statement loc : locations) {
-			Set<SymbolicExpression> seeds = model.getSeeds(loc);
-			if (seeds == null)
+			if (model.getSeeds(loc) == null)
 				// unreachable location
 				continue;
 			locs.add(at(step, loc));
-			List<Term> inv = new ArrayList<>();
-			for (SymbolicExpression c : seeds)
-				inv.add(encoder.encodeCondition(c));
-			if (!inv.isEmpty())
-				conj.add(Term.implies(at(step, loc), Term.and(inv.toArray(Term[]::new))));
+			conj.add(Term.implies(at(step, loc), seeds(loc, step, encoder)));
 		}
 		conj.add(Term.or(locs.toArray(Term[]::new)));
 		return Term.and(conj.toArray(Term[]::new));
+	}
+
+	/**
+	 * Yields the invariant computed by the analysis for the given location, as
+	 * it holds at the given step (regardless of the program counter).
+	 *
+	 * @param location the location
+	 * @param step     the step
+	 *
+	 * @return the invariant, that is {@code false} if the location is
+	 *             unreachable
+	 *
+	 * @throws SemanticException if an expression cannot be encoded
+	 */
+	public Term seeds(
+			Statement location,
+			int step)
+			throws SemanticException {
+		return seeds(location, step,
+				new ExpressionEncoder(model.getSorts(), new StepSymbols(step, "#inv")));
+	}
+
+	private Term seeds(
+			Statement location,
+			int step,
+			ExpressionEncoder encoder)
+			throws SemanticException {
+		Set<SymbolicExpression> seeds = model.getSeeds(location);
+		if (seeds == null)
+			return Term.FALSE;
+		List<Term> inv = new ArrayList<>();
+		for (SymbolicExpression c : seeds)
+			inv.add(encoder.encodeCondition(c));
+		return Term.and(inv.toArray(Term[]::new));
 	}
 
 	/**
@@ -349,21 +387,41 @@ public class Unrolling {
 			throws SemanticException {
 		List<Term> edges = new ArrayList<>();
 		for (Statement loc : locations)
-			for (EdgeTransition edge : model.getTransitions(loc)) {
-				String key = edgeKey(step, edge);
-				StepSymbols symbols = new StepSymbols(step, key.substring(key.indexOf('#')));
-				ExpressionEncoder encoder = new ExpressionEncoder(model.getSorts(), symbols);
-				List<Term> cases = new ArrayList<>();
-				for (SymbolicCase c : edge.getStore().getCases())
-					cases.add(encodeCase(c, step, encoder));
-				edges.add(Term.and(
-						at(step, edge.getEdge().getSource()),
-						Term.eq(pc(step + 1), Term.integer(indexOf(edge.getEdge().getDestination()))),
-						Term.or(cases.toArray(Term[]::new))));
-				exactness.put(key, symbols.exact);
-				inputs.put(key, symbols.used);
-			}
+			for (EdgeTransition edge : model.getTransitions(loc))
+				edges.add(transition(step, edge));
 		return Term.or(edges.toArray(Term[]::new));
+	}
+
+	/**
+	 * Yields the relation of the given transition from step {@code step} to
+	 * step {@code step + 1}: the program counter moves from the source to the
+	 * destination of the edge, and one of the cases of the transition holds.
+	 * The exactness and the fresh values of the encoding are recorded under
+	 * {@link #edgeKey(int, EdgeTransition)}.
+	 *
+	 * @param step the step
+	 * @param edge the transition
+	 *
+	 * @return the transition relation
+	 *
+	 * @throws SemanticException if an expression cannot be encoded
+	 */
+	public Term transition(
+			int step,
+			EdgeTransition edge)
+			throws SemanticException {
+		String key = edgeKey(step, edge);
+		StepSymbols symbols = new StepSymbols(step, key.substring(key.indexOf('#')));
+		ExpressionEncoder encoder = new ExpressionEncoder(model.getSorts(), symbols);
+		List<Term> cases = new ArrayList<>();
+		for (SymbolicCase c : edge.getStore().getCases())
+			cases.add(encodeCase(c, step, encoder));
+		exactness.put(key, symbols.exact);
+		inputs.put(key, symbols.used);
+		return Term.and(
+				at(step, edge.getEdge().getSource()),
+				Term.eq(pc(step + 1), Term.integer(indexOf(edge.getEdge().getDestination()))),
+				Term.or(cases.toArray(Term[]::new)));
 	}
 
 	private Term encodeCase(
