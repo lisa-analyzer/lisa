@@ -6,9 +6,15 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
+import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import org.junit.jupiter.api.Test;
@@ -19,9 +25,9 @@ import org.junit.jupiter.api.Test;
  */
 public class SmtLibProcessSolverTest {
 
-	private static final Map<String, Supplier<SmtSolver>> SOLVERS = Map.of(
-			"z3", SmtLibProcessSolver::z3,
-			"cvc5", SmtLibProcessSolver::cvc5);
+	private static final Map<BooleanSupplier, Supplier<SmtSolver>> SOLVERS = Map.of(
+			SmtLibProcessSolver::isZ3Available, SmtLibProcessSolver::z3,
+			SmtLibProcessSolver::isCvc5Available, SmtLibProcessSolver::cvc5);
 
 	/**
 	 * Runs the given test on each available solver, skipping the test if none
@@ -30,8 +36,8 @@ public class SmtLibProcessSolverTest {
 	private static void onEachSolver(
 			Consumer<SmtSolver> test) {
 		boolean any = false;
-		for (Map.Entry<String, Supplier<SmtSolver>> entry : SOLVERS.entrySet())
-			if (SmtLibProcessSolver.isAvailable(entry.getKey())) {
+		for (Map.Entry<BooleanSupplier, Supplier<SmtSolver>> entry : SOLVERS.entrySet())
+			if (entry.getKey().getAsBoolean()) {
 				any = true;
 				try (SmtSolver s = entry.getValue().get()) {
 					test.accept(s);
@@ -101,8 +107,8 @@ public class SmtLibProcessSolverTest {
 
 	@Test
 	public void timeoutYieldsUnknown() {
-		assumeTrue(SmtLibProcessSolver.isAvailable("z3"), "z3 is not available");
-		try (SmtSolver s = SmtLibProcessSolver.z3("z3", 200)) {
+		assumeTrue(SmtLibProcessSolver.isZ3Available(), "z3 is not available");
+		try (SmtSolver s = SmtLibProcessSolver.z3(200)) {
 			// x^3 + y^3 = z^3 has no positive solution, and nonlinear
 			// integer arithmetic is undecidable: the solver gives up
 			Term x = s.declare("x", Sort.INT);
@@ -122,15 +128,37 @@ public class SmtLibProcessSolverTest {
 	}
 
 	@Test
-	public void unavailableSolver() {
-		assertFalse(SmtLibProcessSolver.isAvailable("this-solver-does-not-exist"));
-		assertThrows(SmtSolverUnavailableException.class,
-				() -> SmtLibProcessSolver.z3("this-solver-does-not-exist", 1000));
+	public void configuredPaths() {
+		try {
+			SmtLibProcessSolver.setZ3Path("this-solver-does-not-exist");
+			assertFalse(SmtLibProcessSolver.isZ3Available());
+			assertThrows(SmtSolverUnavailableException.class, () -> SmtLibProcessSolver.z3(1000));
+
+			SmtLibProcessSolver.setCvc5Path("this-solver-does-not-exist");
+			assertFalse(SmtLibProcessSolver.isCvc5Available());
+			assertThrows(SmtSolverUnavailableException.class, () -> SmtLibProcessSolver.cvc5(1000));
+
+			// an absolute path to the executable found in the path
+			Optional<Path> z3 = Arrays.stream(System.getenv("PATH").split(File.pathSeparator))
+					.map(dir -> Path.of(dir, "z3"))
+					.filter(Files::isExecutable)
+					.findFirst();
+			assumeTrue(z3.isPresent(), "z3 is not available");
+			SmtLibProcessSolver.setZ3Path(z3.get().toAbsolutePath().toString());
+			assertTrue(SmtLibProcessSolver.isZ3Available());
+			try (SmtSolver s = SmtLibProcessSolver.z3()) {
+				assertEquals(SmtResult.SAT, s.check());
+			}
+		} finally {
+			// back to the executables in the path
+			SmtLibProcessSolver.setZ3Path(null);
+			SmtLibProcessSolver.setCvc5Path(null);
+		}
 	}
 
 	@Test
 	public void closedSolver() {
-		assumeTrue(SmtLibProcessSolver.isAvailable("z3"), "z3 is not available");
+		assumeTrue(SmtLibProcessSolver.isZ3Available(), "z3 is not available");
 		SmtSolver s = SmtLibProcessSolver.z3();
 		s.close();
 		assertThrows(SmtException.class, s::check);

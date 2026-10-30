@@ -24,7 +24,9 @@ import java.util.concurrent.TimeUnit;
  * when the solver is created, and its creation fails with an
  * {@link SmtSolverUnavailableException} if the executable cannot be found.
  * Factories for common solvers are provided by {@link #z3()} and
- * {@link #cvc5()}.<br>
+ * {@link #cvc5()}: the executables they run are expected to be in the path of
+ * the current environment, unless a different path is set through
+ * {@link #setZ3Path(String)} and {@link #setCvc5Path(String)}.<br>
  * <br>
  * Each satisfiability check is bounded by a timeout, communicated to the
  * solver: checks exceeding it yield {@link SmtResult#UNKNOWN}. If the solver
@@ -51,6 +53,10 @@ public class SmtLibProcessSolver
 
 	private static final Object EOF = new Object();
 
+	private static volatile String z3Path = null;
+
+	private static volatile String cvc5Path = null;
+
 	private final List<String> command;
 
 	private final long timeout;
@@ -66,21 +72,58 @@ public class SmtLibProcessSolver
 	private boolean closed;
 
 	/**
-	 * Builds a solver running z3 (that must be available as {@code z3} in the
-	 * path), with {@link #DEFAULT_TIMEOUT} as timeout.
+	 * Sets the path to the z3 executable used by {@link #z3()},
+	 * {@link #z3(long)}, and {@link #isZ3Available()}. If no path is set (or if
+	 * it is set to {@code null}), z3 is expected to be available as {@code z3}
+	 * in the path of the current environment.
+	 *
+	 * @param path the path to the z3 executable, or {@code null} to use the one
+	 *                 in the path of the current environment
+	 */
+	public static void setZ3Path(
+			String path) {
+		z3Path = path;
+	}
+
+	/**
+	 * Sets the path to the cvc5 executable used by {@link #cvc5()},
+	 * {@link #cvc5(long)}, and {@link #isCvc5Available()}. If no path is set
+	 * (or if it is set to {@code null}), cvc5 is expected to be available as
+	 * {@code cvc5} in the path of the current environment.
+	 *
+	 * @param path the path to the cvc5 executable, or {@code null} to use the
+	 *                 one in the path of the current environment
+	 */
+	public static void setCvc5Path(
+			String path) {
+		cvc5Path = path;
+	}
+
+	private static String z3Executable() {
+		String path = z3Path;
+		return path == null ? "z3" : path;
+	}
+
+	private static String cvc5Executable() {
+		String path = cvc5Path;
+		return path == null ? "cvc5" : path;
+	}
+
+	/**
+	 * Builds a solver running z3 (see {@link #setZ3Path(String)}), with
+	 * {@link #DEFAULT_TIMEOUT} as timeout.
 	 *
 	 * @return the solver
 	 *
 	 * @throws SmtSolverUnavailableException if z3 cannot be started
 	 */
 	public static SmtLibProcessSolver z3() {
-		return z3("z3", DEFAULT_TIMEOUT);
+		return z3(DEFAULT_TIMEOUT);
 	}
 
 	/**
-	 * Builds a solver running z3.
+	 * Builds a solver running z3 (see {@link #setZ3Path(String)}).
 	 *
-	 * @param executable    the path to the z3 executable
 	 * @param timeoutMillis the timeout of satisfiability checks, in
 	 *                          milliseconds
 	 *
@@ -89,30 +132,28 @@ public class SmtLibProcessSolver
 	 * @throws SmtSolverUnavailableException if z3 cannot be started
 	 */
 	public static SmtLibProcessSolver z3(
-			String executable,
 			long timeoutMillis) {
 		return new SmtLibProcessSolver(
-				List.of(executable, "-in", "-smt2"),
+				List.of(z3Executable(), "-in", "-smt2"),
 				List.of("(set-option :timeout " + timeoutMillis + ")"),
 				timeoutMillis);
 	}
 
 	/**
-	 * Builds a solver running cvc5 (that must be available as {@code cvc5} in
-	 * the path), with {@link #DEFAULT_TIMEOUT} as timeout.
+	 * Builds a solver running cvc5 (see {@link #setCvc5Path(String)}), with
+	 * {@link #DEFAULT_TIMEOUT} as timeout.
 	 *
 	 * @return the solver
 	 *
 	 * @throws SmtSolverUnavailableException if cvc5 cannot be started
 	 */
 	public static SmtLibProcessSolver cvc5() {
-		return cvc5("cvc5", DEFAULT_TIMEOUT);
+		return cvc5(DEFAULT_TIMEOUT);
 	}
 
 	/**
-	 * Builds a solver running cvc5.
+	 * Builds a solver running cvc5 (see {@link #setCvc5Path(String)}).
 	 *
-	 * @param executable    the path to the cvc5 executable
 	 * @param timeoutMillis the timeout of satisfiability checks, in
 	 *                          milliseconds
 	 *
@@ -121,23 +162,38 @@ public class SmtLibProcessSolver
 	 * @throws SmtSolverUnavailableException if cvc5 cannot be started
 	 */
 	public static SmtLibProcessSolver cvc5(
-			String executable,
 			long timeoutMillis) {
 		return new SmtLibProcessSolver(
-				List.of(executable, "--lang=smt2", "--incremental", "--tlimit-per=" + timeoutMillis),
+				List.of(cvc5Executable(), "--lang=smt2", "--incremental", "--tlimit-per=" + timeoutMillis),
 				List.of(),
 				timeoutMillis);
 	}
 
 	/**
-	 * Yields {@code true} if the given executable can be started in the current
-	 * environment, by running it with the {@code --version} option.
+	 * Yields {@code true} if z3 (see {@link #setZ3Path(String)}) can be started
+	 * in the current environment.
 	 *
-	 * @param executable the executable
-	 *
-	 * @return whether or not the executable is available
+	 * @return whether or not z3 is available
 	 */
-	public static boolean isAvailable(
+	public static boolean isZ3Available() {
+		return isAvailable(z3Executable());
+	}
+
+	/**
+	 * Yields {@code true} if cvc5 (see {@link #setCvc5Path(String)}) can be
+	 * started in the current environment.
+	 *
+	 * @return whether or not cvc5 is available
+	 */
+	public static boolean isCvc5Available() {
+		return isAvailable(cvc5Executable());
+	}
+
+	/**
+	 * Yields {@code true} if the given executable can be started, by running it
+	 * with the {@code --version} option.
+	 */
+	private static boolean isAvailable(
 			String executable) {
 		try {
 			Process p = new ProcessBuilder(executable, "--version").redirectErrorStream(true).start();
