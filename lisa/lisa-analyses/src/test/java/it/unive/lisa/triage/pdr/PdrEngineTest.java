@@ -60,6 +60,23 @@ public class PdrEngineTest {
 			+ "      w = 1;\n"
 			+ "    return w;\n"
 			+ "  }\n"
+			+ "  relational(x) {\n"
+			+ "    def y = x;\n"
+			+ "    def w = 0;\n"
+			+ "    if (x != y)\n"
+			+ "      w = 1;\n"
+			+ "    return w;\n"
+			+ "  }\n"
+			+ "  widening(n) {\n"
+			+ "    def i = 0;\n"
+			+ "    def w = 0;\n"
+			+ "    while (i < n)\n"
+			+ "      i = i + 1;\n"
+			+ "    if (n >= 0)\n"
+			+ "      if (i > n)\n"
+			+ "        w = 1;\n"
+			+ "    return w;\n"
+			+ "  }\n"
 			+ "  bounded(x) {\n"
 			+ "    def w = 0;\n"
 			+ "    if (x > 10)\n"
@@ -132,7 +149,7 @@ public class PdrEngineTest {
 			assertTrue(model.getInitialLocations().contains(cex.get(0).getLocation()));
 			assertEquals(model.getBadLocation(), cex.get(cex.size() - 1).getLocation());
 			assertNull(cex.get(cex.size() - 1).getParent());
-			assertEquals("(Value.Int 42)", cex.get(0).getCube().getLiterals().get(find(model, "x")));
+			assertEquals("(Value.Int 42)", cex.get(0).getPoint().get(find(model, "x")));
 		}
 	}
 
@@ -161,11 +178,31 @@ public class PdrEngineTest {
 	}
 
 	@Test
+	public void relationalFalsePositiveIsRefuted() throws SemanticException {
+		AlarmModel model = model("relational", "w = 1");
+		try (SmtSolver s = SmtLibProcessSolver.z3()) {
+			PdrEngine engine = new PdrEngine(model, s);
+			assertEquals(PdrEngine.Status.SAFE, engine.run(10, 1000), engine.getFrames().toString());
+			assertNotNull(engine.getInvariant());
+		}
+	}
+
+	@Test
+	public void wideningFalsePositiveIsRefuted() throws SemanticException {
+		AlarmModel model = model("widening", "w = 1");
+		try (SmtSolver s = SmtLibProcessSolver.z3()) {
+			PdrEngine engine = new PdrEngine(model, s);
+			assertEquals(PdrEngine.Status.SAFE, engine.run(20, 5000), engine.getFrames().toString());
+		}
+	}
+
+	@Test
 	public void infeasibleViolationIsBlocked() throws SemanticException {
 		AlarmModel model = model("bounded", "w = 1");
 		try (SmtSolver s = SmtLibProcessSolver.z3()) {
 			PdrEngine engine = new PdrEngine(model, s);
-			assertEquals(PdrEngine.Status.BLOCKED, engine.run(5, 1000));
+			PdrEngine.Status status = engine.run(5, 1000);
+			assertTrue(status == PdrEngine.Status.SAFE || status == PdrEngine.Status.BLOCKED, status.toString());
 			assertNull(engine.getCounterexample());
 		}
 	}

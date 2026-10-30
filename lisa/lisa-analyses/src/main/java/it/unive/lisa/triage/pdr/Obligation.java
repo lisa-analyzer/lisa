@@ -1,6 +1,7 @@
 package it.unive.lisa.triage.pdr;
 
 import it.unive.lisa.program.cfg.statement.Statement;
+import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.triage.model.EdgeTransition;
 import it.unive.lisa.triage.model.InputValue;
 import java.util.Collections;
@@ -37,6 +38,8 @@ public final class Obligation
 
 	private final boolean exact;
 
+	private final Map<Identifier, String> point;
+
 	private final long order;
 
 	/**
@@ -54,6 +57,8 @@ public final class Obligation
 	 *                     the bad location, by the bad case)
 	 * @param exact    whether or not the transition (or the bad case) is
 	 *                     encoded exactly
+	 * @param point    the values of the identifiers in the model that
+	 *                     produced this obligation (a state of the cube)
 	 * @param order    the creation order of the obligation, used to break
 	 *                     ties in the queue
 	 */
@@ -65,6 +70,7 @@ public final class Obligation
 			EdgeTransition edge,
 			Map<InputValue, String> inputs,
 			boolean exact,
+			Map<Identifier, String> point,
 			long order) {
 		this.location = location;
 		this.cube = cube;
@@ -73,6 +79,7 @@ public final class Obligation
 		this.edge = edge;
 		this.inputs = Collections.unmodifiableMap(inputs);
 		this.exact = exact;
+		this.point = Collections.unmodifiableMap(point);
 		this.order = order;
 	}
 
@@ -139,6 +146,17 @@ public final class Obligation
 	 */
 	public boolean isExact() {
 		return exact;
+	}
+
+	/**
+	 * Yields the values of the identifiers in the model that produced this
+	 * obligation: a state of the cube, that (for obligations at level
+	 * {@code 0}) is an initial state.
+	 *
+	 * @return the values, in SMT-LIB syntax
+	 */
+	public Map<Identifier, String> getPoint() {
+		return point;
 	}
 
 	/**

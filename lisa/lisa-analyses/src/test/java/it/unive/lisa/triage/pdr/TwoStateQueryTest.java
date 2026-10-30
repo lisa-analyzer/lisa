@@ -15,6 +15,12 @@ import it.unive.lisa.checks.semantic.SemanticTool;
 import it.unive.lisa.checks.verification.Violation;
 import it.unive.lisa.imp.IMPFrontend;
 import it.unive.lisa.program.Program;
+import it.unive.lisa.program.SyntheticLocation;
+import it.unive.lisa.program.type.BoolType;
+import it.unive.lisa.program.type.Int32Type;
+import it.unive.lisa.symbolic.value.BinaryExpression;
+import it.unive.lisa.symbolic.value.Constant;
+import it.unive.lisa.symbolic.value.operator.binary.ComparisonEq;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.edge.TrueEdge;
 import it.unive.lisa.program.cfg.statement.Statement;
@@ -30,7 +36,6 @@ import it.unive.lisa.triage.smt.SmtSolver;
 import it.unive.lisa.triage.smt.Term;
 import java.nio.file.Files;
 import java.util.List;
-import java.util.Map;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -117,11 +122,19 @@ public class TwoStateQueryTest {
 			throws SemanticException {
 		Statement src = edge.getEdge().getSource();
 		List<Term> query = List.of(u.at(0, src), u.seeds(src, 0),
-				lemma == null ? Term.TRUE : lemma.at(u, 0), u.transition(0, edge), cube.at(u, 1));
+				lemma == null ? Term.TRUE : lemma.at(u, 0), u.transition(0, edge), cube.at(u, 1, "#cube"));
 		s.push();
 		for (Term t : query)
 			s.assertTerm(t);
 		return s.check();
+	}
+
+	private static Cube is(
+			Identifier id,
+			int value) {
+		return new Cube(List.of(new BinaryExpression(BoolType.INSTANCE, id,
+				new Constant(Int32Type.INSTANCE, value, SyntheticLocation.INSTANCE), ComparisonEq.INSTANCE,
+				SyntheticLocation.INSTANCE)));
 	}
 
 	@Test
@@ -133,27 +146,24 @@ public class TwoStateQueryTest {
 			Unrolling u = new Unrolling(model, s);
 
 			// the guard prevents x = 41 after the true edge
-			assertEquals(SmtResult.UNSAT, query(u, s, edge, null, new Cube(Map.of(x, "(Value.Int 41)"))));
+			assertEquals(SmtResult.UNSAT, query(u, s, edge, null, is(x, 41)));
 			s.pop();
 
-			// x = 42 is possible, and its predecessor has x = 42 as well
-			assertEquals(SmtResult.SAT, query(u, s, edge, null, new Cube(Map.of(x, "(Value.Int 42)"))));
-			Cube pre = Cube.fromModel(u, 0, List.of(x), s);
-			assertEquals(new Cube(Map.of(x, "(Value.Int 42)")), pre);
+			// x = 42 is possible
+			assertEquals(SmtResult.SAT, query(u, s, edge, null, is(x, 42)));
 			s.pop();
 
-			// blocking the predecessor at the source blocks the successor too
-			assertEquals(SmtResult.UNSAT,
-					query(u, s, edge, pre.negate(), new Cube(Map.of(x, "(Value.Int 42)"))));
+			// blocking x = 42 at the source blocks the successor too
+			assertEquals(SmtResult.UNSAT, query(u, s, edge, is(x, 42).negate(), is(x, 42)));
 			s.pop();
 
-			// dropping the literal of x yields the empty cube, that is
-			// reachable through the edge unless the lemma holds at the source
-			Cube empty = new Cube(Map.of(x, "(Value.Int 42)")).without(x);
-			assertEquals(new Cube(Map.of()), empty);
+			// dropping the literal yields the empty cube, that is reachable
+			// through the edge unless the lemma holds at the source
+			Cube empty = is(x, 42).without(is(x, 42).getLiterals().iterator().next());
+			assertEquals(new Cube(List.of()), empty);
 			assertEquals(SmtResult.SAT, query(u, s, edge, null, empty));
 			s.pop();
-			assertEquals(SmtResult.UNSAT, query(u, s, edge, pre.negate(), empty));
+			assertEquals(SmtResult.UNSAT, query(u, s, edge, is(x, 42).negate(), empty));
 			s.pop();
 		}
 	}

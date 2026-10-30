@@ -1,198 +1,106 @@
 package it.unive.lisa.triage.pdr;
 
-import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.program.SyntheticLocation;
+import it.unive.lisa.symbolic.SymbolicExpression;
+import it.unive.lisa.symbolic.value.BinaryExpression;
+import it.unive.lisa.symbolic.value.Constant;
+import it.unive.lisa.symbolic.value.operator.binary.LogicalAnd;
 import it.unive.lisa.triage.bmc.Unrolling;
-import it.unive.lisa.triage.encoding.ValueSort;
-import it.unive.lisa.triage.smt.SExpression;
-import it.unive.lisa.triage.smt.SmtException;
-import it.unive.lisa.triage.smt.SmtSolver;
 import it.unive.lisa.triage.smt.Term;
-import java.util.ArrayList;
+import it.unive.lisa.type.Untyped;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
 /**
- * A cube of property-directed reachability: a conjunction of literals, one
- * per identifier, each being either {@code id = value}, where the value is a
- * term in SMT-LIB syntax as printed by a solver in a model, or (for
- * identifiers encoded as {@link ValueSort values}) a test on the constructor
- * of {@code id}. Cubes describe (sets of) states that must be blocked; once
- * blocked at a location, the cube yields the lemma {@link #negate()}.
- * Generalization drops literals through {@link #without(Identifier)}, and
- * weakens equalities to constructor tests through
- * {@link #weaken(Identifier)}. The empty cube is {@code true}.
+ * A cube of property-directed reachability: a conjunction of boolean
+ * symbolic expressions (literals) over the identifiers of an
+ * {@link it.unive.lisa.triage.model.AlarmModel}, possibly containing fresh
+ * values (existentially quantified). Cubes describe sets of states that must
+ * be blocked; once blocked at a location, the cube yields the lemma
+ * {@link #negate()}. Generalization drops literals through
+ * {@link #without(SymbolicExpression)}. The empty cube is {@code true}.
  *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public final class Cube {
 
-	private final Map<Identifier, String> literals;
-
-	private final Map<Identifier, String> constructors;
+	private final Set<SymbolicExpression> literals;
 
 	/**
-	 * Builds a cube made of equalities.
+	 * Builds the cube. Conjunctions are split into their conjuncts, and
+	 * {@code true} literals are removed.
 	 *
-	 * @param literals the value of each identifier, in SMT-LIB syntax
+	 * @param literals the literals
 	 */
 	public Cube(
-			Map<Identifier, String> literals) {
-		this(literals, Map.of());
+			Collection<SymbolicExpression> literals) {
+		this.literals = Collections.unmodifiableSet(Projection.conjuncts(literals));
 	}
 
 	/**
-	 * Builds the cube.
+	 * Yields the literals of this cube.
 	 *
-	 * @param literals     the value of each identifier constrained by an
-	 *                         equality, in SMT-LIB syntax
-	 * @param constructors the constructor of each identifier constrained by a
-	 *                         constructor test (that must not be constrained
-	 *                         by an equality)
+	 * @return the literals
 	 */
-	public Cube(
-			Map<Identifier, String> literals,
-			Map<Identifier, String> constructors) {
-		this.literals = Collections.unmodifiableMap(new LinkedHashMap<>(literals));
-		this.constructors = Collections.unmodifiableMap(new LinkedHashMap<>(constructors));
-	}
-
-	/**
-	 * Reads a cube from the current model of the given solver, assigning to
-	 * each of the given identifiers its value at the given step of the given
-	 * unrolling. The solver must have just answered
-	 * {@link it.unive.lisa.triage.smt.SmtResult#SAT}.
-	 *
-	 * @param unrolling   the unrolling
-	 * @param step        the step
-	 * @param identifiers the identifiers
-	 * @param solver      the solver
-	 *
-	 * @return the cube
-	 */
-	public static Cube fromModel(
-			Unrolling unrolling,
-			int step,
-			Collection<Identifier> identifiers,
-			SmtSolver solver) {
-		Map<Term, Identifier> terms = new LinkedHashMap<>();
-		for (Identifier id : identifiers)
-			terms.put(unrolling.var(id, step), id);
-		Map<Identifier, String> literals = new LinkedHashMap<>();
-		if (!terms.isEmpty()) {
-			Map<Term, String> values = solver.getValues(new ArrayList<>(terms.keySet()));
-			for (Map.Entry<Term, Identifier> e : terms.entrySet())
-				literals.put(e.getValue(), values.get(e.getKey()));
-		}
-		return new Cube(literals);
-	}
-
-	/**
-	 * Yields the equalities of this cube.
-	 *
-	 * @return the value of each identifier, in SMT-LIB syntax
-	 */
-	public Map<Identifier, String> getLiterals() {
+	public Set<SymbolicExpression> getLiterals() {
 		return literals;
 	}
 
 	/**
-	 * Yields the constructor tests of this cube.
+	 * Yields the cube obtained by dropping the given literal, that represents
+	 * a superset of the states of this one.
 	 *
-	 * @return the constructor of each identifier
-	 */
-	public Map<Identifier, String> getConstructors() {
-		return constructors;
-	}
-
-	/**
-	 * Yields the identifiers constrained by this cube.
-	 *
-	 * @return the identifiers
-	 */
-	public Set<Identifier> getIdentifiers() {
-		Set<Identifier> result = new LinkedHashSet<>(literals.keySet());
-		result.addAll(constructors.keySet());
-		return result;
-	}
-
-	/**
-	 * Yields the cube obtained by dropping the literal of the given
-	 * identifier, that represents a superset of the states of this one.
-	 *
-	 * @param id the identifier
+	 * @param literal the literal
 	 *
 	 * @return the cube
 	 */
 	public Cube without(
-			Identifier id) {
-		Map<Identifier, String> lits = new LinkedHashMap<>(literals);
-		lits.remove(id);
-		Map<Identifier, String> cons = new LinkedHashMap<>(constructors);
-		cons.remove(id);
-		return new Cube(lits, cons);
+			SymbolicExpression literal) {
+		Set<SymbolicExpression> result = new LinkedHashSet<>(literals);
+		result.remove(literal);
+		return new Cube(result);
 	}
 
 	/**
-	 * Yields the cube obtained by replacing the equality of the given
-	 * identifier with a test on the constructor of its value, that represents
-	 * a superset of the states of this one. This is possible only if the
-	 * value is a non-nullary constructor application of {@link ValueSort}
-	 * (e.g., {@code (Value.String "a")} is weakened to the test for
-	 * {@code Value.String}).
+	 * Yields the conjunction of the literals of this cube, as a single
+	 * expression.
 	 *
-	 * @param id the identifier
-	 *
-	 * @return the cube, or {@code null} if the equality cannot be weakened
+	 * @return the conjunction
 	 */
-	public Cube weaken(
-			Identifier id) {
-		String value = literals.get(id);
-		if (value == null)
-			return null;
-		SExpression parsed;
-		try {
-			parsed = SExpression.parse(value);
-		} catch (SmtException e) {
-			return null;
-		}
-		if (parsed.isAtom() || parsed.getChildren().isEmpty() || !parsed.getChildren().get(0).isAtom())
-			return null;
-		String head = parsed.getChildren().get(0).getAtom();
-		if (!ValueSort.DATATYPE.getConstructors().containsKey(head))
-			return null;
-		Map<Identifier, String> lits = new LinkedHashMap<>(literals);
-		lits.remove(id);
-		Map<Identifier, String> cons = new LinkedHashMap<>(constructors);
-		cons.put(id, head);
-		return new Cube(lits, cons);
+	public SymbolicExpression toExpression() {
+		SymbolicExpression result = null;
+		for (SymbolicExpression lit : literals)
+			result = result == null ? lit
+					: new BinaryExpression(Untyped.INSTANCE, result, lit, LogicalAnd.INSTANCE,
+							SyntheticLocation.INSTANCE);
+		return result == null ? new Constant(Untyped.INSTANCE, true, SyntheticLocation.INSTANCE) : result;
 	}
 
 	/**
 	 * Yields the formula of this cube, over the values of identifiers at the
-	 * given step of the given unrolling.
+	 * given step of the given unrolling. Fresh values are encoded through
+	 * {@link Unrolling#condition(SymbolicExpression, int, String)} with the
+	 * given tag, and the exactness of the encoding is recorded under key
+	 * {@code "cond@" + step + tag}.
 	 *
 	 * @param unrolling the unrolling
 	 * @param step      the step
+	 * @param tag       the tag for fresh values, starting with {@code #}
 	 *
 	 * @return the formula
+	 *
+	 * @throws SemanticException if the cube cannot be encoded
 	 */
 	public Term at(
 			Unrolling unrolling,
-			int step) {
-		List<Term> conj = new ArrayList<>();
-		for (Map.Entry<Identifier, String> e : literals.entrySet()) {
-			Term var = unrolling.var(e.getKey(), step);
-			conj.add(Term.eq(var, Term.value(e.getValue(), var.getSort())));
-		}
-		for (Map.Entry<Identifier, String> e : constructors.entrySet())
-			conj.add(ValueSort.DATATYPE.test(e.getValue(), unrolling.var(e.getKey(), step)));
-		return Term.and(conj.toArray(Term[]::new));
+			int step,
+			String tag)
+			throws SemanticException {
+		return unrolling.condition(toExpression(), step, tag);
 	}
 
 	/**
@@ -206,7 +114,7 @@ public final class Cube {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(literals, constructors);
+		return Objects.hashCode(literals);
 	}
 
 	@Override
@@ -216,24 +124,17 @@ public final class Cube {
 			return true;
 		if (obj == null || getClass() != obj.getClass())
 			return false;
-		Cube other = (Cube) obj;
-		return Objects.equals(literals, other.literals) && Objects.equals(constructors, other.constructors);
+		return Objects.equals(literals, ((Cube) obj).literals);
 	}
 
 	@Override
 	public String toString() {
-		if (literals.isEmpty() && constructors.isEmpty())
-			return "true";
-		StringBuilder sb = new StringBuilder("{");
-		for (Map.Entry<Identifier, String> e : literals.entrySet())
-			sb.append(sb.length() > 1 ? ", " : "").append(e.getKey()).append("=").append(e.getValue());
-		for (Map.Entry<Identifier, String> e : constructors.entrySet())
-			sb.append(sb.length() > 1 ? ", " : "").append(e.getKey()).append(" is ").append(e.getValue());
-		return sb.append("}").toString();
+		return literals.isEmpty() ? "true" : literals.toString();
 	}
 
 	/**
-	 * The lemma excluding the states of a cube.
+	 * The lemma excluding the states of a cube. Fresh values of the cube are
+	 * encoded with tag {@code #lemma}.
 	 */
 	public static final class Blocked
 			implements
@@ -258,8 +159,9 @@ public final class Cube {
 		@Override
 		public Term at(
 				Unrolling unrolling,
-				int step) {
-			return Term.not(cube.at(unrolling, step));
+				int step)
+				throws SemanticException {
+			return Term.not(cube.at(unrolling, step, "#lemma"));
 		}
 
 		@Override

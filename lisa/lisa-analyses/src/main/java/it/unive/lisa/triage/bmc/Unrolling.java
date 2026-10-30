@@ -65,6 +65,8 @@ public class Unrolling {
 
 	private final Map<EdgeTransition, Integer> edgeIds;
 
+	private final Map<EdgeTransition, List<SymbolicCase>> cases = new IdentityHashMap<>();
+
 	private int fresh;
 
 	/**
@@ -441,6 +443,98 @@ public class Unrolling {
 				conj.add(Term.eq(post, var(id, step)));
 		}
 		return Term.and(conj.toArray(Term[]::new));
+	}
+
+	/**
+	 * Yields the cases of the given transition, in a fixed order (the one
+	 * used by {@link #transition(int, EdgeTransition, int)}).
+	 *
+	 * @param edge the transition
+	 *
+	 * @return the cases
+	 */
+	public List<SymbolicCase> cases(
+			EdgeTransition edge) {
+		return cases.computeIfAbsent(edge, e -> new ArrayList<>(e.getStore().getCases()));
+	}
+
+	/**
+	 * Yields the key identifying the encoding of a single case of the given
+	 * transition at the given step.
+	 *
+	 * @param step  the step
+	 * @param edge  the transition
+	 * @param index the index of the case in {@link #cases(EdgeTransition)}
+	 *
+	 * @return the key
+	 */
+	public String caseKey(
+			int step,
+			EdgeTransition edge,
+			int index) {
+		return edgeKey(step, edge) + "c" + index;
+	}
+
+	/**
+	 * Yields the relation of a single case of the given transition from step
+	 * {@code step} to step {@code step + 1}: the program counter moves from
+	 * the source to the destination of the edge, and the case holds. The
+	 * exactness and the fresh values of the encoding are recorded under
+	 * {@link #caseKey(int, EdgeTransition, int)}.
+	 *
+	 * @param step  the step
+	 * @param edge  the transition
+	 * @param index the index of the case in {@link #cases(EdgeTransition)}
+	 *
+	 * @return the relation
+	 *
+	 * @throws SemanticException if an expression cannot be encoded
+	 */
+	public Term transition(
+			int step,
+			EdgeTransition edge,
+			int index)
+			throws SemanticException {
+		String key = caseKey(step, edge, index);
+		StepSymbols symbols = new StepSymbols(step, key.substring(key.indexOf('#')));
+		ExpressionEncoder encoder = new ExpressionEncoder(model.getSorts(), symbols);
+		Term c = encodeCase(cases(edge).get(index), step, encoder);
+		exactness.put(key, symbols.exact);
+		inputs.put(key, symbols.used);
+		return Term.and(
+				at(step, edge.getEdge().getSource()),
+				Term.eq(pc(step + 1), Term.integer(indexOf(edge.getEdge().getDestination()))),
+				c);
+	}
+
+	/**
+	 * Encodes the given boolean expression over the values of identifiers at
+	 * the given step. Fresh values are encoded as constants named after the
+	 * given tag, so that the same fresh value is encoded by the same constant
+	 * for the same step and tag, and can be read through
+	 * {@link #freshConstant(FreshValue, String)} with key
+	 * {@code "cond@" + step + tag}, under which the exactness and the fresh
+	 * values of the encoding are also recorded.
+	 *
+	 * @param condition the expression
+	 * @param step      the step
+	 * @param tag       the tag, starting with {@code #}
+	 *
+	 * @return the encoded condition
+	 *
+	 * @throws SemanticException if the expression cannot be encoded
+	 */
+	public Term condition(
+			SymbolicExpression condition,
+			int step,
+			String tag)
+			throws SemanticException {
+		StepSymbols symbols = new StepSymbols(step, tag);
+		Term result = new ExpressionEncoder(model.getSorts(), symbols).encodeCondition(condition);
+		String key = "cond@" + step + tag;
+		exactness.put(key, symbols.exact);
+		inputs.put(key, symbols.used);
+		return result;
 	}
 
 	/**
