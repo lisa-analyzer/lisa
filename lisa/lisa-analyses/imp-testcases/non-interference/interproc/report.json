@@ -1,10 +1,31 @@
 {
   "warnings" : [ {
-    "message" : "['imp-testcases/non-interference/interproc/program.imp':10:2] on 'untyped Integrity::confidentiality_lec5ex1_declassified(Integrity* this)': [EXPRESSION] This assignment assigns a HIGH confidentiality value to a LOW confidentiality variable, thus violating non-interference"
+    "location" : "'imp-testcases/non-interference/interproc/program.imp':10:2",
+    "cfg" : "untyped Integrity::confidentiality_lec5ex1_declassified(Integrity* this)",
+    "text" : "l = h",
+    "context" : "['imp-testcases/non-interference/interproc/program.imp':28:2]",
+    "contextHash" : "4d7781e1b329bd09ead4440fb04a765d",
+    "targetKind" : "EXPRESSION",
+    "message" : "This assignment assigns a HIGH confidentiality value to a LOW confidentiality variable, thus violating non-interference",
+    "definite" : false
   }, {
-    "message" : "['imp-testcases/non-interference/interproc/program.imp':18:3] on 'untyped Integrity::confidentiality_lec6_declassified(Integrity* this)': [EXPRESSION] This assignment, located in a HIGH confidentiality block, assigns a LOW confidentiality variable, thus violating non-interference"
+    "location" : "'imp-testcases/non-interference/interproc/program.imp':18:3",
+    "cfg" : "untyped Integrity::confidentiality_lec6_declassified(Integrity* this)",
+    "text" : "l = 0",
+    "context" : "['imp-testcases/non-interference/interproc/program.imp':29:2]",
+    "contextHash" : "d7d552a9a94a8cfe8a5ef01c9e0e6656",
+    "targetKind" : "EXPRESSION",
+    "message" : "This assignment, located in a HIGH confidentiality block, assigns a LOW confidentiality variable, thus violating non-interference",
+    "definite" : false
   }, {
-    "message" : "['imp-testcases/non-interference/interproc/program.imp':20:3] on 'untyped Integrity::confidentiality_lec6_declassified(Integrity* this)': [EXPRESSION] This assignment, located in a HIGH confidentiality block, assigns a LOW confidentiality variable, thus violating non-interference"
+    "location" : "'imp-testcases/non-interference/interproc/program.imp':20:3",
+    "cfg" : "untyped Integrity::confidentiality_lec6_declassified(Integrity* this)",
+    "text" : "l = 1",
+    "context" : "['imp-testcases/non-interference/interproc/program.imp':29:2]",
+    "contextHash" : "d7d552a9a94a8cfe8a5ef01c9e0e6656",
+    "targetKind" : "EXPRESSION",
+    "message" : "This assignment, located in a HIGH confidentiality block, assigns a LOW confidentiality variable, thus violating non-interference",
+    "definite" : false
   } ],
   "notices" : [ ],
   "files" : [ "report.json", "untyped_Integrity.confidentiality_lec5ex1_declassified(Integrity__this)_4d7781e1b329bd09ead4440fb04a765d.graph.json", "untyped_Integrity.confidentiality_lec6_declassified(Integrity__this)_d7d552a9a94a8cfe8a5ef01c9e0e6656.graph.json", "untyped_Integrity.declassify(Integrity__this,_untyped_y)_137692972c2df725900a6b7653be85fa.graph.json", "untyped_Integrity.declassify(Integrity__this,_untyped_y)_3c5edda6fbff03b5f7429ac86ae29463.graph.json", "untyped_Integrity.main(Integrity__this).graph.json" ],

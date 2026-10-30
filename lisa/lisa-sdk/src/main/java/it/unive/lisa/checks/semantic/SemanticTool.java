@@ -7,13 +7,18 @@ import it.unive.lisa.analysis.Analysis;
 import it.unive.lisa.analysis.AnalyzedCFG;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
+import it.unive.lisa.checks.verification.ReproducingInput;
 import it.unive.lisa.checks.verification.VerificationOutcome;
 import it.unive.lisa.checks.verification.VerificationResult;
 import it.unive.lisa.checks.verification.Violation;
 import it.unive.lisa.checks.verification.WarningVerifier;
 import it.unive.lisa.conf.LiSAConfiguration;
+import it.unive.lisa.interprocedural.ScopeId;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.interprocedural.callgraph.CallResolutionException;
+import it.unive.lisa.outputs.messages.CFGMessage;
+import it.unive.lisa.outputs.messages.ExpressionMessage;
+import it.unive.lisa.outputs.messages.StatementMessage;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeMember;
 import it.unive.lisa.program.cfg.statement.Expression;
@@ -23,6 +28,7 @@ import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
 import it.unive.lisa.util.file.FileManager;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -205,6 +211,250 @@ public class SemanticTool<A extends AbstractLattice<A>, D extends AbstractDomain
 	}
 
 	/**
+	 * Reports a new possible warning, with no reproducing inputs, with the
+	 * given message on the given statement, in the given context (e.g., the one
+	 * of the result that caused the warning).
+	 * 
+	 * @param statement the statement to warn on
+	 * @param context   the context where the warning is reported
+	 * @param message   the message of the warning
+	 */
+	public void warnOn(
+			Statement statement,
+			ScopeId<A> context,
+			String message) {
+		warnOn(statement, context, message, false, null);
+	}
+
+	/**
+	 * Reports a new warning with the given message on the given statement, in
+	 * the given context (e.g., the one of the result that caused the warning).
+	 * If {@code statement} is an instance of {@link Expression}, then
+	 * {@link #warnOn(Expression, ScopeId, String, boolean, List)} is invoked.
+	 * 
+	 * @param statement         the statement to warn on
+	 * @param context           the context where the warning is reported
+	 * @param message           the message of the warning
+	 * @param definite          whether or not the warning is definite, that is,
+	 *                              if the reported behavior happens in at least
+	 *                              one execution of the program
+	 * @param reproducingInputs the inputs reproducing the behavior reported by
+	 *                              the warning (can be {@code null} if no
+	 *                              inputs are known)
+	 */
+	public void warnOn(
+			Statement statement,
+			ScopeId<A> context,
+			String message,
+			boolean definite,
+			List<ReproducingInput> reproducingInputs) {
+		if (statement instanceof Expression)
+			warnOn((Expression) statement, context, message, definite, reproducingInputs);
+		else
+			addWarning(new StatementMessage(statement, message, context, definite, reproducingInputs));
+	}
+
+	/**
+	 * Reports a new possible warning, with no reproducing inputs, with the
+	 * given message on the given expression, in the given context (e.g., the
+	 * one of the result that caused the warning).
+	 * 
+	 * @param expression the expression to warn on
+	 * @param context    the context where the warning is reported
+	 * @param message    the message of the warning
+	 */
+	public void warnOn(
+			Expression expression,
+			ScopeId<A> context,
+			String message) {
+		warnOn(expression, context, message, false, null);
+	}
+
+	/**
+	 * Reports a new warning with the given message on the given expression, in
+	 * the given context (e.g., the one of the result that caused the warning).
+	 * 
+	 * @param expression        the expression to warn on
+	 * @param context           the context where the warning is reported
+	 * @param message           the message of the warning
+	 * @param definite          whether or not the warning is definite, that is,
+	 *                              if the reported behavior happens in at least
+	 *                              one execution of the program
+	 * @param reproducingInputs the inputs reproducing the behavior reported by
+	 *                              the warning (can be {@code null} if no
+	 *                              inputs are known)
+	 */
+	public void warnOn(
+			Expression expression,
+			ScopeId<A> context,
+			String message,
+			boolean definite,
+			List<ReproducingInput> reproducingInputs) {
+		addWarning(new ExpressionMessage(expression, message, context, definite, reproducingInputs));
+	}
+
+	/**
+	 * Reports a new possible warning, with no reproducing inputs, with the
+	 * given message on the given cfg, in the given context (e.g., the one of
+	 * the result that caused the warning).
+	 * 
+	 * @param cfg     the cfg to warn on
+	 * @param context the context where the warning is reported
+	 * @param message the message of the warning
+	 */
+	public void warnOn(
+			CFG cfg,
+			ScopeId<A> context,
+			String message) {
+		warnOn(cfg, context, message, false, null);
+	}
+
+	/**
+	 * Reports a new warning with the given message on the given cfg, in the
+	 * given context (e.g., the one of the result that caused the warning).
+	 * 
+	 * @param cfg               the cfg to warn on
+	 * @param context           the context where the warning is reported
+	 * @param message           the message of the warning
+	 * @param definite          whether or not the warning is definite, that is,
+	 *                              if the reported behavior happens in at least
+	 *                              one execution of the program
+	 * @param reproducingInputs the inputs reproducing the behavior reported by
+	 *                              the warning (can be {@code null} if no
+	 *                              inputs are known)
+	 */
+	public void warnOn(
+			CFG cfg,
+			ScopeId<A> context,
+			String message,
+			boolean definite,
+			List<ReproducingInput> reproducingInputs) {
+		addWarning(new CFGMessage(cfg, message, context, definite, reproducingInputs));
+	}
+
+	/**
+	 * Reports a new possible notice, with no reproducing inputs, with the given
+	 * message on the given statement, in the given context (e.g., the one of
+	 * the result that caused the notice).
+	 * 
+	 * @param statement the statement to notice on
+	 * @param context   the context where the notice is reported
+	 * @param message   the message of the notice
+	 */
+	public void noticeOn(
+			Statement statement,
+			ScopeId<A> context,
+			String message) {
+		noticeOn(statement, context, message, false, null);
+	}
+
+	/**
+	 * Reports a new notice with the given message on the given statement, in
+	 * the given context (e.g., the one of the result that caused the notice).
+	 * If {@code statement} is an instance of {@link Expression}, then
+	 * {@link #noticeOn(Expression, ScopeId, String, boolean, List)} is invoked.
+	 * 
+	 * @param statement         the statement to notice on
+	 * @param context           the context where the notice is reported
+	 * @param message           the message of the notice
+	 * @param definite          whether or not the notice is definite, that is,
+	 *                              if the reported behavior happens in at least
+	 *                              one execution of the program
+	 * @param reproducingInputs the inputs reproducing the behavior reported by
+	 *                              the notice (can be {@code null} if no inputs
+	 *                              are known)
+	 */
+	public void noticeOn(
+			Statement statement,
+			ScopeId<A> context,
+			String message,
+			boolean definite,
+			List<ReproducingInput> reproducingInputs) {
+		if (statement instanceof Expression)
+			noticeOn((Expression) statement, context, message, definite, reproducingInputs);
+		else
+			addNotice(new StatementMessage(statement, message, context, definite, reproducingInputs));
+	}
+
+	/**
+	 * Reports a new possible notice, with no reproducing inputs, with the given
+	 * message on the given expression, in the given context (e.g., the one of
+	 * the result that caused the notice).
+	 * 
+	 * @param expression the expression to notice on
+	 * @param context    the context where the notice is reported
+	 * @param message    the message of the notice
+	 */
+	public void noticeOn(
+			Expression expression,
+			ScopeId<A> context,
+			String message) {
+		noticeOn(expression, context, message, false, null);
+	}
+
+	/**
+	 * Reports a new notice with the given message on the given expression, in
+	 * the given context (e.g., the one of the result that caused the notice).
+	 * 
+	 * @param expression        the expression to notice on
+	 * @param context           the context where the notice is reported
+	 * @param message           the message of the notice
+	 * @param definite          whether or not the notice is definite, that is,
+	 *                              if the reported behavior happens in at least
+	 *                              one execution of the program
+	 * @param reproducingInputs the inputs reproducing the behavior reported by
+	 *                              the notice (can be {@code null} if no inputs
+	 *                              are known)
+	 */
+	public void noticeOn(
+			Expression expression,
+			ScopeId<A> context,
+			String message,
+			boolean definite,
+			List<ReproducingInput> reproducingInputs) {
+		addNotice(new ExpressionMessage(expression, message, context, definite, reproducingInputs));
+	}
+
+	/**
+	 * Reports a new possible notice, with no reproducing inputs, with the given
+	 * message on the given cfg, in the given context (e.g., the one of the
+	 * result that caused the notice).
+	 * 
+	 * @param cfg     the cfg to notice on
+	 * @param context the context where the notice is reported
+	 * @param message the message of the notice
+	 */
+	public void noticeOn(
+			CFG cfg,
+			ScopeId<A> context,
+			String message) {
+		noticeOn(cfg, context, message, false, null);
+	}
+
+	/**
+	 * Reports a new notice with the given message on the given cfg, in the
+	 * given context (e.g., the one of the result that caused the notice).
+	 * 
+	 * @param cfg               the cfg to notice on
+	 * @param context           the context where the notice is reported
+	 * @param message           the message of the notice
+	 * @param definite          whether or not the notice is definite, that is,
+	 *                              if the reported behavior happens in at least
+	 *                              one execution of the program
+	 * @param reproducingInputs the inputs reproducing the behavior reported by
+	 *                              the notice (can be {@code null} if no inputs
+	 *                              are known)
+	 */
+	public void noticeOn(
+			CFG cfg,
+			ScopeId<A> context,
+			String message,
+			boolean definite,
+			List<ReproducingInput> reproducingInputs) {
+		addNotice(new CFGMessage(cfg, message, context, definite, reproducingInputs));
+	}
+
+	/**
 	 * Verifies whether the given violation can happen at the given statement,
 	 * considering only the executions analyzed in the context of the given
 	 * result. The verification is delegated to the {@link WarningVerifier}
@@ -219,8 +469,7 @@ public class SemanticTool<A extends AbstractLattice<A>, D extends AbstractDomain
 	 * 
 	 * @return the result of the verification
 	 * 
-	 * @throws SemanticException if something goes wrong during the
-	 *                               verification
+	 * @throws SemanticException if something goes wrong during the verification
 	 */
 	public VerificationResult verify(
 			AnalyzedCFG<A> result,
@@ -247,8 +496,7 @@ public class SemanticTool<A extends AbstractLattice<A>, D extends AbstractDomain
 	 * 
 	 * @return the result of the verification
 	 * 
-	 * @throws SemanticException if something goes wrong during the
-	 *                               verification
+	 * @throws SemanticException if something goes wrong during the verification
 	 */
 	public VerificationResult verify(
 			Statement st,

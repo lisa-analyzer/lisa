@@ -2,6 +2,7 @@ package it.unive.lisa.checks.verification;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import it.unive.lisa.TestLanguageFeatures;
 import it.unive.lisa.TestTypeSystem;
@@ -106,6 +107,22 @@ public class VerificationTest {
 		assertSame(possible, VerificationResult.POSSIBLE.lub(possible));
 		assertEquals(new VerificationResult(VerificationOutcome.POSSIBLE, "b\nc"), possible.lub(possible2));
 		assertEquals(VerificationResult.REFUTED, VerificationResult.REFUTED.lub(VerificationResult.REFUTED));
+	}
+
+	@Test
+	public void testResultInputs() {
+		ReproducingInput input = new ReproducingInput(new SourceCodeLocation("test", 1, 0), "x", null, 0, "42");
+		VerificationResult withInputs = new VerificationResult(VerificationOutcome.CONFIRMED, null, List.of(input));
+		VerificationResult withExplanation = new VerificationResult(VerificationOutcome.CONFIRMED, "a");
+
+		assertEquals(List.of(input), withInputs.getReproducingInputs());
+		assertSame(withInputs, withInputs.lub(VerificationResult.CONFIRMED));
+		assertSame(withInputs, VerificationResult.CONFIRMED.lub(withInputs));
+		assertEquals(new VerificationResult(VerificationOutcome.CONFIRMED, "a", List.of(input)),
+				withExplanation.lub(withInputs));
+		assertSame(withInputs, withInputs.lub(VerificationResult.POSSIBLE));
+		assertThrows(IllegalArgumentException.class,
+				() -> new VerificationResult(VerificationOutcome.POSSIBLE, null, List.of(input)));
 	}
 
 	@Test

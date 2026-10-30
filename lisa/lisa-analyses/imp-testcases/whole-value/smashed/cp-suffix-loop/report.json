@@ -1,10 +1,31 @@
 {
   "warnings" : [ {
-    "message" : "['imp-testcases/whole-value/loop.imp':6:8] on 'untyped loop::main(loop* this, untyped nondet, untyped value)': [STATEMENT] This assertion might fail"
+    "location" : "'imp-testcases/whole-value/loop.imp':6:8",
+    "cfg" : "untyped loop::main(loop* this, untyped nondet, untyped value)",
+    "text" : "assert contains(res, \"t\")",
+    "context" : "<empty>",
+    "contextHash" : "eb5f5da91de44083d423fe942c39ec56",
+    "targetKind" : "STATEMENT",
+    "message" : "This assertion might fail",
+    "definite" : false
   }, {
-    "message" : "['imp-testcases/whole-value/loop.imp':7:8] on 'untyped loop::main(loop* this, untyped nondet, untyped value)': [STATEMENT] This assertion might fail"
+    "location" : "'imp-testcases/whole-value/loop.imp':7:8",
+    "cfg" : "untyped loop::main(loop* this, untyped nondet, untyped value)",
+    "text" : "assert contains(res, \"!\")",
+    "context" : "<empty>",
+    "contextHash" : "eb5f5da91de44083d423fe942c39ec56",
+    "targetKind" : "STATEMENT",
+    "message" : "This assertion might fail",
+    "definite" : false
   }, {
-    "message" : "['imp-testcases/whole-value/loop.imp':8:8] on 'untyped loop::main(loop* this, untyped nondet, untyped value)': [STATEMENT] This assertion might fail"
+    "location" : "'imp-testcases/whole-value/loop.imp':8:8",
+    "cfg" : "untyped loop::main(loop* this, untyped nondet, untyped value)",
+    "text" : "assert contains(res, \"f\")",
+    "context" : "<empty>",
+    "contextHash" : "eb5f5da91de44083d423fe942c39ec56",
+    "targetKind" : "STATEMENT",
+    "message" : "This assertion might fail",
+    "definite" : false
   } ],
   "notices" : [ ],
   "files" : [ "report.json", "untyped_loop.main(loop__this,_untyped_nondet,_untyped_value).graph.json" ],

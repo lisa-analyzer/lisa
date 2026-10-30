@@ -41,4 +41,9 @@ public class UniqueScope<A extends AbstractLattice<A>>
 		return HASH;
 	}
 
+	@Override
+	public String toString() {
+		return "<unique>";
+	}
+
 }

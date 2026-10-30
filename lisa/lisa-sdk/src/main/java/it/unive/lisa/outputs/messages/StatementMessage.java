@@ -1,6 +1,9 @@
 package it.unive.lisa.outputs.messages;
 
+import it.unive.lisa.checks.verification.ReproducingInput;
+import it.unive.lisa.interprocedural.ScopeId;
 import it.unive.lisa.program.cfg.statement.Statement;
+import java.util.List;
 
 /**
  * A message reported by LiSA on a statement.
@@ -25,7 +28,50 @@ public class StatementMessage
 	public StatementMessage(
 			Statement statement,
 			String message) {
-		super(statement.getLocation(), message);
+		this(statement, message, false, null);
+	}
+
+	/**
+	 * Builds the message.
+	 * 
+	 * @param statement         the statement where this message was reported on
+	 * @param message           the message of this message
+	 * @param definite          whether or not this message is definite, that
+	 *                              is, if the reported behavior happens in at
+	 *                              least one execution of the program
+	 * @param reproducingInputs the inputs reproducing the behavior reported by
+	 *                              this message (can be {@code null} if no
+	 *                              inputs are known)
+	 */
+	public StatementMessage(
+			Statement statement,
+			String message,
+			boolean definite,
+			List<ReproducingInput> reproducingInputs) {
+		this(statement, message, null, definite, reproducingInputs);
+	}
+
+	/**
+	 * Builds the message.
+	 *
+	 * @param statement         the statement where this message was reported on
+	 * @param message           the message of this message
+	 * @param context           the context where this message was reported on
+	 *                              (can be {@code null})
+	 * @param definite          whether or not this message is definite, that
+	 *                              is, if the reported behavior happens in at
+	 *                              least one execution of the program
+	 * @param reproducingInputs the inputs reproducing the behavior reported by
+	 *                              this message (can be {@code null} if no
+	 *                              inputs are known)
+	 */
+	public StatementMessage(
+			Statement statement,
+			String message,
+			ScopeId<?> context,
+			boolean definite,
+			List<ReproducingInput> reproducingInputs) {
+		super(statement.getLocation(), message, context, definite, reproducingInputs);
 		this.statement = statement;
 	}
 
@@ -82,6 +128,16 @@ public class StatementMessage
 	}
 
 	@Override
+	public String getCFGSignature() {
+		return statement.getCFG().getDescriptor().getFullSignatureWithParNames();
+	}
+
+	@Override
+	public String getTargetText() {
+		return statement.toString();
+	}
+
+	@Override
 	public String getTag() {
 		return "STATEMENT";
 	}
@@ -90,7 +146,7 @@ public class StatementMessage
 	public String toString() {
 		return getLocationWithBrackets()
 				+ " on '"
-				+ statement.getCFG().getDescriptor().getFullSignatureWithParNames()
+				+ getCFGSignature()
 				+ "': "
 				+ getTaggedMessage();
 	}

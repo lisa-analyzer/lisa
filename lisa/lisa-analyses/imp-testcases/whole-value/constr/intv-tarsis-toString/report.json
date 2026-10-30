@@ -1,8 +1,22 @@
 {
   "warnings" : [ {
-    "message" : "['imp-testcases/whole-value/toString.imp':13:8] on 'untyped toString::main(toString* this, untyped names)': [STATEMENT] This assertion might fail"
+    "location" : "'imp-testcases/whole-value/toString.imp':13:8",
+    "cfg" : "untyped toString::main(toString* this, untyped names)",
+    "text" : "assert contains(res, \",\")",
+    "context" : "<empty>",
+    "contextHash" : "eb5f5da91de44083d423fe942c39ec56",
+    "targetKind" : "STATEMENT",
+    "message" : "This assertion might fail",
+    "definite" : false
   }, {
-    "message" : "['imp-testcases/whole-value/toString.imp':14:8] on 'untyped toString::main(toString* this, untyped names)': [STATEMENT] This assertion might fail"
+    "location" : "'imp-testcases/whole-value/toString.imp':14:8",
+    "cfg" : "untyped toString::main(toString* this, untyped names)",
+    "text" : "assert contains(res, \"not\")",
+    "context" : "<empty>",
+    "contextHash" : "eb5f5da91de44083d423fe942c39ec56",
+    "targetKind" : "STATEMENT",
+    "message" : "This assertion might fail",
+    "definite" : false
   } ],
   "notices" : [ ],
   "files" : [ "report.json", "untyped_toString.main(toString__this,_untyped_names).graph.json" ],

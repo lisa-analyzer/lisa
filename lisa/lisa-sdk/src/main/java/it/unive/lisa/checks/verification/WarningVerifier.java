@@ -53,8 +53,7 @@ public interface WarningVerifier<A extends AbstractLattice<A>, D extends Abstrac
 	 *
 	 * @return the result of the verification
 	 *
-	 * @throws SemanticException if something goes wrong during the
-	 *                               verification
+	 * @throws SemanticException if something goes wrong during the verification
 	 */
 	VerificationResult verify(
 			AnalyzedCFG<A> result,

@@ -17,9 +17,9 @@ import it.unive.lisa.type.Type;
  * post-state of the statement contains an error continuation (i.e., an error
  * raised by the statement, or propagated to it without being caught).</li>
  * </ul>
- * {@link WarningVerifier}s are not required to support all kinds of
- * violations, and should yield {@link VerificationOutcome#POSSIBLE} for the
- * ones they do not support.
+ * {@link WarningVerifier}s are not required to support all kinds of violations,
+ * and should yield {@link VerificationOutcome#POSSIBLE} for the ones they do
+ * not support.
  *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */

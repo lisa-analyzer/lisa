@@ -27,8 +27,8 @@ public final class ErrorViolation
 	/**
 	 * Builds the violation.
 	 *
-	 * @param type the type of the errors causing the violation, or
-	 *                 {@code null} to match errors of any type
+	 * @param type the type of the errors causing the violation, or {@code null}
+	 *                 to match errors of any type
 	 */
 	ErrorViolation(
 			Type type) {

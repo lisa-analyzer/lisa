@@ -126,9 +126,10 @@ public class InformationFlowTest
 														oracle);
 
 										if (stack.isAlwaysTainted())
-											tool.warnOn(call, "Parameter " + i + " is always tainted");
+											tool.warnOn(call, result.getId(), "Parameter " + i + " is always tainted");
 										else if (stack.isPossiblyTainted())
-											tool.warnOn(call, "Parameter " + i + " is possibly tainted");
+											tool.warnOn(call, result.getId(),
+													"Parameter " + i + " is possibly tainted");
 									}
 								}
 						}
@@ -227,21 +228,25 @@ public class InformationFlowTest
 							if (ll.isLowConfidentiality() && rr.isHighConfidentiality())
 								tool.warnOn(
 										assign,
+										result.getId(),
 										"This assignment assigns a HIGH confidentiality value to a LOW confidentiality variable, thus violating non-interference");
 
 							if (ll.isLowConfidentiality() && state.getExecutionState().isHighConfidentiality())
 								tool.warnOn(
 										assign,
+										result.getId(),
 										"This assignment, located in a HIGH confidentiality block, assigns a LOW confidentiality variable, thus violating non-interference");
 
 							if (ll.isHighIntegrity() && rr.isLowIntegrity())
 								tool.warnOn(
 										assign,
+										result.getId(),
 										"This assignment assigns a LOW integrity value to a HIGH integrity variable, thus violating non-interference");
 
 							if (ll.isHighIntegrity() && state.getExecutionState().isLowIntegrity())
 								tool.warnOn(
 										assign,
+										result.getId(),
 										"This assignment, located in a LOW integrity block, assigns a HIGH integrity variable, thus violating non-interference");
 						}
 				} catch (SemanticException e) {

@@ -12,15 +12,14 @@ import it.unive.lisa.analysis.Analysis;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.AnalysisState.Error;
 import it.unive.lisa.analysis.AnalyzedCFG;
-import it.unive.lisa.analysis.TestMarkerAbstractDomain;
-import it.unive.lisa.analysis.TestMarkerAbstractLattice;
 import it.unive.lisa.analysis.ProgramState;
 import it.unive.lisa.analysis.SemanticException;
-import it.unive.lisa.util.file.FileManager;
-import it.unive.lisa.conf.LiSAConfiguration;
-import it.unive.lisa.checks.verification.Violation;
-import it.unive.lisa.checks.verification.VerificationResult;
+import it.unive.lisa.analysis.TestMarkerAbstractDomain;
+import it.unive.lisa.analysis.TestMarkerAbstractLattice;
 import it.unive.lisa.checks.semantic.SemanticTool;
+import it.unive.lisa.checks.verification.VerificationResult;
+import it.unive.lisa.checks.verification.Violation;
+import it.unive.lisa.conf.LiSAConfiguration;
 import it.unive.lisa.interprocedural.ScopeId;
 import it.unive.lisa.interprocedural.UniqueScope;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
@@ -56,6 +55,7 @@ import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.TypeSystem;
 import it.unive.lisa.type.Untyped;
+import it.unive.lisa.util.file.FileManager;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -68,12 +68,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 /**
- * Tests for {@link Reachability} and {@link ReachabilityVerifier}. Each test builds the cfgs and the results of
- * the fixpoint by hand, choosing the post-state of each statement, and then
- * queries the reachability of the statements. Conditions are evaluated by
- * {@link Domain}, where the state of a guard records whether the condition
- * might hold ({@link #MAY_HOLD}) and whether it might not hold
- * ({@link #MAY_FAIL}).
+ * Tests for {@link Reachability} and {@link ReachabilityVerifier}. Each test
+ * builds the cfgs and the results of the fixpoint by hand, choosing the
+ * post-state of each statement, and then queries the reachability of the
+ * statements. Conditions are evaluated by {@link Domain}, where the state of a
+ * guard records whether the condition might hold ({@link #MAY_HOLD}) and
+ * whether it might not hold ({@link #MAY_FAIL}).
  */
 public class ReachabilityTest {
 

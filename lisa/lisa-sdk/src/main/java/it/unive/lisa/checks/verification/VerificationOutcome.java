@@ -1,8 +1,8 @@
 package it.unive.lisa.checks.verification;
 
 /**
- * The outcome of the verification of a candidate {@link Violation}, as
- * computed by a {@link WarningVerifier}.
+ * The outcome of the verification of a candidate {@link Violation}, as computed
+ * by a {@link WarningVerifier}.
  *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */

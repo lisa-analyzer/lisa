@@ -23,6 +23,7 @@ import it.unive.lisa.analysis.numeric.Sign;
 import it.unive.lisa.analysis.symbols.Symbol;
 import it.unive.lisa.checks.verification.ConditionViolation;
 import it.unive.lisa.checks.verification.ErrorViolation;
+import it.unive.lisa.checks.verification.ReproducingInput;
 import it.unive.lisa.checks.verification.VerificationResult;
 import it.unive.lisa.conf.FixpointConfiguration;
 import it.unive.lisa.conf.LiSAConfiguration;
@@ -57,6 +58,7 @@ import it.unive.lisa.lattices.traces.TraceToken;
 import it.unive.lisa.lattices.types.Supertype;
 import it.unive.lisa.outputs.json.JsonReport;
 import it.unive.lisa.outputs.json.JsonReport.JsonMessage;
+import it.unive.lisa.outputs.json.JsonReport.JsonReproducingInput;
 import it.unive.lisa.outputs.messages.Message;
 import it.unive.lisa.outputs.serializableGraph.SerializableEdge;
 import it.unive.lisa.outputs.serializableGraph.SerializableGraph;
@@ -402,7 +404,8 @@ public class EqualityContractVerificationTest {
 								DefaultConfiguration.defaultHeapDomain(),
 								new Sign(),
 								DefaultConfiguration.defaultTypeDomain()).makeLattice()))
-				.withPrefabValues(MutableGraph.class, g1, g2);
+				.withPrefabValues(MutableGraph.class, g1, g2)
+				.withPrefabValues(ScopeId.class, new UniqueScope<>(), KDepthToken.create(1));
 
 		if (getClass)
 			verifier = verifier.usingGetClass();
@@ -683,6 +686,7 @@ public class EqualityContractVerificationTest {
 	public void testMessages() {
 		// serialization requires non final fields
 		verify(JsonMessage.class, Warning.NONFINAL_FIELDS);
+		verify(JsonReproducingInput.class, Warning.NONFINAL_FIELDS);
 		verify(Message.class);
 		Reflections scanner = mkReflections();
 		for (Class<? extends Message> message : scanner.getSubTypesOf(Message.class))
@@ -694,6 +698,7 @@ public class EqualityContractVerificationTest {
 		verify(ConditionViolation.class);
 		verify(ErrorViolation.class);
 		verify(VerificationResult.class);
+		verify(ReproducingInput.class);
 	}
 
 	@Test

@@ -33,10 +33,10 @@ import it.unive.lisa.type.Type;
  * condition is evaluated is unreachable, or if the condition does not hold in
  * its post-state; it is confirmed if that statement is reachable and the
  * condition always holds in its post-state; it is possible otherwise;</li>
- * <li>an {@link ErrorViolation} is refuted if the statement is unreachable or if
- * its post-state does not contain matching error continuations; it is confirmed
- * if the statement is reachable and its post-state contains only matching
- * error continuations; it is possible otherwise.</li>
+ * <li>an {@link ErrorViolation} is refuted if the statement is unreachable or
+ * if its post-state does not contain matching error continuations; it is
+ * confirmed if the statement is reachable and its post-state contains only
+ * matching error continuations; it is possible otherwise.</li>
  * </ul>
  * Note that {@link ReachabilityStatus#REACHABLE} assumes that all loops
  * terminate: confirmations are only as strong as this assumption. Moreover,
@@ -70,8 +70,8 @@ public class ReachabilityVerifier<A extends AbstractLattice<A>, D extends Abstra
 	}
 
 	/**
-	 * Yields the {@link Reachability} algorithm used by this verifier, built
-	 * on the results of the tool passed to {@link #init(SemanticTool)}.
+	 * Yields the {@link Reachability} algorithm used by this verifier, built on
+	 * the results of the tool passed to {@link #init(SemanticTool)}.
 	 *
 	 * @return the reachability algorithm, or {@code null} if this verifier has
 	 *             not been initialized yet

@@ -1,7 +1,9 @@
 package it.unive.lisa.outputs.messages;
 
+import it.unive.lisa.checks.verification.ReproducingInput;
 import it.unive.lisa.program.Global;
 import it.unive.lisa.program.Unit;
+import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -35,7 +37,30 @@ public class GlobalMessage
 			Unit unit,
 			Global global,
 			String message) {
-		super(global.getLocation(), message);
+		this(unit, global, message, false, null);
+	}
+
+	/**
+	 * Builds the message.
+	 * 
+	 * @param unit              the unit containing the global where this
+	 *                              message was reported on
+	 * @param global            the global where this message was reported on
+	 * @param message           the message of this message
+	 * @param definite          whether or not this message is definite, that
+	 *                              is, if the reported behavior happens in at
+	 *                              least one execution of the program
+	 * @param reproducingInputs the inputs reproducing the behavior reported by
+	 *                              this message (can be {@code null} if no
+	 *                              inputs are known)
+	 */
+	public GlobalMessage(
+			Unit unit,
+			Global global,
+			String message,
+			boolean definite,
+			List<ReproducingInput> reproducingInputs) {
+		super(global.getLocation(), message, definite, reproducingInputs);
 		this.unit = unit;
 		this.global = global;
 	}
@@ -110,6 +135,11 @@ public class GlobalMessage
 	}
 
 	@Override
+	public String getTargetText() {
+		return unit.getName() + "::" + global.getName();
+	}
+
+	@Override
 	public String getTag() {
 		return "GLOBAL";
 	}
@@ -118,9 +148,7 @@ public class GlobalMessage
 	public String toString() {
 		return getLocationWithBrackets()
 				+ " on '"
-				+ unit.getName()
-				+ "::"
-				+ global.getName()
+				+ getTargetText()
 				+ "': "
 				+ getTaggedMessage();
 	}
