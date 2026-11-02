@@ -171,7 +171,9 @@ public class VerificationTest {
 		verifier.answers.put(res, VerificationResult.REFUTED);
 		SemanticTool<MarkerAbstractLattice, MarkerAbstractDomain> tool = tool(results);
 		// warnings that do not report a violation cannot be verified
-		assertEquals(VerificationResult.POSSIBLE, verifier.verify(tool, new StatementMessage(st, "w")));
+		VerificationResult unverifiable = verifier.verify(tool, new StatementMessage(st, "w"));
+		assertEquals(VerificationOutcome.POSSIBLE, unverifiable.getOutcome());
+		assertEquals("the warning reports no violation to verify", unverifiable.getExplanation());
 		assertEquals(VerificationResult.REFUTED,
 				verifier.verify(tool, new StatementMessage(st, "w", null, Violation.reach())));
 	}

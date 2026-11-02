@@ -120,7 +120,7 @@ public abstract class IndividualWarningVerifier<A extends AbstractLattice<A>, D 
 			throws SemanticException {
 		Violation violation = warning.getViolation();
 		if (violation == null)
-			return VerificationResult.POSSIBLE;
+			return new VerificationResult(VerificationOutcome.POSSIBLE, "the warning reports no violation to verify");
 		Statement st = warning.getStatement();
 		ScopeId<?> context = warning.getContext();
 		List<AnalyzedCFG<A>> results = new ArrayList<>();
@@ -132,7 +132,8 @@ public abstract class IndividualWarningVerifier<A extends AbstractLattice<A>, D 
 						|| Objects.equals(Objects.toString(result.getId()), context.toString()))
 					results.add(result);
 		if (results.isEmpty())
-			return VerificationResult.POSSIBLE;
+			return new VerificationResult(VerificationOutcome.POSSIBLE,
+					"no analysis result for the context of the warning");
 
 		// an analysis without events, as the queries are not part of the
 		// fixpoint computation

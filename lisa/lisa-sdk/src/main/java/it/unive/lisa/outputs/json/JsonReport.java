@@ -285,13 +285,15 @@ public class JsonReport {
 	 * representation of the target they have been reported on (if any, and if
 	 * it is not a cfg), the context they have been reported on and its hash (if
 	 * any), the kind of the target, the text of the message, whether the
-	 * message is definite, refuted, or possible, and the inputs reproducing the reported
-	 * behavior (if any).
+	 * message is definite, refuted, or possible, the inputs reproducing the reported
+	 * behavior (if any), and the explanation of the outcome of its verification
+	 * (if any). The explanation is informative only: it is not part of the
+	 * identity of the message, and it is ignored when comparing messages.
 	 * 
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 */
 	@JsonPropertyOrder({ "location", "cfg", "text", "context", "contextHash", "targetKind", "message", "definite",
-			"refuted", "reproducingInputs" })
+			"refuted", "reproducingInputs", "explanation" })
 	public static class JsonMessage
 			implements
 			Comparable<JsonMessage> {
@@ -323,9 +325,12 @@ public class JsonReport {
 		@JsonInclude(JsonInclude.Include.NON_EMPTY)
 		private List<JsonReproducingInput> reproducingInputs;
 
+		@JsonInclude(JsonInclude.Include.NON_NULL)
+		private String explanation;
+
 		/**
 		 * Builds an empty possible message, with no location, cfg, target,
-		 * text, context, context hash, and reproducing inputs.
+		 * text, context, context hash, reproducing inputs, and explanation.
 		 */
 		public JsonMessage() {
 			this.location = null;
@@ -338,6 +343,7 @@ public class JsonReport {
 			this.definite = false;
 			this.refuted = false;
 			this.reproducingInputs = new ArrayList<>();
+			this.explanation = null;
 		}
 
 		/**
@@ -361,6 +367,7 @@ public class JsonReport {
 			this.reproducingInputs = new ArrayList<>();
 			for (ReproducingInput input : message.getReproducingInputs())
 				this.reproducingInputs.add(new JsonReproducingInput(input));
+			this.explanation = message.getExplanation();
 		}
 
 		/**
@@ -562,6 +569,28 @@ public class JsonReport {
 		public void setReproducingInputs(
 				List<JsonReproducingInput> reproducingInputs) {
 			this.reproducingInputs = reproducingInputs == null ? new ArrayList<>() : reproducingInputs;
+		}
+
+		/**
+		 * Yields the explanation of the outcome of the verification of this
+		 * message, if any.
+		 * 
+		 * @return the explanation, or {@code null}
+		 */
+		public String getExplanation() {
+			return explanation;
+		}
+
+		/**
+		 * Sets the explanation of the outcome of the verification of this
+		 * message.
+		 * 
+		 * @param explanation the explanation (can be {@code null} if there is
+		 *                        none)
+		 */
+		public void setExplanation(
+				String explanation) {
+			this.explanation = explanation;
 		}
 
 		@Override

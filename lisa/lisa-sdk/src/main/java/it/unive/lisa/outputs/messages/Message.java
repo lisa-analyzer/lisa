@@ -16,8 +16,8 @@ import org.apache.commons.lang3.StringUtils;
  * has been reported on (if any), and, for definite messages, the
  * {@link ReproducingInput}s that make the reported behavior happen, if known.
  * Messages can also carry the {@link Violation} they report, so that it can be
- * verified after the analysis: the violation is not part of the identity of the
- * message.
+ * verified after the analysis, and the explanation of the outcome of that
+ * verification: neither is part of the identity of the message.
  *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
@@ -51,6 +51,12 @@ public class Message
 	 * The violation reported by this message, if known
 	 */
 	private final Violation violation;
+
+	/**
+	 * The explanation of the outcome of the verification of the violation
+	 * reported by this message, if any
+	 */
+	private final String explanation;
 
 	/**
 	 * The inputs reproducing the behavior reported by this message
@@ -135,6 +141,42 @@ public class Message
 			boolean refuted,
 			List<ReproducingInput> reproducingInputs,
 			Violation violation) {
+		this(message, context, definite, refuted, reproducingInputs, violation, null);
+	}
+
+	/**
+	 * Builds the message.
+	 *
+	 * @param message           the message of this message
+	 * @param context           the context where this message was reported on
+	 *                              (can be {@code null})
+	 * @param definite          whether or not this message is definite, that
+	 *                              is, if the reported behavior happens in at
+	 *                              least one execution of the program
+	 * @param refuted           whether or not this message is refuted, that is,
+	 *                              if the reported behavior happens in no
+	 *                              execution of the program (a message cannot
+	 *                              be both definite and refuted)
+	 * @param reproducingInputs the inputs reproducing the behavior reported by
+	 *                              this message (can be {@code null} if no
+	 *                              inputs are known)
+	 * @param violation         the violation reported by this message (can be
+	 *                              {@code null} if unknown)
+	 * @param explanation       the explanation of the outcome of the
+	 *                              verification of the violation (can be
+	 *                              {@code null} if there is none)
+	 * 
+	 * @throws IllegalArgumentException if both {@code definite} and
+	 *                                      {@code refuted} are {@code true}
+	 */
+	protected Message(
+			String message,
+			ScopeId<?> context,
+			boolean definite,
+			boolean refuted,
+			List<ReproducingInput> reproducingInputs,
+			Violation violation,
+			String explanation) {
 		if (definite && refuted)
 			throw new IllegalArgumentException("A message cannot be both definite and refuted");
 		this.message = message;
@@ -142,6 +184,7 @@ public class Message
 		this.definite = definite;
 		this.refuted = refuted;
 		this.violation = violation;
+		this.explanation = explanation;
 		this.reproducingInputs = reproducingInputs == null || reproducingInputs.isEmpty()
 				? Collections.emptyList()
 				: Collections.unmodifiableList(List.copyOf(reproducingInputs));
@@ -206,6 +249,17 @@ public class Message
 	 */
 	public final Violation getViolation() {
 		return violation;
+	}
+
+	/**
+	 * Yields the explanation of the outcome of the verification of the
+	 * violation reported by this message, if any (e.g., why the violation
+	 * could be neither confirmed nor refuted).
+	 *
+	 * @return the explanation, or {@code null}
+	 */
+	public final String getExplanation() {
+		return explanation;
 	}
 
 	/**

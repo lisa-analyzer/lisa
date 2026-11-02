@@ -98,23 +98,27 @@ public class ExpressionMessage
 			boolean definite,
 			boolean refuted,
 			List<ReproducingInput> reproducingInputs,
-			Violation violation) {
-		super(expression, message, context, definite, refuted, reproducingInputs, violation);
+			Violation violation,
+			String explanation) {
+		super(expression, message, context, definite, refuted, reproducingInputs, violation, explanation);
 	}
 
 	@Override
 	public ExpressionMessage verified(
 			VerificationResult result) {
+		String explanation = result.getExplanation();
 		switch (result.getOutcome()) {
 		case CONFIRMED:
 			return new ExpressionMessage(getExpression(), getMessage(), getContext(), true, false,
-					result.getReproducingInputs(), getViolation());
+					result.getReproducingInputs(), getViolation(), explanation);
 		case REFUTED:
 			return new ExpressionMessage(getExpression(), getMessage(), getContext(), false, true, null,
-					getViolation());
+					getViolation(), explanation);
 		case POSSIBLE:
 		default:
-			return this;
+			return explanation == null ? this
+					: new ExpressionMessage(getExpression(), getMessage(), getContext(), isDefinite(), isRefuted(),
+							getReproducingInputs(), getViolation(), explanation);
 		}
 	}
 

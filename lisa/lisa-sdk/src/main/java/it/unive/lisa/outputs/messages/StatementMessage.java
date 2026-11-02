@@ -117,7 +117,38 @@ public class StatementMessage
 			boolean refuted,
 			List<ReproducingInput> reproducingInputs,
 			Violation violation) {
-		super(statement.getLocation(), message, context, definite, refuted, reproducingInputs, violation);
+		this(statement, message, context, definite, refuted, reproducingInputs, violation, null);
+	}
+
+	/**
+	 * Builds the message.
+	 *
+	 * @param statement         the statement where this message is reported on
+	 * @param message           the message of this message
+	 * @param context           the context where this message was reported on
+	 *                              (can be {@code null})
+	 * @param definite          whether or not this message is definite
+	 * @param refuted           whether or not this message is refuted
+	 * @param reproducingInputs the inputs reproducing the behavior reported by
+	 *                              this message (can be {@code null} if no
+	 *                              inputs are known)
+	 * @param violation         the violation reported by this message (can be
+	 *                              {@code null} if unknown)
+	 * @param explanation       the explanation of the outcome of the
+	 *                              verification of the violation (can be
+	 *                              {@code null} if there is none)
+	 */
+	protected StatementMessage(
+			Statement statement,
+			String message,
+			ScopeId<?> context,
+			boolean definite,
+			boolean refuted,
+			List<ReproducingInput> reproducingInputs,
+			Violation violation,
+			String explanation) {
+		super(statement.getLocation(), message, context, definite, refuted, reproducingInputs, violation,
+				explanation);
 		this.statement = statement;
 	}
 
@@ -125,7 +156,10 @@ public class StatementMessage
 	 * Yields the message resulting from the verification of the violation
 	 * reported by this one: a definite message with the reproducing inputs of
 	 * the result if the violation has been confirmed, a refuted message if it
-	 * has been refuted, and this message otherwise.
+	 * has been refuted, and a possible message otherwise. All of them carry the
+	 * explanation of the result, if any (this message is returned if the
+	 * violation is neither confirmed nor refuted, and there is no
+	 * explanation).
 	 *
 	 * @param result the result of the verification
 	 *
@@ -133,15 +167,19 @@ public class StatementMessage
 	 */
 	public StatementMessage verified(
 			VerificationResult result) {
+		String explanation = result.getExplanation();
 		switch (result.getOutcome()) {
 		case CONFIRMED:
 			return new StatementMessage(statement, getMessage(), getContext(), true, false,
-					result.getReproducingInputs(), getViolation());
+					result.getReproducingInputs(), getViolation(), explanation);
 		case REFUTED:
-			return new StatementMessage(statement, getMessage(), getContext(), false, true, null, getViolation());
+			return new StatementMessage(statement, getMessage(), getContext(), false, true, null, getViolation(),
+					explanation);
 		case POSSIBLE:
 		default:
-			return this;
+			return explanation == null ? this
+					: new StatementMessage(statement, getMessage(), getContext(), isDefinite(), isRefuted(),
+							getReproducingInputs(), getViolation(), explanation);
 		}
 	}
 

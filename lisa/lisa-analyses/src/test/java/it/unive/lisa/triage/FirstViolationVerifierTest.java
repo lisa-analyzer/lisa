@@ -109,6 +109,7 @@ public class FirstViolationVerifierTest {
 		assertTrue(warnings.get("b_always").isDefinite(), warnings.toString());
 		// not verified, since b_always has been confirmed first
 		assertPossible(warnings.get("c_always"));
+		assertEquals(FirstViolationVerifier.NOT_VERIFIED, warnings.get("c_always").getExplanation());
 	}
 
 	@Test
@@ -133,6 +134,7 @@ public class FirstViolationVerifierTest {
 				confirmed.getReproducingInputs().toString());
 		// not verified, since c_shallow has been confirmed first
 		assertPossible(warnings.get("d_shallow"));
+		assertEquals(FirstViolationVerifier.NOT_VERIFIED, warnings.get("d_shallow").getExplanation());
 	}
 
 	@Test

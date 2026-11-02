@@ -691,13 +691,16 @@ public class EqualityContractVerificationTest {
 	@Test
 	public void testMessages() {
 		// serialization requires non final fields
-		verify(JsonMessage.class, Warning.NONFINAL_FIELDS);
+		// the explanation of the verification of a message is not part of its
+		// identity
+		verify(JsonMessage.class, verifier -> verifier.withIgnoredFields("explanation"), Warning.NONFINAL_FIELDS);
 		verify(JsonReproducingInput.class, Warning.NONFINAL_FIELDS);
-		// the violation reported by a message is not part of its identity
-		verify(Message.class, verifier -> verifier.withIgnoredFields("violation"));
+		// neither the violation reported by a message nor the explanation of
+		// its verification are part of its identity
+		verify(Message.class, verifier -> verifier.withIgnoredFields("violation", "explanation"));
 		Reflections scanner = mkReflections();
 		for (Class<? extends Message> message : scanner.getSubTypesOf(Message.class))
-			verify(message, verifier -> verifier.withIgnoredFields("violation"));
+			verify(message, verifier -> verifier.withIgnoredFields("violation", "explanation"));
 	}
 
 	@Test

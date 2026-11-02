@@ -8,8 +8,9 @@ import it.unive.lisa.LiSARunInfo;
 import it.unive.lisa.TestLanguageFeatures;
 import it.unive.lisa.TestTypeSystem;
 import it.unive.lisa.checks.verification.ReproducingInput;
-import it.unive.lisa.checks.verification.Violation;
+import it.unive.lisa.checks.verification.VerificationOutcome;
 import it.unive.lisa.checks.verification.VerificationResult;
+import it.unive.lisa.checks.verification.Violation;
 import it.unive.lisa.conf.LiSAConfiguration;
 import it.unive.lisa.interprocedural.UniqueScope;
 import it.unive.lisa.outputs.messages.CFGMessage;
@@ -164,6 +165,8 @@ public class JsonReportTest {
 		Message onStatement = new StatementMessage(st, "w3", new UniqueScope<>(), false, null);
 		Message refuted = new StatementMessage(st, "w4", null, Violation.reach())
 				.verified(VerificationResult.REFUTED);
+		Message explained = new StatementMessage(st, "w5", null, Violation.reach())
+				.verified(new VerificationResult(VerificationOutcome.POSSIBLE, "budget exhausted"));
 
 		LiSAConfiguration conf = new LiSAConfiguration();
 		LiSARunInfo info = new LiSARunInfo(
@@ -174,7 +177,7 @@ public class JsonReportTest {
 				new DateTime(),
 				new DateTime());
 		LiSAReport report = new LiSAReport(
-				conf, info, List.of(definite, possible, onStatement, refuted), List.of(definite),
+				conf, info, List.of(definite, possible, onStatement, refuted, explained), List.of(definite),
 				Collections.emptyList());
 		JsonReport original = new JsonReport(report);
 
@@ -205,6 +208,13 @@ public class JsonReportTest {
 				.filter(m -> m.getMessage().equals("w4")).findFirst().get();
 		assertTrue(refutedJson.isRefuted());
 		assertTrue(!refutedJson.isDefinite());
+		assertEquals(null, refutedJson.getExplanation());
+
+		JsonReport.JsonMessage explainedJson = original.getWarnings().stream()
+				.filter(m -> m.getMessage().equals("w5")).findFirst().get();
+		assertTrue(!explainedJson.isDefinite());
+		assertTrue(!explainedJson.isRefuted());
+		assertEquals("budget exhausted", explainedJson.getExplanation());
 
 		StringWriter writer = new StringWriter();
 		original.dump(writer);
@@ -212,6 +222,18 @@ public class JsonReportTest {
 		assertEquals(original.getWarnings(), reRead.getWarnings());
 		assertEquals(original.getNotices(), reRead.getNotices());
 		assertEquals(original, reRead);
+		assertEquals("budget exhausted", reRead.getWarnings().stream()
+				.filter(m -> m.getMessage().equals("w5")).findFirst().get().getExplanation());
+	}
+
+	@Test
+	public void explanationsAreIgnoredWhenComparingMessages() {
+		JsonReport.JsonMessage first = new JsonReport.JsonMessage(new Message("w1"));
+		JsonReport.JsonMessage second = new JsonReport.JsonMessage(new Message("w1"));
+		second.setExplanation("budget exhausted");
+		assertEquals(first, second);
+		assertEquals(first.hashCode(), second.hashCode());
+		assertEquals(0, first.compareTo(second));
 	}
 
 	@Test
@@ -237,8 +259,9 @@ public class JsonReportTest {
 		assertTrue(!dumped.contains("\"context\""));
 		assertTrue(!dumped.contains("\"contextHash\""));
 		assertTrue(!dumped.contains("\"reproducingInputs\""));
-		// the refuted flag is dumped only when set
+		// the refuted flag and the explanation are dumped only when set
 		assertTrue(!dumped.contains("\"refuted\""));
+		assertTrue(!dumped.contains("\"explanation\""));
 	}
 
 }

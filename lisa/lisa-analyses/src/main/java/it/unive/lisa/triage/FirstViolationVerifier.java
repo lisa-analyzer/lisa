@@ -28,7 +28,9 @@ import java.util.Map;
  * </ol>
  * Refutations found along the way are kept, so that a warning refuted by the
  * cheap verifier is not verified again by the expensive one. Warnings that are
- * not verified because the verification stopped stay possible.
+ * not verified because the verification stopped stay possible, and their
+ * result explains it ({@link #NOT_VERIFIED}). Warnings that stay possible after
+ * being verified keep the explanation of the last verifier that verified them.
  *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  *
@@ -39,6 +41,12 @@ import java.util.Map;
 public class FirstViolationVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
 		implements
 		WarningVerifier<A, D> {
+
+	/**
+	 * The explanation of the warnings that are not verified, since a warning
+	 * has been confirmed before them.
+	 */
+	public static final String NOT_VERIFIED = "not verified: the verification stopped at the first confirmed warning";
 
 	private final IndividualWarningVerifier<A, D> cheap;
 
@@ -81,8 +89,11 @@ public class FirstViolationVerifier<A extends AbstractLattice<A>, D extends Abst
 	}
 
 	/**
-	 * Verifies, with the given verifier, the warnings that have not been
-	 * refuted yet, recording refutations and confirmations in the given map.
+	 * Verifies, with the given verifier, the warnings that have been neither
+	 * refuted nor confirmed yet, recording the results in the given map. If a
+	 * warning is confirmed, the verification stops, and the warnings that
+	 * have not been verified in this phase are recorded as
+	 * {@link #NOT_VERIFIED}, unless they have been refuted before.
 	 *
 	 * @return {@code true} if a warning has been confirmed
 	 */
@@ -94,16 +105,21 @@ public class FirstViolationVerifier<A extends AbstractLattice<A>, D extends Abst
 					Map<StatementMessage, VerificationResult> results)
 					throws SemanticException {
 		verifier.init(tool);
+		boolean confirmed = false;
 		for (StatementMessage warning : warnings) {
-			if (results.containsKey(warning))
+			VerificationResult previous = results.get(warning);
+			if (previous != null && previous.getOutcome() != VerificationOutcome.POSSIBLE)
 				// refuted in a previous phase
 				continue;
+			if (confirmed) {
+				results.put(warning, new VerificationResult(VerificationOutcome.POSSIBLE, NOT_VERIFIED));
+				continue;
+			}
 			VerificationResult result = verifier.verify(tool, warning);
-			if (result.getOutcome() != VerificationOutcome.POSSIBLE)
-				results.put(warning, result);
+			results.put(warning, result);
 			if (result.getOutcome() == VerificationOutcome.CONFIRMED)
-				return true;
+				confirmed = true;
 		}
-		return false;
+		return confirmed;
 	}
 }
