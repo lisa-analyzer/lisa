@@ -1,6 +1,7 @@
 package it.unive.lisa.outputs.messages;
 
 import it.unive.lisa.checks.verification.ReproducingInput;
+import it.unive.lisa.checks.verification.Violation;
 import it.unive.lisa.interprocedural.ScopeId;
 import java.util.Collections;
 import java.util.List;
@@ -10,9 +11,13 @@ import org.apache.commons.lang3.StringUtils;
 /**
  * A message reported by LiSA on the program under analysis. Besides its text, a
  * message records whether it is definite (i.e., the reported behavior happens
- * in at least one execution of the program) or possible, the context it has
- * been reported on (if any), and, for definite messages, the
+ * in at least one execution of the program), refuted (i.e., the reported
+ * behavior happens in no execution of the program), or possible, the context it
+ * has been reported on (if any), and, for definite messages, the
  * {@link ReproducingInput}s that make the reported behavior happen, if known.
+ * Messages can also carry the {@link Violation} they report, so that it can be
+ * verified after the analysis: the violation is not part of the identity of
+ * the message.
  *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
@@ -36,6 +41,16 @@ public class Message
 	 * Whether or not this message is definite
 	 */
 	private final boolean definite;
+
+	/**
+	 * Whether or not this message is refuted
+	 */
+	private final boolean refuted;
+
+	/**
+	 * The violation reported by this message, if known
+	 */
+	private final Violation violation;
 
 	/**
 	 * The inputs reproducing the behavior reported by this message
@@ -88,9 +103,42 @@ public class Message
 			ScopeId<?> context,
 			boolean definite,
 			List<ReproducingInput> reproducingInputs) {
+		this(message, context, definite, false, reproducingInputs, null);
+	}
+
+	/**
+	 * Builds the message.
+	 *
+	 * @param message           the message of this message
+	 * @param context           the context where this message was reported on
+	 *                              (can be {@code null})
+	 * @param definite          whether or not this message is definite, that
+	 *                              is, if the reported behavior happens in at
+	 *                              least one execution of the program
+	 * @param refuted           whether or not this message is refuted, that
+	 *                              is, if the reported behavior happens in no
+	 *                              execution of the program (a message cannot
+	 *                              be both definite and refuted)
+	 * @param reproducingInputs the inputs reproducing the behavior reported by
+	 *                              this message (can be {@code null} if no
+	 *                              inputs are known)
+	 * @param violation         the violation reported by this message (can be
+	 *                              {@code null} if unknown)
+	 */
+	protected Message(
+			String message,
+			ScopeId<?> context,
+			boolean definite,
+			boolean refuted,
+			List<ReproducingInput> reproducingInputs,
+			Violation violation) {
+		if (definite && refuted)
+			throw new IllegalArgumentException("A message cannot be both definite and refuted");
 		this.message = message;
 		this.context = context;
 		this.definite = definite;
+		this.refuted = refuted;
+		this.violation = violation;
 		this.reproducingInputs = reproducingInputs == null || reproducingInputs.isEmpty()
 				? Collections.emptyList()
 				: Collections.unmodifiableList(List.copyOf(reproducingInputs));
@@ -136,6 +184,25 @@ public class Message
 	 */
 	public final boolean isDefinite() {
 		return definite;
+	}
+
+	/**
+	 * Yields whether or not this message is refuted, that is, if the reported
+	 * behavior happens in no execution of the program.
+	 *
+	 * @return {@code true} if this message is refuted
+	 */
+	public final boolean isRefuted() {
+		return refuted;
+	}
+
+	/**
+	 * Yields the violation reported by this message, if known.
+	 *
+	 * @return the violation, or {@code null}
+	 */
+	public final Violation getViolation() {
+		return violation;
 	}
 
 	/**
@@ -202,6 +269,8 @@ public class Message
 			return cmp;
 		if ((cmp = Boolean.compare(definite, o.definite)) != 0)
 			return cmp;
+		if ((cmp = Boolean.compare(refuted, o.refuted)) != 0)
+			return cmp;
 		if ((cmp = Integer.compare(reproducingInputs.size(), o.reproducingInputs.size())) != 0)
 			return cmp;
 		for (int i = 0; i < reproducingInputs.size(); i++)
@@ -212,7 +281,8 @@ public class Message
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(Objects.toString(context, null), getContextHash(), definite, message, reproducingInputs);
+		return Objects.hash(Objects.toString(context, null), getContextHash(), definite, refuted, message,
+				reproducingInputs);
 	}
 
 	@Override
@@ -226,6 +296,7 @@ public class Message
 			return false;
 		Message other = (Message) obj;
 		return definite == other.definite
+				&& refuted == other.refuted
 				&& Objects.equals(Objects.toString(context, null), Objects.toString(other.context, null))
 				&& Objects.equals(getContextHash(), other.getContextHash())
 				&& Objects.equals(message, other.message)

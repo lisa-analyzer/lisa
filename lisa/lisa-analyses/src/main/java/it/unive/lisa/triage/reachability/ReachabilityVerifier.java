@@ -14,7 +14,7 @@ import it.unive.lisa.checks.verification.ErrorViolation;
 import it.unive.lisa.checks.verification.ReachViolation;
 import it.unive.lisa.checks.verification.VerificationResult;
 import it.unive.lisa.checks.verification.Violation;
-import it.unive.lisa.checks.verification.WarningVerifier;
+import it.unive.lisa.checks.verification.IndividualWarningVerifier;
 import it.unive.lisa.lattices.GenericMapLattice;
 import it.unive.lisa.lattices.GenericSetLattice;
 import it.unive.lisa.lattices.Satisfiability;
@@ -22,7 +22,7 @@ import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.type.Type;
 
 /**
- * A {@link WarningVerifier} that relies on the {@link Reachability} of
+ * An {@link IndividualWarningVerifier} that relies on the {@link Reachability} of
  * statements, together with the satisfiability of conditions and the presence
  * of error continuations in the analysis results, to verify violations:
  * <ul>
@@ -49,8 +49,8 @@ import it.unive.lisa.type.Type;
  * @param <D> the kind of {@link AbstractDomain} ran during the analysis
  */
 public class ReachabilityVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
-		implements
-		WarningVerifier<A, D> {
+		extends
+		IndividualWarningVerifier<A, D> {
 
 	private Reachability<A, D> reachability;
 

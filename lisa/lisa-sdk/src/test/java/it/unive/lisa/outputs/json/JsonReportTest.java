@@ -8,6 +8,8 @@ import it.unive.lisa.LiSARunInfo;
 import it.unive.lisa.TestLanguageFeatures;
 import it.unive.lisa.TestTypeSystem;
 import it.unive.lisa.checks.verification.ReproducingInput;
+import it.unive.lisa.checks.verification.Violation;
+import it.unive.lisa.checks.verification.VerificationResult;
 import it.unive.lisa.conf.LiSAConfiguration;
 import it.unive.lisa.interprocedural.UniqueScope;
 import it.unive.lisa.outputs.messages.CFGMessage;
@@ -160,6 +162,8 @@ public class JsonReportTest {
 		Statement st = new NoOp(cfg, new SourceCodeLocation("file", 5, 6));
 		cfg.addNode(st, true);
 		Message onStatement = new StatementMessage(st, "w3", new UniqueScope<>(), false, null);
+		Message refuted = new StatementMessage(st, "w4", null, Violation.reach())
+				.verified(VerificationResult.REFUTED);
 
 		LiSAConfiguration conf = new LiSAConfiguration();
 		LiSARunInfo info = new LiSARunInfo(
@@ -170,7 +174,8 @@ public class JsonReportTest {
 				new DateTime(),
 				new DateTime());
 		LiSAReport report = new LiSAReport(
-				conf, info, List.of(definite, possible, onStatement), List.of(definite), Collections.emptyList());
+				conf, info, List.of(definite, possible, onStatement, refuted), List.of(definite),
+				Collections.emptyList());
 		JsonReport original = new JsonReport(report);
 
 		JsonReport.JsonMessage structured = original.getWarnings().stream()
@@ -194,6 +199,12 @@ public class JsonReportTest {
 		assertEquals(null, structured.getContextHash());
 		assertEquals(null, structured.getContext());
 		assertTrue(!statement.isDefinite());
+		assertTrue(!statement.isRefuted());
+
+		JsonReport.JsonMessage refutedJson = original.getWarnings().stream()
+				.filter(m -> m.getMessage().equals("w4")).findFirst().get();
+		assertTrue(refutedJson.isRefuted());
+		assertTrue(!refutedJson.isDefinite());
 
 		StringWriter writer = new StringWriter();
 		original.dump(writer);
@@ -226,6 +237,8 @@ public class JsonReportTest {
 		assertTrue(!dumped.contains("\"context\""));
 		assertTrue(!dumped.contains("\"contextHash\""));
 		assertTrue(!dumped.contains("\"reproducingInputs\""));
+		// the refuted flag is dumped only when set
+		assertTrue(!dumped.contains("\"refuted\""));
 	}
 
 }

@@ -8,7 +8,7 @@ import it.unive.lisa.checks.semantic.SemanticTool;
 import it.unive.lisa.checks.verification.VerificationOutcome;
 import it.unive.lisa.checks.verification.VerificationResult;
 import it.unive.lisa.checks.verification.Violation;
-import it.unive.lisa.checks.verification.WarningVerifier;
+import it.unive.lisa.checks.verification.IndividualWarningVerifier;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.triage.inputs.InputSource;
@@ -29,7 +29,7 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 /**
- * A {@link WarningVerifier} based on property-directed reachability
+ * An {@link IndividualWarningVerifier} based on property-directed reachability
  * ({@link PdrEngine}) over the {@link AlarmModel} of the candidate violation,
  * with frames seeded by the invariants computed by the analysis. The verifier
  * yields:
@@ -56,8 +56,8 @@ import java.util.function.Supplier;
  * @param <D> the type of {@link AbstractDomain} used by the analysis
  */
 public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
-		implements
-		WarningVerifier<A, D> {
+		extends
+		IndividualWarningVerifier<A, D> {
 
 	/**
 	 * The default maximum level of frames.

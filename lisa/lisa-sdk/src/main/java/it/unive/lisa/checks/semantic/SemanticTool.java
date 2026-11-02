@@ -8,8 +8,6 @@ import it.unive.lisa.analysis.AnalyzedCFG;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.checks.verification.ReproducingInput;
-import it.unive.lisa.checks.verification.VerificationOutcome;
-import it.unive.lisa.checks.verification.VerificationResult;
 import it.unive.lisa.checks.verification.Violation;
 import it.unive.lisa.checks.verification.WarningVerifier;
 import it.unive.lisa.conf.LiSAConfiguration;
@@ -50,8 +48,6 @@ public class SemanticTool<A extends AbstractLattice<A>, D extends AbstractDomain
 	private final CallGraph callgraph;
 
 	private final Analysis<A, D> analysis;
-
-	private WarningVerifier<A, D> verifier;
 
 	/**
 	 * Builds the tool, storing the given results.
@@ -223,35 +219,57 @@ public class SemanticTool<A extends AbstractLattice<A>, D extends AbstractDomain
 			Statement statement,
 			ScopeId<A> context,
 			String message) {
-		warnOn(statement, context, message, false, null);
+		if (statement instanceof Expression)
+			warnOn((Expression) statement, context, message);
+		else
+			addWarning(new StatementMessage(statement, message, context, false, null));
 	}
 
 	/**
-	 * Reports a new warning with the given message on the given statement, in
-	 * the given context (e.g., the one of the result that caused the warning).
-	 * If {@code statement} is an instance of {@link Expression}, then
-	 * {@link #warnOn(Expression, ScopeId, String, boolean, List)} is invoked.
+	 * Reports a new possible warning with the given message on the given
+	 * statement, reporting the given violation. After the semantic checks,
+	 * LiSA verifies the violations of all warnings through the
+	 * {@link WarningVerifier} selected in
+	 * the configuration ({@link LiSAConfiguration#warningVerifier}), if any,
+	 * possibly confirming or refuting the warning.
 	 * 
-	 * @param statement         the statement to warn on
-	 * @param context           the context where the warning is reported
-	 * @param message           the message of the warning
-	 * @param definite          whether or not the warning is definite, that is,
-	 *                              if the reported behavior happens in at least
-	 *                              one execution of the program
-	 * @param reproducingInputs the inputs reproducing the behavior reported by
-	 *                              the warning (can be {@code null} if no
-	 *                              inputs are known)
+	 * @param statement the statement to warn on
+	 * @param violation the violation reported by the warning
+	 * @param message   the message of the warning
+	 */
+	public void warnOn(
+			Statement statement,
+			Violation violation,
+			String message) {
+		warnOn(statement, null, violation, message);
+	}
+
+	/**
+	 * Reports a new possible warning with the given message on the given
+	 * statement, in the given context (e.g., the one of the result that caused
+	 * the warning), reporting the given violation. After the semantic checks,
+	 * LiSA verifies the violations of all warnings through the
+	 * {@link WarningVerifier} selected in
+	 * the configuration ({@link LiSAConfiguration#warningVerifier}), if any,
+	 * possibly confirming or refuting the warning: the violation is verified
+	 * only in the given context, or in all the contexts where the statement
+	 * has been analyzed if the context is {@code null}.
+	 * 
+	 * @param statement the statement to warn on
+	 * @param context   the context where the warning is reported (can be
+	 *                      {@code null})
+	 * @param violation the violation reported by the warning
+	 * @param message   the message of the warning
 	 */
 	public void warnOn(
 			Statement statement,
 			ScopeId<A> context,
-			String message,
-			boolean definite,
-			List<ReproducingInput> reproducingInputs) {
+			Violation violation,
+			String message) {
 		if (statement instanceof Expression)
-			warnOn((Expression) statement, context, message, definite, reproducingInputs);
+			addWarning(new ExpressionMessage((Expression) statement, message, context, violation));
 		else
-			addWarning(new StatementMessage(statement, message, context, definite, reproducingInputs));
+			addWarning(new StatementMessage(statement, message, context, violation));
 	}
 
 	/**
@@ -267,30 +285,7 @@ public class SemanticTool<A extends AbstractLattice<A>, D extends AbstractDomain
 			Expression expression,
 			ScopeId<A> context,
 			String message) {
-		warnOn(expression, context, message, false, null);
-	}
-
-	/**
-	 * Reports a new warning with the given message on the given expression, in
-	 * the given context (e.g., the one of the result that caused the warning).
-	 * 
-	 * @param expression        the expression to warn on
-	 * @param context           the context where the warning is reported
-	 * @param message           the message of the warning
-	 * @param definite          whether or not the warning is definite, that is,
-	 *                              if the reported behavior happens in at least
-	 *                              one execution of the program
-	 * @param reproducingInputs the inputs reproducing the behavior reported by
-	 *                              the warning (can be {@code null} if no
-	 *                              inputs are known)
-	 */
-	public void warnOn(
-			Expression expression,
-			ScopeId<A> context,
-			String message,
-			boolean definite,
-			List<ReproducingInput> reproducingInputs) {
-		addWarning(new ExpressionMessage(expression, message, context, definite, reproducingInputs));
+		addWarning(new ExpressionMessage(expression, message, context, false, null));
 	}
 
 	/**
@@ -306,30 +301,7 @@ public class SemanticTool<A extends AbstractLattice<A>, D extends AbstractDomain
 			CFG cfg,
 			ScopeId<A> context,
 			String message) {
-		warnOn(cfg, context, message, false, null);
-	}
-
-	/**
-	 * Reports a new warning with the given message on the given cfg, in the
-	 * given context (e.g., the one of the result that caused the warning).
-	 * 
-	 * @param cfg               the cfg to warn on
-	 * @param context           the context where the warning is reported
-	 * @param message           the message of the warning
-	 * @param definite          whether or not the warning is definite, that is,
-	 *                              if the reported behavior happens in at least
-	 *                              one execution of the program
-	 * @param reproducingInputs the inputs reproducing the behavior reported by
-	 *                              the warning (can be {@code null} if no
-	 *                              inputs are known)
-	 */
-	public void warnOn(
-			CFG cfg,
-			ScopeId<A> context,
-			String message,
-			boolean definite,
-			List<ReproducingInput> reproducingInputs) {
-		addWarning(new CFGMessage(cfg, message, context, definite, reproducingInputs));
+		addWarning(new CFGMessage(cfg, message, context, false, null));
 	}
 
 	/**
@@ -452,79 +424,6 @@ public class SemanticTool<A extends AbstractLattice<A>, D extends AbstractDomain
 			boolean definite,
 			List<ReproducingInput> reproducingInputs) {
 		addNotice(new CFGMessage(cfg, message, context, definite, reproducingInputs));
-	}
-
-	/**
-	 * Verifies whether the given violation can happen at the given statement,
-	 * considering only the executions analyzed in the context of the given
-	 * result. The verification is delegated to the {@link WarningVerifier}
-	 * selected in the configuration of the analysis
-	 * ({@link LiSAConfiguration#warningVerifier}), that is initialized with
-	 * this tool the first time this method is invoked. If no verifier has been
-	 * selected, all violations are deemed possible.
-	 * 
-	 * @param result    the result containing the statement
-	 * @param st        the statement on which the warning would be issued
-	 * @param violation the violation to verify
-	 * 
-	 * @return the result of the verification
-	 * 
-	 * @throws SemanticException if something goes wrong during the verification
-	 */
-	public VerificationResult verify(
-			AnalyzedCFG<A> result,
-			Statement st,
-			Violation violation)
-			throws SemanticException {
-		WarningVerifier<A, D> verifier = getVerifier();
-		if (verifier == null)
-			return VerificationResult.POSSIBLE;
-		return verifier.verify(result, st, violation);
-	}
-
-	/**
-	 * Verifies whether the given violation can happen at the given statement,
-	 * considering all the results of its cfg (see
-	 * {@link #verify(AnalyzedCFG, Statement, Violation)}). The results of the
-	 * single verifications are combined through
-	 * {@link VerificationResult#lub(VerificationResult)}: the violation is
-	 * confirmed if it is confirmed in at least one of the results, and it is
-	 * refuted only if it is refuted in all of them.
-	 * 
-	 * @param st        the statement on which the warning would be issued
-	 * @param violation the violation to verify
-	 * 
-	 * @return the result of the verification
-	 * 
-	 * @throws SemanticException if something goes wrong during the verification
-	 */
-	public VerificationResult verify(
-			Statement st,
-			Violation violation)
-			throws SemanticException {
-		if (getVerifier() == null)
-			return VerificationResult.POSSIBLE;
-
-		Collection<AnalyzedCFG<A>> res = results.get(st.getCFG());
-		VerificationResult outcome = VerificationResult.REFUTED;
-		if (res != null)
-			for (AnalyzedCFG<A> result : res) {
-				outcome = outcome.lub(verify(result, st, violation));
-				if (outcome.getOutcome() == VerificationOutcome.CONFIRMED)
-					break;
-			}
-		return outcome;
-	}
-
-	@SuppressWarnings("unchecked")
-	private synchronized WarningVerifier<A, D> getVerifier()
-			throws SemanticException {
-		if (verifier == null && getConfiguration().warningVerifier != null) {
-			WarningVerifier<A, D> candidate = (WarningVerifier<A, D>) getConfiguration().warningVerifier;
-			candidate.init(this);
-			verifier = candidate;
-		}
-		return verifier;
 	}
 
 }

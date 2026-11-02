@@ -1,8 +1,11 @@
 package it.unive.lisa.checks.verification;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import it.unive.lisa.TestLanguageFeatures;
 import it.unive.lisa.TestTypeSystem;
@@ -15,6 +18,7 @@ import it.unive.lisa.checks.semantic.SemanticTool;
 import it.unive.lisa.conf.LiSAConfiguration;
 import it.unive.lisa.interprocedural.UniqueScope;
 import it.unive.lisa.lattices.ExpressionSet;
+import it.unive.lisa.outputs.messages.StatementMessage;
 import it.unive.lisa.program.Program;
 import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.cfg.CFG;
@@ -34,8 +38,8 @@ import org.junit.jupiter.api.Test;
 public class VerificationTest {
 
 	private static class StubVerifier
-			implements
-			WarningVerifier<MarkerAbstractLattice, MarkerAbstractDomain> {
+			extends
+			IndividualWarningVerifier<MarkerAbstractLattice, MarkerAbstractDomain> {
 
 		private final Map<AnalyzedCFG<MarkerAbstractLattice>, VerificationResult> answers = new IdentityHashMap<>();
 
@@ -70,11 +74,9 @@ public class VerificationTest {
 	}
 
 	private static SemanticTool<MarkerAbstractLattice, MarkerAbstractDomain> tool(
-			StubVerifier verifier,
 			Map<CFG, Collection<AnalyzedCFG<MarkerAbstractLattice>>> results) {
-		LiSAConfiguration conf = new LiSAConfiguration();
-		conf.warningVerifier = verifier;
-		return new SemanticTool<>(conf, new FileManager("verification-test"), results, null, null);
+		return new SemanticTool<>(new LiSAConfiguration(), new FileManager("verification-test"), results, null,
+				null);
 	}
 
 	@Test
@@ -126,7 +128,7 @@ public class VerificationTest {
 	}
 
 	@Test
-	public void testNoVerifier() throws Exception {
+	public void testWarningsWithoutViolations() throws Exception {
 		Program program = new Program(new TestLanguageFeatures(), new TestTypeSystem());
 		CFG cfg = new CFG(new CodeMemberDescriptor(new SourceCodeLocation("test", 1, 0), program, false, "f"));
 		Statement st = new NoOp(cfg, new SourceCodeLocation("test", 2, 0));
@@ -135,9 +137,13 @@ public class VerificationTest {
 		Map<CFG, Collection<AnalyzedCFG<MarkerAbstractLattice>>> results = new HashMap<>();
 		results.put(cfg, List.of(res));
 
-		SemanticTool<MarkerAbstractLattice, MarkerAbstractDomain> tool = tool(null, results);
-		assertEquals(VerificationResult.POSSIBLE, tool.verify(res, st, Violation.reach()));
-		assertEquals(VerificationResult.POSSIBLE, tool.verify(st, Violation.reach()));
+		StubVerifier verifier = new StubVerifier();
+		verifier.answers.put(res, VerificationResult.REFUTED);
+		SemanticTool<MarkerAbstractLattice, MarkerAbstractDomain> tool = tool(results);
+		// warnings that do not report a violation cannot be verified
+		assertEquals(VerificationResult.POSSIBLE, verifier.verify(tool, new StatementMessage(st, "w")));
+		assertEquals(VerificationResult.REFUTED,
+				verifier.verify(tool, new StatementMessage(st, "w", null, Violation.reach())));
 	}
 
 	@Test
@@ -155,20 +161,55 @@ public class VerificationTest {
 		results.put(cfg, list);
 
 		StubVerifier verifier = new StubVerifier();
-		SemanticTool<MarkerAbstractLattice, MarkerAbstractDomain> tool = tool(verifier, results);
+		SemanticTool<MarkerAbstractLattice, MarkerAbstractDomain> tool = tool(results);
+		StatementMessage reach = new StatementMessage(st, "reach", null, Violation.reach());
+		StatementMessage error = new StatementMessage(st, "error", null, Violation.error());
 
+		// a warning is refuted only if it is refuted in all results
 		verifier.answers.put(first, VerificationResult.REFUTED);
 		verifier.answers.put(second, VerificationResult.REFUTED);
-		assertEquals(VerificationResult.REFUTED, tool.verify(first, st, Violation.reach()));
-		assertEquals(VerificationResult.REFUTED, tool.verify(st, Violation.reach()));
+		assertEquals(VerificationResult.REFUTED, verifier.verify(tool, reach));
 
 		verifier.answers.put(second, VerificationResult.POSSIBLE);
-		assertEquals(VerificationResult.POSSIBLE, tool.verify(st, Violation.error()));
+		assertEquals(VerificationResult.POSSIBLE, verifier.verify(tool, error));
 
+		// and confirmed if it is confirmed in at least one
 		verifier.answers.put(first, VerificationResult.CONFIRMED);
-		assertEquals(VerificationResult.CONFIRMED, tool.verify(st, Violation.error()));
+		assertEquals(VerificationResult.CONFIRMED, verifier.verify(tool, error));
 
-		// the verifier is initialized only once per tool
+		// the pass initializes the verifier once, and verifies all warnings
+		Map<StatementMessage, VerificationResult> verified = verifier.verify(tool, List.of(reach, error));
 		assertEquals(1, verifier.inits);
+		assertEquals(Map.of(reach, VerificationResult.CONFIRMED, error, VerificationResult.CONFIRMED), verified);
+	}
+
+	@Test
+	public void testVerifiedMessages() throws Exception {
+		Program program = new Program(new TestLanguageFeatures(), new TestTypeSystem());
+		CFG cfg = new CFG(new CodeMemberDescriptor(new SourceCodeLocation("test", 1, 0), program, false, "f"));
+		Statement st = new NoOp(cfg, new SourceCodeLocation("test", 2, 0));
+		cfg.addNode(st, true);
+		Violation violation = Violation.reach();
+		StatementMessage warning = new StatementMessage(st, "w", null, violation);
+		assertFalse(warning.isDefinite());
+		assertFalse(warning.isRefuted());
+		assertSame(violation, warning.getViolation());
+
+		assertSame(warning, warning.verified(VerificationResult.POSSIBLE));
+
+		ReproducingInput input = new ReproducingInput(new SourceCodeLocation("test", 1, 0), "x", null, 0, "42");
+		StatementMessage confirmed = warning
+				.verified(new VerificationResult(VerificationOutcome.CONFIRMED, null, List.of(input)));
+		assertTrue(confirmed.isDefinite());
+		assertFalse(confirmed.isRefuted());
+		assertEquals(List.of(input), confirmed.getReproducingInputs());
+		assertSame(violation, confirmed.getViolation());
+		assertNotEquals(warning, confirmed);
+
+		StatementMessage refuted = warning.verified(VerificationResult.REFUTED);
+		assertFalse(refuted.isDefinite());
+		assertTrue(refuted.isRefuted());
+		assertTrue(refuted.getReproducingInputs().isEmpty());
+		assertNotEquals(warning, refuted);
 	}
 }

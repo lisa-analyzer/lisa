@@ -1,6 +1,8 @@
 package it.unive.lisa.outputs.messages;
 
 import it.unive.lisa.checks.verification.ReproducingInput;
+import it.unive.lisa.checks.verification.VerificationResult;
+import it.unive.lisa.checks.verification.Violation;
 import it.unive.lisa.interprocedural.ScopeId;
 import it.unive.lisa.program.cfg.statement.Expression;
 import java.util.List;
@@ -69,6 +71,51 @@ public class ExpressionMessage
 			boolean definite,
 			List<ReproducingInput> reproducingInputs) {
 		super(expression, message, context, definite, reproducingInputs);
+	}
+
+	/**
+	 * Builds a possible message reporting the given violation, that can be
+	 * verified after the analysis.
+	 *
+	 * @param expression the expression where this message is reported on
+	 * @param message    the message of this message
+	 * @param context    the context where this message was reported on (can
+	 *                       be {@code null})
+	 * @param violation  the violation reported by this message
+	 */
+	public ExpressionMessage(
+			Expression expression,
+			String message,
+			ScopeId<?> context,
+			Violation violation) {
+		super(expression, message, context, violation);
+	}
+
+	private ExpressionMessage(
+			Expression expression,
+			String message,
+			ScopeId<?> context,
+			boolean definite,
+			boolean refuted,
+			List<ReproducingInput> reproducingInputs,
+			Violation violation) {
+		super(expression, message, context, definite, refuted, reproducingInputs, violation);
+	}
+
+	@Override
+	public ExpressionMessage verified(
+			VerificationResult result) {
+		switch (result.getOutcome()) {
+		case CONFIRMED:
+			return new ExpressionMessage(getExpression(), getMessage(), getContext(), true, false,
+					result.getReproducingInputs(), getViolation());
+		case REFUTED:
+			return new ExpressionMessage(getExpression(), getMessage(), getContext(), false, true, null,
+					getViolation());
+		case POSSIBLE:
+		default:
+			return this;
+		}
 	}
 
 	/**

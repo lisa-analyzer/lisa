@@ -13,6 +13,8 @@ import it.unive.lisa.analysis.AnalyzedCFG;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.checks.semantic.SemanticCheck;
 import it.unive.lisa.checks.semantic.SemanticTool;
+import it.unive.lisa.checks.verification.IndividualWarningVerifier;
+import it.unive.lisa.outputs.messages.StatementMessage;
 import it.unive.lisa.checks.verification.ReproducingInput;
 import it.unive.lisa.checks.verification.VerificationOutcome;
 import it.unive.lisa.checks.verification.VerificationResult;
@@ -98,6 +100,9 @@ public class BoundedModelCheckerTest {
 
 	private static SemanticTool<?, ?> tool;
 
+	@SuppressWarnings("rawtypes")
+	private static IndividualWarningVerifier verifier;
+
 	private static class Capture<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
 			implements
 			SemanticCheck<A, D> {
@@ -120,11 +125,12 @@ public class BoundedModelCheckerTest {
 		DefaultConfiguration conf = new DefaultConfiguration();
 		conf.analysis = DefaultConfiguration.defaultAbstractDomain();
 		conf.openCallPolicy = ReturnTopPolicy.INSTANCE;
-		conf.warningVerifier = new BoundedModelChecker<>();
 		conf.workdir = Files.createTempDirectory("bmc").toString();
 		conf.semanticChecks.add(new Capture<>());
 		new LiSA(conf).run(program);
 		assertNotNull(tool);
+		verifier = new BoundedModelChecker<>();
+		verifier.init(tool);
 	}
 
 	private static CFG cfg(
@@ -145,7 +151,15 @@ public class BoundedModelCheckerTest {
 			String statement,
 			Violation violation)
 			throws SemanticException {
-		return tool.verify(node(cfg(cfg), statement), violation);
+		return check(node(cfg(cfg), statement), violation);
+	}
+
+	@SuppressWarnings("unchecked")
+	private static VerificationResult check(
+			Statement st,
+			Violation violation)
+			throws SemanticException {
+		return verifier.verify(tool, new StatementMessage(st, "alarm", null, violation));
 	}
 
 	private static BinaryExpression is(
@@ -169,7 +183,7 @@ public class BoundedModelCheckerTest {
 	@Test
 	public void shallowBugIsConfirmedWithItsInputs() throws SemanticException {
 		Statement ret = node(cfg("shallow"), "return");
-		VerificationResult result = tool.verify(ret, Violation.condition(ret, is("y", 1)));
+		VerificationResult result = check(ret, Violation.condition(ret, is("y", 1)));
 		assertEquals(VerificationOutcome.CONFIRMED, result.getOutcome(), result.toString());
 		assertEquals("42", valueOf(result, "parameter x of"));
 	}

@@ -285,13 +285,13 @@ public class JsonReport {
 	 * representation of the target they have been reported on (if any, and if
 	 * it is not a cfg), the context they have been reported on and its hash (if
 	 * any), the kind of the target, the text of the message, whether the
-	 * message is definite or possible, and the inputs reproducing the reported
+	 * message is definite, refuted, or possible, and the inputs reproducing the reported
 	 * behavior (if any).
 	 * 
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 */
 	@JsonPropertyOrder({ "location", "cfg", "text", "context", "contextHash", "targetKind", "message", "definite",
-			"reproducingInputs" })
+			"refuted", "reproducingInputs" })
 	public static class JsonMessage
 			implements
 			Comparable<JsonMessage> {
@@ -317,6 +317,9 @@ public class JsonReport {
 
 		private boolean definite;
 
+		@JsonInclude(JsonInclude.Include.NON_DEFAULT)
+		private boolean refuted;
+
 		@JsonInclude(JsonInclude.Include.NON_EMPTY)
 		private List<JsonReproducingInput> reproducingInputs;
 
@@ -333,6 +336,7 @@ public class JsonReport {
 			this.targetKind = null;
 			this.message = null;
 			this.definite = false;
+			this.refuted = false;
 			this.reproducingInputs = new ArrayList<>();
 		}
 
@@ -353,6 +357,7 @@ public class JsonReport {
 			this.targetKind = message.getTag();
 			this.message = message.getMessage();
 			this.definite = message.isDefinite();
+			this.refuted = message.isRefuted();
 			this.reproducingInputs = new ArrayList<>();
 			for (ReproducingInput input : message.getReproducingInputs())
 				this.reproducingInputs.add(new JsonReproducingInput(input));
@@ -520,6 +525,26 @@ public class JsonReport {
 		}
 
 		/**
+		 * Yields whether or not this message is refuted, that is, if the
+		 * reported behavior happens in no execution of the program.
+		 * 
+		 * @return {@code true} if this message is refuted
+		 */
+		public boolean isRefuted() {
+			return refuted;
+		}
+
+		/**
+		 * Sets whether or not this message is refuted.
+		 * 
+		 * @param refuted {@code true} if this message is refuted
+		 */
+		public void setRefuted(
+				boolean refuted) {
+			this.refuted = refuted;
+		}
+
+		/**
 		 * Yields the inputs reproducing the behavior reported by this message.
 		 * 
 		 * @return the inputs (empty if none are known)
@@ -554,6 +579,8 @@ public class JsonReport {
 				res.append("[").append(targetKind).append("] ");
 			if (definite)
 				res.append("[DEFINITE] ");
+			if (refuted)
+				res.append("[REFUTED] ");
 			res.append(message);
 			if (!reproducingInputs.isEmpty())
 				res.append(" ").append(reproducingInputs);
@@ -562,8 +589,8 @@ public class JsonReport {
 
 		@Override
 		public int hashCode() {
-			return Objects.hash(cfg, context, contextHash, definite, location, message, reproducingInputs, targetKind,
-					text);
+			return Objects.hash(cfg, context, contextHash, definite, refuted, location, message, reproducingInputs,
+					targetKind, text);
 		}
 
 		@Override
@@ -577,6 +604,7 @@ public class JsonReport {
 				return false;
 			JsonMessage other = (JsonMessage) obj;
 			return definite == other.definite
+					&& refuted == other.refuted
 					&& Objects.equals(location, other.location)
 					&& Objects.equals(cfg, other.cfg)
 					&& Objects.equals(text, other.text)
@@ -606,6 +634,8 @@ public class JsonReport {
 			if ((cmp = StringUtils.compare(message, o.message)) != 0)
 				return cmp;
 			if ((cmp = Boolean.compare(definite, o.definite)) != 0)
+				return cmp;
+			if ((cmp = Boolean.compare(refuted, o.refuted)) != 0)
 				return cmp;
 			if ((cmp = Integer.compare(reproducingInputs.size(), o.reproducingInputs.size())) != 0)
 				return cmp;

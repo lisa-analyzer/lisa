@@ -1,6 +1,8 @@
 package it.unive.lisa.outputs.messages;
 
 import it.unive.lisa.checks.verification.ReproducingInput;
+import it.unive.lisa.checks.verification.VerificationResult;
+import it.unive.lisa.checks.verification.Violation;
 import it.unive.lisa.interprocedural.ScopeId;
 import it.unive.lisa.program.cfg.statement.Statement;
 import java.util.List;
@@ -71,8 +73,76 @@ public class StatementMessage
 			ScopeId<?> context,
 			boolean definite,
 			List<ReproducingInput> reproducingInputs) {
-		super(statement.getLocation(), message, context, definite, reproducingInputs);
+		this(statement, message, context, definite, false, reproducingInputs, null);
+	}
+
+	/**
+	 * Builds a possible message reporting the given violation, that can be
+	 * verified after the analysis.
+	 *
+	 * @param statement the statement where this message is reported on
+	 * @param message   the message of this message
+	 * @param context   the context where this message was reported on (can
+	 *                      be {@code null})
+	 * @param violation the violation reported by this message
+	 */
+	public StatementMessage(
+			Statement statement,
+			String message,
+			ScopeId<?> context,
+			Violation violation) {
+		this(statement, message, context, false, false, null, violation);
+	}
+
+	/**
+	 * Builds the message.
+	 *
+	 * @param statement         the statement where this message is reported on
+	 * @param message           the message of this message
+	 * @param context           the context where this message was reported on
+	 *                              (can be {@code null})
+	 * @param definite          whether or not this message is definite
+	 * @param refuted           whether or not this message is refuted
+	 * @param reproducingInputs the inputs reproducing the behavior reported by
+	 *                              this message (can be {@code null} if no
+	 *                              inputs are known)
+	 * @param violation         the violation reported by this message (can be
+	 *                              {@code null} if unknown)
+	 */
+	protected StatementMessage(
+			Statement statement,
+			String message,
+			ScopeId<?> context,
+			boolean definite,
+			boolean refuted,
+			List<ReproducingInput> reproducingInputs,
+			Violation violation) {
+		super(statement.getLocation(), message, context, definite, refuted, reproducingInputs, violation);
 		this.statement = statement;
+	}
+
+	/**
+	 * Yields the message resulting from the verification of the violation
+	 * reported by this one: a definite message with the reproducing inputs of
+	 * the result if the violation has been confirmed, a refuted message if it
+	 * has been refuted, and this message otherwise.
+	 *
+	 * @param result the result of the verification
+	 *
+	 * @return the verified message
+	 */
+	public StatementMessage verified(
+			VerificationResult result) {
+		switch (result.getOutcome()) {
+		case CONFIRMED:
+			return new StatementMessage(statement, getMessage(), getContext(), true, false,
+					result.getReproducingInputs(), getViolation());
+		case REFUTED:
+			return new StatementMessage(statement, getMessage(), getContext(), false, true, null, getViolation());
+		case POSSIBLE:
+		default:
+			return this;
+		}
 	}
 
 	/**

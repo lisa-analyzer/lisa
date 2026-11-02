@@ -110,10 +110,12 @@ public class LiSAConfiguration
 	public AbstractDomain<?> analysis;
 
 	/**
-	 * The {@link WarningVerifier} instance used by {@link SemanticCheck}s to
-	 * verify candidate {@link Violation}s before issuing warnings. If no value
-	 * is set for this field, all violations are deemed possible. Defaults to
-	 * {@code null}.
+	 * The {@link WarningVerifier} instance used to verify the {@link Violation}s
+	 * reported by the warnings issued by the {@link SemanticCheck}s, once all
+	 * checks have been executed: confirmed warnings become definite (with
+	 * their reproducing inputs), and refuted warnings are marked as refuted.
+	 * If no value is set for this field, no verification takes place and all
+	 * warnings are possible. Defaults to {@code null}.
 	 */
 	public WarningVerifier<?, ?> warningVerifier;
 

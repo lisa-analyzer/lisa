@@ -8,7 +8,7 @@ import it.unive.lisa.checks.semantic.SemanticTool;
 import it.unive.lisa.checks.verification.VerificationOutcome;
 import it.unive.lisa.checks.verification.VerificationResult;
 import it.unive.lisa.checks.verification.Violation;
-import it.unive.lisa.checks.verification.WarningVerifier;
+import it.unive.lisa.checks.verification.IndividualWarningVerifier;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.triage.inputs.ReproducingInputs;
@@ -31,7 +31,7 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 /**
- * A {@link WarningVerifier} based on bounded model checking: the executions of
+ * An {@link IndividualWarningVerifier} based on bounded model checking: the executions of
  * the {@link AlarmModel} of a violation are unrolled up to a given number of
  * steps (see {@link Unrolling}), and an SMT solver searches for one that
  * reaches the violation. The result is:
@@ -56,8 +56,8 @@ import java.util.function.Supplier;
  * @param <D> the type of the domain of the analysis
  */
 public class BoundedModelChecker<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
-		implements
-		WarningVerifier<A, D> {
+		extends
+		IndividualWarningVerifier<A, D> {
 
 	/**
 	 * The default number of steps unrolled.

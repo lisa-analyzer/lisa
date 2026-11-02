@@ -1,6 +1,7 @@
 package it.unive.lisa.outputs.messages;
 
 import it.unive.lisa.checks.verification.ReproducingInput;
+import it.unive.lisa.checks.verification.Violation;
 import it.unive.lisa.interprocedural.ScopeId;
 import it.unive.lisa.program.cfg.CodeLocation;
 import java.util.List;
@@ -74,7 +75,34 @@ public abstract class MessageWithLocation
 			ScopeId<?> context,
 			boolean definite,
 			List<ReproducingInput> reproducingInputs) {
-		super(message, context, definite, reproducingInputs);
+		this(location, message, context, definite, false, reproducingInputs, null);
+	}
+
+	/**
+	 * Builds the message.
+	 *
+	 * @param location          the location in the program where this message
+	 *                              is reported on
+	 * @param message           the message of this message
+	 * @param context           the context where this message was reported on
+	 *                              (can be {@code null})
+	 * @param definite          whether or not this message is definite
+	 * @param refuted           whether or not this message is refuted
+	 * @param reproducingInputs the inputs reproducing the behavior reported by
+	 *                              this message (can be {@code null} if no
+	 *                              inputs are known)
+	 * @param violation         the violation reported by this message (can be
+	 *                              {@code null} if unknown)
+	 */
+	protected MessageWithLocation(
+			CodeLocation location,
+			String message,
+			ScopeId<?> context,
+			boolean definite,
+			boolean refuted,
+			List<ReproducingInput> reproducingInputs,
+			Violation violation) {
+		super(message, context, definite, refuted, reproducingInputs, violation);
 		Objects.requireNonNull(location, "The location of a message with location cannot be null");
 		this.location = location;
 	}

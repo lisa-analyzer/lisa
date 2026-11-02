@@ -2,19 +2,24 @@ package it.unive.lisa.checks.verification;
 
 import it.unive.lisa.analysis.AbstractDomain;
 import it.unive.lisa.analysis.AbstractLattice;
-import it.unive.lisa.analysis.AnalyzedCFG;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.checks.semantic.SemanticCheck;
 import it.unive.lisa.checks.semantic.SemanticTool;
-import it.unive.lisa.program.cfg.statement.Statement;
+import it.unive.lisa.outputs.messages.StatementMessage;
+import java.util.Collection;
+import java.util.Map;
 
 /**
- * An algorithm that, given the results of the analysis, verifies candidate
- * {@link Violation}s before {@link SemanticCheck}s issue warnings for them,
+ * An algorithm that, given the results of the analysis, verifies the
+ * {@link Violation}s reported by the warnings issued by {@link SemanticCheck}s,
  * either confirming them, refuting them, or deeming them possible (see
- * {@link VerificationOutcome}). The verifier to use is selected through the
- * configuration of the analysis, and it is queried by checks through
- * {@link SemanticTool#verify(AnalyzedCFG, Statement, Violation)}.
+ * {@link VerificationOutcome}). Checks issue possible warnings, attaching the
+ * violation they report (see
+ * {@link SemanticTool#warnOn(it.unive.lisa.program.cfg.statement.Statement, it.unive.lisa.interprocedural.ScopeId, Violation, String)}):
+ * once all checks have been executed, LiSA passes all the warnings carrying a
+ * violation to the verifier selected through the configuration of the
+ * analysis, and turns confirmed warnings into definite ones (with their
+ * reproducing inputs) and refuted warnings into refuted ones.
  *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  *
@@ -25,39 +30,21 @@ import it.unive.lisa.program.cfg.statement.Statement;
 public interface WarningVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<A>> {
 
 	/**
-	 * Initializes this verifier with the given tool, that contains the results
-	 * of the analysis. A call to this method should effectively re-initialize
-	 * the verifier as if it is yet to be used, discarding any information
-	 * computed for previous tools. This is useful when the same instance is
-	 * used in multiple analyses.
+	 * Verifies the violations reported by the given warnings, given the
+	 * results of the analysis contained in the given tool. Verifiers are free
+	 * to verify only some of the warnings (e.g., to bound the verification
+	 * time): warnings that are not verified are left possible.
 	 *
-	 * @param tool the tool containing the results of the analysis
+	 * @param tool     the tool containing the results of the analysis
+	 * @param warnings the warnings to verify, each carrying the violation it
+	 *                     reports ({@link StatementMessage#getViolation()})
 	 *
-	 * @throws SemanticException if something goes wrong during the
-	 *                               initialization
-	 */
-	void init(
-			SemanticTool<A, D> tool)
-			throws SemanticException;
-
-	/**
-	 * Verifies whether the given violation can happen at the given statement,
-	 * considering only the executions analyzed in the context of the given
-	 * result. Implementations should return
-	 * {@link VerificationOutcome#POSSIBLE} for kinds of violations they do not
-	 * support.
-	 *
-	 * @param result    the result containing the statement
-	 * @param st        the statement on which the warning would be issued
-	 * @param violation the violation to verify
-	 *
-	 * @return the result of the verification
+	 * @return the result of the verification of each verified warning
 	 *
 	 * @throws SemanticException if something goes wrong during the verification
 	 */
-	VerificationResult verify(
-			AnalyzedCFG<A> result,
-			Statement st,
-			Violation violation)
+	Map<StatementMessage, VerificationResult> verify(
+			SemanticTool<A, D> tool,
+			Collection<StatementMessage> warnings)
 			throws SemanticException;
 }

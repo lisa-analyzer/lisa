@@ -110,27 +110,6 @@ public class ReportingTool {
 	}
 
 	/**
-	 * Reports a new warning that is meant to be a generic warning on the
-	 * program. For warnings related to one of the components of the program
-	 * (e.g., a CFG, a statement, ...) rely on the other methods provided by
-	 * this class.
-	 * 
-	 * @param message           the message of the warning
-	 * @param definite          whether or not the warning is definite, that is,
-	 *                              if the reported behavior happens in at least
-	 *                              one execution of the program
-	 * @param reproducingInputs the inputs reproducing the behavior reported by
-	 *                              the warning (can be {@code null} if no
-	 *                              inputs are known)
-	 */
-	public void warn(
-			String message,
-			boolean definite,
-			List<ReproducingInput> reproducingInputs) {
-		warnings.add(new Message(message, definite, reproducingInputs));
-	}
-
-	/**
 	 * Reports a new warning with the given message on the declaration of the
 	 * given unit.
 	 * 
@@ -141,27 +120,6 @@ public class ReportingTool {
 			Unit unit,
 			String message) {
 		warnings.add(new UnitMessage(unit, message));
-	}
-
-	/**
-	 * Reports a new warning with the given message on the declaration of the
-	 * given unit.
-	 * 
-	 * @param unit              the unit to warn on
-	 * @param message           the message of the warning
-	 * @param definite          whether or not the warning is definite, that is,
-	 *                              if the reported behavior happens in at least
-	 *                              one execution of the program
-	 * @param reproducingInputs the inputs reproducing the behavior reported by
-	 *                              the warning (can be {@code null} if no
-	 *                              inputs are known)
-	 */
-	public void warnOn(
-			Unit unit,
-			String message,
-			boolean definite,
-			List<ReproducingInput> reproducingInputs) {
-		warnings.add(new UnitMessage(unit, message, definite, reproducingInputs));
 	}
 
 	/**
@@ -181,29 +139,6 @@ public class ReportingTool {
 
 	/**
 	 * Reports a new warning with the given message on the declaration of the
-	 * given global.
-	 * 
-	 * @param unit              the unit containing the global to warn on
-	 * @param global            the global to warn on
-	 * @param message           the message of the warning
-	 * @param definite          whether or not the warning is definite, that is,
-	 *                              if the reported behavior happens in at least
-	 *                              one execution of the program
-	 * @param reproducingInputs the inputs reproducing the behavior reported by
-	 *                              the warning (can be {@code null} if no
-	 *                              inputs are known)
-	 */
-	public void warnOn(
-			Unit unit,
-			Global global,
-			String message,
-			boolean definite,
-			List<ReproducingInput> reproducingInputs) {
-		warnings.add(new GlobalMessage(unit, global, message, definite, reproducingInputs));
-	}
-
-	/**
-	 * Reports a new warning with the given message on the declaration of the
 	 * given cfg.
 	 * 
 	 * @param cfg     the cfg to warn on
@@ -217,27 +152,6 @@ public class ReportingTool {
 
 	/**
 	 * Reports a new warning with the given message on the declaration of the
-	 * given cfg.
-	 * 
-	 * @param cfg               the cfg to warn on
-	 * @param message           the message of the warning
-	 * @param definite          whether or not the warning is definite, that is,
-	 *                              if the reported behavior happens in at least
-	 *                              one execution of the program
-	 * @param reproducingInputs the inputs reproducing the behavior reported by
-	 *                              the warning (can be {@code null} if no
-	 *                              inputs are known)
-	 */
-	public void warnOn(
-			CFG cfg,
-			String message,
-			boolean definite,
-			List<ReproducingInput> reproducingInputs) {
-		warnings.add(new CFGMessage(cfg, message, definite, reproducingInputs));
-	}
-
-	/**
-	 * Reports a new warning with the given message on the declaration of the
 	 * cfg represented by the given descriptor.
 	 * 
 	 * @param descriptor the descriptor cfg to warn on
@@ -247,27 +161,6 @@ public class ReportingTool {
 			CodeMemberDescriptor descriptor,
 			String message) {
 		warnings.add(new CFGDescriptorMessage(descriptor, message));
-	}
-
-	/**
-	 * Reports a new warning with the given message on the declaration of the
-	 * cfg represented by the given descriptor.
-	 * 
-	 * @param descriptor        the descriptor cfg to warn on
-	 * @param message           the message of the warning
-	 * @param definite          whether or not the warning is definite, that is,
-	 *                              if the reported behavior happens in at least
-	 *                              one execution of the program
-	 * @param reproducingInputs the inputs reproducing the behavior reported by
-	 *                              the warning (can be {@code null} if no
-	 *                              inputs are known)
-	 */
-	public void warnOn(
-			CodeMemberDescriptor descriptor,
-			String message,
-			boolean definite,
-			List<ReproducingInput> reproducingInputs) {
-		warnings.add(new CFGDescriptorMessage(descriptor, message, definite, reproducingInputs));
 	}
 
 	/**
@@ -288,31 +181,6 @@ public class ReportingTool {
 	}
 
 	/**
-	 * Reports a new warning with the given message on the given statement. If
-	 * {@code statement} is an instance of {@link Expression}, then
-	 * {@link #warnOn(Expression, String, boolean, List)} is invoked.
-	 * 
-	 * @param statement         the statement to warn on
-	 * @param message           the message of the warning
-	 * @param definite          whether or not the warning is definite, that is,
-	 *                              if the reported behavior happens in at least
-	 *                              one execution of the program
-	 * @param reproducingInputs the inputs reproducing the behavior reported by
-	 *                              the warning (can be {@code null} if no
-	 *                              inputs are known)
-	 */
-	public void warnOn(
-			Statement statement,
-			String message,
-			boolean definite,
-			List<ReproducingInput> reproducingInputs) {
-		if (statement instanceof Expression)
-			warnOn((Expression) statement, message, definite, reproducingInputs);
-		else
-			warnings.add(new StatementMessage(statement, message, definite, reproducingInputs));
-	}
-
-	/**
 	 * Reports a new warning with the given message on the given expression.
 	 * 
 	 * @param expression the expression to warn on
@@ -325,26 +193,6 @@ public class ReportingTool {
 	}
 
 	/**
-	 * Reports a new warning with the given message on the given expression.
-	 * 
-	 * @param expression        the expression to warn on
-	 * @param message           the message of the warning
-	 * @param definite          whether or not the warning is definite, that is,
-	 *                              if the reported behavior happens in at least
-	 *                              one execution of the program
-	 * @param reproducingInputs the inputs reproducing the behavior reported by
-	 *                              the warning (can be {@code null} if no
-	 *                              inputs are known)
-	 */
-	public void warnOn(
-			Expression expression,
-			String message,
-			boolean definite,
-			List<ReproducingInput> reproducingInputs) {
-		warnings.add(new ExpressionMessage(expression, message, definite, reproducingInputs));
-	}
-
-	/**
 	 * Reports the given warning.
 	 *
 	 * @param warning the warning to report
@@ -352,6 +200,21 @@ public class ReportingTool {
 	protected void addWarning(
 			Message warning) {
 		warnings.add(warning);
+	}
+
+	/**
+	 * Replaces a warning with another one (e.g., the result of its
+	 * verification). This is meant to be used by LiSA when verifying warnings
+	 * after the semantic checks have been executed.
+	 *
+	 * @param original    the warning to replace
+	 * @param replacement the new warning
+	 */
+	public void replaceWarning(
+			Message original,
+			Message replacement) {
+		warnings.remove(original);
+		warnings.add(replacement);
 	}
 
 	/**

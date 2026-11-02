@@ -18,7 +18,7 @@ import it.unive.lisa.checks.semantic.SemanticTool;
 import it.unive.lisa.checks.verification.VerificationOutcome;
 import it.unive.lisa.checks.verification.VerificationResult;
 import it.unive.lisa.checks.verification.Violation;
-import it.unive.lisa.checks.verification.WarningVerifier;
+import it.unive.lisa.checks.verification.IndividualWarningVerifier;
 import it.unive.lisa.imp.IMPFrontend;
 import it.unive.lisa.interprocedural.ReturnTopPolicy;
 import it.unive.lisa.program.Program;
@@ -135,9 +135,9 @@ public class TriageBenchmarkTest {
 		}
 	}
 
-	private static Map<String, Supplier<WarningVerifier<?, ?>>> configurations() {
+	private static Map<String, Supplier<IndividualWarningVerifier<?, ?>>> configurations() {
 		Supplier<it.unive.lisa.triage.smt.SmtSolver> z3 = () -> SmtLibProcessSolver.z3(SOLVER_TIMEOUT);
-		Map<String, Supplier<WarningVerifier<?, ?>>> result = new LinkedHashMap<>();
+		Map<String, Supplier<IndividualWarningVerifier<?, ?>>> result = new LinkedHashMap<>();
 		result.put("reach", ReachabilityVerifier::new);
 		result.put("bmc", () -> new BoundedModelChecker<>(BMC_BOUND, z3, SymbolicStore.DEFAULT_MAX_CASES));
 		for (boolean seeding : new boolean[] { true, false })
@@ -181,8 +181,8 @@ public class TriageBenchmarkTest {
 					alarm = st;
 			assertNotNull(alarm, "No alarm in " + name);
 			AnalyzedCFG result = (AnalyzedCFG) tool.getResultOf(cfg).iterator().next();
-			for (Map.Entry<String, Supplier<WarningVerifier<?, ?>>> c : configurations().entrySet()) {
-				WarningVerifier verifier = c.getValue().get();
+			for (Map.Entry<String, Supplier<IndividualWarningVerifier<?, ?>>> c : configurations().entrySet()) {
+				IndividualWarningVerifier verifier = c.getValue().get();
 				verifier.init(tool);
 				long start = System.nanoTime();
 				String verdict, explanation;
