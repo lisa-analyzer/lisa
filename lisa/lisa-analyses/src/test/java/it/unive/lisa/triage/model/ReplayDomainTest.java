@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import it.unive.lisa.analysis.numeric.Interval;
+import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.DefaultConfiguration;
 import it.unive.lisa.TestParameterProvider;
 import it.unive.lisa.analysis.Analysis;
@@ -198,5 +200,16 @@ public class ReplayDomainTest {
 		assertTrue(other.lessOrEqual(one.lub(other)));
 		assertFalse(one.lessOrEqual(other));
 		assertEquals(2, one.lub(other).getExecutionState().getStore().getCases().size());
+	}
+
+	@Test
+	public void innerDomainsAreVisible() {
+		// the components of the wrapped domain can be retrieved through the
+		// wrapper
+		ValueDomain<?> value = domain.getDomainInstance(ValueDomain.class);
+		assertTrue(value instanceof Interval, String.valueOf(value));
+		assertTrue(domain.getDomainInstance(ReplayDomain.class) == domain);
+		assertTrue(domain.getDomainInstance(SimpleAbstractDomain.class) != null);
+		assertTrue(domain.getDomainInstance(String.class) == null);
 	}
 }

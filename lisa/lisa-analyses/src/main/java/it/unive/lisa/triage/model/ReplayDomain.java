@@ -30,6 +30,8 @@ import org.apache.commons.lang3.tuple.Pair;
  * @param <A> the type of the abstract states of the wrapped domain
  * @param <D> the type of the wrapped domain
  */
+import java.util.Collection;
+
 public class ReplayDomain<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
 		implements
 		AbstractDomain<ReplayState<A>> {
@@ -186,4 +188,12 @@ public class ReplayDomain<A extends AbstractLattice<A>, D extends AbstractDomain
 			ScopeId<?> context) {
 		return domain.makeOracle(state.getInner(), context);
 	}
+	@Override
+	public <T> Collection<T> getAllDomainInstances(
+			Class<T> domain) {
+		Collection<T> result = AbstractDomain.super.getAllDomainInstances(domain);
+		result.addAll(this.domain.getAllDomainInstances(domain));
+		return result;
+	}
+
 }

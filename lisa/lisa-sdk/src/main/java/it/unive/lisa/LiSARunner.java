@@ -154,7 +154,8 @@ public class LiSARunner<A extends AbstractLattice<A>, D extends AbstractDomain<A
 	 * Verifies the violations reported by the warnings of the given tool
 	 * through the given verifier, replacing each confirmed or refuted warning
 	 * with its verified version. Warnings are passed to the verifier in a
-	 * deterministic order.
+	 * deterministic order. If the verifier fails, the error is logged and the
+	 * warnings are left possible.
 	 */
 	private void verifyWarnings(
 			SemanticTool<A, D> tool,
@@ -177,8 +178,10 @@ public class LiSARunner<A extends AbstractLattice<A>, D extends AbstractDomain<A
 					if (verified != result.getKey())
 						tool.replaceWarning(result.getKey(), verified);
 				}
-			} catch (SemanticException e) {
-				throw new AnalysisExecutionException("Exception while verifying warnings", e);
+			} catch (SemanticException | RuntimeException e) {
+				// a failing verification does not invalidate the analysis: the
+				// warnings that have not been verified stay possible
+				LOG.error("Exception while verifying warnings: unverified warnings are left possible", e);
 			}
 		});
 	}

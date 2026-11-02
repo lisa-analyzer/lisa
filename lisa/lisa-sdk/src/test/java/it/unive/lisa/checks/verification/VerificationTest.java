@@ -25,6 +25,7 @@ import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeMemberDescriptor;
 import it.unive.lisa.program.cfg.statement.NoOp;
 import it.unive.lisa.program.cfg.statement.Statement;
+import it.unive.lisa.type.Untyped;
 import it.unive.lisa.util.file.FileManager;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -33,6 +34,7 @@ import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.junit.jupiter.api.Test;
 
 public class VerificationTest {
@@ -57,6 +59,34 @@ public class VerificationTest {
 				Statement st,
 				Violation violation) {
 			return answers.get(result);
+		}
+
+	}
+
+	private static class StatementStub
+			extends
+			IndividualWarningVerifier<MarkerAbstractLattice, MarkerAbstractDomain> {
+
+		private final Map<Statement, VerificationResult> answers = new IdentityHashMap<>();
+
+		private final List<Statement> asked = new ArrayList<>();
+
+		private boolean fail = false;
+
+		@Override
+		public void init(
+				SemanticTool<MarkerAbstractLattice, MarkerAbstractDomain> tool) {
+		}
+
+		@Override
+		public VerificationResult verify(
+				AnalyzedCFG<MarkerAbstractLattice> result,
+				Statement st,
+				Violation violation) {
+			if (fail)
+				throw new IllegalStateException("failing on purpose");
+			asked.add(st);
+			return answers.get(st);
 		}
 
 	}
@@ -163,7 +193,7 @@ public class VerificationTest {
 		StubVerifier verifier = new StubVerifier();
 		SemanticTool<MarkerAbstractLattice, MarkerAbstractDomain> tool = tool(results);
 		StatementMessage reach = new StatementMessage(st, "reach", null, Violation.reach());
-		StatementMessage error = new StatementMessage(st, "error", null, Violation.error());
+		StatementMessage error = new StatementMessage(st, "other", null, Violation.reach());
 
 		// a warning is refuted only if it is refuted in all results
 		verifier.answers.put(first, VerificationResult.REFUTED);
@@ -211,5 +241,58 @@ public class VerificationTest {
 		assertTrue(refuted.isRefuted());
 		assertTrue(refuted.getReproducingInputs().isEmpty());
 		assertNotEquals(warning, refuted);
+	}
+
+	@Test
+	public void testPropagatedErrors() throws Exception {
+		Program program = new Program(new TestLanguageFeatures(), new TestTypeSystem());
+		CFG cfg = new CFG(new CodeMemberDescriptor(new SourceCodeLocation("test", 1, 0), program, false, "f"));
+		Statement first = new NoOp(cfg, new SourceCodeLocation("test", 2, 0));
+		Statement second = new NoOp(cfg, new SourceCodeLocation("test", 3, 0));
+		Statement ret = new NoOp(cfg, new SourceCodeLocation("test", 4, 0));
+		Statement clean = new NoOp(cfg, new SourceCodeLocation("test", 5, 0));
+		cfg.addNode(first, true);
+		cfg.addNode(second);
+		cfg.addNode(ret);
+		cfg.addNode(clean);
+
+		// two errors, raised at first and second, reach the post-state of ret
+		AnalysisState<MarkerAbstractLattice> withErrors = state()
+				.addError(new AnalysisState.Error(Untyped.INSTANCE, first), state().getExecution())
+				.addError(new AnalysisState.Error(Untyped.INSTANCE, second), state().getExecution());
+		Map<Statement, AnalysisState<MarkerAbstractLattice>> states = new HashMap<>();
+		states.put(ret, withErrors);
+		states.put(clean, state());
+		AnalyzedCFG<MarkerAbstractLattice> res = new AnalyzedCFG<>(cfg, new UniqueScope<>(), state(),
+				new HashMap<>(), states);
+		Map<CFG, Collection<AnalyzedCFG<MarkerAbstractLattice>>> results = new HashMap<>();
+		results.put(cfg, List.of(res));
+		SemanticTool<MarkerAbstractLattice, MarkerAbstractDomain> tool = tool(results);
+
+		StatementStub verifier = new StatementStub();
+		StatementMessage error = new StatementMessage(ret, "error", null, Violation.error());
+
+		// the errors are verified where they are raised, not where they are
+		// reported
+		verifier.answers.put(first, VerificationResult.REFUTED);
+		verifier.answers.put(second, VerificationResult.REFUTED);
+		assertEquals(VerificationResult.REFUTED, verifier.verify(tool, error));
+		assertEquals(Set.of(first, second), new HashSet<>(verifier.asked));
+		assertEquals(2, verifier.asked.size());
+
+		verifier.asked.clear();
+		verifier.answers.put(second, VerificationResult.CONFIRMED);
+		assertEquals(VerificationResult.CONFIRMED, verifier.verify(tool, error));
+
+		// no error reaches clean: the violation is refuted without
+		// querying the verifier
+		verifier.asked.clear();
+		assertEquals(VerificationResult.REFUTED,
+				verifier.verify(tool, new StatementMessage(clean, "error", null, Violation.error())));
+		assertTrue(verifier.asked.isEmpty());
+
+		// a failing verification yields a possible warning
+		verifier.fail = true;
+		assertEquals(VerificationOutcome.POSSIBLE, verifier.verify(tool, error).getOutcome());
 	}
 }

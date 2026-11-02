@@ -25,6 +25,8 @@ import org.apache.commons.lang3.tuple.Pair;
  * @param <D> the type of {@link AbstractDomain} that produces instances of
  *                {@code A}
  */
+import java.util.Collection;
+
 public class HistoryDomain<
 		D extends AbstractDomain<A>,
 		A extends AbstractLattice<A>>
@@ -156,4 +158,12 @@ public class HistoryDomain<
 			ScopeId<?> context) {
 		return domain.makeOracle(state.head(), context);
 	}
+	@Override
+	public <T> Collection<T> getAllDomainInstances(
+			Class<T> domain) {
+		Collection<T> result = AbstractDomain.super.getAllDomainInstances(domain);
+		result.addAll(this.domain.getAllDomainInstances(domain));
+		return result;
+	}
+
 }

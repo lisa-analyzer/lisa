@@ -18,6 +18,8 @@ import it.unive.lisa.checks.verification.IndividualWarningVerifier;
 import it.unive.lisa.lattices.GenericMapLattice;
 import it.unive.lisa.lattices.GenericSetLattice;
 import it.unive.lisa.lattices.Satisfiability;
+import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.type.Type;
 
@@ -33,7 +35,9 @@ import it.unive.lisa.type.Type;
  * condition is evaluated is unreachable, or if the condition does not hold in
  * its post-state; it is confirmed if that statement is reachable and the
  * condition always holds in its post-state; it is possible otherwise;</li>
- * <li>an {@link ErrorViolation} is refuted if the statement is unreachable or
+ * <li>an {@link ErrorViolation} raised by the statement (propagated errors are
+ * redirected to the statements raising them, see
+ * {@link IndividualWarningVerifier}) is refuted if the statement is unreachable or
  * if its post-state does not contain matching error continuations; it is
  * confirmed if the statement is reachable and its post-state contains only
  * matching error continuations; it is possible otherwise.</li>
@@ -128,6 +132,55 @@ public class ReachabilityVerifier<A extends AbstractLattice<A>, D extends Abstra
 		return VerificationResult.POSSIBLE;
 	}
 
+	/**
+	 * {@inheritDoc}<br>
+	 * <br>
+	 * If the statement is an exit point of its cfg, the entry of the cfg is
+	 * {@link ReachabilityStatus#REACHABLE}, and all the exit points of the cfg
+	 * are only reached with matching errors (that is, their normal and halting
+	 * states are bottom, and they contain no other error), then every
+	 * terminating execution of the cfg ends with a matching error, and the
+	 * violation is confirmed. This holds even if no single statement always
+	 * raises the error (e.g., if two branches raise it).
+	 */
+	@Override
+	protected VerificationResult verifyPropagated(
+			AnalyzedCFG<A> result,
+			Statement st,
+			ErrorViolation violation)
+			throws SemanticException {
+		CFG cfg = st.getCFG();
+		if (!cfg.getAllExitpoints().contains(st)
+				|| reachability.getEntryReachability(result) != ReachabilityStatus.REACHABLE)
+			return VerificationResult.POSSIBLE;
+
+		boolean matching = false;
+		for (Statement exit : cfg.getAllExitpoints()) {
+			AnalysisState<A> post = result.getAnalysisStateAfter(exit);
+			GenericMapLattice<Error, ProgramState<A>> errors = post.getErrors();
+			GenericMapLattice<Type, GenericSetLattice<Statement>> smashed = post.getSmashedErrors();
+			if (errors.isTop() || smashed.isTop()
+					|| !post.getExecution().getState().isBottom()
+					|| !post.getHalt().getState().isBottom())
+				return VerificationResult.POSSIBLE;
+			if (!errors.isBottom())
+				for (Error error : errors.getKeys())
+					if (!errors.getState(error).getState().isBottom())
+						if (violation.matches(error.getType()))
+							matching = true;
+						else
+							return VerificationResult.POSSIBLE;
+			if (!smashed.isBottom() && !post.getSmashedErrorsState().getState().isBottom())
+				for (Type type : smashed.getKeys())
+					if (!smashed.getState(type).isBottom())
+						if (violation.matches(type))
+							matching = true;
+						else
+							return VerificationResult.POSSIBLE;
+		}
+		return matching ? VerificationResult.CONFIRMED : VerificationResult.POSSIBLE;
+	}
+
 	private VerificationResult verifyError(
 			AnalyzedCFG<A> result,
 			Statement st,
@@ -137,7 +190,12 @@ public class ReachabilityVerifier<A extends AbstractLattice<A>, D extends Abstra
 		if (status == ReachabilityStatus.UNREACHABLE)
 			return VerificationResult.REFUTED;
 
-		AnalysisState<A> post = result.getAnalysisStateAfter(st);
+		// the post-states of sub-expressions might not contain the errors they
+		// raise: the post-state of the node containing the statement is used
+		Statement node = st instanceof Expression ? ((Expression) st).getRootStatement() : st;
+		if (!st.getCFG().containsNode(node))
+			node = st;
+		AnalysisState<A> post = result.getAnalysisStateAfter(node);
 		GenericMapLattice<Error, ProgramState<A>> errors = post.getErrors();
 		GenericMapLattice<Type, GenericSetLattice<Statement>> smashed = post.getSmashedErrors();
 		if (errors.isTop() || smashed.isTop())
@@ -145,16 +203,17 @@ public class ReachabilityVerifier<A extends AbstractLattice<A>, D extends Abstra
 			return VerificationResult.POSSIBLE;
 
 		boolean matching = false;
-		boolean others = !post.getExecution().isBottom() || !post.getHalt().isBottom();
+		// a state is unreachable if its abstract state is bottom
+		boolean others = !post.getExecution().getState().isBottom() || !post.getHalt().getState().isBottom();
 		if (!errors.isBottom())
 			for (Error error : errors.getKeys())
-				if (!errors.getState(error).isBottom())
+				if (!errors.getState(error).getState().isBottom())
 					if (violation.matches(error.getType()))
 						matching = true;
 					else
 						others = true;
 
-		if (!smashed.isBottom() && !post.getSmashedErrorsState().isBottom())
+		if (!smashed.isBottom() && !post.getSmashedErrorsState().getState().isBottom())
 			for (Type type : smashed.getKeys())
 				if (!smashed.getState(type).isBottom())
 					if (violation.matches(type))

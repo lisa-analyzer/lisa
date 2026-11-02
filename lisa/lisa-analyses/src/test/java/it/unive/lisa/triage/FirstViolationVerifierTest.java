@@ -49,8 +49,31 @@ public class FirstViolationVerifierTest {
 
 	}
 
+	private static class WarnOnFirstThrow<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
+			implements
+			SemanticCheck<A, D> {
+
+		@Override
+		public boolean visit(
+				SemanticTool<A, D> tool,
+				CFG graph,
+				Statement node) {
+			if (node.toString().startsWith("throw") && node.getLocation().toString().contains(":3:"))
+				tool.warnOn(node, Violation.error(), graph.getDescriptor().getName());
+			return true;
+		}
+
+	}
+
 	private static Map<String, Message> analyze(
 			String program)
+			throws Exception {
+		return analyze(program, new WarnOnAssignments<>());
+	}
+
+	private static Map<String, Message> analyze(
+			String program,
+			SemanticCheck<?, ?> check)
 			throws Exception {
 		Program p = IMPFrontend.processText(program);
 		for (CFG cfg : p.getAllCFGs())
@@ -59,7 +82,7 @@ public class FirstViolationVerifierTest {
 		DefaultConfiguration conf = new DefaultConfiguration();
 		conf.analysis = DefaultConfiguration.defaultAbstractDomain();
 		conf.workdir = Files.createTempDirectory("first-violation").toString();
-		conf.semanticChecks.add(new WarnOnAssignments<>());
+		conf.semanticChecks.add(check);
 		conf.warningVerifier = new FirstViolationVerifier<>();
 		LiSAReport report = new LiSA(conf).run(p);
 		Map<String, Message> warnings = new HashMap<>();
@@ -110,6 +133,29 @@ public class FirstViolationVerifierTest {
 				confirmed.getReproducingInputs().toString());
 		// not verified, since c_shallow has been confirmed first
 		assertPossible(warnings.get("d_shallow"));
+	}
+
+	@Test
+	public void errorsReachingAllExitsAreConfirmed() throws Exception {
+		// every execution ends with an error, but no single throw is always
+		// executed: reachability confirms the warning, with no inputs
+		Map<String, Message> warnings = analyze("class A { ~A() {} }\n"
+				+ "class test { both(x) { if (x > 0)\n throw new A();\n else\n throw new A(); } }",
+				new WarnOnFirstThrow<>());
+		assertTrue(warnings.get("both").isDefinite(), warnings.toString());
+		assertTrue(warnings.get("both").getReproducingInputs().isEmpty(), warnings.toString());
+
+		// some executions return normally: reachability cannot confirm the
+		// warning, while pdr does, with a positive x
+		assumeTrue(SmtLibProcessSolver.isZ3Available(), "z3 is not available");
+		warnings = analyze("class A { ~A() {} }\n"
+				+ "class test { some(x) { if (x > 0)\n throw new A();\n return x; } }",
+				new WarnOnFirstThrow<>());
+		Message some = warnings.get("some");
+		assertTrue(some.isDefinite(), warnings.toString());
+		assertTrue(some.getReproducingInputs().stream()
+				.anyMatch(i -> i.getSource().startsWith("parameter x of") && Integer.parseInt(i.getValue()) > 0),
+				some.getReproducingInputs().toString());
 	}
 
 	@Test

@@ -28,6 +28,7 @@ import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
 import it.unive.lisa.util.datastructures.trie.PatriciaTrieMap;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -600,4 +601,12 @@ public class TracePartitioning<A extends AbstractLattice<A>,
 				rem.isEmpty() ? remaining : new TraceLattice<>(remaining.lattice, left),
 				mov.isEmpty() ? moved : new TraceLattice<>(moved.lattice, right));
 	}
+	@Override
+	public <T> Collection<T> getAllDomainInstances(
+			Class<T> domain) {
+		Collection<T> result = AbstractDomain.super.getAllDomainInstances(domain);
+		result.addAll(this.domain.getAllDomainInstances(domain));
+		return result;
+	}
+
 }
