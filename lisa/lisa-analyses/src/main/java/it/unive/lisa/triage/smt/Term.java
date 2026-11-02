@@ -24,7 +24,8 @@ public final class Term {
 	 */
 	public static final Term FALSE = new Term("false", Sort.BOOL);
 
-	private static final Pattern SIMPLE_SYMBOL = Pattern.compile("[a-zA-Z~!@$%^&*_+=<>.?/\\-][a-zA-Z0-9~!@$%^&*_+=<>.?/\\-]*");
+	private static final Pattern SIMPLE_SYMBOL = Pattern
+			.compile("[a-zA-Z~!@$%^&*_+=<>.?/\\-][a-zA-Z0-9~!@$%^&*_+=<>.?/\\-]*");
 
 	private final String smtlib;
 
@@ -58,8 +59,8 @@ public final class Term {
 	/**
 	 * Yields a valid SMT-LIB symbol for the given name, that is, the name
 	 * itself if it is a simple symbol, or the name quoted between {@code |}
-	 * otherwise. Characters that cannot appear in quoted symbols ({@code |}
-	 * and {@code \}) are replaced with {@code _}.
+	 * otherwise. Characters that cannot appear in quoted symbols ({@code |} and
+	 * {@code \}) are replaced with {@code _}.
 	 *
 	 * @param name the name
 	 *

@@ -25,15 +25,15 @@ import java.util.Set;
 
 /**
  * Model-based projection over symbolic expressions. Since the cases of a
- * transition ({@link SymbolicCase}) are functional updates, the exact
- * pre-image of a cube through a case is obtained by substituting the updated
- * identifiers in the literals of the cube
+ * transition ({@link SymbolicCase}) are functional updates, the exact pre-image
+ * of a cube through a case is obtained by substituting the updated identifiers
+ * in the literals of the cube
  * ({@link SymbolicCase#substitute(SymbolicExpression, it.unive.lisa.triage.model.FreshValueFactory, it.unive.lisa.program.cfg.ProgramPoint)})
  * and by conjoining the path condition of the case. The only existentially
- * quantified values left are the fresh values of the case, that are
- * eliminated by replacing them with their values in a model of the query
- * (when these can be expressed as constants): this under-approximates the
- * pre-image, but always contains the predecessor found in the model.
+ * quantified values left are the fresh values of the case, that are eliminated
+ * by replacing them with their values in a model of the query (when these can
+ * be expressed as constants): this under-approximates the pre-image, but always
+ * contains the predecessor found in the model.
  *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
@@ -137,8 +137,8 @@ public final class Projection {
 	 * Replaces fresh values in the given expressions.
 	 *
 	 * @param expressions the expressions
-	 * @param values      the replacement of each fresh value (fresh values
-	 *                        not in the map are left as they are)
+	 * @param values      the replacement of each fresh value (fresh values not
+	 *                        in the map are left as they are)
 	 *
 	 * @return the rewritten expressions
 	 */
@@ -157,8 +157,8 @@ public final class Projection {
 
 	/**
 	 * Converts a value printed by a solver in a model into a constant
-	 * expression. Integers, booleans, strings, and the null value (also
-	 * wrapped in {@link ValueSort values}) are supported.
+	 * expression. Integers, booleans, strings, and the null value (also wrapped
+	 * in {@link ValueSort values}) are supported.
 	 *
 	 * @param smtlib the value, in SMT-LIB syntax
 	 * @param types  the type system providing the types of constants

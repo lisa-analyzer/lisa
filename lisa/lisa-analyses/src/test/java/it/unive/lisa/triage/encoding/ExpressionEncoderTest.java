@@ -1,9 +1,5 @@
 package it.unive.lisa.triage.encoding;
 
-import java.util.List;
-import it.unive.lisa.type.TypeTokenType;
-import it.unive.lisa.symbolic.value.operator.binary.TypeCheck;
-import it.unive.lisa.symbolic.value.operator.binary.LogicalAnd;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
@@ -26,6 +22,7 @@ import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonEq;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonGt;
+import it.unive.lisa.symbolic.value.operator.binary.LogicalAnd;
 import it.unive.lisa.symbolic.value.operator.binary.LogicalOr;
 import it.unive.lisa.symbolic.value.operator.binary.Numeric8BitAdd;
 import it.unive.lisa.symbolic.value.operator.binary.NumericNonOverflowingAdd;
@@ -36,6 +33,7 @@ import it.unive.lisa.symbolic.value.operator.binary.StringConcat;
 import it.unive.lisa.symbolic.value.operator.binary.StringContains;
 import it.unive.lisa.symbolic.value.operator.binary.StringIndexOf;
 import it.unive.lisa.symbolic.value.operator.binary.StringStartsWith;
+import it.unive.lisa.symbolic.value.operator.binary.TypeCheck;
 import it.unive.lisa.symbolic.value.operator.ternary.StringReplace;
 import it.unive.lisa.symbolic.value.operator.ternary.StringSubstring;
 import it.unive.lisa.symbolic.value.operator.unary.BitwiseNegation;
@@ -48,8 +46,10 @@ import it.unive.lisa.triage.smt.SmtSolver;
 import it.unive.lisa.triage.smt.Sort;
 import it.unive.lisa.triage.smt.Term;
 import it.unive.lisa.type.Type;
+import it.unive.lisa.type.TypeTokenType;
 import it.unive.lisa.type.Untyped;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.junit.jupiter.api.AfterEach;
@@ -259,7 +259,8 @@ public class ExpressionEncoderTest {
 		assertValid(bin(BoolType.INSTANCE, string("hello"), string("ell"), StringContains.INSTANCE));
 		// strlen(s + "ab") == strlen(s) + 2
 		assertValid(eq(
-				new UnaryExpression(Int32Type.INSTANCE, bin(StringType.INSTANCE, S, string("ab"), StringConcat.INSTANCE),
+				new UnaryExpression(Int32Type.INSTANCE,
+						bin(StringType.INSTANCE, S, string("ab"), StringConcat.INSTANCE),
 						StringLength.INSTANCE, LOC),
 				bin(Int32Type.INSTANCE, new UnaryExpression(Int32Type.INSTANCE, S, StringLength.INSTANCE, LOC),
 						integer(2), NumericNonOverflowingAdd.INSTANCE)));

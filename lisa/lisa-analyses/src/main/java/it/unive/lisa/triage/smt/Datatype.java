@@ -7,10 +7,10 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * An algebraic datatype of the SMT-LIB language, made of a set of
- * constructors, each with a (possibly empty) list of named fields. Datatypes
- * must be declared through {@link SmtSolver#declareDatatype(Datatype)} before
- * their terms can be used. Terms of a datatype are built and inspected through
+ * An algebraic datatype of the SMT-LIB language, made of a set of constructors,
+ * each with a (possibly empty) list of named fields. Datatypes must be declared
+ * through {@link SmtSolver#declareDatatype(Datatype)} before their terms can be
+ * used. Terms of a datatype are built and inspected through
  * {@link #construct(String, Term...)}, {@link #test(String, Term)}, and
  * {@link #select(String, Term)}. Note that, as defined by SMT-LIB, selecting a
  * field of a term built with a different constructor yields an unspecified

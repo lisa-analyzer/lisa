@@ -6,8 +6,8 @@ import java.util.Map;
 
 /**
  * An {@link SmtSolver} that does not solve anything, but records the SMT-LIB 2
- * script corresponding to the commands it receives. It is useful to inspect
- * (or to solve offline) the queries built for a solver. Requests that need an
+ * script corresponding to the commands it receives. It is useful to inspect (or
+ * to solve offline) the queries built for a solver. Requests that need an
  * actual solver ({@link #check()}, {@link #getValues(Collection)},
  * {@link #getUnsatCore()}, {@link #getReasonUnknown()}) are recorded as
  * commands, and yield {@link SmtResult#UNKNOWN} or empty results.
@@ -67,6 +67,7 @@ public class SmtLibScript
 		command("(declare-const " + constant.toSmtLib() + " " + sort.toSmtLib() + ")");
 		return constant;
 	}
+
 	@Override
 	public String declareFunction(
 			String name,
@@ -80,7 +81,6 @@ public class SmtLibScript
 		command(sb.toString());
 		return symbol;
 	}
-
 
 	@Override
 	public void assertTerm(

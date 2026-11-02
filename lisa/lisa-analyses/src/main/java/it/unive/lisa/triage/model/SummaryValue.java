@@ -5,8 +5,8 @@ import it.unive.lisa.type.Type;
 
 /**
  * A {@link FreshValue} modeling a value that a transition does not compute
- * precisely (e.g., the result of a summarized call, a value read from the
- * heap, or the result of an unsupported construct). Unlike {@link InputValue}s,
+ * precisely (e.g., the result of a summarized call, a value read from the heap,
+ * or the result of an unsupported construct). Unlike {@link InputValue}s,
  * summary values are not part of the inputs of an execution: they are a source
  * of imprecision of the model.
  *

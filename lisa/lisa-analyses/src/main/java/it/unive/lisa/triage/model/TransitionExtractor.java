@@ -25,10 +25,10 @@ import java.util.Map;
 
 /**
  * Extracts the symbolic transitions performed by the nodes of an analysis
- * result (an {@link AnalyzedCFG}, i.e., a cfg in a given context), by
- * replaying their semantics through a {@link ReplayDomain} (see
- * {@link NodeTransitions}). Each node is replayed starting from its state
- * before the node, as computed by the analysis (see
+ * result (an {@link AnalyzedCFG}, i.e., a cfg in a given context), by replaying
+ * their semantics through a {@link ReplayDomain} (see {@link NodeTransitions}).
+ * Each node is replayed starting from its state before the node, as computed by
+ * the analysis (see
  * {@link Reachability#preStateOf(AnalyzedCFG, Statement, Analysis)}), paired
  * with the identity transition.
  *
@@ -150,8 +150,8 @@ public class TransitionExtractor<A extends AbstractLattice<A>, D extends Abstrac
 	}
 
 	/**
-	 * Collects the errors in the given state that have been raised by the
-	 * given node or by its sub-expressions.
+	 * Collects the errors in the given state that have been raised by the given
+	 * node or by its sub-expressions.
 	 */
 	private Map<Error, SymbolicStore> raisedErrors(
 			Statement node,

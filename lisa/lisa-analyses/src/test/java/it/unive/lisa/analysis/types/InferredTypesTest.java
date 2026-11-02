@@ -1,35 +1,35 @@
 package it.unive.lisa.analysis.types;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import it.unive.lisa.symbolic.value.BinaryExpression;
-import it.unive.lisa.symbolic.value.operator.binary.TypeCheck;
-import it.unive.lisa.type.TypeTokenType;
-import java.util.Set;
-import it.unive.lisa.program.Program;
-import it.unive.lisa.imp.IMPFeatures;
-import it.unive.lisa.program.type.Float32Type;
-import it.unive.lisa.program.type.StringType;
 import it.unive.lisa.TestParameterProvider;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.nonrelational.type.TypeEnvironment;
+import it.unive.lisa.imp.IMPFeatures;
 import it.unive.lisa.imp.types.IMPTypeSystem;
 import it.unive.lisa.lattices.types.TypeSet;
+import it.unive.lisa.program.Program;
 import it.unive.lisa.program.SyntheticLocation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.program.type.BoolType;
+import it.unive.lisa.program.type.Float32Type;
 import it.unive.lisa.program.type.Int32Type;
+import it.unive.lisa.program.type.StringType;
+import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.PushAny;
 import it.unive.lisa.symbolic.value.PushInv;
 import it.unive.lisa.symbolic.value.Variable;
+import it.unive.lisa.symbolic.value.operator.binary.TypeCheck;
 import it.unive.lisa.type.TypeSystem;
+import it.unive.lisa.type.TypeTokenType;
 import it.unive.lisa.type.Untyped;
+import java.util.Set;
 import org.junit.jupiter.api.Test;
 
 public class InferredTypesTest {
@@ -99,7 +99,6 @@ public class InferredTypesTest {
 	public void bottomIsTheBottomTypeSet() {
 		assertSame(TypeSet.BOTTOM, domain.bottom());
 	}
-
 
 	@Test
 	public void assumingATypeCheckOnAValueOfUnknownTypeKeepsTheCompatibleTypes()

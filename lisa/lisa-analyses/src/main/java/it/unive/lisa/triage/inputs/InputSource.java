@@ -13,10 +13,10 @@ import java.util.Set;
  * A source of nondeterminism of the program, that is, a point where the
  * analysis introduces an unknown value (a
  * {@link it.unive.lisa.symbolic.value.PushAny}, possibly with constraints as a
- * {@link it.unive.lisa.symbolic.value.PushFromConstraints}). Each evaluation
- * of a source produces a value that is part of the inputs of an execution:
- * fixing the values of all evaluations of all sources fixes the execution, and
- * a concrete assignment of these values can be reported as a list of
+ * {@link it.unive.lisa.symbolic.value.PushFromConstraints}). Each evaluation of
+ * a source produces a value that is part of the inputs of an execution: fixing
+ * the values of all evaluations of all sources fixes the execution, and a
+ * concrete assignment of these values can be reported as a list of
  * {@link ReproducingInput}s (see
  * {@link #toReproducingInput(ScopeId, int, String)}).
  *
@@ -44,11 +44,10 @@ public class InputSource {
 		CALL_RESULT,
 
 		/**
-		 * The value returned by a call that might target code of the
-		 * program, whose result is unknown only because the analysis did not
-		 * compute it precisely (e.g., because calls are analyzed modularly).
-		 * This is not a genuine input: the value is determined by the code
-		 * of the callee.
+		 * The value returned by a call that might target code of the program,
+		 * whose result is unknown only because the analysis did not compute it
+		 * precisely (e.g., because calls are analyzed modularly). This is not a
+		 * genuine input: the value is determined by the code of the callee.
 		 */
 		IMPRECISE_CALL_RESULT,
 

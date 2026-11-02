@@ -19,16 +19,16 @@ import it.unive.lisa.imp.IMPFrontend;
 import it.unive.lisa.interprocedural.ReturnTopPolicy;
 import it.unive.lisa.program.Program;
 import it.unive.lisa.program.SyntheticLocation;
+import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.type.BoolType;
 import it.unive.lisa.program.type.Int32Type;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
+import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonGt;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonLe;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonLt;
-import it.unive.lisa.program.cfg.CFG;
-import it.unive.lisa.program.cfg.statement.Statement;
-import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.triage.model.AlarmModel;
 import it.unive.lisa.triage.model.AlarmModelBuilder;
 import it.unive.lisa.triage.model.SymbolicStore;
@@ -250,7 +250,8 @@ public class PdrEngineTest {
 			PdrEngine engine = new PdrEngine(model, s);
 			assertEquals(PdrEngine.Status.COUNTEREXAMPLE, engine.run(10, 1000));
 			assertTrue(engine.getCounterexample().stream().flatMap(o -> o.getInputs().values().stream())
-					.anyMatch(v -> v.equals("(Value.Int 3)") || v.equals("3")), engine.getCounterexample()
+					.anyMatch(v -> v.equals("(Value.Int 3)") || v.equals("3")),
+					engine.getCounterexample()
 							.toString());
 		}
 	}

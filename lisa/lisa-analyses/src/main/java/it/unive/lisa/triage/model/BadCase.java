@@ -5,12 +5,12 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * One way of violating a property at the bad location of an
- * {@link AlarmModel}: the violation happens in a state at the beginning of the
- * bad location if both the path condition (leading from the beginning of the
- * location to the point where the property is checked) and the violation
- * condition hold. Both are expressed over the values of identifiers at the
- * beginning of the bad location, and over fresh values.
+ * One way of violating a property at the bad location of an {@link AlarmModel}:
+ * the violation happens in a state at the beginning of the bad location if both
+ * the path condition (leading from the beginning of the location to the point
+ * where the property is checked) and the violation condition hold. Both are
+ * expressed over the values of identifiers at the beginning of the bad
+ * location, and over fresh values.
  *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
@@ -25,8 +25,8 @@ public class BadCase {
 	 *
 	 * @param pathCondition the conjuncts of the path condition
 	 * @param violation     the violation condition, or {@code null} if the
-	 *                          violation happens as soon as the path
-	 *                          condition holds
+	 *                          violation happens as soon as the path condition
+	 *                          holds
 	 */
 	public BadCase(
 			List<SymbolicExpression> pathCondition,

@@ -604,8 +604,8 @@ public class Reachability<A extends AbstractLattice<A>, D extends AbstractDomain
 	 *                     analysis
 	 * @param result   the result containing the node
 	 * @param node     the node, that must be a root statement of the cfg
-	 * @param analysis the analysis used to traverse the edges, that should
-	 *                     not post events
+	 * @param analysis the analysis used to traverse the edges, that should not
+	 *                     post events
 	 *
 	 * @return the state before the node
 	 *

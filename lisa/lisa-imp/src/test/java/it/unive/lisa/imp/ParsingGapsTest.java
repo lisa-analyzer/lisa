@@ -6,19 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import it.unive.lisa.program.cfg.statement.Statement;
-import it.unive.lisa.program.cfg.statement.Assignment;
-import it.unive.lisa.program.cfg.statement.Expression;
-import it.unive.lisa.program.cfg.statement.literal.TypeLiteral;
-import it.unive.lisa.program.cfg.statement.types.IsInstance;
-import it.unive.lisa.program.cfg.statement.types.Cast;
-import it.unive.lisa.program.type.Int32Type;
-import it.unive.lisa.program.type.Float32Type;
-import it.unive.lisa.program.type.BoolType;
-import it.unive.lisa.program.type.StringType;
-import it.unive.lisa.type.Type;
-import java.util.ArrayList;
-import java.util.List;
 import it.unive.lisa.program.ClassUnit;
 import it.unive.lisa.program.CompilationUnit;
 import it.unive.lisa.program.Global;
@@ -32,6 +19,19 @@ import it.unive.lisa.program.annotations.values.BasicAnnotationValue;
 import it.unive.lisa.program.annotations.values.BoolAnnotationValue;
 import it.unive.lisa.program.annotations.values.IntAnnotationValue;
 import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.statement.Assignment;
+import it.unive.lisa.program.cfg.statement.Expression;
+import it.unive.lisa.program.cfg.statement.Statement;
+import it.unive.lisa.program.cfg.statement.literal.TypeLiteral;
+import it.unive.lisa.program.cfg.statement.types.Cast;
+import it.unive.lisa.program.cfg.statement.types.IsInstance;
+import it.unive.lisa.program.type.BoolType;
+import it.unive.lisa.program.type.Float32Type;
+import it.unive.lisa.program.type.Int32Type;
+import it.unive.lisa.program.type.StringType;
+import it.unive.lisa.type.Type;
+import java.util.ArrayList;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 
 // gap-filling tests for it.unive.lisa.imp.IMPFrontend/IMPAnnotationVisitor: existing
@@ -156,7 +156,6 @@ public class ParsingGapsTest {
 		assertTrue(p.getEntryPoints().contains(foo));
 		assertTrue(p.getEntryPoints().contains(bar));
 	}
-
 
 	@Test
 	public void typeTestsAndCastsAcceptPrimitiveTypes()

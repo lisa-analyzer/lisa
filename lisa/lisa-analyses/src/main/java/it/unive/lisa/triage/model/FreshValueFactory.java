@@ -39,11 +39,11 @@ public class FreshValueFactory {
 	}
 
 	/**
-	 * Yields a fresh value for the given unknown value, introduced at the
-	 * given program point: an {@link InputValue} if the unknown value comes
-	 * from the program, or a {@link SummaryValue} if it is a
-	 * {@link SummaryMarker} or the result of a call that is not a genuine
-	 * input ({@link InputSource.Kind#IMPRECISE_CALL_RESULT}).
+	 * Yields a fresh value for the given unknown value, introduced at the given
+	 * program point: an {@link InputValue} if the unknown value comes from the
+	 * program, or a {@link SummaryValue} if it is a {@link SummaryMarker} or
+	 * the result of a call that is not a genuine input
+	 * ({@link InputSource.Kind#IMPRECISE_CALL_RESULT}).
 	 *
 	 * @param value the unknown value
 	 * @param pp    the program point where the value is introduced (can be

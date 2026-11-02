@@ -1,7 +1,7 @@
 package it.unive.lisa.triage.inputs;
 
-import it.unive.lisa.interprocedural.ScopeId;
 import it.unive.lisa.checks.verification.ReproducingInput;
+import it.unive.lisa.interprocedural.ScopeId;
 import it.unive.lisa.triage.encoding.ValueSort;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -10,10 +10,10 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * A builder of the {@link ReproducingInput}s of a counterexample, that
- * collects the values of input sources in the order they are consumed by the
- * execution, numbering the occurrences of each source. Values are given in
- * SMT-LIB syntax, as printed by a solver, and are made readable through
+ * A builder of the {@link ReproducingInput}s of a counterexample, that collects
+ * the values of input sources in the order they are consumed by the execution,
+ * numbering the occurrences of each source. Values are given in SMT-LIB syntax,
+ * as printed by a solver, and are made readable through
  * {@link ValueSort#display(String)}.
  *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>

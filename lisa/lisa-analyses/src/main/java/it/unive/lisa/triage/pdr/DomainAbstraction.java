@@ -16,17 +16,16 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * A {@link CubeAbstraction} driven by the abstract domain of the analysis.
- * The cube is abstracted in the domain by assuming each of its literals,
- * through the semantics of the analysis, on the state computed by the
- * analysis at the location: the result over-approximates the states of the
- * cube that satisfy the invariant of the location. The abstract state is
- * then exported as constraints over the identifiers of the cube
- * ({@link ConstraintExporter}). The proposal has thus the shape of the
- * elements of the domain (e.g., bounds for intervals, prefixes for string
- * domains), regardless of the shape of the literals of the cube, and it is
- * independent of the domain at hand: domains that do not generate
- * constraints yield no proposal.
+ * A {@link CubeAbstraction} driven by the abstract domain of the analysis. The
+ * cube is abstracted in the domain by assuming each of its literals, through
+ * the semantics of the analysis, on the state computed by the analysis at the
+ * location: the result over-approximates the states of the cube that satisfy
+ * the invariant of the location. The abstract state is then exported as
+ * constraints over the identifiers of the cube ({@link ConstraintExporter}).
+ * The proposal has thus the shape of the elements of the domain (e.g., bounds
+ * for intervals, prefixes for string domains), regardless of the shape of the
+ * literals of the cube, and it is independent of the domain at hand: domains
+ * that do not generate constraints yield no proposal.
  *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  *

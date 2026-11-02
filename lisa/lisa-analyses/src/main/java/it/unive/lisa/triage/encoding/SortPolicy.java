@@ -38,12 +38,12 @@ public class SortPolicy {
 	/**
 	 * Builds the policy.
 	 *
-	 * @param types        the runtime types that each identifier might have
-	 *                         (an identifier with no types, or that is not in
-	 *                         the map, is encoded through {@link ValueSort})
-	 * @param programTypes all the types of the program, used to decide
-	 *                         whether a type covers all the values of a sort
-	 *                         (can be {@code null} if unknown)
+	 * @param types        the runtime types that each identifier might have (an
+	 *                         identifier with no types, or that is not in the
+	 *                         map, is encoded through {@link ValueSort})
+	 * @param programTypes all the types of the program, used to decide whether
+	 *                         a type covers all the values of a sort (can be
+	 *                         {@code null} if unknown)
 	 */
 	public SortPolicy(
 			Map<Identifier, Set<Type>> types,
@@ -53,12 +53,12 @@ public class SortPolicy {
 	}
 
 	/**
-	 * Yields {@code true} if every value encoded with the given sort has a
-	 * type that can be assigned to the given one, that is, if all the types
-	 * of the program encoded with that sort can be assigned to the given one
-	 * (e.g., if {@code int} is the only integral type of the program, it
-	 * covers all integer values). Yields {@code false} if the types of the
-	 * program are unknown.
+	 * Yields {@code true} if every value encoded with the given sort has a type
+	 * that can be assigned to the given one, that is, if all the types of the
+	 * program encoded with that sort can be assigned to the given one (e.g., if
+	 * {@code int} is the only integral type of the program, it covers all
+	 * integer values). Yields {@code false} if the types of the program are
+	 * unknown.
 	 *
 	 * @param target the type
 	 * @param sort   the sort, that must not be {@link ValueSort#SORT}

@@ -5,10 +5,10 @@ import it.unive.lisa.analysis.AbstractLattice;
 import it.unive.lisa.analysis.AnalyzedCFG;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.checks.semantic.SemanticTool;
+import it.unive.lisa.checks.verification.IndividualWarningVerifier;
 import it.unive.lisa.checks.verification.VerificationOutcome;
 import it.unive.lisa.checks.verification.VerificationResult;
 import it.unive.lisa.checks.verification.Violation;
-import it.unive.lisa.checks.verification.IndividualWarningVerifier;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.triage.inputs.ReproducingInputs;
@@ -31,24 +31,24 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 /**
- * An {@link IndividualWarningVerifier} based on bounded model checking: the executions of
- * the {@link AlarmModel} of a violation are unrolled up to a given number of
- * steps (see {@link Unrolling}), and an SMT solver searches for one that
- * reaches the violation. The result is:
+ * An {@link IndividualWarningVerifier} based on bounded model checking: the
+ * executions of the {@link AlarmModel} of a violation are unrolled up to a
+ * given number of steps (see {@link Unrolling}), and an SMT solver searches for
+ * one that reaches the violation. The result is:
  * <ul>
  * <li>{@link VerificationOutcome#REFUTED} if the results of the analysis
  * already exclude the violation (the statement is unreachable, or no bad case
  * exists);</li>
  * <li>{@link VerificationOutcome#CONFIRMED}, with the inputs reproducing the
- * violation, if an execution reaching it is found, the execution only relies
- * on exact transitions, and the model is confirmable (its initial states are
- * the ones of the program);</li>
+ * violation, if an execution reaching it is found, the execution only relies on
+ * exact transitions, and the model is confirmable (its initial states are the
+ * ones of the program);</li>
  * <li>{@link VerificationOutcome#POSSIBLE} otherwise, including when no
  * execution is found within the bound, when the found execution relies on
  * imprecise transitions, and when no solver is available.</li>
  * </ul>
- * Note that confirmed violations are not yet certified by executing the
- * program with the reproducing inputs.
+ * Note that confirmed violations are not yet certified by executing the program
+ * with the reproducing inputs.
  *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  *
@@ -178,8 +178,8 @@ public class BoundedModelChecker<A extends AbstractLattice<A>, D extends Abstrac
 	 * declarations, the initial states, and the invariants of the first step,
 	 * the script checks (in a pushed scope) whether the bad location can be
 	 * reached in {@code k} steps, and then adds the transitions and the
-	 * invariants of step {@code k + 1}, for each {@code k} up to the bound.
-	 * The script can be fed to an SMT solver to inspect the queries offline.
+	 * invariants of step {@code k + 1}, for each {@code k} up to the bound. The
+	 * script can be fed to an SMT solver to inspect the queries offline.
 	 *
 	 * @param model the model
 	 * @param bound the maximum number of steps

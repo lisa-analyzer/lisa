@@ -16,8 +16,8 @@ import org.apache.commons.lang3.StringUtils;
  * has been reported on (if any), and, for definite messages, the
  * {@link ReproducingInput}s that make the reported behavior happen, if known.
  * Messages can also carry the {@link Violation} they report, so that it can be
- * verified after the analysis: the violation is not part of the identity of
- * the message.
+ * verified after the analysis: the violation is not part of the identity of the
+ * message.
  *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
@@ -115,8 +115,8 @@ public class Message
 	 * @param definite          whether or not this message is definite, that
 	 *                              is, if the reported behavior happens in at
 	 *                              least one execution of the program
-	 * @param refuted           whether or not this message is refuted, that
-	 *                              is, if the reported behavior happens in no
+	 * @param refuted           whether or not this message is refuted, that is,
+	 *                              if the reported behavior happens in no
 	 *                              execution of the program (a message cannot
 	 *                              be both definite and refuted)
 	 * @param reproducingInputs the inputs reproducing the behavior reported by
@@ -124,6 +124,9 @@ public class Message
 	 *                              inputs are known)
 	 * @param violation         the violation reported by this message (can be
 	 *                              {@code null} if unknown)
+	 * 
+	 * @throws IllegalArgumentException if both {@code definite} and
+	 *                                      {@code refuted} are {@code true}
 	 */
 	protected Message(
 			String message,

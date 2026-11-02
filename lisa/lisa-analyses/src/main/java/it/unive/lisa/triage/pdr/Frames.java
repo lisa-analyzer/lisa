@@ -17,11 +17,11 @@ import java.util.Set;
  * every level, and they form an inductive invariant. Frame {@code F_0} is the
  * set of initial states, and it is not represented here.<br>
  * <br>
- * The frames are monotone by construction: {@code F_{i+1}(l) ⊆ F_i(l)} as
- * sets of lemmas implies the reverse inclusion between the represented sets of
+ * The frames are monotone by construction: {@code F_{i+1}(l) ⊆ F_i(l)} as sets
+ * of lemmas implies the reverse inclusion between the represented sets of
  * states. If, after propagation, no lemma has exactly level {@code i} at any
- * location, then {@code F_i = F_{i+1}} everywhere, and the lemmas with level
- * at least {@code i} are an inductive invariant ({@link #convergedLevel()}).
+ * location, then {@code F_i = F_{i+1}} everywhere, and the lemmas with level at
+ * least {@code i} are an inductive invariant ({@link #convergedLevel()}).
  *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  *
@@ -62,9 +62,9 @@ public class Frames<P, L> {
 	}
 
 	/**
-	 * Records that the given lemma holds at the given location in all frames
-	 * up to the given level (included). If the lemma is already known to hold
-	 * up to a higher level, nothing changes.
+	 * Records that the given lemma holds at the given location in all frames up
+	 * to the given level (included). If the lemma is already known to hold up
+	 * to a higher level, nothing changes.
 	 *
 	 * @param location the location
 	 * @param lemma    the lemma
@@ -107,8 +107,8 @@ public class Frames<P, L> {
 	}
 
 	/**
-	 * Yields the lemmas whose conjunction is frame {@code F_level} at the
-	 * given location, that is, the ones with level at least {@code level}.
+	 * Yields the lemmas whose conjunction is frame {@code F_level} at the given
+	 * location, that is, the ones with level at least {@code level}.
 	 *
 	 * @param location the location
 	 * @param level    the level
@@ -161,9 +161,9 @@ public class Frames<P, L> {
 
 	/**
 	 * Yields the smallest level {@code i}, with {@code 1 <= i < depth()}, such
-	 * that no location has lemmas with exactly level {@code i}. At that
-	 * level, {@code F_i = F_{i+1}} at every location, and the lemmas with
-	 * level at least {@code i} form an inductive invariant (see
+	 * that no location has lemmas with exactly level {@code i}. At that level,
+	 * {@code F_i = F_{i+1}} at every location, and the lemmas with level at
+	 * least {@code i} form an inductive invariant (see
 	 * {@link #invariant(int)}).
 	 *
 	 * @return the level, or {@code -1} if the frames did not converge
@@ -183,9 +183,9 @@ public class Frames<P, L> {
 	}
 
 	/**
-	 * Yields frame {@code F_level} at every location having lemmas there.
-	 * When {@code level} is the one returned by {@link #convergedLevel()},
-	 * this is an inductive invariant.
+	 * Yields frame {@code F_level} at every location having lemmas there. When
+	 * {@code level} is the one returned by {@link #convergedLevel()}, this is
+	 * an inductive invariant.
 	 *
 	 * @param level the level
 	 *

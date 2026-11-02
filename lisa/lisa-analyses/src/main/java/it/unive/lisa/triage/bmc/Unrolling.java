@@ -27,10 +27,10 @@ import java.util.Set;
 
 /**
  * The encoding of the executions of an {@link AlarmModel} as SMT formulas over
- * <i>steps</i>. At each step {@code t}, the state of an execution is given by
- * a program counter ({@code pc@t}, an integer identifying the current
- * location) and by the values of the identifiers of the model
- * ({@code id@t}). The encoding provides:
+ * <i>steps</i>. At each step {@code t}, the state of an execution is given by a
+ * program counter ({@code pc@t}, an integer identifying the current location)
+ * and by the values of the identifiers of the model ({@code id@t}). The
+ * encoding provides:
  * <ul>
  * <li>the initial condition ({@link #initial()});</li>
  * <li>the invariants that hold at each step ({@link #invariants(int)}), from
@@ -42,8 +42,8 @@ import java.util.Set;
  * Fresh values get a new constant at each step, since each execution of a
  * transition produces new ones. The encoding also records whether each
  * transition is <i>exact</i>, that is, whether it does not rely on values that
- * are unconstrained because of imprecision (summary values, or operations
- * that the encoder cannot encode).
+ * are unconstrained because of imprecision (summary values, or operations that
+ * the encoder cannot encode).
  *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
@@ -89,12 +89,12 @@ public class Unrolling {
 
 	/**
 	 * Builds the unrolling, declaring the {@link ValueSort} datatype in the
-	 * given solver. In strict mode, transitions, bad cases, and conditions
-	 * also require the values they use to have the sorts that make their
-	 * encoding precise (e.g., operands of arithmetic operations must be
-	 * integers): the encoding then under-approximates the executions of the
-	 * model, and every execution it admits is encoded precisely (except for
-	 * summaries, see {@link #isExact(String)}).
+	 * given solver. In strict mode, transitions, bad cases, and conditions also
+	 * require the values they use to have the sorts that make their encoding
+	 * precise (e.g., operands of arithmetic operations must be integers): the
+	 * encoding then under-approximates the executions of the model, and every
+	 * execution it admits is encoded precisely (except for summaries, see
+	 * {@link #isExact(String)}).
 	 *
 	 * @param model  the model to encode
 	 * @param solver the solver where constants are declared
@@ -335,8 +335,8 @@ public class Unrolling {
 	}
 
 	/**
-	 * Yields the key identifying the encoding of the bad condition at the
-	 * given step.
+	 * Yields the key identifying the encoding of the bad condition at the given
+	 * step.
 	 *
 	 * @param step the step
 	 *
@@ -421,9 +421,9 @@ public class Unrolling {
 	}
 
 	/**
-	 * Yields the invariants computed by the analysis, as they hold at the
-	 * given step: the program counter is at a reachable location, and the
-	 * invariant of the current location holds.
+	 * Yields the invariants computed by the analysis, as they hold at the given
+	 * step: the program counter is at a reachable location, and the invariant
+	 * of the current location holds.
 	 *
 	 * @param step the step
 	 *
@@ -562,8 +562,8 @@ public class Unrolling {
 
 	/**
 	 * Conjoins to the given term the conditions required by the given symbols
-	 * (from the given index) for the encoded expressions to be evaluated
-	 * (see {@link SymbolTable#require(Term)}).
+	 * (from the given index) for the encoded expressions to be evaluated (see
+	 * {@link SymbolTable#require(Term)}).
 	 */
 	private static Term required(
 			Term term,
@@ -578,9 +578,8 @@ public class Unrolling {
 	}
 
 	/**
-	 * In strict mode, conjoins to the given term the conditions recorded by
-	 * the given symbols (from the given index) under which its encoding is
-	 * precise.
+	 * In strict mode, conjoins to the given term the conditions recorded by the
+	 * given symbols (from the given index) under which its encoding is precise.
 	 */
 	private Term strictly(
 			Term term,
@@ -612,8 +611,8 @@ public class Unrolling {
 	}
 
 	/**
-	 * Yields the cases of the given transition, in a fixed order (the one
-	 * used by {@link #transition(int, EdgeTransition, int)}).
+	 * Yields the cases of the given transition, in a fixed order (the one used
+	 * by {@link #transition(int, EdgeTransition, int)}).
 	 *
 	 * @param edge the transition
 	 *
@@ -643,9 +642,9 @@ public class Unrolling {
 
 	/**
 	 * Yields the relation of a single case of the given transition from step
-	 * {@code step} to step {@code step + 1}: the program counter moves from
-	 * the source to the destination of the edge, and the case holds. The
-	 * exactness and the fresh values of the encoding are recorded under
+	 * {@code step} to step {@code step + 1}: the program counter moves from the
+	 * source to the destination of the edge, and the case holds. The exactness
+	 * and the fresh values of the encoding are recorded under
 	 * {@link #caseKey(int, EdgeTransition, int)}.
 	 *
 	 * @param step  the step
@@ -708,8 +707,8 @@ public class Unrolling {
 	}
 
 	/**
-	 * Yields the bad condition at the given step: the program counter is at
-	 * the bad location, and one of the bad cases holds.
+	 * Yields the bad condition at the given step: the program counter is at the
+	 * bad location, and one of the bad cases holds.
 	 *
 	 * @param step the step
 	 *

@@ -116,8 +116,7 @@ public class ReplayInterproceduralTest {
 	}
 
 	/*
-	 * Placeholders to bind the type variables of the tool in a generic
-	 * method.
+	 * Placeholders to bind the type variables of the tool in a generic method.
 	 */
 	private interface DummyA
 			extends

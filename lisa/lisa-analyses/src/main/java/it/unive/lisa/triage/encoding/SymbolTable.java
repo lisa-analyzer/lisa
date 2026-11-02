@@ -45,13 +45,12 @@ public interface SymbolTable {
 			SymbolicExpression origin);
 
 	/**
-	 * Yields a fresh constant of the given sort, standing for the value of
-	 * the given expression that is not encoded precisely only when the given
-	 * guard does not hold: the caller must use the constant only in that
-	 * case (e.g., as {@code ite(guard, precise, fresh)}). Implementations can
-	 * use the guard to decide, given a model, whether the imprecise value
-	 * has been used. By default, this is the same as
-	 * {@link #fresh(Sort, SymbolicExpression)}.
+	 * Yields a fresh constant of the given sort, standing for the value of the
+	 * given expression that is not encoded precisely only when the given guard
+	 * does not hold: the caller must use the constant only in that case (e.g.,
+	 * as {@code ite(guard, precise, fresh)}). Implementations can use the guard
+	 * to decide, given a model, whether the imprecise value has been used. By
+	 * default, this is the same as {@link #fresh(Sort, SymbolicExpression)}.
 	 *
 	 * @param sort   the sort of the constant
 	 * @param origin the expression whose value is not encoded precisely
@@ -70,8 +69,8 @@ public interface SymbolTable {
 	 * Signals that the encoding being built is precise only if the given
 	 * condition holds (e.g., a value is read as an integer, and its value is
 	 * unspecified if it is not an integer). Implementations can use the
-	 * condition to decide, given a model, whether the encoding is precise.
-	 * By default, this does nothing.
+	 * condition to decide, given a model, whether the encoding is precise. By
+	 * default, this does nothing.
 	 *
 	 * @param guard the condition
 	 */
@@ -97,21 +96,20 @@ public interface SymbolTable {
 	/**
 	 * Yields the application of an unspecified, deterministic function to the
 	 * given arguments, standing for the value of the given expression that is
-	 * not encoded precisely only when the given guard does not hold (the
-	 * caller must use the application only in that case). Unlike
-	 * {@link #fresh(Sort, SymbolicExpression, Term)}, the same function
-	 * applied to the same arguments yields the same value, in every encoding
-	 * that uses it (e.g., the result of an arithmetic operation over
-	 * floating point numbers is unknown, but always the same for the same
-	 * operands). By default, this is the same as
+	 * not encoded precisely only when the given guard does not hold (the caller
+	 * must use the application only in that case). Unlike
+	 * {@link #fresh(Sort, SymbolicExpression, Term)}, the same function applied
+	 * to the same arguments yields the same value, in every encoding that uses
+	 * it (e.g., the result of an arithmetic operation over floating point
+	 * numbers is unknown, but always the same for the same operands). By
+	 * default, this is the same as
 	 * {@link #fresh(Sort, SymbolicExpression, Term)}.
 	 *
 	 * @param function  the name of the function
 	 * @param result    the sort of the result
 	 * @param arguments the arguments
 	 * @param origin    the expression whose value is not encoded precisely
-	 * @param guard     the condition under which the application is not
-	 *                      used
+	 * @param guard     the condition under which the application is not used
 	 *
 	 * @return the application
 	 */

@@ -1,8 +1,8 @@
 package it.unive.lisa.triage.smt;
 
 /**
- * An {@link SmtException} raised when the requested solver is not available
- * in the current environment (e.g., its executable cannot be found).
+ * An {@link SmtException} raised when the requested solver is not available in
+ * the current environment (e.g., its executable cannot be found).
  *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */

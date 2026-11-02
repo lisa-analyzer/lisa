@@ -601,6 +601,7 @@ public class TracePartitioning<A extends AbstractLattice<A>,
 				rem.isEmpty() ? remaining : new TraceLattice<>(remaining.lattice, left),
 				mov.isEmpty() ? moved : new TraceLattice<>(moved.lattice, right));
 	}
+
 	@Override
 	public <T> Collection<T> getAllDomainInstances(
 			Class<T> domain) {

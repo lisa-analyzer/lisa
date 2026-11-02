@@ -16,15 +16,15 @@ import it.unive.lisa.checks.verification.Violation;
 import it.unive.lisa.imp.IMPFrontend;
 import it.unive.lisa.program.Program;
 import it.unive.lisa.program.SyntheticLocation;
+import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.edge.TrueEdge;
+import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.type.BoolType;
 import it.unive.lisa.program.type.Int32Type;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
-import it.unive.lisa.symbolic.value.operator.binary.ComparisonEq;
-import it.unive.lisa.program.cfg.CFG;
-import it.unive.lisa.program.cfg.edge.TrueEdge;
-import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.symbolic.value.operator.binary.ComparisonEq;
 import it.unive.lisa.triage.bmc.Unrolling;
 import it.unive.lisa.triage.model.AlarmModel;
 import it.unive.lisa.triage.model.AlarmModelBuilder;
@@ -40,10 +40,10 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 /**
- * Tests for the two-state queries that property-directed reachability issues
- * on single transitions of an {@link AlarmModel}, encoded through
- * {@link Unrolling} with {@link Cube}s and {@link Lemma}s. Tests are skipped
- * if z3 is not available.
+ * Tests for the two-state queries that property-directed reachability issues on
+ * single transitions of an {@link AlarmModel}, encoded through
+ * {@link Unrolling} with {@link Cube}s and {@link Lemma}s. Tests are skipped if
+ * z3 is not available.
  */
 public class TwoStateQueryTest {
 

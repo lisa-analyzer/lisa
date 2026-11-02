@@ -50,8 +50,8 @@ public interface SmtSolver
 			Sort sort);
 
 	/**
-	 * Declares a new uninterpreted function with the given name and
-	 * signature. Applications of the function are built with
+	 * Declares a new uninterpreted function with the given name and signature.
+	 * Applications of the function are built with
 	 * {@link Term#app(String, Sort, Term...)}, using the returned symbol.
 	 *
 	 * @param name      the name of the function

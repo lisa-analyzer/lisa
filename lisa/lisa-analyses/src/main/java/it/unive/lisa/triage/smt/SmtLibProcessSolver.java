@@ -290,6 +290,7 @@ public class SmtLibProcessSolver
 		command("(declare-const " + constant.toSmtLib() + " " + sort.toSmtLib() + ")");
 		return constant;
 	}
+
 	@Override
 	public String declareFunction(
 			String name,
@@ -303,7 +304,6 @@ public class SmtLibProcessSolver
 		command(sb.toString());
 		return symbol;
 	}
-
 
 	@Override
 	public void assertTerm(
@@ -423,8 +423,8 @@ public class SmtLibProcessSolver
 	}
 
 	/**
-	 * Sends a command and waits for its response, failing if the solver
-	 * reports an error.
+	 * Sends a command and waits for its response, failing if the solver reports
+	 * an error.
 	 */
 	private SExpression query(
 			String cmd) {

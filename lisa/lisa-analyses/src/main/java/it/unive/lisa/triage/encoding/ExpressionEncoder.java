@@ -110,8 +110,8 @@ import java.util.function.Function;
  * theory;</li>
  * <li>values of other types, and values whose type is unknown or not unique,
  * are encoded through the {@link ValueSort} datatype, where reading a value as
- * an integer, boolean, or string yields an unspecified value if the value is
- * of a different kind;</li>
+ * an integer, boolean, or string yields an unspecified value if the value is of
+ * a different kind;</li>
  * <li>floating point arithmetic, bitwise operators (except negation),
  * regular-expression based and case-dependent string operations, character
  * operations, type checks, and heap expressions yield fresh constants.</li>
@@ -587,8 +587,8 @@ public class ExpressionEncoder
 	 * values, and unconstrained otherwise (e.g., if some operand is a floating
 	 * point number). Any other combination of sorts yields a fresh constant.
 	 * The static type of the expression is not used to decide whether the
-	 * operation is over integers, since frontends might use a common
-	 * supertype of all the possible runtime types of the operands.
+	 * operation is over integers, since frontends might use a common supertype
+	 * of all the possible runtime types of the operands.
 	 */
 	private Term arithmetic(
 			ValueExpression expression,

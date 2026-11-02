@@ -4,8 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import it.unive.lisa.analysis.numeric.Interval;
-import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.DefaultConfiguration;
 import it.unive.lisa.TestParameterProvider;
 import it.unive.lisa.analysis.Analysis;
@@ -15,6 +13,8 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SimpleAbstractDomain;
 import it.unive.lisa.analysis.nonrelational.type.TypeEnvironment;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
+import it.unive.lisa.analysis.numeric.Interval;
+import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.UniqueScope;
 import it.unive.lisa.lattices.ExpressionSet;
 import it.unive.lisa.lattices.SimpleAbstractState;
@@ -53,7 +53,8 @@ public class ReplayDomainTest {
 
 	private static final Variable Z = new Variable(Int32Type.INSTANCE, "z", LOC);
 
-	private static final UniqueScope<SimpleAbstractState<Monolith, ValueEnvironment<IntInterval>,
+	private static final UniqueScope<SimpleAbstractState<Monolith,
+			ValueEnvironment<IntInterval>,
 			TypeEnvironment<TypeSet>>> CTX = new UniqueScope<>();
 
 	private final ProgramPoint pp = TestParameterProvider.provideParam(null, ProgramPoint.class);
@@ -63,7 +64,8 @@ public class ReplayDomainTest {
 	private ReplayDomain<SimpleAbstractState<Monolith, ValueEnvironment<IntInterval>, TypeEnvironment<TypeSet>>,
 			SimpleAbstractDomain<Monolith, ValueEnvironment<IntInterval>, TypeEnvironment<TypeSet>>> domain;
 
-	private Analysis<ReplayState<SimpleAbstractState<Monolith, ValueEnvironment<IntInterval>,
+	private Analysis<ReplayState<SimpleAbstractState<Monolith,
+			ValueEnvironment<IntInterval>,
 			TypeEnvironment<TypeSet>>>,
 			ReplayDomain<SimpleAbstractState<Monolith, ValueEnvironment<IntInterval>, TypeEnvironment<TypeSet>>,
 					SimpleAbstractDomain<Monolith, ValueEnvironment<IntInterval>, TypeEnvironment<TypeSet>>>> analysis;
@@ -75,9 +77,11 @@ public class ReplayDomainTest {
 		analysis = new Analysis<>(domain);
 	}
 
-	private AnalysisState<ReplayState<SimpleAbstractState<Monolith, ValueEnvironment<IntInterval>,
+	private AnalysisState<ReplayState<SimpleAbstractState<Monolith,
+			ValueEnvironment<IntInterval>,
 			TypeEnvironment<TypeSet>>>> start() {
-		ProgramState<ReplayState<SimpleAbstractState<Monolith, ValueEnvironment<IntInterval>,
+		ProgramState<ReplayState<SimpleAbstractState<Monolith,
+				ValueEnvironment<IntInterval>,
 				TypeEnvironment<TypeSet>>>> execution = new ProgramState<>(
 						domain.lift(DefaultConfiguration.defaultAbstractDomain().makeLattice().top()),
 						new ExpressionSet());

@@ -322,9 +322,9 @@ public class RegexAutomaton
 	 * transitions not recognizing the top string recognize single characters
 	 * and can be matched one by one. A transition recognizing the top string
 	 * (that is, any string, including the empty one) can match any sequence of
-	 * transitions of the other automaton: it can consume a character and
-	 * either stop or keep consuming, and it can match no character at all.
-	 * The result over-approximates the intersection of the languages.
+	 * transitions of the other automaton: it can consume a character and either
+	 * stop or keep consuming, and it can match no character at all. The result
+	 * over-approximates the intersection of the languages.
 	 */
 	@Override
 	public RegexAutomaton intersection(
@@ -386,9 +386,9 @@ public class RegexAutomaton
 	}
 
 	/**
-	 * Yields, for each state, the states reachable from it through
-	 * transitions recognizing the top string (that can match the empty
-	 * string), including the state itself.
+	 * Yields, for each state, the states reachable from it through transitions
+	 * recognizing the top string (that can match the empty string), including
+	 * the state itself.
 	 */
 	private Map<State, Set<State>> topClosure() {
 		Map<State, Set<State>> result = new HashMap<>();

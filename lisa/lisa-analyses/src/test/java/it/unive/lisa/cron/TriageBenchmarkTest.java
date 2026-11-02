@@ -15,10 +15,10 @@ import it.unive.lisa.analysis.string.Suffix;
 import it.unive.lisa.analysis.string.tarsis.Tarsis;
 import it.unive.lisa.checks.semantic.SemanticCheck;
 import it.unive.lisa.checks.semantic.SemanticTool;
+import it.unive.lisa.checks.verification.IndividualWarningVerifier;
 import it.unive.lisa.checks.verification.VerificationOutcome;
 import it.unive.lisa.checks.verification.VerificationResult;
 import it.unive.lisa.checks.verification.Violation;
-import it.unive.lisa.checks.verification.IndividualWarningVerifier;
 import it.unive.lisa.imp.IMPFrontend;
 import it.unive.lisa.interprocedural.ReturnTopPolicy;
 import it.unive.lisa.program.Program;
@@ -43,10 +43,10 @@ import java.util.function.Supplier;
 import org.junit.jupiter.api.Test;
 
 /**
- * The triage benchmark: runs every warning verifier configuration on the
- * alarms of the programs in {@code imp-testcases/triage}, checks that no
- * verdict is unsound, and writes a report ({@code benchmark.md}) and the raw
- * results ({@code results.csv}) to {@code test-outputs/triage}.<br>
+ * The triage benchmark: runs every warning verifier configuration on the alarms
+ * of the programs in {@code imp-testcases/triage}, checks that no verdict is
+ * unsound, and writes a report ({@code benchmark.md}) and the raw results
+ * ({@code results.csv}) to {@code test-outputs/triage}.<br>
  * <br>
  * Each method of the benchmark programs contains one alarm: a call to
  * {@code this.bug()}, checked for reachability. Methods named {@code safe_*}
@@ -58,8 +58,8 @@ import org.junit.jupiter.api.Test;
  * By default, the benchmark runs a reduced set of configurations and suites,
  * taking a few minutes. Setting the system property {@value #FULL} to
  * {@code true} runs the full ablation (every generalization strategy with and
- * without the invariants of the analysis, and the CharInclusion string
- * domain), that takes considerably longer.
+ * without the invariants of the analysis, and the CharInclusion string domain),
+ * that takes considerably longer.
  */
 public class TriageBenchmarkTest {
 

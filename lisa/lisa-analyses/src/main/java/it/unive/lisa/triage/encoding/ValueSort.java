@@ -15,16 +15,16 @@ import java.util.Map;
 /**
  * The {@code Value} algebraic datatype, used to encode program values whose
  * type is not statically known or not unique (e.g., variables of dynamically
- * typed languages). A value is either an integer, a boolean, a string, the
- * null value, a reference (identified by an integer), or an opaque value of a
- * type that is not encoded precisely (e.g., floating point numbers),
- * identified by an integer. The datatype must be declared through
+ * typed languages). A value is either an integer, a boolean, a string, the null
+ * value, a reference (identified by an integer), or an opaque value of a type
+ * that is not encoded precisely (e.g., floating point numbers), identified by
+ * an integer. The datatype must be declared through
  * {@link it.unive.lisa.triage.smt.SmtSolver#declareDatatype(Datatype)} before
  * being used.<br>
  * <br>
  * Selecting a field of a value built with a different constructor yields an
- * unspecified value of the field's sort: this is used to soundly read values
- * of unknown types as values of a given sort.
+ * unspecified value of the field's sort: this is used to soundly read values of
+ * unknown types as values of a given sort.
  *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
@@ -151,15 +151,15 @@ public final class ValueSort {
 	}
 
 	/**
-	 * Yields the boolean term that holds if the given value has been built
-	 * with the constructor of terms of the given sort, that must be one of
+	 * Yields the boolean term that holds if the given value has been built with
+	 * the constructor of terms of the given sort, that must be one of
 	 * {@link Sort#INT}, {@link Sort#BOOL}, or {@link Sort#STRING}.
 	 *
 	 * @param value the value
 	 * @param sort  the sort
 	 *
-	 * @return the boolean term, or {@code null} if no constructor builds
-	 *             values from terms of the given sort
+	 * @return the boolean term, or {@code null} if no constructor builds values
+	 *             from terms of the given sort
 	 */
 	public static Term is(
 			Term value,
@@ -178,8 +178,8 @@ public final class ValueSort {
 	/**
 	 * Yields the value representing the given type when used as a type token
 	 * (e.g., the right operand of a type check): an opaque value whose
-	 * identifier is unique for each type name, so that tokens of the same
-	 * type are equal and tokens of different types are different.
+	 * identifier is unique for each type name, so that tokens of the same type
+	 * are equal and tokens of different types are different.
 	 *
 	 * @param type the type
 	 *
@@ -195,9 +195,9 @@ public final class ValueSort {
 	}
 
 	/**
-	 * Yields the boolean term that holds if the given value might be a
-	 * number: an integer, or an opaque value (that might be, e.g., a floating
-	 * point number).
+	 * Yields the boolean term that holds if the given value might be a number:
+	 * an integer, or an opaque value (that might be, e.g., a floating point
+	 * number).
 	 *
 	 * @param value the value
 	 *
@@ -209,10 +209,10 @@ public final class ValueSort {
 	}
 
 	/**
-	 * Yields a human-readable representation of the given value, as returned
-	 * by a solver in SMT-LIB syntax (e.g., {@code (Value.Int (- 3))} becomes
-	 * {@code -3}, and {@code Value.Null} becomes {@code null}). Values that
-	 * are not recognized are returned unchanged.
+	 * Yields a human-readable representation of the given value, as returned by
+	 * a solver in SMT-LIB syntax (e.g., {@code (Value.Int (- 3))} becomes
+	 * {@code -3}, and {@code Value.Null} becomes {@code null}). Values that are
+	 * not recognized are returned unchanged.
 	 *
 	 * @param smtlib the value, in SMT-LIB syntax
 	 *

@@ -22,10 +22,9 @@ import java.util.Map;
  * <li>all warnings are verified with a cheap verifier (by default, a
  * {@link ReachabilityVerifier}), stopping at the first warning that is
  * confirmed;</li>
- * <li>if no warning has been confirmed, the warnings that have not been
- * refuted are verified with an expensive verifier (by default, a
- * {@link PdrVerifier}), again stopping at the first warning that is
- * confirmed.</li>
+ * <li>if no warning has been confirmed, the warnings that have not been refuted
+ * are verified with an expensive verifier (by default, a {@link PdrVerifier}),
+ * again stopping at the first warning that is confirmed.</li>
  * </ol>
  * Refutations found along the way are kept, so that a warning refuted by the
  * cheap verifier is not verified again by the expensive one. Warnings that are

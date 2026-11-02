@@ -225,9 +225,9 @@ public final class AlarmModelBuilder {
 	}
 
 	/**
-	 * Yields the conjuncts of the path conditions of the transitions and of
-	 * the bad cases that do not contain fresh values, that is, the ones that
-	 * can be evaluated in the states computed by the analysis.
+	 * Yields the conjuncts of the path conditions of the transitions and of the
+	 * bad cases that do not contain fresh values, that is, the ones that can be
+	 * evaluated in the states computed by the analysis.
 	 */
 	private static Set<SymbolicExpression> conditions(
 			Collection<NodeTransitions> transitions,

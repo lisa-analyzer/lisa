@@ -5,10 +5,10 @@ import it.unive.lisa.analysis.AbstractLattice;
 import it.unive.lisa.analysis.AnalyzedCFG;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.checks.semantic.SemanticTool;
+import it.unive.lisa.checks.verification.IndividualWarningVerifier;
 import it.unive.lisa.checks.verification.VerificationOutcome;
 import it.unive.lisa.checks.verification.VerificationResult;
 import it.unive.lisa.checks.verification.Violation;
-import it.unive.lisa.checks.verification.IndividualWarningVerifier;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.triage.inputs.InputSource;
@@ -35,16 +35,15 @@ import java.util.function.Supplier;
  * yields:
  * <ul>
  * <li>{@link VerificationOutcome#REFUTED} if the statement is unreachable or
- * the violation cannot happen according to the analysis (first checked
- * through a {@link ReachabilityVerifier}, that queries the abstract states
- * directly, and then through the invariants exported as constraints), or if
- * an inductive invariant excluding the violation is found;</li>
+ * the violation cannot happen according to the analysis (first checked through
+ * a {@link ReachabilityVerifier}, that queries the abstract states directly,
+ * and then through the invariants exported as constraints), or if an inductive
+ * invariant excluding the violation is found;</li>
  * <li>{@link VerificationOutcome#CONFIRMED} if a counterexample is found, all
- * of its steps are encoded exactly, and the model starts from the beginning
- * of the program: the reproducing inputs are the values of the parameters in
- * the initial state and the values of the inputs consumed along the
- * counterexample (note that confirmations are not yet certified by
- * execution);</li>
+ * of its steps are encoded exactly, and the model starts from the beginning of
+ * the program: the reproducing inputs are the values of the parameters in the
+ * initial state and the values of the inputs consumed along the counterexample
+ * (note that confirmations are not yet certified by execution);</li>
  * <li>{@link VerificationOutcome#POSSIBLE} otherwise (imprecise
  * counterexamples, exhausted budgets, solver failures, or no solver
  * available).</li>
@@ -111,12 +110,11 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 	 * @param maxLevel   the maximum level of frames
 	 * @param maxQueries the maximum number of queries per candidate violation
 	 * @param maxMillis  the maximum time per candidate violation, in
-	 *                       milliseconds ({@code 0} or negative means no
-	 *                       limit)
+	 *                       milliseconds ({@code 0} or negative means no limit)
 	 * @param solvers    the supplier of the solvers to use (one per candidate
 	 *                       violation)
-	 * @param maxCases   the maximum number of cases of each transition of
-	 *                       the model
+	 * @param maxCases   the maximum number of cases of each transition of the
+	 *                       model
 	 */
 	public PdrVerifier(
 			int maxLevel,
@@ -161,11 +159,11 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 	}
 
 	/**
-	 * Yields the statistics of the engine on the last candidate violation
-	 * that reached it: the number of queries ({@code queries}), the number of
-	 * frames ({@code level}), and the number of generalizations proposed by
-	 * the domain ({@code proposals}) and used ({@code accepted}). Violations
-	 * decided before running the engine yield an empty map.
+	 * Yields the statistics of the engine on the last candidate violation that
+	 * reached it: the number of queries ({@code queries}), the number of frames
+	 * ({@code level}), and the number of generalizations proposed by the domain
+	 * ({@code proposals}) and used ({@code accepted}). Violations decided
+	 * before running the engine yield an empty map.
 	 *
 	 * @return the statistics
 	 */
@@ -174,9 +172,9 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 	}
 
 	/**
-	 * Sets whether or not to check the candidate violation against the
-	 * results of the analysis through a {@link ReachabilityVerifier} before
-	 * building its model (default: {@code true}).
+	 * Sets whether or not to check the candidate violation against the results
+	 * of the analysis through a {@link ReachabilityVerifier} before building
+	 * its model (default: {@code true}).
 	 *
 	 * @param fixpointCheck whether or not to check the results first
 	 *

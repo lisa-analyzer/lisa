@@ -29,32 +29,31 @@ import java.util.Set;
 /**
  * Property-directed reachability (IC3/PDR) over an {@link AlarmModel}, with
  * frames kept per location ({@link Frames}). Frame {@code F_0} is the set of
- * initial states, while every frame {@code F_i(l)}, with {@code i >= 1}, is
- * the conjunction of the invariant computed by the analysis at {@code l} and
- * of the lemmas of {@code l} with level at least {@code i}.<br>
+ * initial states, while every frame {@code F_i(l)}, with {@code i >= 1}, is the
+ * conjunction of the invariant computed by the analysis at {@code l} and of the
+ * lemmas of {@code l} with level at least {@code i}.<br>
  * <br>
  * At each level {@code k}, the engine looks for states of {@code F_k} at the
  * bad location that violate the property, and turns each of them into an
  * {@link Obligation}. Obligations are processed lowest level first: an
- * obligation {@code (l, c, i)} is blocked if no case of a transition leads
- * from {@code F_{i-1}} to {@code c} at {@code l} (and, if {@code l} is
- * initial, {@code c} contains no initial state), otherwise the predecessor
- * found becomes a new obligation at level {@code i - 1}. Predecessors are
- * symbolic: they are computed by model-based projection
- * ({@link Projection}) of the cube through the case of the transition taken
- * in the model. An obligation at level {@code 0} contains initial states, so
- * the chain of obligations from it to the bad location is a counterexample.
- * Blocked cubes are first reduced to the union of the unsat cores of the
- * queries that blocked them (with no additional query), then generalized by
- * dropping literals, and their negation is added as a lemma.<br>
+ * obligation {@code (l, c, i)} is blocked if no case of a transition leads from
+ * {@code F_{i-1}} to {@code c} at {@code l} (and, if {@code l} is initial,
+ * {@code c} contains no initial state), otherwise the predecessor found becomes
+ * a new obligation at level {@code i - 1}. Predecessors are symbolic: they are
+ * computed by model-based projection ({@link Projection}) of the cube through
+ * the case of the transition taken in the model. An obligation at level
+ * {@code 0} contains initial states, so the chain of obligations from it to the
+ * bad location is a counterexample. Blocked cubes are first reduced to the
+ * union of the unsat cores of the queries that blocked them (with no additional
+ * query), then generalized by dropping literals, and their negation is added as
+ * a lemma.<br>
  * <br>
- * Once every violation at level {@code k} is blocked, lemmas are propagated
- * to the next levels. If a level is left without lemmas of its own, two
+ * Once every violation at level {@code k} is blocked, lemmas are propagated to
+ * the next levels. If a level is left without lemmas of its own, two
  * consecutive frames coincide, and the frame is an inductive invariant: the
- * violation is impossible. This relies on the invariants of the analysis
- * being sound (they hold in every reachable state), while it does not
- * require them to be inductive with respect to the encoding of the
- * transitions.<br>
+ * violation is impossible. This relies on the invariants of the analysis being
+ * sound (they hold in every reachable state), while it does not require them to
+ * be inductive with respect to the encoding of the transitions.<br>
  * <br>
  * Queries are two-state: the pre-state is step {@code 0} of an
  * {@link Unrolling}, the post-state is step {@code 1}.
@@ -68,8 +67,8 @@ public class PdrEngine {
 	 */
 	public enum Status {
 		/**
-		 * A chain of obligations from the initial states to the violation
-		 * has been found.
+		 * A chain of obligations from the initial states to the violation has
+		 * been found.
 		 */
 		COUNTEREXAMPLE,
 
@@ -79,8 +78,8 @@ public class PdrEngine {
 		SAFE,
 
 		/**
-		 * No violation is possible within the reached level, but no
-		 * inductive invariant has been found.
+		 * No violation is possible within the reached level, but no inductive
+		 * invariant has been found.
 		 */
 		BLOCKED,
 
@@ -119,8 +118,8 @@ public class PdrEngine {
 
 		/**
 		 * Blocked cubes are reduced to the unsat cores, replaced by the
-		 * proposal of the {@link CubeAbstraction} if it is still blocked,
-		 * and then literals are dropped.
+		 * proposal of the {@link CubeAbstraction} if it is still blocked, and
+		 * then literals are dropped.
 		 */
 		BOTH
 	}
@@ -204,8 +203,8 @@ public class PdrEngine {
 	 * @param solver the solver to use, that is not closed by the engine
 	 * @param strict whether or not to encode the model in strict mode (see
 	 *                   {@link Unrolling#Unrolling(AlarmModel, SmtSolver, boolean)}):
-	 *                   in strict mode, counterexamples use only values
-	 *                   that are computed precisely, but the absence of
+	 *                   in strict mode, counterexamples use only values that
+	 *                   are computed precisely, but the absence of
 	 *                   counterexamples does not prove anything
 	 */
 	public PdrEngine(
@@ -236,9 +235,9 @@ public class PdrEngine {
 	}
 
 	/**
-	 * Sets the abstraction proposing generalizations of blocked cubes, used
-	 * by {@link Generalization#DOMAIN} and {@link Generalization#BOTH}
-	 * (default: none).
+	 * Sets the abstraction proposing generalizations of blocked cubes, used by
+	 * {@link Generalization#DOMAIN} and {@link Generalization#BOTH} (default:
+	 * none).
 	 *
 	 * @param abstraction the abstraction, or {@code null}
 	 */
@@ -321,8 +320,8 @@ public class PdrEngine {
 
 	/**
 	 * Yields the inductive invariant found by the last run returning
-	 * {@link Status#SAFE}: the lemmas of each location, that hold together
-	 * with the invariants computed by the analysis.
+	 * {@link Status#SAFE}: the lemmas of each location, that hold together with
+	 * the invariants computed by the analysis.
 	 *
 	 * @return the invariant, or {@code null}
 	 */
@@ -332,8 +331,8 @@ public class PdrEngine {
 
 	/**
 	 * Runs the engine until a counterexample or an inductive invariant is
-	 * found, or every violation within {@code maxLevel} steps has been
-	 * blocked, with no time limit.
+	 * found, or every violation within {@code maxLevel} steps has been blocked,
+	 * with no time limit.
 	 *
 	 * @param maxLevel   the maximum level to reach
 	 * @param maxQueries the maximum number of queries to issue
@@ -351,14 +350,14 @@ public class PdrEngine {
 
 	/**
 	 * Runs the engine until a counterexample or an inductive invariant is
-	 * found, or every violation within {@code maxLevel} steps has been
-	 * blocked. The time limit is checked before each query: a single query
-	 * is bounded by the timeout of the solver.
+	 * found, or every violation within {@code maxLevel} steps has been blocked.
+	 * The time limit is checked before each query: a single query is bounded by
+	 * the timeout of the solver.
 	 *
 	 * @param maxLevel   the maximum level to reach
 	 * @param maxQueries the maximum number of queries to issue
-	 * @param maxMillis  the maximum time to spend, in milliseconds
-	 *                       ({@code 0} or negative means no limit)
+	 * @param maxMillis  the maximum time to spend, in milliseconds ({@code 0}
+	 *                       or negative means no limit)
 	 *
 	 * @return the outcome
 	 *
@@ -402,8 +401,8 @@ public class PdrEngine {
 
 	/**
 	 * Yields an obligation for a state of {@code F_level} (or of the initial
-	 * states, if {@code level} is {@code 0}) at the bad location, violating
-	 * the property, or {@code null} if there is none.
+	 * states, if {@code level} is {@code 0}) at the bad location, violating the
+	 * property, or {@code null} if there is none.
 	 */
 	private Obligation badObligation(
 			int level)
@@ -433,8 +432,8 @@ public class PdrEngine {
 	}
 
 	/**
-	 * Processes the queue until it is empty (every obligation is blocked) or
-	 * a counterexample is found.
+	 * Processes the queue until it is empty (every obligation is blocked) or a
+	 * counterexample is found.
 	 *
 	 * @return {@code true} if a counterexample has been found
 	 */
@@ -475,13 +474,13 @@ public class PdrEngine {
 	}
 
 	/**
-	 * Yields a predecessor of the given cube at the given location: an
-	 * initial state in the cube (as an obligation at level {@code 0}, with no
+	 * Yields a predecessor of the given cube at the given location: an initial
+	 * state in the cube (as an obligation at level {@code 0}, with no
 	 * transition), or the projection of the cube on a state of
 	 * {@code F_{level-1}} at another location that reaches the cube in one
-	 * transition. Yields {@code null} if there is none (the cube is blocked
-	 * at the given level): in that case, if {@code core} is not {@code null},
-	 * it is filled with literals of the cube that are enough to block it (the
+	 * transition. Yields {@code null} if there is none (the cube is blocked at
+	 * the given level): in that case, if {@code core} is not {@code null}, it
+	 * is filled with literals of the cube that are enough to block it (the
 	 * union of the unsat cores of the queries).
 	 */
 	private Obligation predecessor(
@@ -547,8 +546,8 @@ public class PdrEngine {
 
 	/**
 	 * Generalizes a cube blocked at the given level, according to the
-	 * configured {@link Generalization}, given the union of the unsat cores
-	 * of the queries that blocked it.
+	 * configured {@link Generalization}, given the union of the unsat cores of
+	 * the queries that blocked it.
 	 */
 	private Cube generalize(
 			Statement location,
@@ -618,8 +617,8 @@ public class PdrEngine {
 	}
 
 	/**
-	 * Yields frame {@code F_level} at the given location, over step
-	 * {@code 0}, including the program counter.
+	 * Yields frame {@code F_level} at the given location, over step {@code 0},
+	 * including the program counter.
 	 */
 	private Term frame(
 			Statement location,
@@ -640,8 +639,8 @@ public class PdrEngine {
 	 * Checks the conjunction of the given terms in a new scope, that is left
 	 * open (so that the model can be read) and must be closed by the caller.
 	 *
-	 * @throws Stop if the budget is exhausted or the solver cannot decide
-	 *                  (in which case the scope is closed)
+	 * @throws Stop if the budget is exhausted or the solver cannot decide (in
+	 *                  which case the scope is closed)
 	 */
 	private SmtResult check(
 			Term... terms)
@@ -714,8 +713,8 @@ public class PdrEngine {
 	}
 
 	/**
-	 * Yields the values, in the current model, of the fresh values occurring
-	 * in the given expressions that have been encoded under the given key.
+	 * Yields the values, in the current model, of the fresh values occurring in
+	 * the given expressions that have been encoded under the given key.
 	 */
 	private Map<FreshValue, String> freshValues(
 			Collection<? extends SymbolicExpression> expressions,

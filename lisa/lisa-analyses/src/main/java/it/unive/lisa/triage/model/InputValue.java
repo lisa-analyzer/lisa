@@ -19,8 +19,8 @@ public class InputValue
 	 * Builds the value.
 	 *
 	 * @param source the source producing the value
-	 * @param index  a number that uniquely identifies the value among the
-	 *                   fresh values of a model
+	 * @param index  a number that uniquely identifies the value among the fresh
+	 *                   values of a model
 	 */
 	public InputValue(
 			InputSource source,

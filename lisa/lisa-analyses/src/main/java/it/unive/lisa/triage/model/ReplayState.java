@@ -19,15 +19,14 @@ import java.util.function.Predicate;
  * The lattice of {@link ReplayDomain}: an abstract state of the analysis,
  * paired with a {@link SymbolicStore} recording the symbolic transition
  * performed since the beginning of the replay. The abstract state is
- * responsible for all the semantic queries (satisfiability, runtime types,
- * call resolution, heap rewriting), exactly as during the analysis, while the
- * store only records.<br>
+ * responsible for all the semantic queries (satisfiability, runtime types, call
+ * resolution, heap rewriting), exactly as during the analysis, while the store
+ * only records.<br>
  * <br>
- * A state is bottom if its abstract state is, and top only if both its
- * abstract state and its store are. The lattice operations other than the
- * least upper bound (and the ones derived from it) are never used during a
- * replay: they are delegated to the abstract states, keeping the store of
- * {@code this}.
+ * A state is bottom if its abstract state is, and top only if both its abstract
+ * state and its store are. The lattice operations other than the least upper
+ * bound (and the ones derived from it) are never used during a replay: they are
+ * delegated to the abstract states, keeping the store of {@code this}.
  *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  *

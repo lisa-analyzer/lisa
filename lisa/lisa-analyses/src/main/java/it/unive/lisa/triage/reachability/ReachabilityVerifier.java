@@ -11,10 +11,10 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.checks.semantic.SemanticTool;
 import it.unive.lisa.checks.verification.ConditionViolation;
 import it.unive.lisa.checks.verification.ErrorViolation;
+import it.unive.lisa.checks.verification.IndividualWarningVerifier;
 import it.unive.lisa.checks.verification.ReachViolation;
 import it.unive.lisa.checks.verification.VerificationResult;
 import it.unive.lisa.checks.verification.Violation;
-import it.unive.lisa.checks.verification.IndividualWarningVerifier;
 import it.unive.lisa.lattices.GenericMapLattice;
 import it.unive.lisa.lattices.GenericSetLattice;
 import it.unive.lisa.lattices.Satisfiability;
@@ -24,9 +24,10 @@ import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.type.Type;
 
 /**
- * An {@link IndividualWarningVerifier} that relies on the {@link Reachability} of
- * statements, together with the satisfiability of conditions and the presence
- * of error continuations in the analysis results, to verify violations:
+ * An {@link IndividualWarningVerifier} that relies on the {@link Reachability}
+ * of statements, together with the satisfiability of conditions and the
+ * presence of error continuations in the analysis results, to verify
+ * violations:
  * <ul>
  * <li>a {@link ReachViolation} is refuted if the statement is
  * {@link ReachabilityStatus#UNREACHABLE}, confirmed if it is
@@ -37,8 +38,8 @@ import it.unive.lisa.type.Type;
  * condition always holds in its post-state; it is possible otherwise;</li>
  * <li>an {@link ErrorViolation} raised by the statement (propagated errors are
  * redirected to the statements raising them, see
- * {@link IndividualWarningVerifier}) is refuted if the statement is unreachable or
- * if its post-state does not contain matching error continuations; it is
+ * {@link IndividualWarningVerifier}) is refuted if the statement is unreachable
+ * or if its post-state does not contain matching error continuations; it is
  * confirmed if the statement is reachable and its post-state contains only
  * matching error continuations; it is possible otherwise.</li>
  * </ul>

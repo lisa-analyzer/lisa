@@ -6,11 +6,11 @@ import it.unive.lisa.type.Type;
 import java.util.Objects;
 
 /**
- * An unknown value introduced by the replay of a statement (e.g., the result
- * of a summarized call). Abstract domains treat it as any other
- * {@link PushAny}, while the symbolic component of a {@link ReplayState} turns
- * it into a {@link SummaryValue} instead of an {@link InputValue}, since it is
- * not a source of nondeterminism of the program.
+ * An unknown value introduced by the replay of a statement (e.g., the result of
+ * a summarized call). Abstract domains treat it as any other {@link PushAny},
+ * while the symbolic component of a {@link ReplayState} turns it into a
+ * {@link SummaryValue} instead of an {@link InputValue}, since it is not a
+ * source of nondeterminism of the program.
  *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */

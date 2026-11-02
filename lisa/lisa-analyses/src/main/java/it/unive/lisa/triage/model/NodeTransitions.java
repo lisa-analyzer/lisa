@@ -81,8 +81,8 @@ public class NodeTransitions {
 	}
 
 	/**
-	 * Yields the transition to the end of the cfg, if the node is an exit
-	 * point and the execution can terminate normally after it.
+	 * Yields the transition to the end of the cfg, if the node is an exit point
+	 * and the execution can terminate normally after it.
 	 *
 	 * @return the transition, or {@code null}
 	 */

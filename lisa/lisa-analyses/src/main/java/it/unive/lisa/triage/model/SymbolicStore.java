@@ -136,8 +136,8 @@ public final class SymbolicStore {
 	 * Assumes the given condition in every case.
 	 *
 	 * @param condition the condition
-	 * @param pp        the program point where the condition is assumed (can
-	 *                      be {@code null})
+	 * @param pp        the program point where the condition is assumed (can be
+	 *                      {@code null})
 	 *
 	 * @return the resulting store
 	 */

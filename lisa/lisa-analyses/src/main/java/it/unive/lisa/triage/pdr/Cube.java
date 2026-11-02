@@ -16,11 +16,11 @@ import java.util.Objects;
 import java.util.Set;
 
 /**
- * A cube of property-directed reachability: a conjunction of boolean
- * symbolic expressions (literals) over the identifiers of an
+ * A cube of property-directed reachability: a conjunction of boolean symbolic
+ * expressions (literals) over the identifiers of an
  * {@link it.unive.lisa.triage.model.AlarmModel}, possibly containing fresh
- * values (existentially quantified). Cubes describe sets of states that must
- * be blocked; once blocked at a location, the cube yields the lemma
+ * values (existentially quantified). Cubes describe sets of states that must be
+ * blocked; once blocked at a location, the cube yields the lemma
  * {@link #negate()}. Generalization drops literals through
  * {@link #without(SymbolicExpression)}. The empty cube is {@code true}.
  *
@@ -51,8 +51,8 @@ public final class Cube {
 	}
 
 	/**
-	 * Yields the cube obtained by dropping the given literal, that represents
-	 * a superset of the states of this one.
+	 * Yields the cube obtained by dropping the given literal, that represents a
+	 * superset of the states of this one.
 	 *
 	 * @param literal the literal
 	 *

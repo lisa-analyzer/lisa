@@ -41,10 +41,10 @@ import java.util.function.UnaryOperator;
  * statements of one analysis result (an {@link AnalyzedCFG}, i.e., a cfg in a
  * given context) through a {@link ReplayDomain}. No fixpoint is ever computed:
  * <ul>
- * <li>calls to cfgs are <b>summarized</b>: their result is an unknown value
- * (a {@link SummaryMarker}), and the heap is unconstrained after them; errors
- * raised by the callees, and executions halting inside them, are taken from
- * the results of the analysis, with all values unconstrained;</li>
+ * <li>calls to cfgs are <b>summarized</b>: their result is an unknown value (a
+ * {@link SummaryMarker}), and the heap is unconstrained after them; errors
+ * raised by the callees, and executions halting inside them, are taken from the
+ * results of the analysis, with all values unconstrained;</li>
  * <li>open calls are evaluated through the {@link OpenCallPolicy} of the
  * analysis, so that the unknown values they return become inputs of the
  * program;</li>

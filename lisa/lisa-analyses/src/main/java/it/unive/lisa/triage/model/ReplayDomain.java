@@ -12,25 +12,8 @@ import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.program.cfg.protection.ProtectedBlock;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
-import org.apache.commons.lang3.tuple.Pair;
-
-/**
- * An {@link AbstractDomain} used to replay the semantics of statements after
- * the analysis, recording the symbolic transitions they perform. Its states
- * ({@link ReplayState}s) pair an abstract state of the wrapped domain, on which
- * the semantics is computed exactly as during the analysis, with a
- * {@link SymbolicStore} that records assignments, assumptions, and the unknown
- * values introduced along the way. Since the replay goes through the regular
- * semantics of statements, everything that they do (including joins of
- * alternatives, scoping, and moves between continuations) is reflected in the
- * recorded transitions.
- *
- * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
- *
- * @param <A> the type of the abstract states of the wrapped domain
- * @param <D> the type of the wrapped domain
- */
 import java.util.Collection;
+import org.apache.commons.lang3.tuple.Pair;
 
 public class ReplayDomain<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
 		implements
@@ -188,6 +171,7 @@ public class ReplayDomain<A extends AbstractLattice<A>, D extends AbstractDomain
 			ScopeId<?> context) {
 		return domain.makeOracle(state.getInner(), context);
 	}
+
 	@Override
 	public <T> Collection<T> getAllDomainInstances(
 			Class<T> domain) {

@@ -20,8 +20,8 @@ import java.util.function.Supplier;
 import org.junit.jupiter.api.Test;
 
 /**
- * Tests for {@link SmtLibProcessSolver}. Tests are skipped for solvers that
- * are not available in the current environment.
+ * Tests for {@link SmtLibProcessSolver}. Tests are skipped for solvers that are
+ * not available in the current environment.
  */
 public class SmtLibProcessSolverTest {
 

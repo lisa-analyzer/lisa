@@ -14,11 +14,11 @@ import java.util.Set;
 
 /**
  * A model of the executions of a cfg (in a given context) that might lead to
- * the violation of a property, built by {@link AlarmModelBuilder}. The model
- * is a control-flow automaton whose locations are the beginnings of the nodes
- * of the cfg that can reach the node where the property is checked (the
- * <i>bad location</i>), and whose edges carry the symbolic transitions
- * extracted from the results of the analysis. The model contains:
+ * the violation of a property, built by {@link AlarmModelBuilder}. The model is
+ * a control-flow automaton whose locations are the beginnings of the nodes of
+ * the cfg that can reach the node where the property is checked (the <i>bad
+ * location</i>), and whose edges carry the symbolic transitions extracted from
+ * the results of the analysis. The model contains:
  * <ul>
  * <li>the locations ({@link #getLocations()}) and their transitions
  * ({@link #getTransitions(Statement)}, restricted to edges between
@@ -28,8 +28,8 @@ import java.util.Set;
  * ({@link #getInitialConstraints()});</li>
  * <li>the bad location and the ways of violating the property there
  * ({@link #getBadCases()});</li>
- * <li>the invariants computed by the analysis at each location, as
- * constraints ({@link #getSeeds(Statement)});</li>
+ * <li>the invariants computed by the analysis at each location, as constraints
+ * ({@link #getSeeds(Statement)});</li>
  * <li>the identifiers used in the model, with the sorts to encode them, the
  * fresh values used in the transitions, and the sources of the parameters of
  * the cfg.</li>
@@ -76,13 +76,11 @@ public class AlarmModel {
 	 * @param locations          the locations
 	 * @param initial            the initial locations
 	 * @param transitions        the transitions of each location
-	 * @param initialConstraints the constraints that hold in the initial
-	 *                               states
-	 * @param badCases           the ways of violating the property at the
-	 *                               bad location
+	 * @param initialConstraints the constraints that hold in the initial states
+	 * @param badCases           the ways of violating the property at the bad
+	 *                               location
 	 * @param seeds              the invariants of each reachable location
-	 *                               (unreachable locations are not in the
-	 *                               map)
+	 *                               (unreachable locations are not in the map)
 	 * @param vocabulary         the identifiers used in the model
 	 * @param sorts              the policy deciding the sorts of identifiers
 	 * @param freshValues        the fresh values used in the model, by name
@@ -128,8 +126,7 @@ public class AlarmModel {
 	}
 
 	/**
-	 * Yields the bad location, that is, the node where the property is
-	 * checked.
+	 * Yields the bad location, that is, the node where the property is checked.
 	 *
 	 * @return the bad location
 	 */
@@ -169,8 +166,8 @@ public class AlarmModel {
 	}
 
 	/**
-	 * Yields the transitions from the given location to other locations of
-	 * the model.
+	 * Yields the transitions from the given location to other locations of the
+	 * model.
 	 *
 	 * @param location the location
 	 *
@@ -207,8 +204,8 @@ public class AlarmModel {
 	}
 
 	/**
-	 * Yields the invariant computed by the analysis at the given location, as
-	 * a set of constraints.
+	 * Yields the invariant computed by the analysis at the given location, as a
+	 * set of constraints.
 	 *
 	 * @param location the location
 	 *
@@ -259,8 +256,8 @@ public class AlarmModel {
 	}
 
 	/**
-	 * Yields {@code true} if the initial states of this model correspond to
-	 * the beginning of the program.
+	 * Yields {@code true} if the initial states of this model correspond to the
+	 * beginning of the program.
 	 *
 	 * @return whether or not this model is confirmable
 	 */
@@ -304,7 +301,9 @@ public class AlarmModel {
 		sb.append("initial constraints: ").append(initialConstraints).append("\n");
 
 		List<Statement> sorted = new ArrayList<>(locations);
-		sorted.sort((l, r) -> l.getLocation().compareTo(r.getLocation()));
+		sorted.sort((
+				l,
+				r) -> l.getLocation().compareTo(r.getLocation()));
 		for (Statement loc : sorted) {
 			sb.append("location ").append(loc).append(" at ").append(loc.getLocation());
 			if (loc == badLocation)

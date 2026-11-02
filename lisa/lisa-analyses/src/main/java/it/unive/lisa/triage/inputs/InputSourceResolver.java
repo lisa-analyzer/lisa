@@ -27,23 +27,21 @@ import java.util.stream.Collectors;
 
 /**
  * Resolves the unknown values introduced by the analysis (that is,
- * {@link PushAny}s, possibly with constraints as
- * {@link PushFromConstraints}s) to the {@link InputSource}s they come from.
- * Resolution is language-agnostic, and relies only on the location of the
- * unknown values:
+ * {@link PushAny}s, possibly with constraints as {@link PushFromConstraints}s)
+ * to the {@link InputSource}s they come from. Resolution is language-agnostic,
+ * and relies only on the location of the unknown values:
  * <ul>
  * <li>an unknown value located at a parameter of a cfg is the value of that
  * parameter (e.g., for entrypoints, or for cfgs analyzed without considering
  * their callers);</li>
- * <li>an unknown value located at a call is the value returned by the call:
- * if the call targets {@link NativeCFG}s (where frontends usually model
- * library methods that return unknown values), the source is described
- * through the signature of the native cfgs, otherwise (e.g., for calls that
- * cannot be resolved) through the name of the call's target; if the call
- * might target a cfg of the program (according to the call graph, or since
- * a cfg has the name of the call's target), its result is not a genuine
- * input, but an imprecision of the analysis
- * ({@link InputSource.Kind#IMPRECISE_CALL_RESULT});</li>
+ * <li>an unknown value located at a call is the value returned by the call: if
+ * the call targets {@link NativeCFG}s (where frontends usually model library
+ * methods that return unknown values), the source is described through the
+ * signature of the native cfgs, otherwise (e.g., for calls that cannot be
+ * resolved) through the name of the call's target; if the call might target a
+ * cfg of the program (according to the call graph, or since a cfg has the name
+ * of the call's target), its result is not a genuine input, but an imprecision
+ * of the analysis ({@link InputSource.Kind#IMPRECISE_CALL_RESULT});</li>
  * <li>any other unknown value is described through the program point that
  * introduces it.</li>
  * </ul>
@@ -68,8 +66,8 @@ public class InputSourceResolver {
 	private final Set<String> cfgNames;
 
 	/**
-	 * Builds the resolver for the program whose results are stored in the
-	 * given tool.
+	 * Builds the resolver for the program whose results are stored in the given
+	 * tool.
 	 *
 	 * @param tool the tool containing the results of the analysis
 	 */
@@ -83,8 +81,8 @@ public class InputSourceResolver {
 	 *
 	 * @param cfgs      the cfgs of the program
 	 * @param callgraph the call graph built during the analysis (can be
-	 *                      {@code null}, in which case calls to native cfgs
-	 *                      are not recognized)
+	 *                      {@code null}, in which case calls to native cfgs are
+	 *                      not recognized)
 	 */
 	public InputSourceResolver(
 			Collection<CFG> cfgs,
@@ -125,7 +123,8 @@ public class InputSourceResolver {
 				CodeMember cm = node.getCodeMember();
 				if (cm instanceof NativeCFG)
 					for (Call call : callgraph.getCallSites(cm))
-						natives.computeIfAbsent(call.getLocation(), l -> new TreeSet<>(BY_SIGNATURE)).add((NativeCFG) cm);
+						natives.computeIfAbsent(call.getLocation(), l -> new TreeSet<>(BY_SIGNATURE))
+								.add((NativeCFG) cm);
 				else if (cm instanceof CFG)
 					for (Call call : callgraph.getCallSites(cm))
 						implemented.add(call.getLocation());

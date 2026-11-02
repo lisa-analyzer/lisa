@@ -8,13 +8,13 @@ import java.util.Collections;
 import java.util.Map;
 
 /**
- * A proof obligation of property-directed reachability: the states of a cube
- * at a location must be shown unreachable within a given number of steps
- * (the level), or a predecessor must be found. Each obligation, except the
- * one at the bad location, records the obligation it is a predecessor of
- * (its parent) and the transition leading there (or no transition, if the
- * obligation restricts the cube of its parent to initial states), together
- * with the values of the inputs taken by that transition and the exactness of its encoding, so
+ * A proof obligation of property-directed reachability: the states of a cube at
+ * a location must be shown unreachable within a given number of steps (the
+ * level), or a predecessor must be found. Each obligation, except the one at
+ * the bad location, records the obligation it is a predecessor of (its parent)
+ * and the transition leading there (or no transition, if the obligation
+ * restricts the cube of its parent to initial states), together with the values
+ * of the inputs taken by that transition and the exactness of its encoding, so
  * that a chain of obligations reaching the initial states yields a
  * counterexample.
  *
@@ -48,19 +48,18 @@ public final class Obligation
 	 * @param location the location
 	 * @param cube     the cube
 	 * @param level    the level
-	 * @param parent   the obligation this is a predecessor of, or
-	 *                     {@code null} for the bad location
-	 * @param edge     the transition from {@code location} to the location
-	 *                     of the parent (for the bad location,
-	 *                     {@code null})
-	 * @param inputs   the values of the inputs taken by the transition (for
-	 *                     the bad location, by the bad case)
+	 * @param parent   the obligation this is a predecessor of, or {@code null}
+	 *                     for the bad location
+	 * @param edge     the transition from {@code location} to the location of
+	 *                     the parent (for the bad location, {@code null})
+	 * @param inputs   the values of the inputs taken by the transition (for the
+	 *                     bad location, by the bad case)
 	 * @param exact    whether or not the transition (or the bad case) is
 	 *                     encoded exactly
-	 * @param point    the values of the identifiers in the model that
-	 *                     produced this obligation (a state of the cube)
-	 * @param order    the creation order of the obligation, used to break
-	 *                     ties in the queue
+	 * @param point    the values of the identifiers in the model that produced
+	 *                     this obligation (a state of the cube)
+	 * @param order    the creation order of the obligation, used to break ties
+	 *                     in the queue
 	 */
 	public Obligation(
 			Statement location,

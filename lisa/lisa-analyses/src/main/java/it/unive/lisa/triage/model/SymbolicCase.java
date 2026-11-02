@@ -27,15 +27,15 @@ import java.util.function.Predicate;
 
 /**
  * One case of a symbolic transition: a path condition, under which the
- * transition updates some identifiers with symbolic values. Both the
- * conditions and the values are expressed over the values that identifiers
- * have <b>before</b> the transition (identifiers that are not updated keep
- * their value), and over {@link FreshValue}s. A case also records:
+ * transition updates some identifiers with symbolic values. Both the conditions
+ * and the values are expressed over the values that identifiers have
+ * <b>before</b> the transition (identifiers that are not updated keep their
+ * value), and over {@link FreshValue}s. A case also records:
  * <ul>
  * <li>the identifiers that are forgotten by the transition, whose value after
  * the transition is unconstrained;</li>
- * <li>whether the transition writes the heap ({@code heapHavoc}), in which
- * case the whole heap is unconstrained after the transition;</li>
+ * <li>whether the transition writes the heap ({@code heapHavoc}), in which case
+ * the whole heap is unconstrained after the transition;</li>
  * <li>whether the transition loses track of all values ({@code havocAll}), in
  * which case every identifier that is not explicitly updated afterwards is
  * unconstrained after the transition.</li>
@@ -95,8 +95,8 @@ public final class SymbolicCase {
 	}
 
 	/**
-	 * Yields the identifiers updated by this case, mapped to their values
-	 * after the transition.
+	 * Yields the identifiers updated by this case, mapped to their values after
+	 * the transition.
 	 *
 	 * @return the updates
 	 */
@@ -127,8 +127,8 @@ public final class SymbolicCase {
 	}
 
 	/**
-	 * Yields {@code true} if this case writes the heap, making it
-	 * unconstrained after the transition.
+	 * Yields {@code true} if this case writes the heap, making it unconstrained
+	 * after the transition.
 	 *
 	 * @return whether or not the heap is unconstrained after the transition
 	 */
@@ -159,8 +159,8 @@ public final class SymbolicCase {
 	}
 
 	/**
-	 * Rewrites the given expression, evaluated at the end of this case, into
-	 * an expression over the values before the transition and fresh values.
+	 * Rewrites the given expression, evaluated at the end of this case, into an
+	 * expression over the values before the transition and fresh values.
 	 * Identifiers are replaced by their current values, unknown values
 	 * ({@link PushAny}) by fresh values, and anything that cannot be tracked
 	 * (heap accesses, unconstrained identifiers, unsupported expressions) by
@@ -243,8 +243,7 @@ public final class SymbolicCase {
 	 * @param id      the assigned identifier
 	 * @param value   the assigned value
 	 * @param factory the factory of fresh values
-	 * @param pp      the program point of the assignment (can be
-	 *                    {@code null})
+	 * @param pp      the program point of the assignment (can be {@code null})
 	 *
 	 * @return the resulting case
 	 */
@@ -273,8 +272,8 @@ public final class SymbolicCase {
 	 *
 	 * @param condition the condition
 	 * @param factory   the factory of fresh values
-	 * @param pp        the program point where the condition is assumed (can
-	 *                      be {@code null})
+	 * @param pp        the program point where the condition is assumed (can be
+	 *                      {@code null})
 	 *
 	 * @return the resulting case
 	 */
