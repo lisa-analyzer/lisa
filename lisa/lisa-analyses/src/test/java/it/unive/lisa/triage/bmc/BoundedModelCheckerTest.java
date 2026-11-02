@@ -54,8 +54,9 @@ public class BoundedModelCheckerTest {
 	private static final String PROGRAM = "class test {\n"
 			+ "  shallow(x) {\n"
 			+ "    def y = 2;\n"
-			+ "    if (x == 42)\n"
-			+ "      y = 1;\n"
+			+ "    if (x is int)\n"
+			+ "      if (x == 42)\n"
+			+ "        y = 1;\n"
 			+ "    return y;\n"
 			+ "  }\n"
 			+ "  dead() {\n"
@@ -68,15 +69,17 @@ public class BoundedModelCheckerTest {
 			+ "  relational(x) {\n"
 			+ "    def y = x;\n"
 			+ "    def w = 0;\n"
-			+ "    if (x != y)\n"
-			+ "      w = 1;\n"
+			+ "    if (x is int)\n"
+			+ "      if (x != y)\n"
+			+ "        w = 1;\n"
 			+ "    return w;\n"
 			+ "  }\n"
 			+ "  open(x) {\n"
 			+ "    def b = this.g(x);\n"
 			+ "    def w = 0;\n"
-			+ "    if (b == 3)\n"
-			+ "      w = 1;\n"
+			+ "    if (b is int)\n"
+			+ "      if (b == 3)\n"
+			+ "        w = 1;\n"
 			+ "    return w;\n"
 			+ "  }\n"
 			+ "  linear(x, y) {\n"
@@ -234,15 +237,15 @@ public class BoundedModelCheckerTest {
 		assertTrue(text.contains("bad cases:"), text);
 
 		// the script yields the same answers of the checker when given to z3:
-		// the return is reached (with y = 1) after three steps
-		String script = BoundedModelChecker.script(model, 3);
+		// the return is reached (with y = 1) after four steps
+		String script = BoundedModelChecker.script(model, 4);
 		Process z3 = new ProcessBuilder("z3", "-in").redirectErrorStream(true).start();
 		try (Writer w = new OutputStreamWriter(z3.getOutputStream(), StandardCharsets.UTF_8)) {
 			w.write(script);
 		}
 		String output = new String(z3.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
 		z3.waitFor();
-		assertEquals(List.of("unsat", "unsat", "unsat", "sat"), List.of(output.trim().split("\\s+")),
+		assertEquals(List.of("unsat", "unsat", "unsat", "unsat", "sat"), List.of(output.trim().split("\\s+")),
 				output + "\n" + script);
 	}
 

@@ -191,6 +191,18 @@ public class TransitionExtractorTest {
 		return new Variable(Untyped.INSTANCE, name, SyntheticLocation.INSTANCE);
 	}
 
+	/**
+	 * Encodes that the given variable of the pre-state is an integer: untyped
+	 * IMP values might also be, e.g., floating point numbers, whose
+	 * comparisons are not modeled.
+	 */
+	private Term isInteger(
+			String name)
+			throws SemanticException {
+		Term t = encoder.encode(pre(name));
+		return t.getSort().equals(ValueSort.SORT) ? ValueSort.is(t, Sort.INT) : Term.TRUE;
+	}
+
 	private static BinaryExpression eq(
 			SymbolicExpression l,
 			SymbolicExpression r) {
@@ -225,10 +237,13 @@ public class TransitionExtractorTest {
 				for (Map.Entry<Identifier, SymbolicExpression> e : c.getUpdates().entrySet())
 					if (e.getKey().getName().equals(name))
 						value = e.getValue();
+				// updates are assignments, encoded as in the unrolling (not as
+				// program equalities, that might not be reflexive)
+				Term post = encoder.encode(post(name));
 				if (value != null)
-					conjuncts.add(encoder.encodeCondition(eq(post(name), value)));
+					conjuncts.add(Term.eq(post, encoder.encodeAs(value, post.getSort())));
 				else if (!c.isUnconstrained(pre(name)))
-					conjuncts.add(encoder.encodeCondition(eq(post(name), pre(name))));
+					conjuncts.add(Term.eq(post, encoder.encodeAs(pre(name), post.getSort())));
 			}
 			cases.add(Term.and(conjuncts.toArray(Term[]::new)));
 		}
@@ -258,12 +273,13 @@ public class TransitionExtractorTest {
 		Term t = transition(single(tr).getStore(), "x", "y");
 		// if x is 5, y becomes 6: it is surely not 7 (even if string
 		// concatenation is also considered)
-		assertEquals(SmtResult.SAT, check(t, encoder.encodeCondition(eq(pre("x"), integer(5))),
+		assertEquals(SmtResult.SAT, check(t, isInteger("x"), encoder.encodeCondition(eq(pre("x"), integer(5))),
 				encoder.encodeCondition(eq(post("y"), integer(6)))));
-		assertEquals(SmtResult.UNSAT, check(t, encoder.encodeCondition(eq(pre("x"), integer(5))),
+		assertEquals(SmtResult.UNSAT, check(t, isInteger("x"), encoder.encodeCondition(eq(pre("x"), integer(5))),
 				encoder.encodeCondition(eq(post("y"), integer(7)))));
 		// x is not modified
-		assertEquals(SmtResult.UNSAT, check(t, Term.not(encoder.encodeCondition(eq(post("x"), pre("x"))))));
+		assertEquals(SmtResult.UNSAT,
+				check(t, isInteger("x"), Term.not(encoder.encodeCondition(eq(post("x"), pre("x"))))));
 		// the state after the sub-expression is available
 		Statement sum = ((NaryExpression) node(main, "+(x, 1)")).getSubExpressions()[1];
 		assertNotNull(tr.getPartial(sum));
@@ -280,13 +296,14 @@ public class TransitionExtractorTest {
 			Term t = transition(e.getStore(), "y");
 			Term small = encoder.encodeCondition(eq(pre("y"), integer(3)));
 			Term big = encoder.encodeCondition(eq(pre("y"), integer(11)));
+			Term integer = isInteger("y");
 			if (e.getEdge() instanceof TrueEdge) {
-				assertEquals(SmtResult.UNSAT, check(t, small));
-				assertEquals(SmtResult.SAT, check(t, big));
+				assertEquals(SmtResult.UNSAT, check(t, integer, small));
+				assertEquals(SmtResult.SAT, check(t, integer, big));
 			} else {
 				assertTrue(e.getEdge() instanceof FalseEdge);
-				assertEquals(SmtResult.SAT, check(t, small));
-				assertEquals(SmtResult.UNSAT, check(t, big));
+				assertEquals(SmtResult.SAT, check(t, integer, small));
+				assertEquals(SmtResult.UNSAT, check(t, integer, big));
 			}
 		}
 	}
@@ -316,7 +333,7 @@ public class TransitionExtractorTest {
 		NodeTransitions body = extract(loop, node(loop, "+(i, 1)"));
 		Term t = transition(single(body).getStore(), "i", "n");
 		// i' = i + 1 for integers
-		assertEquals(SmtResult.UNSAT, check(t, encoder.encodeCondition(eq(pre("i"), integer(4))),
+		assertEquals(SmtResult.UNSAT, check(t, isInteger("i"), encoder.encodeCondition(eq(pre("i"), integer(4))),
 				Term.not(encoder.encodeCondition(eq(post("i"), integer(5))))));
 	}
 

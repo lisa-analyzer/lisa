@@ -48,15 +48,17 @@ public class PdrEngineTest {
 	private static final String PROGRAM = "class test {\n"
 			+ "  shallow(x) {\n"
 			+ "    def y = 2;\n"
-			+ "    if (x == 42)\n"
-			+ "      y = 1;\n"
+			+ "    if (x is int)\n"
+			+ "      if (x == 42)\n"
+			+ "        y = 1;\n"
 			+ "    return y;\n"
 			+ "  }\n"
 			+ "  open(x) {\n"
 			+ "    def b = this.g(x);\n"
 			+ "    def w = 0;\n"
-			+ "    if (b == 3)\n"
-			+ "      w = 1;\n"
+			+ "    if (b is int)\n"
+			+ "      if (b == 3)\n"
+			+ "        w = 1;\n"
 			+ "    return w;\n"
 			+ "  }\n"
 			+ "  loop() {\n"
@@ -71,18 +73,21 @@ public class PdrEngineTest {
 			+ "  relational(x) {\n"
 			+ "    def y = x;\n"
 			+ "    def w = 0;\n"
-			+ "    if (x != y)\n"
-			+ "      w = 1;\n"
+			+ "    if (x is int)\n"
+			+ "      if (x != y)\n"
+			+ "        w = 1;\n"
 			+ "    return w;\n"
 			+ "  }\n"
 			+ "  widening(n) {\n"
 			+ "    def i = 0;\n"
 			+ "    def w = 0;\n"
-			+ "    while (i < n)\n"
-			+ "      i = i + 1;\n"
-			+ "    if (n >= 0)\n"
-			+ "      if (i > n)\n"
-			+ "        w = 1;\n"
+			+ "    if (n is int) {\n"
+			+ "      while (i < n)\n"
+			+ "        i = i + 1;\n"
+			+ "      if (n >= 0)\n"
+			+ "        if (i > n)\n"
+			+ "          w = 1;\n"
+			+ "    }\n"
 			+ "    return w;\n"
 			+ "  }\n"
 			+ "  bigloop() {\n"
@@ -96,9 +101,10 @@ public class PdrEngineTest {
 			+ "  }\n"
 			+ "  bounded(x) {\n"
 			+ "    def w = 0;\n"
-			+ "    if (x > 10)\n"
-			+ "      if (x < 5)\n"
-			+ "        w = 1;\n"
+			+ "    if (x is int)\n"
+			+ "      if (x > 10)\n"
+			+ "        if (x < 5)\n"
+			+ "          w = 1;\n"
 			+ "    return w;\n"
 			+ "  }\n"
 			+ "}";
@@ -182,7 +188,10 @@ public class PdrEngineTest {
 				for (Object[] c : cases)
 					try (SmtSolver s = SmtLibProcessSolver.z3()) {
 						PdrEngine engine = engine((String) c[0], (String) c[1], s, g, seeding);
-						PdrEngine.Status status = engine.run(20, 2000);
+						// without seeds, some refutations exhaust the budget
+						// (e.g., widening has to learn that n is an integer):
+						// a time limit keeps the test short
+						PdrEngine.Status status = engine.run(20, 2000, 10_000);
 						if ((boolean) c[2])
 							assertTrue(status != PdrEngine.Status.SAFE && status != PdrEngine.Status.BLOCKED,
 									c[0] + " " + g + " " + seeding + ": " + status);

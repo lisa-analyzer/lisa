@@ -117,9 +117,9 @@ public class FirstViolationVerifierTest {
 		assumeTrue(SmtLibProcessSolver.isZ3Available(), "z3 is not available");
 		Map<String, Message> warnings = analyze("class test {\n"
 				+ "  a_dead() { def z = 0; def w = 0; if (z > 5) w = 1; return w; }\n"
-				+ "  b_relational(x) { def y = x; def w = 0; if (x != y) w = 1; return w; }\n"
-				+ "  c_shallow(x) { def w = 0; if (x == 42) w = 1; return w; }\n"
-				+ "  d_shallow(x) { def w = 0; if (x == 7) w = 1; return w; }\n"
+				+ "  b_relational(x) { def y = x; def w = 0; if (x is int) if (x != y) w = 1; return w; }\n"
+				+ "  c_shallow(x) { def w = 0; if (x is int) if (x == 42) w = 1; return w; }\n"
+				+ "  d_shallow(x) { def w = 0; if (x is int) if (x == 7) w = 1; return w; }\n"
 				+ "}");
 		assertEquals(4, warnings.size(), warnings.toString());
 		// refuted by reachability

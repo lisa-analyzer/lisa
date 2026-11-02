@@ -50,8 +50,9 @@ public class TwoStateQueryTest {
 	private static final String PROGRAM = "class test {\n"
 			+ "  shallow(x) {\n"
 			+ "    def y = 2;\n"
-			+ "    if (x == 42)\n"
-			+ "      y = 1;\n"
+			+ "    if (x is int)\n"
+			+ "      if (x == 42)\n"
+			+ "        y = 1;\n"
 			+ "    return y;\n"
 			+ "  }\n"
 			+ "}";
@@ -102,11 +103,12 @@ public class TwoStateQueryTest {
 		return model.getVocabulary().stream().filter(i -> i.getName().equals(name)).findFirst().get();
 	}
 
+	// the true edge of the guard x == 42
 	private static EdgeTransition trueEdge(
 			AlarmModel model) {
 		for (Statement loc : model.getLocations())
 			for (EdgeTransition e : model.getTransitions(loc))
-				if (e.getEdge() instanceof TrueEdge)
+				if (e.getEdge() instanceof TrueEdge && e.getEdge().getSource().toString().contains("42"))
 					return e;
 		throw new AssertionError("No true edge");
 	}
