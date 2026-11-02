@@ -6,6 +6,19 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import it.unive.lisa.program.cfg.statement.Statement;
+import it.unive.lisa.program.cfg.statement.Assignment;
+import it.unive.lisa.program.cfg.statement.Expression;
+import it.unive.lisa.program.cfg.statement.literal.TypeLiteral;
+import it.unive.lisa.program.cfg.statement.types.IsInstance;
+import it.unive.lisa.program.cfg.statement.types.Cast;
+import it.unive.lisa.program.type.Int32Type;
+import it.unive.lisa.program.type.Float32Type;
+import it.unive.lisa.program.type.BoolType;
+import it.unive.lisa.program.type.StringType;
+import it.unive.lisa.type.Type;
+import java.util.ArrayList;
+import java.util.List;
 import it.unive.lisa.program.ClassUnit;
 import it.unive.lisa.program.CompilationUnit;
 import it.unive.lisa.program.Global;
@@ -144,4 +157,44 @@ public class ParsingGapsTest {
 		assertTrue(p.getEntryPoints().contains(bar));
 	}
 
+
+	@Test
+	public void typeTestsAndCastsAcceptPrimitiveTypes()
+			throws ParsingException {
+		Program p = IMPFrontend.processText("class c { m(x) { "
+				+ "def a = x is int; def b = x is float; def c = x is boolean; def d = x is string; "
+				+ "def e = x as int; def f = x is c; } }");
+		CFG m = p.getAllCFGs().stream().filter(cfg -> cfg.getDescriptor().getName().equals("m")).findFirst().get();
+		List<Type> tested = new ArrayList<>();
+		List<Type> casted = new ArrayList<>();
+		for (Statement st : m.getNodes()) {
+			if (!(st instanceof Assignment))
+				continue;
+			Expression rhs = ((Assignment) st).getRight();
+			if (rhs instanceof IsInstance)
+				tested.add((Type) ((TypeLiteral) ((IsInstance) rhs).getRight()).getValue());
+			else if (rhs instanceof Cast)
+				casted.add((Type) ((TypeLiteral) ((Cast) rhs).getRight()).getValue());
+		}
+		assertTrue(tested.contains(Int32Type.INSTANCE), tested.toString());
+		assertTrue(tested.contains(Float32Type.INSTANCE), tested.toString());
+		assertTrue(tested.contains(BoolType.INSTANCE), tested.toString());
+		assertTrue(tested.contains(StringType.INSTANCE), tested.toString());
+		assertTrue(tested.stream().anyMatch(t -> t.toString().equals("c")), tested.toString());
+		assertEquals(List.of(Int32Type.INSTANCE), casted);
+	}
+
+	@Test
+	public void typeTestsBindTighterThanLogicalOperators()
+			throws ParsingException {
+		Program p = IMPFrontend.processText("class c { m(x, y) { def a = x is int && y is int; } }");
+		CFG m = p.getAllCFGs().stream().filter(cfg -> cfg.getDescriptor().getName().equals("m")).findFirst().get();
+		Expression rhs = m.getNodes().stream()
+				.filter(st -> st instanceof Assignment)
+				.map(st -> ((Assignment) st).getRight())
+				.findFirst().get();
+		// the conjunction of two type tests, not a type test on a conjunction
+		assertFalse(rhs instanceof IsInstance, rhs.toString());
+		assertTrue(rhs.toString().startsWith("&&("), rhs.toString());
+	}
 }

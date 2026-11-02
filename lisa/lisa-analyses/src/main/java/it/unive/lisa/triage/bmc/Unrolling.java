@@ -59,6 +59,8 @@ public class Unrolling {
 
 	private final Map<String, Term> constants;
 
+	private final Map<String, String> functions = new HashMap<>();
+
 	private final Map<String, Boolean> exactness;
 
 	private final Map<String, List<Term>> guards = new HashMap<>();
@@ -154,6 +156,19 @@ public class Unrolling {
 			String name,
 			Sort sort) {
 		return constants.computeIfAbsent(name, n -> solver.declare(n, sort));
+	}
+
+	/**
+	 * Yields the symbol of the uninterpreted function with the given name and
+	 * signature, declaring it in the solver the first time.
+	 */
+	private String function(
+			String name,
+			List<Sort> arguments,
+			Sort result) {
+		String key = name + arguments + result;
+		return functions.computeIfAbsent(key,
+				k -> solver.declareFunction(name + "#" + functions.size(), arguments, result));
 	}
 
 	/**
@@ -257,6 +272,29 @@ public class Unrolling {
 		public void exactOnlyIf(
 				Term guard) {
 			guards.add(guard);
+		}
+
+		@Override
+		public Term apply(
+				String function,
+				Sort result,
+				List<Term> arguments,
+				SymbolicExpression origin,
+				Term guard) {
+			guards.add(guard);
+			List<Sort> sorts = new ArrayList<>();
+			for (Term arg : arguments)
+				sorts.add(arg.getSort());
+			return Term.app(Unrolling.this.function(function, sorts, result), result,
+					arguments.toArray(Term[]::new));
+		}
+
+		private final List<Term> requirements = new ArrayList<>();
+
+		@Override
+		public void require(
+				Term condition) {
+			requirements.add(condition);
 		}
 
 	}
@@ -489,7 +527,8 @@ public class Unrolling {
 		List<Term> precise = new ArrayList<>();
 		for (SymbolicCase c : edge.getStore().getCases()) {
 			int from = symbols.guards.size();
-			Term ct = encodeCase(c, step, encoder);
+			int req = symbols.requirements.size();
+			Term ct = required(encodeCase(c, step, encoder), symbols, req);
 			cases.add(strictly(ct, symbols, from));
 			precise.add(preciseCase(ct, symbols, from));
 		}
@@ -518,6 +557,23 @@ public class Unrolling {
 			else if (!c.isUnconstrained(id))
 				conj.add(Term.eq(post, var(id, step)));
 		}
+		return Term.and(conj.toArray(Term[]::new));
+	}
+
+	/**
+	 * Conjoins to the given term the conditions required by the given symbols
+	 * (from the given index) for the encoded expressions to be evaluated
+	 * (see {@link SymbolTable#require(Term)}).
+	 */
+	private static Term required(
+			Term term,
+			StepSymbols symbols,
+			int from) {
+		if (symbols.requirements.size() == from)
+			return term;
+		List<Term> conj = new ArrayList<>();
+		conj.add(term);
+		conj.addAll(symbols.requirements.subList(from, symbols.requirements.size()));
 		return Term.and(conj.toArray(Term[]::new));
 	}
 
@@ -608,7 +664,7 @@ public class Unrolling {
 		String key = caseKey(step, edge, index);
 		StepSymbols symbols = new StepSymbols(step, key.substring(key.indexOf('#')));
 		ExpressionEncoder encoder = new ExpressionEncoder(model.getSorts(), symbols);
-		Term c = strictly(encodeCase(cases(edge).get(index), step, encoder), symbols, 0);
+		Term c = strictly(required(encodeCase(cases(edge).get(index), step, encoder), symbols, 0), symbols, 0);
 		exactness.put(key, symbols.exact);
 		guards.put(key, symbols.guards);
 		inputs.put(key, symbols.used);
@@ -641,8 +697,9 @@ public class Unrolling {
 			String tag)
 			throws SemanticException {
 		StepSymbols symbols = new StepSymbols(step, tag);
-		Term result = strictly(new ExpressionEncoder(model.getSorts(), symbols).encodeCondition(condition), symbols,
-				0);
+		Term result = strictly(
+				required(new ExpressionEncoder(model.getSorts(), symbols).encodeCondition(condition), symbols, 0),
+				symbols, 0);
 		String key = "cond@" + step + tag;
 		exactness.put(key, symbols.exact);
 		guards.put(key, symbols.guards);
@@ -670,12 +727,13 @@ public class Unrolling {
 		List<Term> precise = new ArrayList<>();
 		for (BadCase c : model.getBadCases()) {
 			int from = symbols.guards.size();
+			int req = symbols.requirements.size();
 			List<Term> conj = new ArrayList<>();
 			for (SymbolicExpression cond : c.getPathCondition())
 				conj.add(encoder.encodeCondition(cond));
 			if (c.getViolation() != null)
 				conj.add(encoder.encodeCondition(c.getViolation()));
-			Term ct = Term.and(conj.toArray(Term[]::new));
+			Term ct = required(Term.and(conj.toArray(Term[]::new)), symbols, req);
 			cases.add(strictly(ct, symbols, from));
 			precise.add(preciseCase(ct, symbols, from));
 		}

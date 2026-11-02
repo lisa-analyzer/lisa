@@ -1,5 +1,9 @@
 package it.unive.lisa.triage.encoding;
 
+import java.util.List;
+import it.unive.lisa.type.TypeTokenType;
+import it.unive.lisa.symbolic.value.operator.binary.TypeCheck;
+import it.unive.lisa.symbolic.value.operator.binary.LogicalAnd;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
@@ -164,6 +168,40 @@ public class ExpressionEncoderTest {
 		solver.assertTerm(encoder.encodeCondition(condition));
 		assertEquals(SmtResult.SAT, solver.check(), "Not satisfiable: " + condition);
 		solver.pop();
+	}
+
+	private static SymbolicExpression not(
+			SymbolicExpression e) {
+		return new UnaryExpression(BoolType.INSTANCE, e, LogicalNegation.INSTANCE, LOC);
+	}
+
+	private static SymbolicExpression and(
+			SymbolicExpression l,
+			SymbolicExpression r) {
+		return bin(BoolType.INSTANCE, l, r, LogicalAnd.INSTANCE);
+	}
+
+	private static SymbolicExpression isInt(
+			SymbolicExpression e) {
+		return bin(BoolType.INSTANCE, e,
+				new Constant(new TypeTokenType(Set.of(Int32Type.INSTANCE)), Int32Type.INSTANCE, LOC),
+				TypeCheck.INSTANCE);
+	}
+
+	@Test
+	public void typeChecks() throws SemanticException {
+		// a value that is a string is not an int
+		assertValid(not(and(isInt(V), eq(V, string("a")))));
+		// without knowing the types of the program, an integer value might
+		// not be an int (e.g., it might be a long)
+		assertSatisfiable(and(eq(V, integer(3)), not(isInt(V))));
+		// if int is the only integral type, integer values are ints
+		Variable u = new Variable(Untyped.INSTANCE, "u", LOC);
+		Map<Identifier, Set<Type>> types = Map.of(u, Set.of(Int32Type.INSTANCE, StringType.INSTANCE));
+		encoder = new ExpressionEncoder(
+				new SortPolicy(types, List.of(Int32Type.INSTANCE, StringType.INSTANCE, BoolType.INSTANCE)),
+				new Symbols());
+		assertValid(not(and(eq(u, integer(3)), not(isInt(u)))));
 	}
 
 	@Test

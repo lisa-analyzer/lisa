@@ -70,6 +70,7 @@ import it.unive.lisa.symbolic.value.operator.binary.StringIsSuffixOf;
 import it.unive.lisa.symbolic.value.operator.binary.StringStartsWith;
 import it.unive.lisa.symbolic.value.operator.binary.StringSubstringToEnd;
 import it.unive.lisa.symbolic.value.operator.binary.TypeCast;
+import it.unive.lisa.symbolic.value.operator.binary.TypeCheck;
 import it.unive.lisa.symbolic.value.operator.binary.TypeConv;
 import it.unive.lisa.symbolic.value.operator.ternary.StringIndexOfFromIndex;
 import it.unive.lisa.symbolic.value.operator.ternary.StringReplace;
@@ -329,7 +330,10 @@ public class ExpressionEncoder
 			return Term.bool((Boolean) value);
 		if (value instanceof String)
 			return Term.string((String) value);
-		// floats, characters, type tokens, ...
+		if (value instanceof Type)
+			// type tokens, used by type operators
+			return ValueSort.typeToken((Type) value);
+		// floats, characters, ...
 		return havoc(expression);
 	}
 
@@ -441,6 +445,10 @@ public class ExpressionEncoder
 					Term.app("-", Sort.INT, Term.app("str.len", Sort.INT, s), from));
 		}
 
+		if (op instanceof TypeCheck && expression.getRight() instanceof Constant
+				&& ((Constant) expression.getRight()).getValue() instanceof Type)
+			return typeCheck(left, (Type) ((Constant) expression.getRight()).getValue(), expression);
+
 		if (op instanceof TypeCast || op instanceof TypeConv)
 			// the value is preserved if it already has the target sort, and
 			// read as the target sort otherwise
@@ -482,6 +490,9 @@ public class ExpressionEncoder
 	private Term str(
 			Term term,
 			SymbolicExpression origin) {
+		// operands of string operators are strings
+		if (term.getSort().equals(ValueSort.SORT))
+			symbols.require(ValueSort.is(term, Sort.STRING));
 		return coerce(term, Sort.STRING, origin);
 	}
 
@@ -502,9 +513,66 @@ public class ExpressionEncoder
 			BinaryExpression origin) {
 		if (!numericOrValue(left) || !numericOrValue(right))
 			return symbols.fresh(Sort.BOOL, origin);
+		// operands of comparisons are numbers
+		requireNumeric(left);
+		requireNumeric(right);
 		// values that are not integers are read as unspecified integers, so
 		// that the result of the comparison is unconstrained
 		return Term.app(op, Sort.BOOL, coerce(left, Sort.INT, origin), coerce(right, Sort.INT, origin));
+	}
+
+	/**
+	 * Encodes whether the given term has a type that can be assigned to the
+	 * given one. A value can have the type only if it has been built with the
+	 * constructor of the sort of the type, and it surely has it if the type
+	 * covers the sort ({@link SortPolicy#covers(Type, Sort)}): otherwise, the
+	 * result is unconstrained among the values with the right constructor.
+	 * Terms that are not values have the type if it covers their sort, and do
+	 * not have it if their sort is different.
+	 */
+	private Term typeCheck(
+			Term term,
+			Type target,
+			BinaryExpression origin) {
+		Sort sort = sorts.sortOf(target);
+		if (sort.equals(ValueSort.SORT))
+			return symbols.fresh(Sort.BOOL, origin);
+		boolean covers = sorts.covers(target, sort);
+		if (term.getSort().equals(ValueSort.SORT)) {
+			Term constructor = ValueSort.is(term, sort);
+			return covers ? constructor : Term.and(constructor, typeTest(term, target, origin));
+		}
+		if (!term.getSort().equals(sort))
+			return Term.FALSE;
+		return covers ? Term.TRUE : typeTest(term, target, origin);
+	}
+
+	/**
+	 * Yields an unknown, but deterministic, test of whether the given term has
+	 * the given type (never precise).
+	 */
+	private Term typeTest(
+			Term term,
+			Type target,
+			BinaryExpression origin) {
+		return symbols.apply("$is " + target, Sort.BOOL, List.of(term), origin, Term.FALSE);
+	}
+
+	private static String operatorOf(
+			ValueExpression expression) {
+		if (expression instanceof UnaryExpression)
+			return ((UnaryExpression) expression).getOperator().getClass().getSimpleName();
+		if (expression instanceof BinaryExpression)
+			return ((BinaryExpression) expression).getOperator().getClass().getSimpleName();
+		if (expression instanceof TernaryExpression)
+			return ((TernaryExpression) expression).getOperator().getClass().getSimpleName();
+		return expression.getClass().getSimpleName();
+	}
+
+	private void requireNumeric(
+			Term term) {
+		if (term.getSort().equals(ValueSort.SORT))
+			symbols.require(ValueSort.isNumeric(term));
 	}
 
 	private static boolean numericOrValue(
@@ -541,6 +609,8 @@ public class ExpressionEncoder
 			ints.add(t.getSort().equals(ValueSort.SORT) ? ValueSort.unwrap(t, Sort.INT) : t);
 			if (t.getSort().equals(ValueSort.SORT))
 				guards.add(ValueSort.is(t, Sort.INT));
+			// operands of arithmetic operators are numbers
+			requireNumeric(t);
 		}
 
 		Term guard = Term.and(guards.toArray(Term[]::new));
@@ -553,7 +623,13 @@ public class ExpressionEncoder
 
 		if (!values)
 			return result;
-		return Term.ite(guard, ValueSort.wrap(result), symbols.fresh(ValueSort.SORT, expression, guard));
+		// the result over values that are not integers is unknown, but it is
+		// a function of the operands
+		List<Term> wrapped = new ArrayList<>(operands.size());
+		for (Term t : operands)
+			wrapped.add(ValueSort.wrap(t));
+		return Term.ite(guard, ValueSort.wrap(result),
+				symbols.apply("$" + operatorOf(expression), ValueSort.SORT, wrapped, expression, guard));
 	}
 
 	private static Term neg(

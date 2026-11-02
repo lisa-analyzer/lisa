@@ -67,6 +67,20 @@ public class SmtLibScript
 		command("(declare-const " + constant.toSmtLib() + " " + sort.toSmtLib() + ")");
 		return constant;
 	}
+	@Override
+	public String declareFunction(
+			String name,
+			List<Sort> arguments,
+			Sort result) {
+		String symbol = Term.symbol(name);
+		StringBuilder sb = new StringBuilder("(declare-fun ").append(symbol).append(" (");
+		for (int k = 0; k < arguments.size(); k++)
+			sb.append(k == 0 ? "" : " ").append(arguments.get(k).toSmtLib());
+		sb.append(") ").append(result.toSmtLib()).append(")");
+		command(sb.toString());
+		return symbol;
+	}
+
 
 	@Override
 	public void assertTerm(

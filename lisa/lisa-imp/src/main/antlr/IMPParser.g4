@@ -70,10 +70,10 @@ expression
 	| NOT nested = expression
 	| left = expression (MUL | DIV | MOD) right = expression
 	| left = expression (ADD | SUB) right = expression
+	| left = expression (IS | AS) type = typeName
 	| left = expression (GT | GE | LT | LE) right = expression
 	| left = expression (EQUAL | NOTEQUAL) right = expression
 	| left = expression (AND | OR) right = expression
-	| left = expression (IS | AS) type = unitName
 	| SUB nested = expression
 	| NEW (newBasicArrayExpr | newReferenceType)
 	| BUMP (newBasicArrayExpr | newReferenceType)
@@ -183,6 +183,8 @@ catchBlock
  */
 
 unitName: IDENTIFIER (DOT IDENTIFIER)*;
+
+typeName: primitiveType | unitName;
 
 annotation: name = unitName annotationMembers?;
 

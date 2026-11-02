@@ -6,6 +6,8 @@ import it.unive.lisa.triage.smt.SExpression;
 import it.unive.lisa.triage.smt.SmtException;
 import it.unive.lisa.triage.smt.Sort;
 import it.unive.lisa.triage.smt.Term;
+import it.unive.lisa.type.Type;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -169,6 +171,41 @@ public final class ValueSort {
 		if (sort.equals(Sort.STRING))
 			return DATATYPE.test(STRING, value);
 		return null;
+	}
+
+	private static final Map<String, Integer> TYPE_TOKENS = new HashMap<>();
+
+	/**
+	 * Yields the value representing the given type when used as a type token
+	 * (e.g., the right operand of a type check): an opaque value whose
+	 * identifier is unique for each type name, so that tokens of the same
+	 * type are equal and tokens of different types are different.
+	 *
+	 * @param type the type
+	 *
+	 * @return the value
+	 */
+	public static Term typeToken(
+			Type type) {
+		int id;
+		synchronized (TYPE_TOKENS) {
+			id = TYPE_TOKENS.computeIfAbsent(type.toString(), k -> TYPE_TOKENS.size());
+		}
+		return DATATYPE.construct(OPAQUE, Term.integer(-1 - id));
+	}
+
+	/**
+	 * Yields the boolean term that holds if the given value might be a
+	 * number: an integer, or an opaque value (that might be, e.g., a floating
+	 * point number).
+	 *
+	 * @param value the value
+	 *
+	 * @return the boolean term
+	 */
+	public static Term isNumeric(
+			Term value) {
+		return Term.or(DATATYPE.test(INT, value), DATATYPE.test(OPAQUE, value));
 	}
 
 	/**

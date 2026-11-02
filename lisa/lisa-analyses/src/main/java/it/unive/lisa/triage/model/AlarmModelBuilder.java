@@ -11,6 +11,7 @@ import it.unive.lisa.checks.verification.ConditionViolation;
 import it.unive.lisa.checks.verification.ErrorViolation;
 import it.unive.lisa.checks.verification.ReachViolation;
 import it.unive.lisa.checks.verification.Violation;
+import it.unive.lisa.lattices.Satisfiability;
 import it.unive.lisa.program.cfg.Parameter;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Statement;
@@ -20,11 +21,14 @@ import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.PushAny;
 import it.unive.lisa.symbolic.value.TernaryExpression;
 import it.unive.lisa.symbolic.value.UnaryExpression;
+import it.unive.lisa.symbolic.value.operator.binary.LogicalAnd;
+import it.unive.lisa.symbolic.value.operator.unary.LogicalNegation;
 import it.unive.lisa.triage.encoding.SortPolicy;
 import it.unive.lisa.triage.inputs.InputSource;
 import it.unive.lisa.triage.inputs.InputSourceResolver;
 import it.unive.lisa.type.Type;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -108,10 +112,27 @@ public final class AlarmModelBuilder {
 
 		ConstraintExporter<A, D> exporter = new ConstraintExporter<>(tool.getAnalysis().domain, result.getId());
 		Map<Statement, Set<SymbolicExpression>> seeds = new HashMap<>();
+		Set<SymbolicExpression> conditions = conditions(transitions.values(), badCases);
 		for (Statement node : cone) {
 			Set<SymbolicExpression> cs = exporter.constraints(preStates.get(node), vocabulary, node);
-			if (cs != null)
-				seeds.put(node, cs);
+			if (cs == null)
+				continue;
+			// conditions of the model whose truth is decided by the analysis
+			// are invariants, even if the domain cannot express them as
+			// constraints
+			for (SymbolicExpression cond : conditions)
+				try {
+					Satisfiability sat = tool.getAnalysis().satisfies(preStates.get(node), cond, result.getId(),
+							node);
+					if (sat == Satisfiability.SATISFIED)
+						cs.add(cond);
+					else if (sat == Satisfiability.NOT_SATISFIED)
+						cs.add(new UnaryExpression(cond.getStaticType(), cond, LogicalNegation.INSTANCE,
+								cond.getCodeLocation()));
+				} catch (SemanticException e) {
+					// the condition cannot be evaluated in this state
+				}
+			seeds.put(node, cs);
 		}
 		Set<SymbolicExpression> init = new HashSet<>();
 		if (!initial.isEmpty()) {
@@ -149,7 +170,7 @@ public final class AlarmModelBuilder {
 				badCases,
 				seeds,
 				vocabulary,
-				new SortPolicy(types),
+				new SortPolicy(types, bad.getProgram().getTypes().getTypes()),
 				factory.getValues(),
 				parameters,
 				confirmable);
@@ -201,6 +222,56 @@ public final class AlarmModelBuilder {
 						cases.add(new BadCase(c.getPathCondition(), null));
 		}
 		return cases;
+	}
+
+	/**
+	 * Yields the conjuncts of the path conditions of the transitions and of
+	 * the bad cases that do not contain fresh values, that is, the ones that
+	 * can be evaluated in the states computed by the analysis.
+	 */
+	private static Set<SymbolicExpression> conditions(
+			Collection<NodeTransitions> transitions,
+			List<BadCase> badCases) {
+		List<SymbolicExpression> all = new ArrayList<>();
+		for (NodeTransitions tr : transitions)
+			for (EdgeTransition e : tr.getOutgoing())
+				for (SymbolicCase c : e.getStore().getCases())
+					all.addAll(c.getPathCondition());
+		for (BadCase c : badCases) {
+			all.addAll(c.getPathCondition());
+			if (c.getViolation() != null)
+				all.add(c.getViolation());
+		}
+		Set<SymbolicExpression> result = new LinkedHashSet<>();
+		for (SymbolicExpression e : all)
+			conjuncts(e, result);
+		return result;
+	}
+
+	private static void conjuncts(
+			SymbolicExpression e,
+			Set<SymbolicExpression> result) {
+		if (e instanceof BinaryExpression && ((BinaryExpression) e).getOperator() == LogicalAnd.INSTANCE) {
+			conjuncts(((BinaryExpression) e).getLeft(), result);
+			conjuncts(((BinaryExpression) e).getRight(), result);
+		} else if (!hasFreshValues(e))
+			result.add(e);
+	}
+
+	private static boolean hasFreshValues(
+			SymbolicExpression e) {
+		if (e instanceof FreshValue)
+			return true;
+		if (e instanceof UnaryExpression)
+			return hasFreshValues(((UnaryExpression) e).getExpression());
+		if (e instanceof BinaryExpression)
+			return hasFreshValues(((BinaryExpression) e).getLeft())
+					|| hasFreshValues(((BinaryExpression) e).getRight());
+		if (e instanceof TernaryExpression)
+			return hasFreshValues(((TernaryExpression) e).getLeft())
+					|| hasFreshValues(((TernaryExpression) e).getMiddle())
+					|| hasFreshValues(((TernaryExpression) e).getRight());
+		return false;
 	}
 
 	private static void collect(

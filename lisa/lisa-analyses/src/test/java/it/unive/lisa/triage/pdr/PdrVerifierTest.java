@@ -89,6 +89,30 @@ public class PdrVerifierTest {
 			+ "      w = 1;\n"
 			+ "    return w;\n"
 			+ "  }\n"
+			+ "  untyped(x, y) {\n"
+			+ "    def s = x + y;\n"
+			+ "    def w = 0;\n"
+			+ "    if (s - x != y)\n"
+			+ "      w = 1;\n"
+			+ "    return w;\n"
+			+ "  }\n"
+
+			+ "  integers(x, y) {\n"
+			+ "    def w = 0;\n"
+			+ "    if (x is int && y is int) {\n"
+			+ "      def s = x + y;\n"
+			+ "      if (s - x != y)\n"
+			+ "        w = 1;\n"
+			+ "    }\n"
+			+ "    return w;\n"
+			+ "  }\n"
+			+ "  ilinear(x, y) {\n"
+			+ "    def w = 0;\n"
+			+ "    if (x is int && y is int)\n"
+			+ "      if (x + y == 10 && x - y == 4)\n"
+			+ "        w = 1;\n"
+			+ "    return w;\n"
+			+ "  }\n"
 			+ "  linear(x, y) {\n"
 			+ "    def w = 0;\n"
 			+ "    if (x + y == 10 && x - y == 4)\n"
@@ -218,6 +242,30 @@ public class PdrVerifierTest {
 		// inc is analyzed modularly: its result is unknown, but it is not an
 		// input, so no counterexample through it can be confirmed
 		VerificationResult result = verify("summarized", "w = 1", Violation.reach());
+		assertEquals(VerificationOutcome.POSSIBLE, result.getOutcome(), result.toString());
+	}
+
+	@Test
+	public void integerArithmeticIsRefuted() throws SemanticException {
+		// the type checks make x and y integers, and then s is their sum
+		VerificationResult result = verify("integers", "w = 1", Violation.reach());
+		assertEquals(VerificationOutcome.REFUTED, result.getOutcome(), result.toString());
+	}
+
+	@Test
+	public void integerArithmeticIsConfirmed() throws SemanticException {
+		// type checks are encoded precisely, so the counterexample is exact
+		VerificationResult result = verify("ilinear", "w = 1", Violation.reach());
+		assertEquals(VerificationOutcome.CONFIRMED, result.getOutcome(), result.toString());
+		assertEquals("7", valueOf(result, "parameter x of"));
+		assertEquals("3", valueOf(result, "parameter y of"));
+	}
+
+	@Test
+	public void untypedArithmeticIsNotRefuted() throws SemanticException {
+		// x and y might be floating point numbers, where (x + y) - x != y
+		// can hold: the violation is possible
+		VerificationResult result = verify("untyped", "w = 1", Violation.reach());
 		assertEquals(VerificationOutcome.POSSIBLE, result.getOutcome(), result.toString());
 	}
 

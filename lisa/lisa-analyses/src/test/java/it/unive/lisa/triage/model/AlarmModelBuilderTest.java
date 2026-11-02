@@ -18,6 +18,7 @@ import it.unive.lisa.imp.IMPFrontend;
 import it.unive.lisa.program.Program;
 import it.unive.lisa.program.SyntheticLocation;
 import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.edge.TrueEdge;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.type.BoolType;
 import it.unive.lisa.program.type.Int32Type;
@@ -179,6 +180,19 @@ public class AlarmModelBuilderTest {
 		assertEquals(InputSource.Kind.PARAMETER, source.getKind());
 		assertTrue(source.getDescription().startsWith("parameter x of"), source.getDescription());
 		assertTrue(model.getParameters().containsKey(find(model, "this")));
+	}
+
+	@Test
+	public void conditionsDecidedByTheAnalysisAreSeeds() throws SemanticException {
+		CFG main = cfg("main");
+		AlarmModel model = build(main, node(main, "return"), Violation.reach());
+		Statement guard = node(main, ">(y, 10)");
+		SymbolicExpression condition = model.getTransitions(guard).stream()
+				.filter(e -> e.getEdge() instanceof TrueEdge)
+				.findFirst().get().getStore().getCases().iterator().next().getPathCondition().get(0);
+		// in the true branch, the analysis knows that the guard holds
+		Set<SymbolicExpression> seeds = model.getSeeds(node(main, "y = 0"));
+		assertTrue(seeds.contains(condition), condition + " not in " + seeds);
 	}
 
 	@Test

@@ -21,8 +21,10 @@ public class SortPolicy {
 
 	private final Map<Identifier, Set<Type>> types;
 
+	private final Collection<Type> programTypes;
+
 	/**
-	 * Builds the policy.
+	 * Builds the policy, with no knowledge of the types of the program.
 	 *
 	 * @param types the runtime types that each identifier might have (an
 	 *                  identifier with no types, or that is not in the map, is
@@ -30,7 +32,52 @@ public class SortPolicy {
 	 */
 	public SortPolicy(
 			Map<Identifier, Set<Type>> types) {
+		this(types, null);
+	}
+
+	/**
+	 * Builds the policy.
+	 *
+	 * @param types        the runtime types that each identifier might have
+	 *                         (an identifier with no types, or that is not in
+	 *                         the map, is encoded through {@link ValueSort})
+	 * @param programTypes all the types of the program, used to decide
+	 *                         whether a type covers all the values of a sort
+	 *                         (can be {@code null} if unknown)
+	 */
+	public SortPolicy(
+			Map<Identifier, Set<Type>> types,
+			Collection<Type> programTypes) {
 		this.types = types;
+		this.programTypes = programTypes;
+	}
+
+	/**
+	 * Yields {@code true} if every value encoded with the given sort has a
+	 * type that can be assigned to the given one, that is, if all the types
+	 * of the program encoded with that sort can be assigned to the given one
+	 * (e.g., if {@code int} is the only integral type of the program, it
+	 * covers all integer values). Yields {@code false} if the types of the
+	 * program are unknown.
+	 *
+	 * @param target the type
+	 * @param sort   the sort, that must not be {@link ValueSort#SORT}
+	 *
+	 * @return whether or not the type covers the sort
+	 */
+	public boolean covers(
+			Type target,
+			Sort sort) {
+		if (programTypes == null)
+			return false;
+		boolean any = false;
+		for (Type t : programTypes)
+			if (sortOf(t).equals(sort)) {
+				if (!t.canBeAssignedTo(target))
+					return false;
+				any = true;
+			}
+		return any;
 	}
 
 	/**

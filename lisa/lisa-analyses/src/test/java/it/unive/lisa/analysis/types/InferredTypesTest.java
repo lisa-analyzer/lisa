@@ -1,9 +1,18 @@
 package it.unive.lisa.analysis.types;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import it.unive.lisa.symbolic.value.BinaryExpression;
+import it.unive.lisa.symbolic.value.operator.binary.TypeCheck;
+import it.unive.lisa.type.TypeTokenType;
+import java.util.Set;
+import it.unive.lisa.program.Program;
+import it.unive.lisa.imp.IMPFeatures;
+import it.unive.lisa.program.type.Float32Type;
+import it.unive.lisa.program.type.StringType;
 import it.unive.lisa.TestParameterProvider;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
@@ -91,4 +100,30 @@ public class InferredTypesTest {
 		assertSame(TypeSet.BOTTOM, domain.bottom());
 	}
 
+
+	@Test
+	public void assumingATypeCheckOnAValueOfUnknownTypeKeepsTheCompatibleTypes()
+			throws SemanticException {
+		// the top type set has no elements, but it stands for all types:
+		// assuming that x is an int must not yield bottom
+		Identifier x = new Variable(Untyped.INSTANCE, "x", loc);
+		TypeEnvironment<TypeSet> env = new TypeEnvironment<>(domain.top());
+		BinaryExpression check = new BinaryExpression(BoolType.INSTANCE, x,
+				new Constant(new TypeTokenType(Set.of(Int32Type.INSTANCE)), Int32Type.INSTANCE, loc),
+				TypeCheck.INSTANCE, loc);
+		Program program = new Program(new IMPFeatures(), new IMPTypeSystem());
+		program.getTypes().registerType(Int32Type.INSTANCE);
+		program.getTypes().registerType(Float32Type.INSTANCE);
+		program.getTypes().registerType(StringType.INSTANCE);
+		ProgramPoint withTypes = new TestParameterProvider.FakePP() {
+			@Override
+			public Program getProgram() {
+				return program;
+			}
+		};
+		TypeEnvironment<TypeSet> result = domain.assumeBinaryExpression(env, check, withTypes, withTypes, oracle);
+		assertFalse(result.isBottom());
+		assertTrue(result.getState(x).elements.contains(Int32Type.INSTANCE), result.toString());
+		assertFalse(result.getState(x).elements.contains(StringType.INSTANCE), result.toString());
+	}
 }
