@@ -139,7 +139,8 @@ public class ReachabilityVerifier<A extends AbstractLattice<A>, D extends Abstra
 	 * If the statement is an exit point of its cfg, the entry of the cfg is
 	 * {@link ReachabilityStatus#REACHABLE}, and all the exit points of the cfg
 	 * are only reached with matching errors (that is, their normal and halting
-	 * states are bottom, and they contain no other error), then every
+	 * states are bottom, and they contain no other error, ignoring the errors
+	 * caught by the error edges leaving them), then every
 	 * terminating execution of the cfg ends with a matching error, and the
 	 * violation is confirmed. This holds even if no single statement always
 	 * raises the error (e.g., if two branches raise it).
@@ -157,7 +158,7 @@ public class ReachabilityVerifier<A extends AbstractLattice<A>, D extends Abstra
 
 		boolean matching = false;
 		for (Statement exit : cfg.getAllExitpoints()) {
-			AnalysisState<A> post = result.getAnalysisStateAfter(exit);
+			AnalysisState<A> post = analysis.removeCaughtErrors(result.getAnalysisStateAfter(exit), exit);
 			GenericMapLattice<Error, ProgramState<A>> errors = post.getErrors();
 			GenericMapLattice<Type, GenericSetLattice<Statement>> smashed = post.getSmashedErrors();
 			if (errors.isTop() || smashed.isTop()

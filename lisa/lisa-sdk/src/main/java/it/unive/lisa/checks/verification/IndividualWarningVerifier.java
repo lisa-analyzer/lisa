@@ -2,6 +2,7 @@ package it.unive.lisa.checks.verification;
 
 import it.unive.lisa.analysis.AbstractDomain;
 import it.unive.lisa.analysis.AbstractLattice;
+import it.unive.lisa.analysis.Analysis;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.AnalyzedCFG;
 import it.unive.lisa.analysis.SemanticException;
@@ -133,10 +134,16 @@ public abstract class IndividualWarningVerifier<A extends AbstractLattice<A>, D 
 		if (results.isEmpty())
 			return VerificationResult.POSSIBLE;
 
+		// an analysis without events, as the queries are not part of the
+		// fixpoint computation
+		@SuppressWarnings({ "rawtypes", "unchecked" })
+		Analysis<A, D> analysis = new Analysis(
+				tool.getConfiguration().analysis,
+				tool.getConfiguration().shouldSmashError);
 		VerificationResult outcome = VerificationResult.REFUTED;
 		try {
 			for (AnalyzedCFG<A> result : results) {
-				outcome = outcome.lub(verifyIn(result, st, violation));
+				outcome = outcome.lub(verifyIn(analysis, result, st, violation));
 				if (outcome.getOutcome() == VerificationOutcome.CONFIRMED)
 					break;
 			}
@@ -178,9 +185,11 @@ public abstract class IndividualWarningVerifier<A extends AbstractLattice<A>, D 
 	 * Verifies the given violation at the given statement, in the given
 	 * result. Error violations are verified at the statements throwing the
 	 * matching error continuations in the post-state of the statement (see
-	 * the documentation of this class).
+	 * the documentation of this class), excluding the ones that are caught by
+	 * the error edges leaving the statement.
 	 */
 	private VerificationResult verifyIn(
+			Analysis<A, D> analysis,
 			AnalyzedCFG<A> result,
 			Statement st,
 			Violation violation)
@@ -193,7 +202,8 @@ public abstract class IndividualWarningVerifier<A extends AbstractLattice<A>, D 
 		if (direct.getOutcome() != VerificationOutcome.POSSIBLE)
 			return direct;
 
-		AnalysisState<A> post = result.getAnalysisStateAfter(st);
+		// errors caught when leaving the statement do not propagate further
+		AnalysisState<A> post = analysis.removeCaughtErrors(result.getAnalysisStateAfter(st), st);
 		GenericMapLattice<AnalysisState.Error, ?> errors = post.getErrors();
 		GenericMapLattice<Type, GenericSetLattice<Statement>> smashed = post.getSmashedErrors();
 		if (errors.isTop() || smashed.isTop())

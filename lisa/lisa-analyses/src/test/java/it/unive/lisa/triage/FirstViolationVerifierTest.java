@@ -159,6 +159,16 @@ public class FirstViolationVerifierTest {
 	}
 
 	@Test
+	public void caughtErrorsAreRefuted() throws Exception {
+		// the only exit is the throw, but its error is caught by a handler
+		// that never terminates: the error never leaves the method
+		Map<String, Message> warnings = analyze("class A { ~A() {} }\n"
+				+ "class test { caught(x) { def w = 0; try {\n throw new A();\n } catch (A e) { while (true) w = 1; } } }",
+				new WarnOnFirstThrow<>());
+		assertTrue(warnings.get("caught").isRefuted(), warnings.toString());
+	}
+
+	@Test
 	public void noVerificationWithoutVerifier() throws Exception {
 		Program p = IMPFrontend.processText("class test { a_dead() { def z = 0; def w = 0; if (z > 5) w = 1; } }");
 		DefaultConfiguration conf = new DefaultConfiguration();
