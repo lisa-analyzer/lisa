@@ -496,16 +496,41 @@ public class ExpressionEncoder
 		return coerce(term, Sort.STRING, origin);
 	}
 
+	/**
+	 * Encodes the equality of two terms. Values are equal if they are the same
+	 * value, unless one of them is opaque and might be a floating point number
+	 * ({@link SortPolicy#mayBeOpaque(SymbolicExpression)}): the meaning of
+	 * opaque values is not modeled, and equality between them does not
+	 * coincide with their identity (e.g., a floating point NaN is not equal to
+	 * itself, and {@code 1 == 1.0} holds). Such equalities are thus an
+	 * unknown, but deterministic, function of the operands (never precise).
+	 */
 	private Term equality(
 			Term left,
 			Term right,
 			SymbolicExpression origin) {
-		if (left.getSort().equals(right.getSort()))
+		boolean opaque = mayBeOpaque(origin);
+		if (left.getSort().equals(right.getSort()) && (!opaque || !left.getSort().equals(ValueSort.SORT)))
 			return Term.eq(left, right);
 		// values of different sorts are compared as values
-		return Term.eq(coerce(left, ValueSort.SORT, origin), coerce(right, ValueSort.SORT, origin));
+		Term l = coerce(left, ValueSort.SORT, origin);
+		Term r = coerce(right, ValueSort.SORT, origin);
+		if (!opaque)
+			return Term.eq(l, r);
+		Term modeled = Term.not(Term.or(ValueSort.isOpaque(l), ValueSort.isOpaque(r)));
+		return Term.ite(modeled, Term.eq(l, r),
+				symbols.apply("$==", Sort.BOOL, List.of(l, r), origin, modeled));
 	}
 
+	/**
+	 * Encodes a comparison between two numbers. Only integers are compared by
+	 * their value: if an operand might be a floating point number
+	 * ({@link SortPolicy#mayBeOpaque(SymbolicExpression)}), comparisons
+	 * involving numbers that are not integers (that might be NaN, so that
+	 * neither {@code x > y} nor {@code y >= x} holds) are an unknown, but
+	 * deterministic, function of the operands (never precise). Otherwise, the
+	 * operands are read as integers.
+	 */
 	private Term comparison(
 			String op,
 			Term left,
@@ -516,9 +541,38 @@ public class ExpressionEncoder
 		// operands of comparisons are numbers
 		requireNumeric(left);
 		requireNumeric(right);
-		// values that are not integers are read as unspecified integers, so
-		// that the result of the comparison is unconstrained
-		return Term.app(op, Sort.BOOL, coerce(left, Sort.INT, origin), coerce(right, Sort.INT, origin));
+		if (left.getSort().equals(Sort.INT) && right.getSort().equals(Sort.INT))
+			return Term.app(op, Sort.BOOL, left, right);
+		if (!mayBeOpaque(origin))
+			// values that are not integers are read as unspecified integers
+			return Term.app(op, Sort.BOOL, coerce(left, Sort.INT, origin), coerce(right, Sort.INT, origin));
+
+		List<Term> guards = new ArrayList<>(2);
+		for (Term t : List.of(left, right))
+			if (t.getSort().equals(ValueSort.SORT))
+				guards.add(ValueSort.is(t, Sort.INT));
+		Term guard = Term.and(guards.toArray(Term[]::new));
+		Term ints = Term.app(op, Sort.BOOL, asInt(left), asInt(right));
+		return Term.ite(guard, ints, symbols.apply("$" + op, Sort.BOOL,
+				List.of(ValueSort.wrap(left), ValueSort.wrap(right)), origin, guard));
+	}
+
+	/**
+	 * Yields whether an operand of the given binary expression might be an
+	 * opaque value whose meaning is not modeled (always {@code true} if the
+	 * expression is not binary).
+	 */
+	private boolean mayBeOpaque(
+			SymbolicExpression origin) {
+		if (!(origin instanceof BinaryExpression))
+			return true;
+		BinaryExpression binary = (BinaryExpression) origin;
+		return sorts.mayBeOpaque(binary.getLeft()) || sorts.mayBeOpaque(binary.getRight());
+	}
+
+	private static Term asInt(
+			Term term) {
+		return term.getSort().equals(ValueSort.SORT) ? ValueSort.unwrap(term, Sort.INT) : term;
 	}
 
 	/**

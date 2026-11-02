@@ -1,5 +1,6 @@
 package it.unive.lisa.triage.encoding;
 
+import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.triage.smt.Sort;
 import it.unive.lisa.type.Type;
@@ -133,5 +134,31 @@ public class SortPolicy {
 		if (ts == null || ts.isEmpty())
 			return ValueSort.SORT;
 		return sortOf(ts);
+	}
+
+	/**
+	 * Yields whether the values of the given expression might be opaque values
+	 * whose meaning is not modeled, and whose equalities and comparisons thus
+	 * do not follow from their identity (that is, floating point numbers, or
+	 * values of unknown type). Identifiers are judged through their runtime
+	 * types (if known), while other expressions through their static type.
+	 *
+	 * @param expression the expression
+	 *
+	 * @return whether the values might be opaque
+	 */
+	public boolean mayBeOpaque(
+			SymbolicExpression expression) {
+		if (expression instanceof Identifier) {
+			Set<Type> ts = types.get(expression);
+			if (ts != null && !ts.isEmpty())
+				return ts.stream().anyMatch(SortPolicy::mayBeOpaque);
+		}
+		return mayBeOpaque(expression.getStaticType());
+	}
+
+	private static boolean mayBeOpaque(
+			Type type) {
+		return type.isUntyped() || (type.isNumericType() && !type.asNumericType().isIntegral());
 	}
 }

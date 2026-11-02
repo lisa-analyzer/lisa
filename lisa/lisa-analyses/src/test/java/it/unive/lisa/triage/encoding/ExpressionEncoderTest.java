@@ -21,6 +21,7 @@ import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonEq;
+import it.unive.lisa.symbolic.value.operator.binary.ComparisonGe;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonGt;
 import it.unive.lisa.symbolic.value.operator.binary.LogicalAnd;
 import it.unive.lisa.symbolic.value.operator.binary.LogicalOr;
@@ -246,6 +247,29 @@ public class ExpressionEncoderTest {
 		// float arithmetic is not encoded: the result might be anything
 		assertSatisfiable(eq(sum, half));
 		assertSatisfiable(new UnaryExpression(BoolType.INSTANCE, eq(sum, half), LogicalNegation.INSTANCE, LOC));
+	}
+
+	@Test
+	public void floatComparisons() throws SemanticException {
+		Variable f = new Variable(Float32Type.INSTANCE, "f", LOC);
+		Variable g = new Variable(Float32Type.INSTANCE, "g", LOC);
+		Map<Identifier, Set<Type>> types = new HashMap<>();
+		types.put(f, Set.of(Float32Type.INSTANCE));
+		types.put(g, Set.of(Float32Type.INSTANCE));
+		types.put(X, Set.of(Int32Type.INSTANCE));
+		types.put(Y, Set.of(Int32Type.INSTANCE));
+		types.put(V, Set.of(Int32Type.INSTANCE, StringType.INSTANCE));
+		encoder = new ExpressionEncoder(new SortPolicy(types), new Symbols());
+		// floats are not totally ordered: with NaN, neither f > g nor g >= f
+		assertSatisfiable(and(not(bin(BoolType.INSTANCE, f, g, ComparisonGt.INSTANCE)),
+				not(bin(BoolType.INSTANCE, g, f, ComparisonGe.INSTANCE))));
+		// a NaN is not equal to itself
+		assertSatisfiable(not(eq(f, f)));
+		// integers are totally ordered, also when they are values
+		assertValid(bin(BoolType.INSTANCE, bin(BoolType.INSTANCE, X, Y, ComparisonGt.INSTANCE),
+				bin(BoolType.INSTANCE, Y, X, ComparisonGe.INSTANCE), LogicalOr.INSTANCE));
+		assertValid(implies(eq(V, integer(3)), bin(BoolType.INSTANCE, V, integer(2), ComparisonGt.INSTANCE)));
+		assertValid(eq(V, V));
 	}
 
 	@Test

@@ -195,6 +195,20 @@ public final class ValueSort {
 	}
 
 	/**
+	 * Yields the boolean term that holds if the given value is opaque, that
+	 * is, a value whose meaning is not modeled (e.g., a floating point number,
+	 * or a type token).
+	 *
+	 * @param value the value
+	 *
+	 * @return the boolean term
+	 */
+	public static Term isOpaque(
+			Term value) {
+		return DATATYPE.test(OPAQUE, value);
+	}
+
+	/**
 	 * Yields the boolean term that holds if the given value might be a number:
 	 * an integer, or an opaque value (that might be, e.g., a floating point
 	 * number).
