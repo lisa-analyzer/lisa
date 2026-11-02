@@ -185,13 +185,13 @@ public final class SymbolicCase {
 			if (value != null)
 				return value;
 			if (isHeap(id))
-				return summary(expression, "value read from the heap", factory);
+				return summary(expression, SummaryValue.Kind.HEAP, "value read from the heap", factory);
 			if (isUnconstrained(id))
-				return summary(expression, "unconstrained value of " + id, factory);
+				return summary(expression, SummaryValue.Kind.UNCONSTRAINED, "unconstrained value of " + id, factory);
 			return id;
 		}
 		if (expression instanceof PushInv)
-			return summary(expression, "invalid value", factory);
+			return summary(expression, SummaryValue.Kind.INVALID, "invalid value", factory);
 		if (expression instanceof PushAny)
 			return factory.fresh((PushAny) expression, pp);
 		if (expression instanceof Constant || expression instanceof NullConstant || expression instanceof Skip)
@@ -224,15 +224,16 @@ public final class SymbolicCase {
 					t.getCodeLocation());
 		}
 		if (expression instanceof HeapExpression)
-			return summary(expression, "heap expression " + expression, factory);
-		return summary(expression, "unsupported expression " + expression, factory);
+			return summary(expression, SummaryValue.Kind.HEAP, "heap expression " + expression, factory);
+		return summary(expression, SummaryValue.Kind.UNSUPPORTED, "unsupported expression " + expression, factory);
 	}
 
 	private static SummaryValue summary(
 			SymbolicExpression expression,
+			SummaryValue.Kind kind,
 			String reason,
 			FreshValueFactory factory) {
-		return factory.summary(expression.getStaticType(), reason, expression.getCodeLocation());
+		return factory.summary(expression.getStaticType(), kind, reason, expression.getCodeLocation());
 	}
 
 	/**
@@ -380,7 +381,7 @@ public final class SymbolicCase {
 				if (!v1.equals(id))
 					upd.put(id, v1);
 			} else
-				upd.put(id, factory.summary(id.getStaticType(), "merged value of " + id, location));
+				upd.put(id, factory.summary(id.getStaticType(), SummaryValue.Kind.MERGE, "merged value of " + id, location));
 		}
 
 		List<Predicate<Identifier>> tests = new ArrayList<>(first.forgottenIf);

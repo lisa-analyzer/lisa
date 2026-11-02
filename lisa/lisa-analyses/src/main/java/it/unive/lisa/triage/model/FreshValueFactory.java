@@ -55,10 +55,12 @@ public class FreshValueFactory {
 			PushAny value,
 			ProgramPoint pp) {
 		if (value instanceof SummaryMarker)
-			return summary(value.getStaticType(), ((SummaryMarker) value).getReason(), value.getCodeLocation());
+			return summary(value.getStaticType(), SummaryValue.Kind.CALL_RESULT, ((SummaryMarker) value).getReason(),
+					value.getCodeLocation());
 		InputSource source = resolver.resolve(value, pp);
 		if (source.getKind() == InputSource.Kind.IMPRECISE_CALL_RESULT)
-			return summary(value.getStaticType(), "imprecise " + source.getDescription(), value.getCodeLocation());
+			return summary(value.getStaticType(), SummaryValue.Kind.CALL_RESULT, "imprecise " + source.getDescription(),
+					value.getCodeLocation());
 		InputValue input = new InputValue(source, next++);
 		values.put(input.getName(), input);
 		return input;
@@ -68,6 +70,7 @@ public class FreshValueFactory {
 	 * Yields a fresh {@link SummaryValue}.
 	 *
 	 * @param type     the static type of the value
+	 * @param kind     the kind of imprecision the value comes from
 	 * @param reason   a human-readable description of why the value is not
 	 *                     computed precisely
 	 * @param location the location where the value is produced
@@ -76,9 +79,10 @@ public class FreshValueFactory {
 	 */
 	public synchronized SummaryValue summary(
 			Type type,
+			SummaryValue.Kind kind,
 			String reason,
 			CodeLocation location) {
-		SummaryValue summary = new SummaryValue(type, reason, location, next++);
+		SummaryValue summary = new SummaryValue(type, kind, reason, location, next++);
 		values.put(summary.getName(), summary);
 		return summary;
 	}

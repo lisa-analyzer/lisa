@@ -5,7 +5,9 @@ import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.triage.model.EdgeTransition;
 import it.unive.lisa.triage.model.InputValue;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * A proof obligation of property-directed reachability: the states of a cube at
@@ -14,7 +16,8 @@ import java.util.Map;
  * the bad location, records the obligation it is a predecessor of (its parent)
  * and the transition leading there (or no transition, if the obligation
  * restricts the cube of its parent to initial states), together with the values
- * of the inputs taken by that transition and the exactness of its encoding, so
+ * of the inputs taken by that transition and the exactness of its encoding (as
+ * the reasons why it is not exact, if any), so
  * that a chain of obligations reaching the initial states yields a
  * counterexample.
  *
@@ -36,7 +39,7 @@ public final class Obligation
 
 	private final Map<InputValue, String> inputs;
 
-	private final boolean exact;
+	private final Set<String> imprecisions;
 
 	private final Map<Identifier, String> point;
 
@@ -54,8 +57,10 @@ public final class Obligation
 	 *                     the parent (for the bad location, {@code null})
 	 * @param inputs   the values of the inputs taken by the transition (for the
 	 *                     bad location, by the bad case)
-	 * @param exact    whether or not the transition (or the bad case) is
-	 *                     encoded exactly
+	 * @param imprecisions the reasons why the transition (or the bad case) is
+	 *                         not encoded exactly (empty if it is), as
+	 *                         {@link it.unive.lisa.triage.bmc.Unrolling#getImprecisions(String, it.unive.lisa.triage.smt.SmtSolver)}
+	 *                         yields them
 	 * @param point    the values of the identifiers in the model that produced
 	 *                     this obligation (a state of the cube)
 	 * @param order    the creation order of the obligation, used to break ties
@@ -68,7 +73,7 @@ public final class Obligation
 			Obligation parent,
 			EdgeTransition edge,
 			Map<InputValue, String> inputs,
-			boolean exact,
+			Set<String> imprecisions,
 			Map<Identifier, String> point,
 			long order) {
 		this.location = location;
@@ -77,7 +82,7 @@ public final class Obligation
 		this.parent = parent;
 		this.edge = edge;
 		this.inputs = Collections.unmodifiableMap(inputs);
-		this.exact = exact;
+		this.imprecisions = Collections.unmodifiableSet(new LinkedHashSet<>(imprecisions));
 		this.point = Collections.unmodifiableMap(point);
 		this.order = order;
 	}
@@ -144,7 +149,17 @@ public final class Obligation
 	 * @return whether or not the encoding is exact
 	 */
 	public boolean isExact() {
-		return exact;
+		return imprecisions.isEmpty();
+	}
+
+	/**
+	 * Yields the reasons why the transition leading to the parent (or, for the
+	 * bad location, the bad case) is not encoded exactly.
+	 *
+	 * @return the reasons (empty if the encoding is exact)
+	 */
+	public Set<String> getImprecisions() {
+		return imprecisions;
 	}
 
 	/**

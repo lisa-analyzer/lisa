@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
@@ -125,6 +126,12 @@ public class PdrEngine {
 	}
 
 	private static final String CUBE = "#cube";
+
+	/**
+	 * The reason of imprecision of obligations whose cube still contains fresh
+	 * values after the projection, that are thus left unconstrained.
+	 */
+	public static final String UNPROJECTED = "unprojected values: fresh values left unconstrained by the projection";
 
 	private Generalization generalization = Generalization.BOTH;
 
@@ -417,12 +424,13 @@ public class PdrEngine {
 			Term query = cube.at(unrolling, 0, CUBE);
 			String key = "cond@0" + CUBE;
 			if (check(frame(bad, level), query) == SmtResult.SAT) {
-				boolean exact = unrolling.isExact(key, solver);
+				Set<String> imprecisions = new LinkedHashSet<>(unrolling.getImprecisions(key, solver));
 				Map<FreshValue, String> values = freshValues(cube.getLiterals(), key);
 				Cube projected = project(cube.getLiterals(), values);
-				exact &= Projection.freshValues(projected.getLiterals()).isEmpty();
-				Obligation o = new Obligation(bad, projected, level, null, null, inputs(values), exact, point(),
-						created++);
+				if (!Projection.freshValues(projected.getLiterals()).isEmpty())
+					imprecisions.add(UNPROJECTED);
+				Obligation o = new Obligation(bad, projected, level, null, null, inputs(values), imprecisions,
+						point(), created++);
 				solver.pop();
 				return o;
 			}
@@ -468,7 +476,7 @@ public class PdrEngine {
 			// the same states might still reach the bad location in more steps
 			if (o.getLevel() < frames.depth())
 				queue.add(new Obligation(o.getLocation(), o.getCube(), o.getLevel() + 1, o.getParent(),
-						o.getEdge(), o.getInputs(), o.isExact(), o.getPoint(), created++));
+						o.getEdge(), o.getInputs(), o.getImprecisions(), o.getPoint(), created++));
 		}
 		return false;
 	}
@@ -494,8 +502,8 @@ public class PdrEngine {
 		if (model.getInitialLocations().contains(location)) {
 			if (check(List.of(frame(location, 0)), cube, 0, core) == SmtResult.SAT) {
 				// no step is taken: the obligation refines its parent
-				Obligation init = new Obligation(location, cube, 0, parent, null, Collections.emptyMap(), true,
-						point(), created++);
+				Obligation init = new Obligation(location, cube, 0, parent, null, Collections.emptyMap(),
+						Collections.emptySet(), point(), created++);
 				solver.pop();
 				return init;
 			}
@@ -516,7 +524,8 @@ public class PdrEngine {
 					// been encoded one by one) to compute its exactness in
 					// the model
 					cube.at(unrolling, 1, CUBE);
-					boolean exact = unrolling.isExact(caseKey, solver) && unrolling.isExact(cubeKey, solver);
+					Set<String> imprecisions = new LinkedHashSet<>(unrolling.getImprecisions(caseKey, solver));
+					imprecisions.addAll(unrolling.getImprecisions(cubeKey, solver));
 					SymbolicCase c = cases.get(i);
 					List<SymbolicExpression> lits = new ArrayList<>(c.getPathCondition());
 					for (SymbolicExpression lit : cube.getLiterals())
@@ -532,9 +541,10 @@ public class PdrEngine {
 					Map<FreshValue, String> caseInputs = freshValues(unrolling.getFreshValues(caseKey), caseKey);
 					Cube projected = project(lits, all);
 					// values that could not be projected are left unconstrained
-					exact &= Projection.freshValues(projected.getLiterals()).isEmpty();
+					if (!Projection.freshValues(projected.getLiterals()).isEmpty())
+						imprecisions.add(UNPROJECTED);
 					Obligation pred = new Obligation(src, projected, level - 1, parent, e, inputs(caseInputs),
-							exact, point(), created++);
+							imprecisions, point(), created++);
 					solver.pop();
 					return pred;
 				}

@@ -16,12 +16,71 @@ public class SummaryValue
 		extends
 		FreshValue {
 
+	/**
+	 * The kinds of imprecision a summary value can come from.
+	 *
+	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+	 */
+	public enum Kind {
+
+		/**
+		 * The result of a call whose callee is not modeled.
+		 */
+		CALL_RESULT("call results"),
+
+		/**
+		 * A value read from the heap, that is not modeled.
+		 */
+		HEAP("heap values"),
+
+		/**
+		 * A value that differs among merged cases of a transition.
+		 */
+		MERGE("merged values"),
+
+		/**
+		 * The value of an identifier that is no longer constrained (e.g., it
+		 * has been forgotten).
+		 */
+		UNCONSTRAINED("unconstrained values"),
+
+		/**
+		 * An invalid value.
+		 */
+		INVALID("invalid values"),
+
+		/**
+		 * The result of an expression that is not supported.
+		 */
+		UNSUPPORTED("unsupported expressions");
+
+		private final String description;
+
+		private Kind(
+				String description) {
+			this.description = description;
+		}
+
+		/**
+		 * Yields a human-readable description of the values of this kind, in
+		 * the plural.
+		 *
+		 * @return the description
+		 */
+		public String getDescription() {
+			return description;
+		}
+	}
+
+	private final Kind kind;
+
 	private final String reason;
 
 	/**
 	 * Builds the value.
 	 *
 	 * @param staticType the static type of the value
+	 * @param kind       the kind of imprecision the value comes from
 	 * @param reason     a human-readable description of why the value is not
 	 *                       computed precisely
 	 * @param location   the location where the value is produced
@@ -30,11 +89,22 @@ public class SummaryValue
 	 */
 	public SummaryValue(
 			Type staticType,
+			Kind kind,
 			String reason,
 			CodeLocation location,
 			long index) {
 		super(staticType, "$summary#" + index, location);
+		this.kind = kind;
 		this.reason = reason;
+	}
+
+	/**
+	 * Yields the kind of imprecision this value comes from.
+	 *
+	 * @return the kind
+	 */
+	public Kind getKind() {
+		return kind;
 	}
 
 	/**

@@ -237,7 +237,7 @@ public class ExpressionEncoder
 				// values built with another constructor are read as
 				// unspecified (but consistent) values of the sort
 				converted = ValueSort.unwrap(term, sort);
-				symbols.exactOnlyIf(guard);
+				symbols.exactOnlyIf(guard, origin);
 			}
 		}
 		return converted != null ? converted : symbols.fresh(sort, origin);

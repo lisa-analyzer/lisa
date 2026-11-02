@@ -79,6 +79,22 @@ public interface SymbolTable {
 	}
 
 	/**
+	 * Signals that the encoding being built is precise only if the given
+	 * condition holds, as {@link #exactOnlyIf(Term)}, because of the encoding
+	 * of the given expression. By default, this calls
+	 * {@link #exactOnlyIf(Term)}.
+	 *
+	 * @param guard  the condition
+	 * @param origin the expression whose encoding is precise only if the
+	 *                   condition holds (can be {@code null} if unknown)
+	 */
+	default void exactOnlyIf(
+			Term guard,
+			SymbolicExpression origin) {
+		exactOnlyIf(guard);
+	}
+
+	/**
 	 * Signals that the expression being encoded can be evaluated only if the
 	 * given condition holds, since its operators are not defined otherwise
 	 * (e.g., the operands of numeric operators must be numbers): executions

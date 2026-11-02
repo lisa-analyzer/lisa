@@ -26,8 +26,10 @@ import it.unive.lisa.triage.smt.SmtSolverUnavailableException;
 import it.unive.lisa.triage.smt.Term;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Supplier;
 
 /**
@@ -224,7 +226,7 @@ public class BoundedModelChecker<A extends AbstractLattice<A>, D extends Abstrac
 		for (Term pc : pcs)
 			trace.add(unrolling.locationAt(Integer.parseInt(pcValues.get(pc))));
 
-		boolean exact = true;
+		Set<String> imprecisions = new LinkedHashSet<>();
 		ReproducingInputs inputs = new ReproducingInputs(model.getResult().getId());
 
 		Map<Term, Identifier> params = new HashMap<>();
@@ -238,18 +240,17 @@ public class BoundedModelChecker<A extends AbstractLattice<A>, D extends Abstrac
 			for (EdgeTransition edge : model.getTransitions(trace.get(t)))
 				if (edge.getEdge().getDestination() == trace.get(t + 1)) {
 					String key = unrolling.edgeKey(t, edge);
-					exact &= unrolling.isExact(key, solver);
+					imprecisions.addAll(unrolling.getImprecisions(key, solver));
 					collectInputs(unrolling, key, solver, inputs);
 				}
 		String badKey = unrolling.badKey(length);
-		exact &= unrolling.isExact(badKey, solver);
+		imprecisions.addAll(unrolling.getImprecisions(badKey, solver));
 		collectInputs(unrolling, badKey, solver, inputs);
 
 		String path = "violation reached in " + length + " steps through " + trace;
-		if (!exact) {
+		if (!imprecisions.isEmpty()) {
 			inexact = true;
-			return new VerificationResult(VerificationOutcome.POSSIBLE,
-					path + ", relying on values that are not computed precisely");
+			return new VerificationResult(VerificationOutcome.POSSIBLE, path + ", " + Unrolling.explain(imprecisions));
 		}
 		if (!model.isConfirmable())
 			return new VerificationResult(VerificationOutcome.POSSIBLE,

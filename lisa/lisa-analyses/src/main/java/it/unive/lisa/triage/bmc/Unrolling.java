@@ -3,7 +3,10 @@ package it.unive.lisa.triage.bmc;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.symbolic.SymbolicExpression;
+import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.symbolic.value.TernaryExpression;
+import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.triage.encoding.ExpressionEncoder;
 import it.unive.lisa.triage.encoding.SymbolTable;
 import it.unive.lisa.triage.encoding.ValueSort;
@@ -18,6 +21,7 @@ import it.unive.lisa.triage.smt.SmtSolver;
 import it.unive.lisa.triage.smt.Sort;
 import it.unive.lisa.triage.smt.Term;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.LinkedHashSet;
@@ -64,6 +68,41 @@ public class Unrolling {
 	private final Map<String, Boolean> exactness;
 
 	private final Map<String, List<Term>> guards = new HashMap<>();
+
+	/**
+	 * The reasons why the encoding with each key is not exact, regardless of
+	 * the model (see {@link #getImprecisions(String, SmtSolver)})
+	 */
+	private final Map<String, Set<String>> reasons = new HashMap<>();
+
+	/**
+	 * The reasons why the encoding with each key is not exact in models where
+	 * a condition holds and a guard does not (see
+	 * {@link #getImprecisions(String, SmtSolver)})
+	 */
+	private final Map<String, List<GuardedReason>> guardedReasons = new HashMap<>();
+
+	/**
+	 * A reason of imprecision that holds when {@code when} holds and
+	 * {@code guard} does not.
+	 */
+	private static final class GuardedReason {
+
+		private final Term when;
+
+		private final Term guard;
+
+		private final String reason;
+
+		private GuardedReason(
+				Term when,
+				Term guard,
+				String reason) {
+			this.when = when;
+			this.guard = guard;
+			this.reason = reason;
+		}
+	}
 
 	private final boolean strict;
 
@@ -242,8 +281,11 @@ public class Unrolling {
 				Sort sort) {
 			if (id instanceof FreshValue) {
 				used.add((FreshValue) id);
-				if (id instanceof SummaryValue)
+				if (id instanceof SummaryValue) {
 					exact = false;
+					SummaryValue summary = (SummaryValue) id;
+					reasons.add(summary.getKind().getDescription() + ": " + summary.getReason());
+				}
 				return Unrolling.this.constant(id.getName() + "@" + step + tag, sort);
 			}
 			return var(id, step);
@@ -251,11 +293,30 @@ public class Unrolling {
 
 		private final List<Term> guards = new ArrayList<>();
 
+		/**
+		 * The reasons of the imprecision signaled by each guard, aligned with
+		 * {@link #guards}.
+		 */
+		private final List<String> guardReasons = new ArrayList<>();
+
+		/**
+		 * The reasons why the encoding is not exact, regardless of the model.
+		 */
+		private final Set<String> reasons = new LinkedHashSet<>();
+
+		private void guard(
+				Term guard,
+				String reason) {
+			guards.add(guard);
+			guardReasons.add(reason);
+		}
+
 		@Override
 		public Term fresh(
 				Sort sort,
 				SymbolicExpression origin) {
 			exact = false;
+			reasons.add(UNSUPPORTED_OPERATIONS + ": " + describe(origin));
 			return Unrolling.this.constant("$havoc#" + (Unrolling.this.fresh++), sort);
 		}
 
@@ -264,14 +325,21 @@ public class Unrolling {
 				Sort sort,
 				SymbolicExpression origin,
 				Term guard) {
-			guards.add(guard);
+			guard(guard, OTHER_KINDS + ": " + describe(origin));
 			return Unrolling.this.constant("$havoc#" + (Unrolling.this.fresh++), sort);
 		}
 
 		@Override
 		public void exactOnlyIf(
 				Term guard) {
-			guards.add(guard);
+			exactOnlyIf(guard, null);
+		}
+
+		@Override
+		public void exactOnlyIf(
+				Term guard,
+				SymbolicExpression origin) {
+			guard(guard, OTHER_KINDS + ": " + describe(origin));
 		}
 
 		@Override
@@ -281,7 +349,7 @@ public class Unrolling {
 				List<Term> arguments,
 				SymbolicExpression origin,
 				Term guard) {
-			guards.add(guard);
+			guard(guard, reasonOf(function, origin));
 			List<Sort> sorts = new ArrayList<>();
 			for (Term arg : arguments)
 				sorts.add(arg.getSort());
@@ -385,6 +453,149 @@ public class Unrolling {
 			if (!value.equals("true"))
 				return false;
 		return true;
+	}
+
+	/**
+	 * The kind of imprecision of values whose meaning the encoder does not
+	 * model (e.g., the results of unsupported operations).
+	 */
+	public static final String UNSUPPORTED_OPERATIONS = "unsupported operations";
+
+	/**
+	 * The kind of imprecision of operations applied to values of kinds they
+	 * are not modeled for (e.g., arithmetic over floating point numbers).
+	 */
+	public static final String OTHER_KINDS = "operations on values of other kinds";
+
+	/**
+	 * The kind of imprecision of comparisons and equalities between values
+	 * that might not be integers (e.g., floating point numbers).
+	 */
+	public static final String NON_INTEGER_COMPARISONS = "comparisons of non-integers";
+
+	/**
+	 * The kind of imprecision of type tests that the encoder cannot decide.
+	 */
+	public static final String TYPE_TESTS = "type tests";
+
+	/**
+	 * Yields the reasons why the encoding with the given key is not exact in
+	 * the current model of the given solver, that must have just answered
+	 * {@link it.unive.lisa.triage.smt.SmtResult#SAT}. Each reason has the form
+	 * {@code kind: detail}, where the kind is the one of a
+	 * {@link SummaryValue} ({@link SummaryValue.Kind#getDescription()}) or one
+	 * of the constants of this class, and the detail tells which value or
+	 * operation is not encoded precisely. The result is empty if and only if
+	 * the encoding is exact in the model ({@link #isExact(String, SmtSolver)}).
+	 *
+	 * @param key    the key
+	 * @param solver the solver
+	 *
+	 * @return the reasons
+	 */
+	public Set<String> getImprecisions(
+			String key,
+			SmtSolver solver) {
+		Set<String> result = new LinkedHashSet<>();
+		if (!isExact(key))
+			result.addAll(reasons.getOrDefault(key, Set.of()));
+		List<GuardedReason> guarded = guardedReasons.getOrDefault(key, List.of());
+		if (!guarded.isEmpty()) {
+			List<Term> terms = new ArrayList<>();
+			for (GuardedReason g : guarded) {
+				terms.add(g.when);
+				terms.add(g.guard);
+			}
+			Map<Term, String> values = solver.getValues(terms);
+			for (GuardedReason g : guarded)
+				if ("true".equals(values.get(g.when)) && !"true".equals(values.get(g.guard)))
+					result.add(g.reason);
+		}
+		if (result.isEmpty() && !isExact(key, solver))
+			result.add("unknown: imprecision of " + key);
+		return result;
+	}
+
+	/**
+	 * The number of details listed by {@link #explain(Collection)}.
+	 */
+	private static final int MAX_DETAILS = 5;
+
+	/**
+	 * Explains that a counterexample relies on values that are not computed
+	 * precisely, for the given reasons (in the form yielded by
+	 * {@link #getImprecisions(String, SmtSolver)}): the distinct kinds of the
+	 * reasons are listed between parentheses, separated by commas, followed by
+	 * (some of) their details, separated by semicolons.
+	 *
+	 * @param imprecisions the reasons
+	 *
+	 * @return the explanation
+	 */
+	public static String explain(
+			Collection<String> imprecisions) {
+		Set<String> kinds = new LinkedHashSet<>();
+		List<String> details = new ArrayList<>();
+		for (String reason : imprecisions) {
+			int sep = reason.indexOf(": ");
+			kinds.add(sep < 0 ? reason : reason.substring(0, sep));
+			if (sep >= 0 && details.size() < MAX_DETAILS)
+				details.add(reason.substring(sep + 2));
+		}
+		String res = "relying on values that are not computed precisely (" + String.join(", ", kinds) + ")";
+		return details.isEmpty() ? res : res + ": " + String.join("; ", details);
+	}
+
+	private void record(
+			String key,
+			StepSymbols symbols,
+			List<GuardedReason> guarded) {
+		reasons.put(key, new LinkedHashSet<>(symbols.reasons));
+		guardedReasons.put(key, guarded);
+	}
+
+	private static List<GuardedReason> guardedReasons(
+			Term when,
+			StepSymbols symbols,
+			int from) {
+		List<GuardedReason> result = new ArrayList<>();
+		for (int i = from; i < symbols.guards.size(); i++)
+			result.add(new GuardedReason(when, symbols.guards.get(i), symbols.guardReasons.get(i)));
+		return result;
+	}
+
+	private static String reasonOf(
+			String function,
+			SymbolicExpression origin) {
+		if (function.startsWith("$is "))
+			return TYPE_TESTS + ": " + function.substring(4);
+		switch (function) {
+		case "$==":
+		case "$<":
+		case "$<=":
+		case "$>":
+		case "$>=":
+			return NON_INTEGER_COMPARISONS + ": " + describe(origin);
+		default:
+			return OTHER_KINDS + ": " + describe(origin);
+		}
+	}
+
+	/**
+	 * Yields a short description of the given expression, naming its
+	 * operator, if any.
+	 */
+	private static String describe(
+			SymbolicExpression origin) {
+		if (origin == null)
+			return "unknown";
+		if (origin instanceof UnaryExpression)
+			return ((UnaryExpression) origin).getOperator().getClass().getSimpleName();
+		if (origin instanceof BinaryExpression)
+			return ((BinaryExpression) origin).getOperator().getClass().getSimpleName();
+		if (origin instanceof TernaryExpression)
+			return ((TernaryExpression) origin).getOperator().getClass().getSimpleName();
+		return origin.getClass().getSimpleName();
 	}
 
 	/**
@@ -525,15 +736,18 @@ public class Unrolling {
 		ExpressionEncoder encoder = new ExpressionEncoder(model.getSorts(), symbols);
 		List<Term> cases = new ArrayList<>();
 		List<Term> precise = new ArrayList<>();
+		List<GuardedReason> guarded = new ArrayList<>();
 		for (SymbolicCase c : edge.getStore().getCases()) {
 			int from = symbols.guards.size();
 			int req = symbols.requirements.size();
 			Term ct = required(encodeCase(c, step, encoder), symbols, req);
 			cases.add(strictly(ct, symbols, from));
 			precise.add(preciseCase(ct, symbols, from));
+			guarded.addAll(guardedReasons(ct, symbols, from));
 		}
 		exactness.put(key, symbols.exact);
 		guards.put(key, List.of(Term.or(precise.toArray(Term[]::new))));
+		record(key, symbols, guarded);
 		inputs.put(key, symbols.used);
 		return Term.and(
 				at(step, edge.getEdge().getSource()),
@@ -666,6 +880,7 @@ public class Unrolling {
 		Term c = strictly(required(encodeCase(cases(edge).get(index), step, encoder), symbols, 0), symbols, 0);
 		exactness.put(key, symbols.exact);
 		guards.put(key, symbols.guards);
+		record(key, symbols, guardedReasons(Term.TRUE, symbols, 0));
 		inputs.put(key, symbols.used);
 		return Term.and(
 				at(step, edge.getEdge().getSource()),
@@ -702,6 +917,7 @@ public class Unrolling {
 		String key = "cond@" + step + tag;
 		exactness.put(key, symbols.exact);
 		guards.put(key, symbols.guards);
+		record(key, symbols, guardedReasons(Term.TRUE, symbols, 0));
 		inputs.put(key, symbols.used);
 		return result;
 	}
@@ -724,6 +940,7 @@ public class Unrolling {
 		ExpressionEncoder encoder = new ExpressionEncoder(model.getSorts(), symbols);
 		List<Term> cases = new ArrayList<>();
 		List<Term> precise = new ArrayList<>();
+		List<GuardedReason> guarded = new ArrayList<>();
 		for (BadCase c : model.getBadCases()) {
 			int from = symbols.guards.size();
 			int req = symbols.requirements.size();
@@ -735,9 +952,11 @@ public class Unrolling {
 			Term ct = required(Term.and(conj.toArray(Term[]::new)), symbols, req);
 			cases.add(strictly(ct, symbols, from));
 			precise.add(preciseCase(ct, symbols, from));
+			guarded.addAll(guardedReasons(ct, symbols, from));
 		}
 		exactness.put(key, symbols.exact);
 		guards.put(key, List.of(Term.or(precise.toArray(Term[]::new))));
+		record(key, symbols, guarded);
 		inputs.put(key, symbols.used);
 		return Term.and(at(step, model.getBadLocation()), Term.or(cases.toArray(Term[]::new)));
 	}

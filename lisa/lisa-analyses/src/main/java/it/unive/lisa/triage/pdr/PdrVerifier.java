@@ -11,6 +11,7 @@ import it.unive.lisa.checks.verification.VerificationResult;
 import it.unive.lisa.checks.verification.Violation;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.triage.bmc.Unrolling;
 import it.unive.lisa.triage.inputs.InputSource;
 import it.unive.lisa.triage.inputs.ReproducingInputs;
 import it.unive.lisa.triage.model.AlarmModel;
@@ -24,8 +25,10 @@ import it.unive.lisa.triage.smt.SmtSolver;
 import it.unive.lisa.triage.smt.SmtSolverUnavailableException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Supplier;
 
 /**
@@ -285,10 +288,10 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 				inputs.add(param.getValue(), value);
 		}
 
-		boolean exact = true;
+		Set<String> imprecisions = new LinkedHashSet<>();
 		List<Statement> trace = new ArrayList<>();
 		for (Obligation o : cex) {
-			exact &= o.isExact();
+			imprecisions.addAll(o.getImprecisions());
 			// obligations restricting their parent to initial states do not
 			// correspond to a step
 			if (trace.isEmpty() || trace.get(trace.size() - 1) != o.getLocation())
@@ -298,10 +301,9 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 		}
 
 		String path = "violation reached in " + (trace.size() - 1) + " steps through " + trace;
-		if (!exact) {
+		if (!imprecisions.isEmpty()) {
 			inexact = true;
-			return new VerificationResult(VerificationOutcome.POSSIBLE,
-					path + ", relying on values that are not computed precisely");
+			return new VerificationResult(VerificationOutcome.POSSIBLE, path + ", " + Unrolling.explain(imprecisions));
 		}
 		if (!model.isConfirmable())
 			return new VerificationResult(VerificationOutcome.POSSIBLE,

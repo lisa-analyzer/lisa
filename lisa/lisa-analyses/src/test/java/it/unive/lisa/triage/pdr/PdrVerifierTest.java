@@ -30,9 +30,12 @@ import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonEq;
+import it.unive.lisa.triage.bmc.Unrolling;
+import it.unive.lisa.triage.model.SummaryValue;
 import it.unive.lisa.triage.smt.SmtLibProcessSolver;
 import it.unive.lisa.type.Untyped;
 import java.nio.file.Files;
+import java.util.List;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -262,6 +265,22 @@ public class PdrVerifierTest {
 		// input, so no counterexample through it can be confirmed
 		VerificationResult result = verify("summarized", "w = 1", Violation.reach());
 		assertEquals(VerificationOutcome.POSSIBLE, result.getOutcome(), result.toString());
+		// the explanation tells which values are imprecise
+		assertTrue(result.getExplanation().contains("relying on values that are not computed precisely ("),
+				result.toString());
+		assertTrue(result.getExplanation().contains(SummaryValue.Kind.CALL_RESULT.getDescription()),
+				result.toString());
+		assertTrue(result.getExplanation().contains("inc"), result.toString());
+	}
+
+	@Test
+	public void imprecisionsAreExplainedByKind() {
+		assertEquals("relying on values that are not computed precisely (call results, heap values): "
+				+ "result of call to f; value read from the heap; result of call to g",
+				Unrolling.explain(List.of("call results: result of call to f", "heap values: value read from the heap",
+						"call results: result of call to g")));
+		assertEquals("relying on values that are not computed precisely (unknown)",
+				Unrolling.explain(List.of("unknown")));
 	}
 
 	@Test
