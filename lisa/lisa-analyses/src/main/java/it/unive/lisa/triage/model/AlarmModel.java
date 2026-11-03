@@ -6,7 +6,9 @@ import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.triage.encoding.SortPolicy;
 import it.unive.lisa.triage.inputs.InputSource;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -17,7 +19,10 @@ import java.util.Set;
  * a control-flow automaton whose locations (see {@link ModelLocation}) are the
  * beginnings of the nodes of the cfg that can reach the node where the property is checked (the <i>bad
  * location</i>), and whose edges carry the symbolic transitions extracted from
- * the results of the analysis. The model contains:
+ * the results of the analysis. If some calls are expanded, the locations also
+ * include the ones of the frames of their callees, and the ones where the
+ * callers resume after the callees return (see {@link AlarmModelBuilder}). The
+ * model contains:
  * <ul>
  * <li>the locations ({@link #getLocations()}) and their transitions
  * ({@link #getTransitions(ModelLocation)}, restricted to edges between
@@ -67,6 +72,10 @@ public class AlarmModel {
 
 	private final boolean confirmable;
 
+	private final Set<Frame> frames;
+
+	private final boolean truncated;
+
 	/**
 	 * Builds the model.
 	 *
@@ -101,6 +110,51 @@ public class AlarmModel {
 			Map<String, FreshValue> freshValues,
 			Map<Identifier, InputSource> parameters,
 			boolean confirmable) {
+		this(root, badLocation, locations, initial, transitions, initialConstraints, badCases, seeds, vocabulary,
+				sorts, freshValues, parameters, confirmable, Collections.emptySet(), false);
+	}
+
+	/**
+	 * Builds the model.
+	 *
+	 * @param root               the root frame of the model, whose result is
+	 *                               the one the model is built from
+	 * @param badLocation        the bad location
+	 * @param locations          the locations
+	 * @param initial            the initial locations
+	 * @param transitions        the transitions of each location
+	 * @param initialConstraints the constraints that hold in the initial states
+	 * @param badCases           the ways of violating the property at the bad
+	 *                               location
+	 * @param seeds              the invariants of each reachable location
+	 *                               (unreachable locations are not in the map)
+	 * @param vocabulary         the identifiers used in the model
+	 * @param sorts              the policy deciding the sorts of identifiers
+	 * @param freshValues        the fresh values used in the model, by name
+	 * @param parameters         the sources of the parameters of the cfg
+	 * @param confirmable        whether or not the model is confirmable
+	 * @param frames             the frames of the expanded callees that have
+	 *                               locations in the model
+	 * @param truncated          whether or not some calls have not been
+	 *                               expanded because the model reached its
+	 *                               maximum number of locations
+	 */
+	public AlarmModel(
+			Frame root,
+			ModelLocation badLocation,
+			Set<ModelLocation> locations,
+			Set<ModelLocation> initial,
+			Map<ModelLocation, NodeTransitions> transitions,
+			Set<SymbolicExpression> initialConstraints,
+			List<BadCase> badCases,
+			Map<ModelLocation, Set<SymbolicExpression>> seeds,
+			Set<Identifier> vocabulary,
+			SortPolicy sorts,
+			Map<String, FreshValue> freshValues,
+			Map<Identifier, InputSource> parameters,
+			boolean confirmable,
+			Set<Frame> frames,
+			boolean truncated) {
 		this.root = root;
 		this.badLocation = badLocation;
 		this.locations = Collections.unmodifiableSet(locations);
@@ -114,6 +168,53 @@ public class AlarmModel {
 		this.freshValues = Collections.unmodifiableMap(freshValues);
 		this.parameters = Collections.unmodifiableMap(parameters);
 		this.confirmable = confirmable;
+		this.frames = Collections.unmodifiableSet(frames);
+		this.truncated = truncated;
+	}
+
+	/**
+	 * Yields the frames of the expanded callees that have locations in this
+	 * model (the root frame excluded).
+	 *
+	 * @return the frames
+	 */
+	public Set<Frame> getFrames() {
+		return frames;
+	}
+
+	/**
+	 * Yields the frames of the callees of the expandable calls reached at the
+	 * given locations of this model, that are not already among the given
+	 * ones (see {@link NodeTransitions#getCalls()}).
+	 *
+	 * @param trace    the locations
+	 * @param expanded the frames already expanded
+	 *
+	 * @return the frames to expand
+	 */
+	public Set<Frame> getExpandableFrames(
+			Collection<ModelLocation> trace,
+			Set<Frame> expanded) {
+		Set<Frame> more = new LinkedHashSet<>();
+		for (ModelLocation loc : trace) {
+			NodeTransitions tr = transitions.get(loc);
+			if (tr != null)
+				for (ReplayedCall call : tr.getCalls())
+					if (call.isExpandable())
+						more.addAll(call.getCalleeFrames());
+		}
+		more.removeAll(expanded);
+		return more;
+	}
+
+	/**
+	 * Yields {@code true} if some calls have not been expanded because the
+	 * model reached its maximum number of locations.
+	 *
+	 * @return whether or not the model has been truncated
+	 */
+	public boolean isTruncated() {
+		return truncated;
 	}
 
 	/**
@@ -178,7 +279,7 @@ public class AlarmModel {
 
 	/**
 	 * Yields the transitions from the given location to other locations of the
-	 * model.
+	 * model (including the ones entering and returning from callees).
 	 *
 	 * @param location the location
 	 *
@@ -305,7 +406,9 @@ public class AlarmModel {
 				sb.append("  ").append(fresh.getKey()).append(": ")
 						.append(fresh.getValue() instanceof InputValue
 								? ((InputValue) fresh.getValue()).getSource().getDescription()
-								: "summary of " + ((SummaryValue) fresh.getValue()).getReason())
+								: fresh.getValue() instanceof SummaryValue
+										? "summary of " + ((SummaryValue) fresh.getValue()).getReason()
+										: "allocated references")
 						.append("\n");
 		}
 

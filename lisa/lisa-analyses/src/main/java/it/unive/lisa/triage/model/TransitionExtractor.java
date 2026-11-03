@@ -7,6 +7,7 @@ import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.AnalysisState.Error;
 import it.unive.lisa.analysis.AnalyzedCFG;
 import it.unive.lisa.analysis.ProgramState;
+import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.checks.semantic.SemanticTool;
@@ -17,10 +18,12 @@ import it.unive.lisa.program.cfg.edge.ErrorEdge;
 import it.unive.lisa.program.cfg.fixpoints.forward.ForwardCFGFixpoint;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Statement;
+import it.unive.lisa.program.cfg.statement.call.CFGCall;
 import it.unive.lisa.triage.reachability.Reachability;
 import it.unive.lisa.type.Type;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -28,6 +31,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BooleanSupplier;
 
 /**
  * Extracts the symbolic transitions performed by the nodes of an analysis
@@ -36,7 +40,15 @@ import java.util.Set;
  * Each node is replayed starting from its state before the node, as computed by
  * the analysis (see
  * {@link Reachability#preStateOf(AnalyzedCFG, Statement, Analysis)}), paired
- * with the identity transition.
+ * with the identity transition.<br>
+ * <br>
+ * When callees are expanded (see {@link ReplayInterprocedural}), the
+ * transitions of a node also include the ones entering the frames of its
+ * expanded callees, and the ones of the exit points of the cfg of a callee
+ * frame include the transition returning to the location where the caller
+ * resumes, obtained by bringing the post-state of the exit point back to the
+ * caller as the analysis does (assigning the returned value to the meta
+ * variable of the call, and popping the scope of the call).
  *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  *
@@ -55,27 +67,56 @@ public class TransitionExtractor<A extends AbstractLattice<A>, D extends Abstrac
 
 	private final ReplayInterprocedural<A, D> replay;
 
+	private final Statement resumeNode;
+
 	/**
-	 * Builds the extractor.
+	 * Builds the extractor, summarizing all calls.
 	 *
 	 * @param tool     the tool containing the results of the analysis
 	 * @param frame    the frame whose nodes are replayed
 	 * @param factory  the factory of the fresh values used in the transitions
 	 * @param maxCases the maximum number of cases of each transition
 	 */
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public TransitionExtractor(
 			SemanticTool<A, D> tool,
 			Frame frame,
 			FreshValueFactory factory,
 			int maxCases) {
+		this(tool, frame, factory, maxCases, Collections.emptySet(), () -> false, null);
+	}
+
+	/**
+	 * Builds the extractor.
+	 *
+	 * @param tool       the tool containing the results of the analysis
+	 * @param frame      the frame whose nodes are replayed
+	 * @param factory    the factory of the fresh values used in the
+	 *                       transitions
+	 * @param maxCases   the maximum number of cases of each transition
+	 * @param expanded   the frames of the callees to expand
+	 * @param budget     tells whether or not new callees can be entered (see
+	 *                       {@link ReplayInterprocedural})
+	 * @param resumeNode the node of the parent frame containing the call that
+	 *                       reaches the frame, where the caller resumes after
+	 *                       the call returns ({@code null} for the root frame)
+	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public TransitionExtractor(
+			SemanticTool<A, D> tool,
+			Frame frame,
+			FreshValueFactory factory,
+			int maxCases,
+			Set<Frame> expanded,
+			BooleanSupplier budget,
+			Statement resumeNode) {
 		this.frame = frame;
 		this.result = (AnalyzedCFG<A>) frame.getResult();
 		// we use an analysis without events, as the replay is not part of
 		// the fixpoint computation
 		this.analysis = new Analysis(tool.getConfiguration().analysis, tool.getConfiguration().shouldSmashError);
 		this.domain = new ReplayDomain<>(analysis.domain, factory, maxCases);
-		this.replay = new ReplayInterprocedural<>(tool, result, domain);
+		this.replay = new ReplayInterprocedural<>(tool, frame, domain, expanded, budget);
+		this.resumeNode = resumeNode;
 	}
 
 	/**
@@ -134,22 +175,52 @@ public class TransitionExtractor<A extends AbstractLattice<A>, D extends Abstrac
 	public NodeTransitions extract(
 			Statement node)
 			throws SemanticException {
+		return extract(new ModelLocation(frame, node), true);
+	}
+
+	/**
+	 * Extracts the symbolic transitions starting at the given location of the
+	 * frame of this extractor: the location before a node, or the one where
+	 * the node resumes after an expanded call returned.
+	 *
+	 * @param location  the location
+	 * @param expansion whether or not the calls of the node can be expanded
+	 *
+	 * @return the transitions
+	 *
+	 * @throws SemanticException if something goes wrong while replaying the
+	 *                               node
+	 */
+	public NodeTransitions extract(
+			ModelLocation location,
+			boolean expansion)
+			throws SemanticException {
+		Statement node = location.getNode();
+		replay.startRun(node, location.getResumed(), expansion);
 		// errors and halts reaching the node come from previous steps: only
 		// the executions entering the node are replayed
 		AnalysisState<ReplayState<A>> pre = ReplayStates.liftExecution(preStateOf(node), domain);
 		StatementStore<ReplayState<A>> expressions = new StatementStore<>(pre).bottom();
 		AnalysisState<ReplayState<A>> post = node.forwardSemantics(pre, replay, expressions);
+		// when the run stops at an expanded call, the semantics of the
+		// expressions evaluated afterwards might turn the bottom execution
+		// into one whose computed expressions are not bottom: such executions
+		// are discarded
+		Map<Frame, SymbolicStore> entered = replay.getEntered();
+		if (replay.hasStopped())
+			post = stopped(post);
 
 		Map<Statement, SymbolicStore> partial = new HashMap<>();
 		for (Statement sub : expressions.getKeys()) {
 			AnalysisState<ReplayState<A>> state = expressions.getState(sub);
+			if (replay.hasStopped())
+				state = stopped(state);
 			if (!state.getExecution().isBottom())
 				partial.put(sub, state.getExecutionState().getStore());
 		}
 		if (!post.getExecution().isBottom())
 			partial.put(node, post.getExecutionState().getStore());
 
-		ModelLocation location = new ModelLocation(frame, node);
 		List<EdgeTransition> outgoing = new ArrayList<>();
 		for (Edge edge : result.getOutgoingEdges(node))
 			traverse(location, edge, post, outgoing);
@@ -161,11 +232,37 @@ public class TransitionExtractor<A extends AbstractLattice<A>, D extends Abstrac
 			for (Edge handler : downstreamHandlers(node))
 				traverse(location, handler.newInstance(node, handler.getDestination()), post, outgoing);
 
-		SymbolicStore exit = null;
-		if (result.getAllExitpoints().contains(node) && !post.getExecution().isBottom())
-			exit = post.getExecutionState().getStore();
+		// the callees entered by the node
+		for (Map.Entry<Frame, SymbolicStore> callee : entered.entrySet())
+			for (Statement entry : callee.getKey().getResult().getEntrypoints())
+				outgoing.add(new EdgeTransition(
+						location,
+						new ModelLocation(callee.getKey(), entry),
+						null,
+						callee.getValue()));
 
-		return new NodeTransitions(location, outgoing, exit, raisedErrors(node, post), partial);
+		SymbolicStore exit = null;
+		if (result.getAllExitpoints().contains(node) && !post.getExecution().isBottom()) {
+			exit = post.getExecutionState().getStore();
+			if (!frame.isRoot() && resumeNode != null) {
+				// the return to the caller, that resumes after the call
+				CFGCall call = frame.getCall();
+				AnalysisState<ReplayState<A>> back = call.getProgram().getFeatures().getScopingStrategy().unscope(
+						call,
+						new ScopeToken(call),
+						post,
+						replay.getAnalysis(),
+						frame.getParent().getResult().getId());
+				if (!back.getExecution().isBottom())
+					outgoing.add(new EdgeTransition(
+							location,
+							new ModelLocation(frame.getParent(), resumeNode, call),
+							null,
+							back.getExecutionState().getStore()));
+			}
+		}
+
+		return new NodeTransitions(location, outgoing, exit, raisedErrors(node, post), partial, replay.getCalls());
 	}
 
 	private void traverse(
@@ -187,6 +284,13 @@ public class TransitionExtractor<A extends AbstractLattice<A>, D extends Abstrac
 					new ModelLocation(frame, edge.getDestination()),
 					edge,
 					traversed.getExecutionState().getStore()));
+	}
+
+	private static <A extends AbstractLattice<A>> AnalysisState<ReplayState<A>> stopped(
+			AnalysisState<ReplayState<A>> state) {
+		if (!state.getExecution().isBottom() && state.getExecutionState().isBottom())
+			return state.withExecution(state.getExecution().bottom());
+		return state;
 	}
 
 	private static boolean raisesErrors(

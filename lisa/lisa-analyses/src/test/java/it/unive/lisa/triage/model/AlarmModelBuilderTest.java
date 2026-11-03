@@ -3,6 +3,7 @@ package it.unive.lisa.triage.model;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import it.unive.lisa.DefaultConfiguration;
@@ -15,6 +16,9 @@ import it.unive.lisa.checks.semantic.SemanticCheck;
 import it.unive.lisa.checks.semantic.SemanticTool;
 import it.unive.lisa.checks.verification.Violation;
 import it.unive.lisa.imp.IMPFrontend;
+import it.unive.lisa.interprocedural.ReturnTopPolicy;
+import it.unive.lisa.interprocedural.callgraph.RTACallGraph;
+import it.unive.lisa.interprocedural.context.ContextBasedAnalysis;
 import it.unive.lisa.program.Program;
 import it.unive.lisa.program.SyntheticLocation;
 import it.unive.lisa.program.cfg.CFG;
@@ -33,6 +37,7 @@ import it.unive.lisa.triage.inputs.InputSource;
 import it.unive.lisa.triage.smt.Sort;
 import it.unive.lisa.type.Untyped;
 import java.nio.file.Files;
+import java.util.List;
 import java.util.Set;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -66,9 +71,51 @@ public class AlarmModelBuilderTest {
 			+ "  }\n"
 			+ "}";
 
+	private static final String CALLS = "class A {\n"
+			+ "  f;\n"
+			+ "  ~A() {}\n"
+			+ "}\n"
+			+ "class calls {\n"
+			+ "  inc(a) {\n"
+			+ "    return a + 1;\n"
+			+ "  }\n"
+			+ "  rec(n) {\n"
+			+ "    if (n <= 0)\n"
+			+ "      return 0;\n"
+			+ "    def m = n - 1;\n"
+			+ "    return this.rec(m) + 1;\n"
+			+ "  }\n"
+			+ "  caller(x) {\n"
+			+ "    def y = this.inc(x);\n"
+			+ "    def w = 0;\n"
+			+ "    if (y == 5)\n"
+			+ "      w = 1;\n"
+			+ "    return w;\n"
+			+ "  }\n"
+			+ "  recursive(x) {\n"
+			+ "    def y = this.rec(x);\n"
+			+ "    def w = 0;\n"
+			+ "    if (y == 5)\n"
+			+ "      w = 1;\n"
+			+ "    return w;\n"
+			+ "  }\n"
+			+ "  operand(x) {\n"
+			+ "    def a = new A();\n"
+			+ "    def y = a.f + this.inc(x);\n"
+			+ "    def w = 0;\n"
+			+ "    if (y == 5)\n"
+			+ "      w = 1;\n"
+			+ "    return w;\n"
+			+ "  }\n"
+			+ "}";
+
 	private static Program program;
 
 	private static SemanticTool<?, ?> tool;
+
+	private static Program callsProgram;
+
+	private static SemanticTool<?, ?> callsTool;
 
 	private static class Capture<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
 			implements
@@ -80,6 +127,35 @@ public class AlarmModelBuilderTest {
 			AlarmModelBuilderTest.tool = tool;
 		}
 
+	}
+
+	private static class CaptureCalls<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
+			implements
+			SemanticCheck<A, D> {
+
+		@Override
+		public void afterExecution(
+				SemanticTool<A, D> tool) {
+			AlarmModelBuilderTest.callsTool = tool;
+		}
+
+	}
+
+	@BeforeAll
+	public static void analyzeCalls() throws Exception {
+		callsProgram = IMPFrontend.processText(CALLS);
+		for (CFG cfg : callsProgram.getAllCFGs())
+			if (!callsProgram.getEntryPoints().contains(cfg))
+				callsProgram.addEntryPoint(cfg);
+		DefaultConfiguration conf = new DefaultConfiguration();
+		conf.analysis = DefaultConfiguration.defaultAbstractDomain();
+		conf.callGraph = new RTACallGraph();
+		conf.interproceduralAnalysis = new ContextBasedAnalysis<>();
+		conf.openCallPolicy = ReturnTopPolicy.INSTANCE;
+		conf.workdir = Files.createTempDirectory("models").toString();
+		conf.semanticChecks.add(new CaptureCalls<>());
+		new LiSA(conf).run(callsProgram);
+		assertNotNull(callsTool);
 	}
 
 	@BeforeAll
@@ -213,5 +289,132 @@ public class AlarmModelBuilderTest {
 		// raising errors of an unrelated type is not a violation
 		AlarmModel unrelated = build(thrower, thr, Violation.error(Int32Type.INSTANCE));
 		assertTrue(unrelated.getBadCases().isEmpty());
+	}
+
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private static AlarmModel buildCalls(
+			String name,
+			Set<Frame> expanded)
+			throws SemanticException {
+		CFG cfg = callsProgram.getAllCFGs().stream().filter(c -> c.getDescriptor().getName().equals(name))
+				.findFirst().get();
+		SemanticTool t = callsTool;
+		AnalyzedCFG result = (AnalyzedCFG) t.getResultOf(cfg).iterator().next();
+		return AlarmModelBuilder.build(t, result, node(cfg, "w = 1"), Violation.reach(),
+				SymbolicStore.DEFAULT_MAX_CASES, expanded);
+	}
+
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private static AlarmModel buildCalls(
+			String name)
+			throws SemanticException {
+		CFG cfg = callsProgram.getAllCFGs().stream().filter(c -> c.getDescriptor().getName().equals(name))
+				.findFirst().get();
+		SemanticTool t = callsTool;
+		AnalyzedCFG result = (AnalyzedCFG) t.getResultOf(cfg).iterator().next();
+		return AlarmModelBuilder.build(t, result, node(cfg, "w = 1"), Violation.reach(),
+				SymbolicStore.DEFAULT_MAX_CASES);
+	}
+
+	private static ReplayedCall callAt(
+			AlarmModel model,
+			ModelLocation loc) {
+		List<ReplayedCall> calls = model.getNodeTransitions(loc).getCalls();
+		assertEquals(1, calls.size(), calls.toString());
+		return calls.get(0);
+	}
+
+	@Test
+	public void callsAreSummarizedWithoutExpansion() throws SemanticException {
+		AlarmModel plain = buildCalls("caller");
+		AlarmModel empty = buildCalls("caller", Set.of());
+		// no expansion: the models are the same
+		assertEquals(plain.dump(), empty.dump());
+		assertTrue(empty.getFrames().isEmpty());
+		assertFalse(empty.isTruncated());
+		for (ModelLocation loc : empty.getLocations()) {
+			assertTrue(loc.getFrame().isRoot());
+			assertNull(loc.getResumed());
+			for (EdgeTransition e : empty.getTransitions(loc))
+				assertNotNull(e.getEdge());
+		}
+
+		// the call is discovered by the replay, and it can be expanded
+		CFG caller = callsProgram.getAllCFGs().stream().filter(c -> c.getDescriptor().getName().equals("caller"))
+				.findFirst().get();
+		ReplayedCall call = callAt(empty, at(empty, node(caller, "inc(")));
+		assertTrue(call.isExpandable(), call.toString());
+		assertFalse(call.isExpanded());
+		assertEquals(1, call.getCalleeFrames().size());
+		assertEquals("inc", call.getCalleeFrames().get(0).getResult().getDescriptor().getName());
+	}
+
+	@Test
+	public void expandedCallsHaveCalleeFrames() throws SemanticException {
+		CFG caller = callsProgram.getAllCFGs().stream().filter(c -> c.getDescriptor().getName().equals("caller"))
+				.findFirst().get();
+		Statement site = node(caller, "inc(");
+		ReplayedCall call = callAt(buildCalls("caller"), new ModelLocation(Frame.root(
+				(AnalyzedCFG<?>) callsTool.getResultOf(caller).iterator().next()), site));
+		Frame callee = call.getCalleeFrames().get(0);
+		AlarmModel model = buildCalls("caller", Set.of(callee));
+		assertEquals(Set.of(callee), model.getFrames());
+		assertTrue(callAt(model, at(model, site)).isExpanded());
+
+		ModelLocation before = at(model, site);
+		ModelLocation resumed = new ModelLocation(model.getRootFrame(), site, call.getCall());
+		assertTrue(model.getLocations().contains(resumed), model.getLocations().toString());
+
+		// the location before the call only enters the callee
+		List<EdgeTransition> enter = model.getTransitions(before);
+		assertEquals(1, enter.size(), enter.toString());
+		assertNull(enter.get(0).getEdge());
+		assertEquals(callee, enter.get(0).getDestination().getFrame());
+		assertTrue(callee.getResult().getEntrypoints().contains(enter.get(0).getDestination().getNode()));
+
+		// the exit of the callee returns where the caller resumes
+		ModelLocation exit = new ModelLocation(callee, node(callee.getResult(), "return"));
+		assertTrue(model.getLocations().contains(exit), model.getLocations().toString());
+		List<EdgeTransition> back = model.getTransitions(exit);
+		assertEquals(1, back.size(), back.toString());
+		assertNull(back.get(0).getEdge());
+		assertEquals(resumed, back.get(0).getDestination());
+		SymbolicCase ret = back.get(0).getStore().getCases().iterator().next();
+		assertTrue(ret.getUpdates().containsKey(call.getCall().getMetaVariable()), ret.toString());
+
+		// the caller resumes through the edges of the node, with the result
+		// of the call
+		List<EdgeTransition> next = model.getTransitions(resumed);
+		assertEquals(1, next.size(), next.toString());
+		assertNotNull(next.get(0).getEdge());
+		SymbolicCase resume = next.get(0).getStore().getCases().iterator().next();
+		assertEquals(call.getCall().getMetaVariable(), resume.getUpdates().get(find(model, "y")), resume.toString());
+		// resume locations have no invariants
+		assertTrue(model.getSeeds(resumed).isEmpty());
+	}
+
+	@Test
+	public void recursiveCallsAreNotExpandable() throws SemanticException {
+		AlarmModel model = buildCalls("recursive");
+		ReplayedCall outer = model.getLocations().stream()
+				.flatMap(l -> model.getNodeTransitions(l).getCalls().stream()).findFirst().get();
+		assertTrue(outer.isExpandable(), outer.toString());
+		AlarmModel expanded = buildCalls("recursive", Set.copyOf(outer.getCalleeFrames()));
+		ReplayedCall inner = expanded.getLocations().stream()
+				.filter(l -> !l.getFrame().isRoot())
+				.flatMap(l -> expanded.getNodeTransitions(l).getCalls().stream()).findFirst()
+				.orElseThrow(() -> new AssertionError(outer + "\n" + expanded.dump()));
+		assertFalse(inner.isExpandable(), inner.toString());
+		assertEquals("recursive call", inner.getObstacle());
+	}
+
+	@Test
+	public void callsAfterHeapReadsAreNotExpandable() throws SemanticException {
+		AlarmModel model = buildCalls("operand");
+		ReplayedCall call = model.getLocations().stream()
+				.flatMap(l -> model.getNodeTransitions(l).getCalls().stream())
+				.filter(c -> c.getCall().getTargetName().equals("inc")).findFirst().get();
+		assertFalse(call.isExpandable(), call.toString());
+		assertTrue(call.getObstacle().contains("heap"), call.getObstacle());
 	}
 }

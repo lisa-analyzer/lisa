@@ -521,6 +521,25 @@ public class Unrolling {
 	}
 
 	/**
+	 * Yields {@code true} if some of the given reasons of imprecision (in the
+	 * form yielded by {@link #getImprecisions(String, SmtSolver)}) might be
+	 * caused by summarized calls: results of calls (see
+	 * {@link SummaryValue.Kind#CALL_RESULT}), or contents of the heap after
+	 * writes that are not modeled (see {@link SummaryValue.Kind#HEAP}), such as
+	 * the ones of summarized callees.
+	 *
+	 * @param imprecisions the reasons
+	 *
+	 * @return whether or not calls might cause imprecision
+	 */
+	public static boolean dueToCalls(
+			Collection<String> imprecisions) {
+		String calls = SummaryValue.Kind.CALL_RESULT.getDescription() + ":";
+		String heap = SummaryValue.Kind.HEAP.getDescription() + ":";
+		return imprecisions.stream().anyMatch(r -> r.startsWith(calls) || r.startsWith(heap));
+	}
+
+	/**
 	 * The number of details listed by {@link #explain(Collection)}.
 	 */
 	private static final int MAX_DETAILS = 5;

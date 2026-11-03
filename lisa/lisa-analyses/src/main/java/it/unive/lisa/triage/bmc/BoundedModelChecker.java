@@ -15,6 +15,7 @@ import it.unive.lisa.triage.inputs.ReproducingInputs;
 import it.unive.lisa.triage.model.AlarmModel;
 import it.unive.lisa.triage.model.AlarmModelBuilder;
 import it.unive.lisa.triage.model.EdgeTransition;
+import it.unive.lisa.triage.model.Frame;
 import it.unive.lisa.triage.model.InputValue;
 import it.unive.lisa.triage.model.ModelLocation;
 import it.unive.lisa.triage.model.SymbolicStore;
@@ -27,6 +28,7 @@ import it.unive.lisa.triage.smt.SmtSolverUnavailableException;
 import it.unive.lisa.triage.smt.Term;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -51,7 +53,15 @@ import java.util.function.Supplier;
  * imprecise transitions, and when no solver is available.</li>
  * </ul>
  * Note that confirmed violations are not yet certified by executing the program
- * with the reproducing inputs.
+ * with the reproducing inputs.<br>
+ * <br>
+ * Calls are first summarized. When the execution found is imprecise because it
+ * relies on the results of summarized calls, or on heap contents they might
+ * have written (see {@link Unrolling#dueToCalls(java.util.Collection)}), the
+ * expandable calls reached along it are expanded (see
+ * {@link AlarmModelBuilder}), and the search is repeated on the new model. This
+ * happens for at most a given number of rounds, and until the model reaches
+ * its maximum number of locations.
  *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  *
@@ -67,6 +77,12 @@ public class BoundedModelChecker<A extends AbstractLattice<A>, D extends Abstrac
 	 */
 	public static final int DEFAULT_BOUND = 20;
 
+	/**
+	 * The default maximum number of models built per candidate violation, each
+	 * expanding more calls than the previous one.
+	 */
+	public static final int DEFAULT_MAX_ROUNDS = 5;
+
 	private final int bound;
 
 	private final Supplier<SmtSolver> solvers;
@@ -76,6 +92,16 @@ public class BoundedModelChecker<A extends AbstractLattice<A>, D extends Abstrac
 	private SemanticTool<A, D> tool;
 
 	private boolean inexact;
+
+	private int maxRounds = DEFAULT_MAX_ROUNDS;
+
+	private int maxLocations = AlarmModelBuilder.DEFAULT_MAX_LOCATIONS;
+
+	/**
+	 * The trace of the last execution found, if it might rely on summarized
+	 * calls (see {@link Unrolling#dueToCalls(java.util.Collection)}).
+	 */
+	private List<ModelLocation> callTrace;
 
 	/**
 	 * Builds the verifier, unrolling {@link #DEFAULT_BOUND} steps with z3 (see
@@ -103,6 +129,36 @@ public class BoundedModelChecker<A extends AbstractLattice<A>, D extends Abstrac
 		this.maxCases = maxCases;
 	}
 
+	/**
+	 * Sets the maximum number of models built per candidate violation, each
+	 * expanding the calls whose results make the previous execution imprecise
+	 * (default: {@link #DEFAULT_MAX_ROUNDS}; {@code 1} never expands calls).
+	 *
+	 * @param maxRounds the maximum number of rounds
+	 *
+	 * @return this verifier
+	 */
+	public BoundedModelChecker<A, D> withMaxRounds(
+			int maxRounds) {
+		this.maxRounds = maxRounds;
+		return this;
+	}
+
+	/**
+	 * Sets the maximum number of locations of a model, beyond which calls are
+	 * no longer expanded (default:
+	 * {@link AlarmModelBuilder#DEFAULT_MAX_LOCATIONS}).
+	 *
+	 * @param maxLocations the maximum number of locations
+	 *
+	 * @return this verifier
+	 */
+	public BoundedModelChecker<A, D> withMaxLocations(
+			int maxLocations) {
+		this.maxLocations = maxLocations;
+		return this;
+	}
+
 	@Override
 	public void init(
 			SemanticTool<A, D> tool) {
@@ -115,22 +171,35 @@ public class BoundedModelChecker<A extends AbstractLattice<A>, D extends Abstrac
 			Statement st,
 			Violation violation)
 			throws SemanticException {
-		AlarmModel model = AlarmModelBuilder.build(tool, result, st, violation, maxCases);
-		if (model.getSeeds(model.getBadLocation()) == null)
-			return new VerificationResult(VerificationOutcome.REFUTED, "the statement is unreachable");
-		if (model.getBadCases().isEmpty())
-			return new VerificationResult(VerificationOutcome.REFUTED, "the violation cannot happen");
+		Set<Frame> expanded = new HashSet<>();
+		for (int round = 1;; round++) {
+			AlarmModel model = AlarmModelBuilder.build(tool, result, st, violation, maxCases, expanded,
+					maxLocations);
+			if (model.getSeeds(model.getBadLocation()) == null)
+				return new VerificationResult(VerificationOutcome.REFUTED, "the statement is unreachable");
+			if (model.getBadCases().isEmpty())
+				return new VerificationResult(VerificationOutcome.REFUTED, "the violation cannot happen");
 
-		inexact = false;
-		VerificationResult res = search(model, false);
-		if (inexact) {
-			// look for a counterexample where all values are computed
-			// precisely
-			VerificationResult strict = search(model, true);
-			if (strict.getOutcome() == VerificationOutcome.CONFIRMED)
-				return strict;
+			inexact = false;
+			callTrace = null;
+			VerificationResult res = search(model, false);
+			List<ModelLocation> trace = callTrace;
+			if (inexact) {
+				// look for a counterexample where all values are computed
+				// precisely
+				VerificationResult strict = search(model, true);
+				if (strict.getOutcome() == VerificationOutcome.CONFIRMED)
+					return strict;
+			}
+
+			if (res.getOutcome() != VerificationOutcome.POSSIBLE || trace == null || round >= maxRounds
+					|| model.isTruncated())
+				return res;
+			Set<Frame> more = model.getExpandableFrames(trace, expanded);
+			if (more.isEmpty())
+				return res;
+			expanded.addAll(more);
 		}
-		return res;
 	}
 
 	private VerificationResult search(
@@ -250,6 +319,8 @@ public class BoundedModelChecker<A extends AbstractLattice<A>, D extends Abstrac
 
 		String path = "violation reached in " + length + " steps through " + trace;
 		if (!imprecisions.isEmpty()) {
+			if (!inexact && Unrolling.dueToCalls(imprecisions))
+				callTrace = trace;
 			inexact = true;
 			return new VerificationResult(VerificationOutcome.POSSIBLE, path + ", " + Unrolling.explain(imprecisions));
 		}

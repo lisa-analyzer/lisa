@@ -5,6 +5,7 @@ import it.unive.lisa.analysis.AbstractLattice;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.AnalysisState.Error;
 import it.unive.lisa.analysis.AnalyzedCFG;
+import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.checks.semantic.SemanticTool;
 import it.unive.lisa.checks.verification.ConditionViolation;
@@ -18,6 +19,7 @@ import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.symbolic.value.OutOfScopeIdentifier;
 import it.unive.lisa.symbolic.value.PushAny;
 import it.unive.lisa.symbolic.value.TernaryExpression;
 import it.unive.lisa.symbolic.value.UnaryExpression;
@@ -29,6 +31,7 @@ import it.unive.lisa.triage.inputs.InputSourceResolver;
 import it.unive.lisa.type.Type;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -36,23 +39,42 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BooleanSupplier;
 
 /**
  * Builds the {@link AlarmModel} of a candidate violation, given the results of
  * an analysis. The locations of the model are the nodes of the cfg that can
  * reach the bad location (its <i>cone</i>): the node of the statement on which
  * the warning would be issued, or, for {@link ConditionViolation}s, the node
- * containing the statement after which the condition is evaluated.
+ * containing the statement after which the condition is evaluated.<br>
+ * <br>
+ * Calls to cfgs can be <i>expanded</i>, given the frames of their callees (see
+ * {@link Frame#enter(it.unive.lisa.program.cfg.statement.call.CFGCall, AnalyzedCFG)}
+ * and {@link ReplayInterprocedural}): the model then also contains the
+ * locations of the frames of the expanded callees (the nodes of their cfgs
+ * that can reach an exit point, recursively expanding their own calls), and
+ * the locations where the callers resume after the callees return, connected
+ * by the transitions entering and returning from the callees. Since the number
+ * of locations can grow quickly, expansion stops when the model has more
+ * locations than a given budget (the remaining calls are summarized). The
+ * model is finally restricted to the locations that can reach the bad
+ * location.
  *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public final class AlarmModelBuilder {
 
+	/**
+	 * The default maximum number of locations of a model, beyond which calls
+	 * are no longer expanded.
+	 */
+	public static final int DEFAULT_MAX_LOCATIONS = 2000;
+
 	private AlarmModelBuilder() {
 	}
 
 	/**
-	 * Builds the model of the given violation.
+	 * Builds the model of the given violation, summarizing all calls.
 	 *
 	 * @param <A>       the type of the abstract states of the analysis
 	 * @param <D>       the type of the domain of the analysis
@@ -74,6 +96,69 @@ public final class AlarmModelBuilder {
 			Violation violation,
 			int maxCases)
 			throws SemanticException {
+		return build(tool, result, st, violation, maxCases, Collections.emptySet(), DEFAULT_MAX_LOCATIONS);
+	}
+
+	/**
+	 * Builds the model of the given violation, expanding the calls whose
+	 * callee frames are all in the given set, with
+	 * {@link #DEFAULT_MAX_LOCATIONS} as budget of locations.
+	 *
+	 * @param <A>       the type of the abstract states of the analysis
+	 * @param <D>       the type of the domain of the analysis
+	 * @param tool      the tool containing the results of the analysis
+	 * @param result    the result containing the statement
+	 * @param st        the statement on which the warning would be issued
+	 * @param violation the violation
+	 * @param maxCases  the maximum number of cases of each transition
+	 * @param expanded  the frames of the callees to expand
+	 *
+	 * @return the model
+	 *
+	 * @throws SemanticException if something goes wrong while building the
+	 *                               model
+	 */
+	public static <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AlarmModel build(
+			SemanticTool<A, D> tool,
+			AnalyzedCFG<A> result,
+			Statement st,
+			Violation violation,
+			int maxCases,
+			Set<Frame> expanded)
+			throws SemanticException {
+		return build(tool, result, st, violation, maxCases, expanded, DEFAULT_MAX_LOCATIONS);
+	}
+
+	/**
+	 * Builds the model of the given violation, expanding the calls whose
+	 * callee frames are all in the given set, as long as the model has at
+	 * most {@code maxLocations} locations.
+	 *
+	 * @param <A>          the type of the abstract states of the analysis
+	 * @param <D>          the type of the domain of the analysis
+	 * @param tool         the tool containing the results of the analysis
+	 * @param result       the result containing the statement
+	 * @param st           the statement on which the warning would be issued
+	 * @param violation    the violation
+	 * @param maxCases     the maximum number of cases of each transition
+	 * @param expanded     the frames of the callees to expand
+	 * @param maxLocations the maximum number of locations of the model, beyond
+	 *                         which calls are no longer expanded
+	 *
+	 * @return the model
+	 *
+	 * @throws SemanticException if something goes wrong while building the
+	 *                               model
+	 */
+	public static <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AlarmModel build(
+			SemanticTool<A, D> tool,
+			AnalyzedCFG<A> result,
+			Statement st,
+			Violation violation,
+			int maxCases,
+			Set<Frame> expanded,
+			int maxLocations)
+			throws SemanticException {
 		Statement bad = violation instanceof ConditionViolation
 				? rootOf(((ConditionViolation) violation).getWhere())
 				: rootOf(st);
@@ -83,27 +168,83 @@ public final class AlarmModelBuilder {
 		Set<ModelLocation> cone = new LinkedHashSet<>();
 		for (Statement node : cone(result, bad))
 			cone.add(new ModelLocation(frame, node));
-		Set<ModelLocation> initial = new LinkedHashSet<>();
-		for (Statement entry : result.getEntrypoints()) {
-			ModelLocation loc = new ModelLocation(frame, entry);
-			if (cone.contains(loc))
-				initial.add(loc);
-		}
 
 		InputSourceResolver resolver = new InputSourceResolver(tool);
 		FreshValueFactory factory = new FreshValueFactory(resolver, new HeapModel(result.getProgram()));
-		TransitionExtractor<A, D> extractor = new TransitionExtractor<>(tool, frame, factory, maxCases);
-		// the transitions are also kept by node, since the order in which
-		// they are visited determines the order of the vocabulary
-		Map<Statement, NodeTransitions> byNode = new HashMap<>();
+		// the locations are extracted once, in the order they are discovered:
+		// the ones of the cone first, then the ones of the expanded callees
+		// and the ones where callers resume
+		Set<ModelLocation> locations = new LinkedHashSet<>(cone);
+		LinkedList<ModelLocation> ws = new LinkedList<>(cone);
+		boolean[] truncated = { false };
+		BooleanSupplier budget = () -> {
+			if (locations.size() < maxLocations)
+				return true;
+			truncated[0] = true;
+			return false;
+		};
+		Map<Frame, TransitionExtractor<A, D>> extractors = new HashMap<>();
+		extractors.put(frame, new TransitionExtractor<>(tool, frame, factory, maxCases, expanded, budget, null));
 		Map<ModelLocation, NodeTransitions> transitions = new HashMap<>();
 		Map<ModelLocation, AnalysisState<A>> preStates = new HashMap<>();
-		for (ModelLocation loc : cone) {
-			NodeTransitions tr = extractor.extract(loc.getNode());
-			byNode.put(loc.getNode(), tr);
+		boolean expansion = false;
+		while (!ws.isEmpty()) {
+			ModelLocation loc = ws.removeFirst();
+			TransitionExtractor<A, D> extractor = extractors.get(loc.getFrame());
+			NodeTransitions tr = extractor.extract(loc, !loc.equals(badLocation));
 			transitions.put(loc, tr);
 			preStates.put(loc, extractor.preStateOf(loc.getNode()));
+			for (EdgeTransition e : tr.getOutgoing()) {
+				ModelLocation dest = e.getDestination();
+				if (e.getEdge() != null || locations.contains(dest))
+					continue;
+				expansion = true;
+				Frame callee = dest.getFrame();
+				if (dest.getResumed() != null)
+					// the location where the caller resumes
+					add(dest, locations, ws);
+				else if (!extractors.containsKey(callee)) {
+					// a new callee frame: its nodes that can reach an exit
+					extractors.put(callee, new TransitionExtractor<>(tool, callee, factory, maxCases, expanded,
+							budget, loc.getNode()));
+					// the location where the caller resumes is added only if
+					// some exit point can return to it
+					Set<Statement> exits = new LinkedHashSet<>();
+					for (Statement exit : callee.getResult().getAllExitpoints())
+						exits.addAll(cone(callee.getResult(), exit));
+					for (Statement node : exits)
+						add(new ModelLocation(callee, node), locations, ws);
+				}
+			}
 		}
+
+		if (expansion) {
+			// only the locations that can reach the bad one are relevant
+			Set<ModelLocation> relevant = backwardReachable(badLocation, locations, transitions);
+			locations.retainAll(relevant);
+			transitions.keySet().retainAll(relevant);
+		}
+
+		Set<ModelLocation> initial = new LinkedHashSet<>();
+		for (Statement entry : result.getEntrypoints()) {
+			ModelLocation loc = new ModelLocation(frame, entry);
+			if (locations.contains(loc))
+				initial.add(loc);
+		}
+
+		// the transitions of the root frame are also kept by node, since the
+		// order in which they are visited determines the order of the
+		// vocabulary; the ones of other locations follow, in the order they
+		// have been discovered
+		Map<Statement, NodeTransitions> byNode = new HashMap<>();
+		List<NodeTransitions> others = new ArrayList<>();
+		for (ModelLocation loc : locations)
+			if (loc.getFrame().isRoot() && loc.getResumed() == null)
+				byNode.put(loc.getNode(), transitions.get(loc));
+			else
+				others.add(transitions.get(loc));
+		List<NodeTransitions> all = new ArrayList<>(byNode.values());
+		all.addAll(others);
 
 		List<BadCase> badCases = badCases(transitions.get(badLocation), violation, factory);
 
@@ -114,7 +255,7 @@ public final class AlarmModelBuilder {
 		}
 
 		Set<Identifier> vocabulary = new LinkedHashSet<>(parameters.keySet());
-		for (NodeTransitions tr : byNode.values())
+		for (NodeTransitions tr : all)
 			collect(tr, vocabulary);
 		for (BadCase c : badCases) {
 			for (SymbolicExpression cond : c.getPathCondition())
@@ -126,7 +267,7 @@ public final class AlarmModelBuilder {
 		// execution of the model: dropping them avoids encoding their values
 		// (e.g., the unused results of calls, that are not computed precisely)
 		Set<Identifier> read = new HashSet<>(parameters.keySet());
-		for (NodeTransitions tr : byNode.values())
+		for (NodeTransitions tr : all)
 			collectRead(tr, read);
 		for (BadCase c : badCases) {
 			for (SymbolicExpression cond : c.getPathCondition())
@@ -136,27 +277,44 @@ public final class AlarmModelBuilder {
 		}
 		vocabulary.retainAll(read);
 		// identifiers renamed by scoping take their values from the
-		// identifiers they are renamed from, that are thus read as well
+		// identifiers they are renamed from, that are thus read as well;
+		// when callees are expanded, only the identifiers that are visible in
+		// some frame are relevant (e.g., popping a scope renames any
+		// identifier, even the ones that are already out of that scope)
+		Set<List<ScopeToken>> scopes = new HashSet<>();
+		for (Frame f : extractors.keySet())
+			scopes.addAll(scopesOf(f));
 		boolean grown = true;
 		while (grown) {
 			grown = false;
-			for (NodeTransitions tr : byNode.values())
+			for (NodeTransitions tr : all)
 				for (SymbolicStore store : storesOf(tr))
 					for (SymbolicCase c : store.getCases())
 						for (Identifier id : new ArrayList<>(vocabulary))
-							if (!c.getUpdates().containsKey(id) && !c.isUnconstrained(id))
-								grown |= vocabulary.add(c.preIdentifier(id));
+							if (!c.getUpdates().containsKey(id) && !c.isUnconstrained(id)) {
+								Identifier pre = c.preIdentifier(id);
+								if (!expansion || scopes.contains(scopesOf(pre)))
+									grown |= vocabulary.add(pre);
+							}
 		}
 
-		ConstraintExporter<A, D> exporter = new ConstraintExporter<>(tool.getAnalysis().domain,
-				frame.getResult().getId());
+		// each frame exports constraints in its own context
+		Map<Frame, ConstraintExporter<A, D>> exporters = new HashMap<>();
 		Map<ModelLocation, Set<SymbolicExpression>> seeds = new HashMap<>();
-		Set<SymbolicExpression> conditions = conditions(byNode.values(), badCases);
-		for (ModelLocation loc : cone) {
+		Set<SymbolicExpression> conditions = conditions(all, badCases);
+		for (ModelLocation loc : locations) {
 			Statement node = loc.getNode();
+			ConstraintExporter<A, D> exporter = exporters.computeIfAbsent(loc.getFrame(),
+					f -> new ConstraintExporter<>(tool.getAnalysis().domain, f.getResult().getId()));
 			Set<SymbolicExpression> cs = exporter.constraints(preStates.get(loc), vocabulary, node);
 			if (cs == null)
 				continue;
+			if (loc.getResumed() != null) {
+				// the state before the node does not describe the values
+				// after the callees returned
+				seeds.put(loc, new HashSet<>());
+				continue;
+			}
 			// conditions of the model whose truth is decided by the analysis
 			// are invariants, even if the domain cannot express them as
 			// constraints
@@ -176,17 +334,18 @@ public final class AlarmModelBuilder {
 		}
 		Set<SymbolicExpression> init = new HashSet<>();
 		if (!initial.isEmpty()) {
-			Set<SymbolicExpression> cs = exporter.constraints(result.getEntryState(), vocabulary,
+			Set<SymbolicExpression> cs = exporters.get(frame).constraints(result.getEntryState(), vocabulary,
 					initial.iterator().next().getNode());
 			if (cs != null)
 				init.addAll(cs);
 		}
 
 		Map<Identifier, Set<Type>> types = new HashMap<>();
-		for (ModelLocation loc : cone) {
+		for (ModelLocation loc : locations) {
 			AnalysisState<A> pre = preStates.get(loc);
 			if (pre.getExecution().isBottom())
 				continue;
+			TransitionExtractor<A, D> extractor = extractors.get(loc.getFrame());
 			for (Identifier id : vocabulary)
 				if (pre.getExecutionState().knowsIdentifier(id))
 					types.computeIfAbsent(id, i -> new HashSet<>())
@@ -201,10 +360,15 @@ public final class AlarmModelBuilder {
 				&& result.getProgram().getEntryPoints().stream()
 						.anyMatch(cfg -> cfg.getDescriptor().equals(result.getDescriptor()));
 
+		Set<Frame> frames = new LinkedHashSet<>();
+		for (ModelLocation loc : locations)
+			if (!loc.getFrame().isRoot())
+				frames.add(loc.getFrame());
+
 		return new AlarmModel(
 				frame,
 				badLocation,
-				cone,
+				locations,
 				initial,
 				transitions,
 				init,
@@ -214,7 +378,79 @@ public final class AlarmModelBuilder {
 				new SortPolicy(types, bad.getProgram().getTypes().getTypes()),
 				factory.getValues(),
 				parameters,
-				confirmable);
+				confirmable,
+				frames,
+				truncated[0]);
+	}
+
+	/**
+	 * Yields the scopes of the identifiers of the callers that are visible in
+	 * the given frame, from the innermost one: for each prefix of the chain of
+	 * calls leading to the frame (from the last call), the tokens of the
+	 * scopes pushed by the calls.
+	 */
+	private static Set<List<ScopeToken>> scopesOf(
+			Frame frame) {
+		Set<List<ScopeToken>> result = new HashSet<>();
+		List<ScopeToken> chain = new ArrayList<>();
+		result.add(new ArrayList<>(chain));
+		for (Frame f = frame; !f.isRoot(); f = f.getParent()) {
+			chain.add(new ScopeToken(f.getCall()));
+			result.add(new ArrayList<>(chain));
+		}
+		return result;
+	}
+
+	/**
+	 * Yields the tokens of the scopes the given identifier is out of, from the
+	 * innermost one.
+	 */
+	private static List<ScopeToken> scopesOf(
+			Identifier id) {
+		List<ScopeToken> chain = new ArrayList<>();
+		Identifier current = id;
+		while (current instanceof OutOfScopeIdentifier) {
+			ScopeToken token = ((OutOfScopeIdentifier) current).getScope();
+			chain.add(token);
+			try {
+				current = ((OutOfScopeIdentifier) current).popScope(token, null);
+			} catch (SemanticException e) {
+				break;
+			}
+		}
+		return chain;
+	}
+
+	private static void add(
+			ModelLocation loc,
+			Set<ModelLocation> locations,
+			LinkedList<ModelLocation> ws) {
+		if (locations.add(loc))
+			ws.add(loc);
+	}
+
+	/**
+	 * The locations that can reach the given one through the transitions of
+	 * the given locations, including the location itself.
+	 */
+	private static Set<ModelLocation> backwardReachable(
+			ModelLocation target,
+			Set<ModelLocation> locations,
+			Map<ModelLocation, NodeTransitions> transitions) {
+		Map<ModelLocation, Set<ModelLocation>> predecessors = new HashMap<>();
+		for (ModelLocation loc : locations)
+			for (EdgeTransition e : transitions.get(loc).getOutgoing())
+				if (locations.contains(e.getDestination()))
+					predecessors.computeIfAbsent(e.getDestination(), d -> new HashSet<>()).add(loc);
+		Set<ModelLocation> reached = new HashSet<>();
+		LinkedList<ModelLocation> ws = new LinkedList<>();
+		ws.add(target);
+		while (!ws.isEmpty()) {
+			ModelLocation current = ws.removeFirst();
+			if (reached.add(current))
+				ws.addAll(predecessors.getOrDefault(current, Collections.emptySet()));
+		}
+		return reached;
 	}
 
 	private static Statement rootOf(

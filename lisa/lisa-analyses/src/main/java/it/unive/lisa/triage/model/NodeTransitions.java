@@ -23,6 +23,11 @@ import java.util.Map;
  * sub-expressions (and of the node itself), that allow conditions to be
  * evaluated in the middle of the node.</li>
  * </ul>
+ * When callees are expanded, the outgoing transitions also include the ones
+ * entering the frames of the callees, and the ones returning from an exit
+ * point of a callee to the location where the caller resumes (these do not
+ * correspond to edges of a cfg). The calls to cfgs reached while replaying the
+ * node are also recorded (see {@link #getCalls()}).
  * Executions that halt are not represented, since they do not reach any other
  * program point.
  *
@@ -40,6 +45,8 @@ public class NodeTransitions {
 
 	private final Map<Statement, SymbolicStore> partial;
 
+	private final List<ReplayedCall> calls;
+
 	/**
 	 * Builds the transitions.
 	 *
@@ -55,11 +62,44 @@ public class NodeTransitions {
 			SymbolicStore exit,
 			Map<Error, SymbolicStore> errors,
 			Map<Statement, SymbolicStore> partial) {
+		this(location, outgoing, exit, errors, partial, Collections.emptyList());
+	}
+
+	/**
+	 * Builds the transitions.
+	 *
+	 * @param location the location of the node
+	 * @param outgoing the transitions through the outgoing edges, and the ones
+	 *                     entering and returning from callees
+	 * @param exit     the transition to the end of the cfg, or {@code null}
+	 * @param errors   the transitions to the errors raised by the node
+	 * @param partial  the transitions to the end of each sub-expression
+	 * @param calls    the calls to cfgs reached while replaying the node, in
+	 *                     evaluation order
+	 */
+	public NodeTransitions(
+			ModelLocation location,
+			List<EdgeTransition> outgoing,
+			SymbolicStore exit,
+			Map<Error, SymbolicStore> errors,
+			Map<Statement, SymbolicStore> partial,
+			List<ReplayedCall> calls) {
 		this.location = location;
 		this.outgoing = Collections.unmodifiableList(outgoing);
 		this.exit = exit;
 		this.errors = Collections.unmodifiableMap(errors);
 		this.partial = Collections.unmodifiableMap(partial);
+		this.calls = Collections.unmodifiableList(calls);
+	}
+
+	/**
+	 * Yields the calls to cfgs reached while replaying the node from this
+	 * location, in evaluation order.
+	 *
+	 * @return the calls
+	 */
+	public List<ReplayedCall> getCalls() {
+		return calls;
 	}
 
 	/**
@@ -81,7 +121,8 @@ public class NodeTransitions {
 	}
 
 	/**
-	 * Yields the transitions through the feasible outgoing edges of the node.
+	 * Yields the transitions through the feasible outgoing edges of the node,
+	 * and the ones entering or returning from callees.
 	 *
 	 * @return the transitions
 	 */

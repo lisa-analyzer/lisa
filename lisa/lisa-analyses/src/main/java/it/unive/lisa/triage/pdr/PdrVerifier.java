@@ -16,6 +16,7 @@ import it.unive.lisa.triage.inputs.InputSource;
 import it.unive.lisa.triage.inputs.ReproducingInputs;
 import it.unive.lisa.triage.model.AlarmModel;
 import it.unive.lisa.triage.model.AlarmModelBuilder;
+import it.unive.lisa.triage.model.Frame;
 import it.unive.lisa.triage.model.InputValue;
 import it.unive.lisa.triage.model.ModelLocation;
 import it.unive.lisa.triage.model.SymbolicStore;
@@ -26,6 +27,7 @@ import it.unive.lisa.triage.smt.SmtSolver;
 import it.unive.lisa.triage.smt.SmtSolverUnavailableException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -52,6 +54,13 @@ import java.util.function.Supplier;
  * counterexamples, exhausted budgets, solver failures, or no solver
  * available).</li>
  * </ul>
+ * Calls are first summarized. When the counterexample found is imprecise
+ * because it relies on the results of summarized calls, or on heap contents
+ * they might have written (see
+ * {@link Unrolling#dueToCalls(java.util.Collection)}), the expandable calls
+ * reached along it are expanded (see {@link AlarmModelBuilder}), and the search
+ * is repeated on the new model. This happens for at most a given number of
+ * rounds, and until the model reaches its maximum number of locations.
  *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  *
@@ -77,6 +86,12 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 	 */
 	public static final long DEFAULT_MAX_MILLIS = 60_000;
 
+	/**
+	 * The default maximum number of models built per candidate violation, each
+	 * expanding more calls than the previous one.
+	 */
+	public static final int DEFAULT_MAX_ROUNDS = 5;
+
 	private final int maxLevel;
 
 	private final int maxQueries;
@@ -98,6 +113,16 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 	private Map<String, Integer> statistics = Map.of();
 
 	private boolean inexact;
+
+	private int maxRounds = DEFAULT_MAX_ROUNDS;
+
+	private int maxLocations = AlarmModelBuilder.DEFAULT_MAX_LOCATIONS;
+
+	/**
+	 * The trace of the last counterexample found, if it might rely on
+	 * summarized calls (see {@link Unrolling#dueToCalls(java.util.Collection)}).
+	 */
+	private List<ModelLocation> callTrace;
 
 	/**
 	 * Builds the verifier, with default budgets, using z3 (as configured in
@@ -163,11 +188,44 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 	}
 
 	/**
+	 * Sets the maximum number of models built per candidate violation, each
+	 * expanding the calls whose results make the previous counterexample
+	 * imprecise (default: {@link #DEFAULT_MAX_ROUNDS}; {@code 1} never expands
+	 * calls).
+	 *
+	 * @param maxRounds the maximum number of rounds
+	 *
+	 * @return this verifier
+	 */
+	public PdrVerifier<A, D> withMaxRounds(
+			int maxRounds) {
+		this.maxRounds = maxRounds;
+		return this;
+	}
+
+	/**
+	 * Sets the maximum number of locations of a model, beyond which calls are
+	 * no longer expanded (default:
+	 * {@link AlarmModelBuilder#DEFAULT_MAX_LOCATIONS}).
+	 *
+	 * @param maxLocations the maximum number of locations
+	 *
+	 * @return this verifier
+	 */
+	public PdrVerifier<A, D> withMaxLocations(
+			int maxLocations) {
+		this.maxLocations = maxLocations;
+		return this;
+	}
+
+	/**
 	 * Yields the statistics of the engine on the last candidate violation that
 	 * reached it: the number of queries ({@code queries}), the number of frames
 	 * ({@code level}), and the number of generalizations proposed by the domain
-	 * ({@code proposals}) and used ({@code accepted}). Violations decided
-	 * before running the engine yield an empty map.
+	 * ({@code proposals}) and used ({@code accepted}). Queries are counted
+	 * over all the models built for the violation, while the other statistics
+	 * refer to the last one. Violations decided before running the engine
+	 * yield an empty map.
 	 *
 	 * @return the statistics
 	 */
@@ -212,27 +270,48 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 						"refuted by the results of the analysis"
 								+ (res.getExplanation() == null ? "" : ": " + res.getExplanation()));
 		}
-		AlarmModel model = AlarmModelBuilder.build(tool, result, st, violation, maxCases);
-		if (model.getSeeds(model.getBadLocation()) == null)
-			return new VerificationResult(VerificationOutcome.REFUTED, "the statement is unreachable");
-		if (model.getBadCases().isEmpty())
-			return new VerificationResult(VerificationOutcome.REFUTED, "the violation cannot happen");
+		Set<Frame> expanded = new HashSet<>();
+		int queries = 0;
+		for (int round = 1;; round++) {
+			AlarmModel model = AlarmModelBuilder.build(tool, result, st, violation, maxCases, expanded,
+					maxLocations);
+			if (model.getSeeds(model.getBadLocation()) == null)
+				return new VerificationResult(VerificationOutcome.REFUTED, "the statement is unreachable");
+			if (model.getBadCases().isEmpty())
+				return new VerificationResult(VerificationOutcome.REFUTED, "the violation cannot happen");
 
-		inexact = false;
-		VerificationResult res = search(model, false);
-		if (inexact) {
-			// look for a counterexample where all values are computed
-			// precisely: since the strict encoding under-approximates the
-			// executions, only its counterexamples are meaningful
-			Map<String, Integer> first = statistics;
-			VerificationResult strict = search(model, true);
-			Map<String, Integer> merged = new HashMap<>(first);
-			merged.merge("queries", statistics.getOrDefault("queries", 0), Integer::sum);
-			statistics = merged;
-			if (strict.getOutcome() == VerificationOutcome.CONFIRMED)
+			inexact = false;
+			callTrace = null;
+			statistics = Map.of();
+			VerificationResult res = search(model, false);
+			List<ModelLocation> trace = callTrace;
+			queries += statistics.getOrDefault("queries", 0);
+			Map<String, Integer> last = statistics;
+			VerificationResult strict = null;
+			if (inexact) {
+				// look for a counterexample where all values are computed
+				// precisely: since the strict encoding under-approximates the
+				// executions, only its counterexamples are meaningful
+				statistics = Map.of();
+				strict = search(model, true);
+				queries += statistics.getOrDefault("queries", 0);
+			}
+			if (!last.isEmpty() || queries > 0) {
+				Map<String, Integer> merged = new HashMap<>(last);
+				merged.put("queries", queries);
+				statistics = merged;
+			}
+			if (strict != null && strict.getOutcome() == VerificationOutcome.CONFIRMED)
 				return strict;
+
+			if (res.getOutcome() != VerificationOutcome.POSSIBLE || trace == null || round >= maxRounds
+					|| model.isTruncated())
+				return res;
+			Set<Frame> more = model.getExpandableFrames(trace, expanded);
+			if (more.isEmpty())
+				return res;
+			expanded.addAll(more);
 		}
-		return res;
 	}
 
 	private VerificationResult search(
@@ -302,6 +381,8 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 
 		String path = "violation reached in " + (trace.size() - 1) + " steps through " + trace;
 		if (!imprecisions.isEmpty()) {
+			if (!inexact && Unrolling.dueToCalls(imprecisions))
+				callTrace = trace;
 			inexact = true;
 			return new VerificationResult(VerificationOutcome.POSSIBLE, path + ", " + Unrolling.explain(imprecisions));
 		}
