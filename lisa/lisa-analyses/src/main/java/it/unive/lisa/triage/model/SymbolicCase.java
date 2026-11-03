@@ -1,5 +1,7 @@
 package it.unive.lisa.triage.model;
 
+import it.unive.lisa.analysis.ScopeToken;
+import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.CodeMemberDescriptor;
 import it.unive.lisa.program.cfg.Parameter;
@@ -18,6 +20,7 @@ import it.unive.lisa.symbolic.value.GlobalVariable;
 import it.unive.lisa.symbolic.value.HeapLocation;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.MemoryPointer;
+import it.unive.lisa.symbolic.value.OutOfScopeIdentifier;
 import it.unive.lisa.symbolic.value.PushAny;
 import it.unive.lisa.symbolic.value.PushInv;
 import it.unive.lisa.symbolic.value.Skip;
@@ -76,7 +79,8 @@ public final class SymbolicCase {
 			Collections.emptyList(),
 			false,
 			Collections.emptySet(),
-			false);
+			false,
+			Collections.emptyList());
 
 	private final List<SymbolicExpression> pathCondition;
 
@@ -95,6 +99,13 @@ public final class SymbolicCase {
 
 	private final boolean havocAll;
 
+	/**
+	 * The scopes pushed and popped by the transition, in order: the
+	 * identifiers that are not updated are renamed accordingly (see
+	 * {@link #preIdentifier(Identifier)}).
+	 */
+	private final List<Scoping> scopings;
+
 	private SymbolicCase(
 			List<SymbolicExpression> pathCondition,
 			Map<Identifier, SymbolicExpression> updates,
@@ -102,7 +113,8 @@ public final class SymbolicCase {
 			List<Predicate<Identifier>> forgottenIf,
 			boolean heapHavoc,
 			Set<Identifier> preservedHeap,
-			boolean havocAll) {
+			boolean havocAll,
+			List<Scoping> scopings) {
 		this.pathCondition = pathCondition;
 		this.updates = updates;
 		this.forgotten = forgotten;
@@ -110,6 +122,91 @@ public final class SymbolicCase {
 		this.heapHavoc = heapHavoc;
 		this.preservedHeap = preservedHeap;
 		this.havocAll = havocAll;
+		this.scopings = scopings;
+	}
+
+	/**
+	 * A scope pushed or popped by a transition.
+	 */
+	private static final class Scoping {
+
+		private final ScopeToken token;
+
+		private final boolean push;
+
+		private Scoping(
+				ScopeToken token,
+				boolean push) {
+			this.token = token;
+			this.push = push;
+		}
+
+		/**
+		 * Yields the name of the given identifier after this scoping, or
+		 * {@code null} if the identifier is not visible afterwards. The
+		 * identifiers of the heap model are never scoped.
+		 */
+		private Identifier rename(
+				Identifier id) {
+			if (HeapModel.isHeapState(id))
+				return id;
+			try {
+				SymbolicExpression res = push ? id.pushScope(token, null) : id.popScope(token, null);
+				return res instanceof Identifier ? (Identifier) res : null;
+			} catch (SemanticException e) {
+				return null;
+			}
+		}
+
+		/**
+		 * Yields the name before this scoping of the given identifier, or
+		 * {@code null} if the identifier did not exist before (e.g., a
+		 * variable of the scope that has been pushed).
+		 */
+		private Identifier inverse(
+				Identifier id) {
+			if (HeapModel.isHeapState(id))
+				return id;
+			if (push) {
+				if (id.equals(rename(id)))
+					// not affected by scoping (e.g., globals)
+					return id;
+				if (!(id instanceof OutOfScopeIdentifier))
+					return null;
+				try {
+					return ((OutOfScopeIdentifier) id).popScope(token, null);
+				} catch (SemanticException e) {
+					return null;
+				}
+			}
+			try {
+				SymbolicExpression pre = id.pushScope(token, null);
+				return pre instanceof Identifier ? (Identifier) pre : null;
+			} catch (SemanticException e) {
+				return null;
+			}
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(token, push);
+		}
+
+		@Override
+		public boolean equals(
+				Object obj) {
+			if (this == obj)
+				return true;
+			if (!(obj instanceof Scoping))
+				return false;
+			Scoping other = (Scoping) obj;
+			return push == other.push && Objects.equals(token, other.token);
+		}
+
+		@Override
+		public String toString() {
+			return (push ? "push " : "pop ") + token;
+		}
 	}
 
 	/**
@@ -153,7 +250,28 @@ public final class SymbolicCase {
 		for (Predicate<Identifier> test : forgottenIf)
 			if (test.test(id))
 				return true;
-		return false;
+		return preIdentifier(id) == null;
+	}
+
+	/**
+	 * Yields the identifier whose value before the transition is the value of
+	 * the given identifier after it, if the identifier is not updated: the
+	 * identifier itself, renamed back through the scopes pushed and popped by
+	 * the transition. Yields {@code null} if no such identifier exists (e.g.,
+	 * for a variable of a scope pushed by the transition, that did not exist
+	 * before).
+	 *
+	 * @param id the identifier, after the transition
+	 *
+	 * @return the corresponding identifier before the transition, or
+	 *             {@code null}
+	 */
+	public Identifier preIdentifier(
+			Identifier id) {
+		Identifier pre = id;
+		for (int i = scopings.size() - 1; i >= 0 && pre != null; i--)
+			pre = scopings.get(i).inverse(pre);
+		return pre;
 	}
 
 	/**
@@ -221,7 +339,7 @@ public final class SymbolicCase {
 						factory);
 			if (isUnconstrained(id))
 				return summary(expression, SummaryValue.Kind.UNCONSTRAINED, "unconstrained value of " + id, factory);
-			return id;
+			return preIdentifier(id);
 		}
 		if (expression instanceof PushInv)
 			return summary(expression, SummaryValue.Kind.INVALID, "invalid value", factory);
@@ -451,7 +569,7 @@ public final class SymbolicCase {
 		Map<Identifier, SymbolicExpression> upd = new LinkedHashMap<>(updates);
 		upd.put(id, bounded(id, value, factory));
 		return new SymbolicCase(pathCondition, Collections.unmodifiableMap(upd), forgotten, forgottenIf, heapHavoc,
-				preservedHeap, havocAll);
+				preservedHeap, havocAll, scopings);
 	}
 
 	/**
@@ -552,7 +670,7 @@ public final class SymbolicCase {
 			forg = Collections.unmodifiableSet(forg);
 		}
 		return new SymbolicCase(pathCondition, Collections.unmodifiableMap(upd), forg, forgottenIf, heapHavoc,
-				preservedHeap, havocAll);
+				preservedHeap, havocAll, scopings);
 	}
 
 	/**
@@ -573,7 +691,7 @@ public final class SymbolicCase {
 		List<SymbolicExpression> pc = new ArrayList<>(pathCondition);
 		pc.add(substitute(condition, factory, pp));
 		return new SymbolicCase(Collections.unmodifiableList(pc), updates, forgotten, forgottenIf, heapHavoc,
-				preservedHeap, havocAll);
+				preservedHeap, havocAll, scopings);
 	}
 
 	/**
@@ -593,7 +711,7 @@ public final class SymbolicCase {
 			forg.add(id);
 		}
 		return new SymbolicCase(pathCondition, Collections.unmodifiableMap(upd), Collections.unmodifiableSet(forg),
-				forgottenIf, heapHavoc, preservedHeap, havocAll);
+				forgottenIf, heapHavoc, preservedHeap, havocAll, scopings);
 	}
 
 	/**
@@ -611,7 +729,7 @@ public final class SymbolicCase {
 		List<Predicate<Identifier>> tests = new ArrayList<>(forgottenIf);
 		tests.add(test);
 		return new SymbolicCase(pathCondition, Collections.unmodifiableMap(upd), forgotten,
-				Collections.unmodifiableList(tests), heapHavoc, preservedHeap, havocAll);
+				Collections.unmodifiableList(tests), heapHavoc, preservedHeap, havocAll, scopings);
 	}
 
 	/**
@@ -623,7 +741,7 @@ public final class SymbolicCase {
 		if (heapHavoc && preservedHeap.isEmpty())
 			return this;
 		return new SymbolicCase(pathCondition, updates, forgotten, forgottenIf, true, Collections.emptySet(),
-				havocAll);
+				havocAll, scopings);
 	}
 
 	/**
@@ -657,7 +775,51 @@ public final class SymbolicCase {
 		upd.put(HeapModel.ALLOC, new BinaryExpression(HeapType.COUNTER, counter, allocated,
 				NumericNonOverflowingAdd.INSTANCE, location));
 		return new SymbolicCase(Collections.unmodifiableList(pc), Collections.unmodifiableMap(upd), forgotten,
-				forgottenIf, true, Collections.unmodifiableSet(kept), havocAll);
+				forgottenIf, true, Collections.unmodifiableSet(kept), havocAll, scopings);
+	}
+
+	/**
+	 * Yields this case, followed by the push (if {@code push} holds) or the
+	 * pop of the scope identified by the given token: identifiers are renamed
+	 * as the analysis renames them ({@link Identifier#pushScope} and
+	 * {@link Identifier#popScope}), and the ones that are not visible after the
+	 * scoping are forgotten. The identifiers of the heap model are never
+	 * renamed.
+	 *
+	 * @param token the token of the scope
+	 * @param push  whether the scope is pushed or popped
+	 *
+	 * @return the resulting case
+	 */
+	public SymbolicCase scope(
+			ScopeToken token,
+			boolean push) {
+		if (havocAll && updates.isEmpty())
+			return this;
+		Scoping scoping = new Scoping(token, push);
+		Map<Identifier, SymbolicExpression> upd = new LinkedHashMap<>();
+		for (Map.Entry<Identifier, SymbolicExpression> u : updates.entrySet()) {
+			Identifier renamed = scoping.rename(u.getKey());
+			if (renamed != null)
+				upd.put(renamed, u.getValue());
+		}
+		Set<Identifier> forg = new HashSet<>();
+		for (Identifier id : forgotten) {
+			Identifier renamed = scoping.rename(id);
+			if (renamed != null)
+				forg.add(renamed);
+		}
+		List<Predicate<Identifier>> tests = new ArrayList<>();
+		for (Predicate<Identifier> test : forgottenIf)
+			tests.add(id -> {
+				Identifier pre = scoping.inverse(id);
+				return pre != null && test.test(pre);
+			});
+		List<Scoping> scs = new ArrayList<>(scopings);
+		scs.add(scoping);
+		return new SymbolicCase(pathCondition, Collections.unmodifiableMap(upd), Collections.unmodifiableSet(forg),
+				Collections.unmodifiableList(tests), heapHavoc, preservedHeap, havocAll,
+				Collections.unmodifiableList(scs));
 	}
 
 	/**
@@ -668,7 +830,7 @@ public final class SymbolicCase {
 	 */
 	public SymbolicCase withHavocAll() {
 		return new SymbolicCase(pathCondition, Collections.emptyMap(), Collections.emptySet(),
-				Collections.emptyList(), true, Collections.emptySet(), true);
+				Collections.emptyList(), true, Collections.emptySet(), true, Collections.emptyList());
 	}
 
 	/**
@@ -697,11 +859,14 @@ public final class SymbolicCase {
 		Map<Identifier, SymbolicExpression> upd = new LinkedHashMap<>();
 		Set<Identifier> forg = new HashSet<>(first.forgotten);
 		forg.addAll(second.forgotten);
+		// identifiers that are not updated keep their values only if both
+		// cases rename them in the same way
+		boolean sameScopings = first.scopings.equals(second.scopings);
 		for (Identifier id : keys) {
 			SymbolicExpression v1 = first.valueOf(id);
 			SymbolicExpression v2 = second.valueOf(id);
 			if (v1 != null && v1.equals(v2)) {
-				if (!v1.equals(id))
+				if (!sameScopings || !v1.equals(first.preIdentifier(id)))
 					upd.put(id, v1);
 			} else
 				upd.put(id, factory.summary(id.getStaticType(), SummaryValue.Kind.MERGE, "merged value of " + id, location));
@@ -716,7 +881,8 @@ public final class SymbolicCase {
 				Collections.unmodifiableList(tests),
 				first.heapHavoc || second.heapHavoc,
 				mergePreserved(first, second),
-				first.havocAll || second.havocAll);
+				first.havocAll || second.havocAll || !sameScopings,
+				sameScopings ? first.scopings : Collections.emptyList());
 	}
 
 	/**
@@ -743,12 +909,13 @@ public final class SymbolicCase {
 		SymbolicExpression value = updates.get(id);
 		if (value != null)
 			return value;
-		return isUnconstrained(id) ? null : id;
+		return isUnconstrained(id) ? null : preIdentifier(id);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(forgotten, forgottenIf, havocAll, heapHavoc, preservedHeap, pathCondition, updates);
+		return Objects.hash(forgotten, forgottenIf, havocAll, heapHavoc, preservedHeap, pathCondition, updates,
+				scopings);
 	}
 
 	@Override
@@ -767,7 +934,8 @@ public final class SymbolicCase {
 				&& Objects.equals(forgotten, other.forgotten)
 				&& Objects.equals(forgottenIf, other.forgottenIf)
 				&& Objects.equals(pathCondition, other.pathCondition)
-				&& Objects.equals(updates, other.updates);
+				&& Objects.equals(updates, other.updates)
+				&& Objects.equals(scopings, other.scopings);
 	}
 
 	@Override
@@ -782,6 +950,8 @@ public final class SymbolicCase {
 			sb.append(" heap-havoc").append(preservedHeap.isEmpty() ? "" : " preserving " + preservedHeap);
 		if (havocAll)
 			sb.append(" havoc-all");
+		if (!scopings.isEmpty())
+			sb.append(" scopes ").append(scopings);
 		return sb.toString();
 	}
 }

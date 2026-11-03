@@ -823,8 +823,11 @@ public class Unrolling {
 			Term post = var(id, step + 1);
 			if (value != null)
 				conj.add(Term.eq(post, encoder.encodeAs(value, post.getSort())));
-			else if (!c.isUnconstrained(id))
-				conj.add(Term.eq(post, var(id, step)));
+			else if (!c.isUnconstrained(id)) {
+				// the identifier might have been renamed by scoping
+				Identifier pre = c.preIdentifier(id);
+				conj.add(Term.eq(post, pre.equals(id) ? var(id, step) : encoder.encodeAs(pre, post.getSort())));
+			}
 		}
 		return Term.and(conj.toArray(Term[]::new));
 	}

@@ -1,5 +1,6 @@
 package it.unive.lisa.triage.model;
 
+import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.program.SyntheticLocation;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.ProgramPoint;
@@ -236,6 +237,21 @@ public final class SymbolicStore {
 	 */
 	public SymbolicStore havocAll() {
 		return map(SymbolicCase::withHavocAll);
+	}
+
+	/**
+	 * Pushes (if {@code push} holds) or pops the scope identified by the given
+	 * token in every case (see {@link SymbolicCase#scope(ScopeToken, boolean)}).
+	 *
+	 * @param token the token of the scope
+	 * @param push  whether the scope is pushed or popped
+	 *
+	 * @return the resulting store
+	 */
+	public SymbolicStore scope(
+			ScopeToken token,
+			boolean push) {
+		return map(c -> c.scope(token, push));
 	}
 
 	/**

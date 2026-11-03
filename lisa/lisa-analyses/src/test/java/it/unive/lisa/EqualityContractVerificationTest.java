@@ -704,7 +704,7 @@ public class EqualityContractVerificationTest {
 	}
 
 	@Test
-	public void testVerification() {
+	public void testVerification() throws ClassNotFoundException {
 		verify(ConditionViolation.class);
 		verify(ErrorViolation.class);
 		verify(VerificationResult.class);
@@ -713,6 +713,8 @@ public class EqualityContractVerificationTest {
 		verify(Sort.class, verifier -> verifier.withPrefabValues(Sort.class, Sort.INT, Sort.BOOL));
 		verify(InputSource.class);
 		verify(SymbolicCase.class);
+		// the scopes pushed and popped by cases are private
+		verify(Class.forName(SymbolicCase.class.getName() + "$Scoping"), false);
 		// the factory of fresh values and the bound on cases do not affect
 		// the represented transition
 		verify(SymbolicStore.class, verifier -> verifier.withIgnoredFields("factory", "maxCases"));

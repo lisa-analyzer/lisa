@@ -1,5 +1,7 @@
 package it.unive.lisa.triage.model;
 
+import it.unive.lisa.symbolic.value.GlobalVariable;
+import it.unive.lisa.analysis.ScopeToken;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -166,6 +168,46 @@ public class ReplayDomainTest {
 		// reading the heap yields a summary
 		state = analysis.assign(state, X, cell, CTX, pp);
 		assertTrue(single(state).getUpdates().get(X) instanceof SummaryValue);
+	}
+
+	@Test
+	public void scopingRenamesIdentifiers() throws SemanticException {
+		ScopeToken token = new ScopeToken(pp);
+		Variable formal = new Variable(Int32Type.INSTANCE, "p", LOC);
+		GlobalVariable global = new GlobalVariable(Int32Type.INSTANCE, "g", LOC);
+		var state = start();
+		state = analysis.assign(state, X, plus(Y, integer(1)), CTX, pp);
+
+		// entering a call: the variables of the caller become out of scope,
+		// while globals and the heap model are not renamed
+		state = state.pushScope(token, pp);
+		Identifier scopedX = (Identifier) X.pushScope(token, pp);
+		Identifier scopedY = (Identifier) Y.pushScope(token, pp);
+		SymbolicCase c = single(state);
+		assertEquals(plus(Y, integer(1)), c.getUpdates().get(scopedX));
+		assertFalse(c.getUpdates().containsKey(X));
+		assertEquals(Y, c.preIdentifier(scopedY));
+		assertEquals(global, c.preIdentifier(global));
+		assertEquals(HeapModel.ALLOC, c.preIdentifier(HeapModel.ALLOC));
+		// the variables of the callee did not exist before
+		assertTrue(c.isUnconstrained(Y));
+		assertTrue(c.isUnconstrained(formal));
+
+		// the actual parameter is read through its scoped name
+		state = analysis.assign(state, formal, plus(scopedY, integer(2)), CTX, pp);
+		assertEquals(plus(Y, integer(2)), single(state).getUpdates().get(formal));
+
+		// leaving the call: the variables of the callee are dropped (a
+		// variable with the same name is the one of the caller, that is not
+		// changed), and the ones of the caller are visible again
+		state = state.popScope(token, pp);
+		c = single(state);
+		assertEquals(plus(Y, integer(1)), c.getUpdates().get(X));
+		assertFalse(c.getUpdates().containsKey(formal));
+		assertEquals(formal, c.preIdentifier(formal));
+		assertFalse(c.isUnconstrained(Y));
+		assertEquals(Y, c.preIdentifier(Y));
+		assertEquals(Y, c.substitute(Y, factory, pp));
 	}
 
 	@Test

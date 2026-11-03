@@ -122,6 +122,18 @@ public final class AlarmModelBuilder {
 				collect(c.getViolation(), read);
 		}
 		vocabulary.retainAll(read);
+		// identifiers renamed by scoping take their values from the
+		// identifiers they are renamed from, that are thus read as well
+		boolean grown = true;
+		while (grown) {
+			grown = false;
+			for (NodeTransitions tr : transitions.values())
+				for (SymbolicStore store : storesOf(tr))
+					for (SymbolicCase c : store.getCases())
+						for (Identifier id : new ArrayList<>(vocabulary))
+							if (!c.getUpdates().containsKey(id) && !c.isUnconstrained(id))
+								grown |= vocabulary.add(c.preIdentifier(id));
+		}
 
 		ConstraintExporter<A, D> exporter = new ConstraintExporter<>(tool.getAnalysis().domain, result.getId());
 		Map<Statement, Set<SymbolicExpression>> seeds = new HashMap<>();
@@ -316,19 +328,28 @@ public final class AlarmModelBuilder {
 	private static void collectRead(
 			NodeTransitions tr,
 			Set<Identifier> ids) {
-		List<SymbolicStore> stores = new ArrayList<>();
-		for (EdgeTransition e : tr.getOutgoing())
-			stores.add(e.getStore());
-		if (tr.getExit() != null)
-			stores.add(tr.getExit());
-		stores.addAll(tr.getErrors().values());
-		for (SymbolicStore store : stores)
+		for (SymbolicStore store : storesOf(tr))
 			for (SymbolicCase c : store.getCases()) {
 				for (SymbolicExpression cond : c.getPathCondition())
 					collect(cond, ids);
 				for (SymbolicExpression value : c.getUpdates().values())
 					collect(value, ids);
 			}
+	}
+
+	/**
+	 * Yields the stores of the given transitions: the ones of the outgoing
+	 * edges, of the exit, and of the errors raised.
+	 */
+	private static List<SymbolicStore> storesOf(
+			NodeTransitions tr) {
+		List<SymbolicStore> stores = new ArrayList<>();
+		for (EdgeTransition e : tr.getOutgoing())
+			stores.add(e.getStore());
+		if (tr.getExit() != null)
+			stores.add(tr.getExit());
+		stores.addAll(tr.getErrors().values());
+		return stores;
 	}
 
 	private static void collect(

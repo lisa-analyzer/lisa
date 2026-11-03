@@ -131,9 +131,7 @@ public class ReplayState<A extends AbstractLattice<A>>
 			ScopeToken token,
 			ProgramPoint pp)
 			throws SemanticException {
-		// identifiers get renamed: the store does not track renamings, so
-		// it soundly loses all values
-		return new ReplayState<>(inner.pushScope(token, pp), store.havocAll());
+		return new ReplayState<>(inner.pushScope(token, pp), store.scope(token, true));
 	}
 
 	@Override
@@ -141,7 +139,7 @@ public class ReplayState<A extends AbstractLattice<A>>
 			ScopeToken token,
 			ProgramPoint pp)
 			throws SemanticException {
-		return new ReplayState<>(inner.popScope(token, pp), store.havocAll());
+		return new ReplayState<>(inner.popScope(token, pp), store.scope(token, false));
 	}
 
 	@Override
