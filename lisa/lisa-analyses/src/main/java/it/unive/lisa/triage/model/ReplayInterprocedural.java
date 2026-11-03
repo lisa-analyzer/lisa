@@ -45,10 +45,11 @@ import java.util.function.UnaryOperator;
  * <li>calls to cfgs are <b>summarized</b>: their result is an unknown value (a
  * {@link SummaryMarker}), and the heap is unconstrained after them; errors
  * raised by the callees, and executions halting inside them, are taken from the
- * results of the analysis, with all values unconstrained;</li>
+ * results of the analysis, with all values unconstrained and under an unknown
+ * condition (since the executions of the callees are not modeled);</li>
  * <li>open calls are evaluated through the {@link OpenCallPolicy} of the
- * analysis, so that the unknown values they return become inputs of the
- * program;</li>
+ * analysis (the unknown values they return are not inputs of the program, see
+ * {@link it.unive.lisa.triage.inputs.InputSourceResolver});</li>
  * <li>calls are resolved by the interprocedural analysis that produced the
  * results, so that resolution matches the one of the analysis;</li>
  * <li>the current context is the one of the replayed result.</li>
@@ -167,9 +168,13 @@ public class ReplayInterprocedural<A extends AbstractLattice<A>, D extends Abstr
 				s -> s.withStore(s.getStore().heapHavoc(preserved, call.getLocation()))));
 
 		// errors raised and halts reached inside the callees, as computed by
-		// the analysis, with all values unconstrained
+		// the analysis, with all values unconstrained: whether they happen
+		// depends on the execution of the callees, that is not modeled, and is
+		// thus an unknown condition
 		AnalysisState<A> post = result.getAnalysisStateAfter(call.getSource() == null ? call : call.getSource());
-		SymbolicStore lost = entryState.getExecutionState().getStore().havocAll();
+		SummaryMarker happens = new SummaryMarker(call.getProgram().getTypes().getBooleanType(),
+				"errors raised and halts reached by " + call.getFullTargetName(), call.getLocation());
+		SymbolicStore lost = entryState.getExecutionState().getStore().havocAll().assume(happens, call);
 		// errors raised by calls are attributed to the call in the program
 		Call thrower = call;
 		while (thrower.getSource() != null)
