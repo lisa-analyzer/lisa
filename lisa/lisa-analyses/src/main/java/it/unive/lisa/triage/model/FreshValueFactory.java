@@ -66,10 +66,13 @@ public class FreshValueFactory {
 
 	/**
 	 * Yields a fresh value for the given unknown value, introduced at the given
-	 * program point: an {@link InputValue} if the unknown value comes from the
-	 * program, or a {@link SummaryValue} if it is a {@link SummaryMarker} or
-	 * the result of a call that is not a genuine input
-	 * ({@link InputSource.Kind#IMPRECISE_CALL_RESULT}).
+	 * program point: an {@link InputValue} if the unknown value is an input of
+	 * the program (a parameter, or the result of a call), or a
+	 * {@link SummaryValue} if it is a {@link SummaryMarker}, the result of a
+	 * call that is not a genuine input
+	 * ({@link InputSource.Kind#IMPRECISE_CALL_RESULT}), or an unknown value of
+	 * other origin ({@link InputSource.Kind#UNKNOWN}), that approximates the
+	 * code producing it.
 	 *
 	 * @param value the unknown value
 	 * @param pp    the program point where the value is introduced (can be
@@ -86,6 +89,11 @@ public class FreshValueFactory {
 		InputSource source = resolver.resolve(value, pp);
 		if (source.getKind() == InputSource.Kind.IMPRECISE_CALL_RESULT)
 			return summary(value.getStaticType(), SummaryValue.Kind.CALL_RESULT, "imprecise " + source.getDescription(),
+					value.getCodeLocation());
+		if (source.getKind() == InputSource.Kind.UNKNOWN)
+			// unknown values that are neither parameters nor results of calls
+			// are approximations of the code producing them, not inputs
+			return summary(value.getStaticType(), SummaryValue.Kind.UNSUPPORTED, source.getDescription(),
 					value.getCodeLocation());
 		InputValue input = new InputValue(source, next++);
 		values.put(input.getName(), input);

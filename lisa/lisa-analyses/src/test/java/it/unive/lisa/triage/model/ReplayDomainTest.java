@@ -34,7 +34,6 @@ import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonGt;
 import it.unive.lisa.symbolic.value.operator.binary.NumericNonOverflowingAdd;
 import it.unive.lisa.symbolic.value.operator.binary.NumericNonOverflowingMul;
-import it.unive.lisa.triage.inputs.InputSource;
 import it.unive.lisa.triage.inputs.InputSourceResolver;
 import it.unive.lisa.util.numeric.IntInterval;
 import java.util.List;
@@ -147,11 +146,13 @@ public class ReplayDomainTest {
 		state = analysis.assign(state, X, new PushAny(Int32Type.INSTANCE, LOC), CTX, pp);
 		state = analysis.assign(state, Y, new SummaryMarker(Int32Type.INSTANCE, "call result", LOC), CTX, pp);
 		SymbolicCase c = single(state);
-		InputValue input = (InputValue) c.getUpdates().get(X);
-		assertEquals(InputSource.Kind.UNKNOWN, input.getSource().getKind());
+		// an unknown value that is neither a parameter nor the result of a
+		// call is not an input: it approximates the code producing it
+		SummaryValue unknown = (SummaryValue) c.getUpdates().get(X);
+		assertEquals(SummaryValue.Kind.UNSUPPORTED, unknown.getKind());
 		SummaryValue summary = (SummaryValue) c.getUpdates().get(Y);
 		assertEquals("call result", summary.getReason());
-		assertEquals(Map.of(input.getName(), input, summary.getName(), summary), factory.getValues());
+		assertEquals(Map.of(unknown.getName(), unknown, summary.getName(), summary), factory.getValues());
 	}
 
 	@Test

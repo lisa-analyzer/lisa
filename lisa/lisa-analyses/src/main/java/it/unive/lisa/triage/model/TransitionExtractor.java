@@ -116,7 +116,9 @@ public class TransitionExtractor<A extends AbstractLattice<A>, D extends Abstrac
 	public NodeTransitions extract(
 			Statement node)
 			throws SemanticException {
-		AnalysisState<ReplayState<A>> pre = ReplayStates.lift(preStateOf(node), domain);
+		// errors and halts reaching the node come from previous steps: only
+		// the executions entering the node are replayed
+		AnalysisState<ReplayState<A>> pre = ReplayStates.liftExecution(preStateOf(node), domain);
 		StatementStore<ReplayState<A>> expressions = new StatementStore<>(pre).bottom();
 		AnalysisState<ReplayState<A>> post = node.forwardSemantics(pre, replay, expressions);
 

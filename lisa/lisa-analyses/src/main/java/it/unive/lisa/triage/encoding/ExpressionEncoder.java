@@ -244,9 +244,17 @@ public class ExpressionEncoder
 		return converted != null ? converted : symbols.fresh(sort, origin);
 	}
 
+	/**
+	 * Yields an unconstrained value for an expression that cannot be encoded.
+	 * The value can be of any kind, regardless of the static type of the
+	 * expression: frontends might assign imprecise (or wrong) static types to
+	 * the results of operations they model, and trusting them would exclude
+	 * real executions. The value is not precise anyway, so this costs no
+	 * precision.
+	 */
 	private Term havoc(
 			SymbolicExpression expression) {
-		return symbols.fresh(sorts.sortOf(expression.getStaticType()), expression);
+		return symbols.fresh(ValueSort.SORT, expression);
 	}
 
 	@Override
@@ -308,7 +316,9 @@ public class ExpressionEncoder
 	public Term visit(
 			PushAny expression,
 			Object... params) {
-		return havoc(expression);
+		// unknown values (e.g., inputs) have the type declared by the code
+		// producing them
+		return symbols.fresh(sorts.sortOf(expression.getStaticType()), expression);
 	}
 
 	@Override

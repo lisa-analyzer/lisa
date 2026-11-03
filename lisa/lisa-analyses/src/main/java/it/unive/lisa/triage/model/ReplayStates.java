@@ -72,6 +72,28 @@ public final class ReplayStates {
 	}
 
 	/**
+	 * Lifts the normal execution of the given state, computed by the analysis,
+	 * to a state of the given {@link ReplayDomain} whose store represents the
+	 * identity transition. The halting and error continuations of the given
+	 * state are dropped: they come from executions that have already halted or
+	 * raised an error, and they are not part of the executions that continue
+	 * from the state.
+	 *
+	 * @param <A>    the type of the abstract states
+	 * @param <D>    the type of the domain of the analysis
+	 * @param state  the state to lift
+	 * @param domain the replay domain
+	 *
+	 * @return the lifted state
+	 */
+	public static <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<ReplayState<A>> liftExecution(
+			AnalysisState<A> state,
+			ReplayDomain<A, D> domain) {
+		ProgramState<ReplayState<A>> execution = lift(state.getExecution(), domain);
+		return new AnalysisState<>(execution).bottom().withExecution(execution);
+	}
+
+	/**
 	 * Lifts the given program state, computed by the analysis, to a program
 	 * state of the given {@link ReplayDomain}, whose store represents the
 	 * identity transition.

@@ -12,6 +12,7 @@ import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.call.Call;
+import it.unive.lisa.program.cfg.statement.call.OpenCall;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.PushAny;
 import it.unive.lisa.symbolic.value.PushFromConstraints;
@@ -174,6 +175,10 @@ public class InputSourceResolver {
 		if (call != null)
 			return new InputSource(InputSource.Kind.CALL_RESULT, location, value.getStaticType(), constraints,
 					"return of " + call.getFullTargetName());
+		if (pp instanceof OpenCall)
+			// the open call policy produced the value, wherever it is located
+			return new InputSource(InputSource.Kind.CALL_RESULT, location, value.getStaticType(), constraints,
+					"return of " + ((OpenCall) pp).getFullTargetName());
 
 		return new InputSource(InputSource.Kind.UNKNOWN, location, value.getStaticType(), constraints,
 				"unknown value of type " + value.getStaticType()
