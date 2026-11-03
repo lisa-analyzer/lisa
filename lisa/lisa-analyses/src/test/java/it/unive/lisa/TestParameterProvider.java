@@ -1,5 +1,7 @@
 package it.unive.lisa;
 
+import it.unive.lisa.triage.model.ReplayAnalysis;
+import java.util.function.Predicate;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import it.unive.lisa.analysis.AbstractDomain;
@@ -755,6 +757,11 @@ public class TestParameterProvider {
 		if (root == TracePartitioning.class || root == Analysis.class || root == HistoryDomain.class
 				|| root == ReplayDomain.class && param == AbstractDomain.class)
 			return (R) DefaultConfiguration.defaultAbstractDomain();
+		if (root == ReplayAnalysis.class && param == ReplayDomain.class)
+			return (R) new ReplayDomain<>(DefaultConfiguration.defaultAbstractDomain(),
+					new FreshValueFactory(new InputSourceResolver(List.of(), null)), SymbolicStore.DEFAULT_MAX_CASES);
+		if (root == ReplayAnalysis.class && param == Predicate.class)
+			return null;
 		if (param == FreshValueFactory.class)
 			return (R) new FreshValueFactory(new InputSourceResolver(List.of(), null));
 		if (root == ReplayDomain.class && param == int.class)

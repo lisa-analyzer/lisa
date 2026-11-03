@@ -23,72 +23,9 @@ public final class HeapOperators {
 	}
 
 	/**
-	 * The value of a map (the left operand, of {@link HeapType#FIELD} or
-	 * {@link HeapType#CELLS} type) at a reference (the right operand).
-	 *
-	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
-	 */
-	public static final class ReferenceSelect
-			implements
-			BinaryOperator {
-
-		/**
-		 * The singleton instance of this class.
-		 */
-		public static final ReferenceSelect INSTANCE = new ReferenceSelect();
-
-		private ReferenceSelect() {
-		}
-
-		@Override
-		public Set<Type> typeInference(
-				TypeSystem types,
-				Set<Type> left,
-				Set<Type> right) {
-			return Collections.singleton(Untyped.INSTANCE);
-		}
-
-		@Override
-		public String toString() {
-			return "select";
-		}
-	}
-
-	/**
-	 * The value of the cells of an array (the left operand, of
-	 * {@link HeapType#FIELD} type) at an index (the right operand).
-	 *
-	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
-	 */
-	public static final class IndexSelect
-			implements
-			BinaryOperator {
-
-		/**
-		 * The singleton instance of this class.
-		 */
-		public static final IndexSelect INSTANCE = new IndexSelect();
-
-		private IndexSelect() {
-		}
-
-		@Override
-		public Set<Type> typeInference(
-				TypeSystem types,
-				Set<Type> left,
-				Set<Type> right) {
-			return Collections.singleton(Untyped.INSTANCE);
-		}
-
-		@Override
-		public String toString() {
-			return "select-index";
-		}
-	}
-
-	/**
 	 * The map obtained by writing, in a map (the left operand), a value (the
-	 * right operand) at a reference (the middle operand).
+	 * right operand) at a key (the middle operand, a reference for the
+	 * contents of fields, or the key of a cell for the cells of arrays).
 	 *
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 */
@@ -120,41 +57,9 @@ public final class HeapOperators {
 	}
 
 	/**
-	 * The cells obtained by writing, in the cells of an array (the left
-	 * operand), a value (the right operand) at an index (the middle operand).
-	 *
-	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
-	 */
-	public static final class IndexStore
-			implements
-			TernaryOperator {
-
-		/**
-		 * The singleton instance of this class.
-		 */
-		public static final IndexStore INSTANCE = new IndexStore();
-
-		private IndexStore() {
-		}
-
-		@Override
-		public Set<Type> typeInference(
-				TypeSystem types,
-				Set<Type> left,
-				Set<Type> middle,
-				Set<Type> right) {
-			return Collections.singleton(Untyped.INSTANCE);
-		}
-
-		@Override
-		public String toString() {
-			return "store-index";
-		}
-	}
-
-	/**
-	 * The value of a map (the left operand) at a reference (the right
-	 * operand), as read by the program: the middle operand tells which
+	 * The value of a map (the left operand) at a key (the right operand, a
+	 * reference for the contents of fields, or the key of a cell for the cells
+	 * of arrays), as read by the program: the middle operand tells which
 	 * locations have been written, and the read is precise only if the
 	 * location has been written.
 	 *
@@ -188,37 +93,35 @@ public final class HeapOperators {
 	}
 
 	/**
-	 * The value of the cells of an array (the left operand) at an index (the
-	 * right operand), as read by the program: the middle operand tells which
-	 * cells have been written, and the read is precise only if the cell has
-	 * been written.
+	 * The key of the cell of an array (see
+	 * {@link it.unive.lisa.triage.encoding.CellKeySort}) at an index (the right
+	 * operand) of the array referenced by a reference (the left operand).
 	 *
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 */
-	public static final class IndexRead
+	public static final class CellKey
 			implements
-			TernaryOperator {
+			BinaryOperator {
 
 		/**
 		 * The singleton instance of this class.
 		 */
-		public static final IndexRead INSTANCE = new IndexRead();
+		public static final CellKey INSTANCE = new CellKey();
 
-		private IndexRead() {
+		private CellKey() {
 		}
 
 		@Override
 		public Set<Type> typeInference(
 				TypeSystem types,
 				Set<Type> left,
-				Set<Type> middle,
 				Set<Type> right) {
 			return Collections.singleton(Untyped.INSTANCE);
 		}
 
 		@Override
 		public String toString() {
-			return "read-index";
+			return "cell";
 		}
 	}
 

@@ -1,5 +1,6 @@
 package it.unive.lisa.triage.model;
 
+import it.unive.lisa.triage.encoding.CellKeySort;
 import it.unive.lisa.triage.encoding.ValueSort;
 import it.unive.lisa.triage.smt.Sort;
 import it.unive.lisa.type.Type;
@@ -21,30 +22,33 @@ public enum HeapType
 
 	/**
 	 * The contents of a field of all objects: a map from the identifiers of
-	 * references to values. Also used for the cells of a single array, a map
-	 * from indexes to values.
+	 * references to values.
 	 */
 	FIELD(Sort.array(Sort.INT, ValueSort.SORT)),
 
 	/**
-	 * The cells of all arrays: a map from the identifiers of references to the
-	 * cells of the referenced array.
+	 * The cells of all arrays: a map from the keys of cells (pairs of the
+	 * identifier of a reference and an index, see {@link CellKeySort}) to
+	 * values.
 	 */
-	CELLS(Sort.array(Sort.INT, Sort.array(Sort.INT, ValueSort.SORT))),
+	CELLS(Sort.array(CellKeySort.SORT, ValueSort.SORT)),
 
 	/**
 	 * Which fields of which objects have been written: a map from the
-	 * identifiers of references to booleans. Also used for the cells of a
-	 * single array, a map from indexes to booleans.
+	 * identifiers of references to booleans.
 	 */
 	WRITTEN_FIELD(Sort.array(Sort.INT, Sort.BOOL)),
 
 	/**
-	 * Which cells of which arrays have been written: a map from the
-	 * identifiers of references to the cells of the referenced array, that map
-	 * indexes to booleans.
+	 * Which cells of which arrays have been written: a map from the keys of
+	 * cells to booleans.
 	 */
-	WRITTEN_CELLS(Sort.array(Sort.INT, Sort.array(Sort.INT, Sort.BOOL))),
+	WRITTEN_CELLS(Sort.array(CellKeySort.SORT, Sort.BOOL)),
+
+	/**
+	 * The key of a cell of an array.
+	 */
+	CELL_KEY(CellKeySort.SORT),
 
 	/**
 	 * The counter of allocations, that is, the identifier of the next

@@ -7,6 +7,7 @@ import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.TernaryExpression;
 import it.unive.lisa.symbolic.value.UnaryExpression;
+import it.unive.lisa.triage.encoding.CellKeySort;
 import it.unive.lisa.triage.encoding.ExpressionEncoder;
 import it.unive.lisa.triage.encoding.SymbolTable;
 import it.unive.lisa.triage.encoding.ValueSort;
@@ -157,6 +158,7 @@ public class Unrolling {
 		this.inputs = new HashMap<>();
 		this.edgeIds = new IdentityHashMap<>();
 		solver.declareDatatype(ValueSort.DATATYPE);
+		solver.declareDatatype(CellKeySort.DATATYPE);
 	}
 
 	/**
@@ -615,16 +617,14 @@ public class Unrolling {
 		Term counter = var(HeapModel.ALLOC, 0);
 		List<Term> result = new ArrayList<>();
 		Term r = Term.boundVariable("$r", Sort.INT);
-		Term i = Term.boundVariable("$i", Sort.INT);
+		Term k = Term.boundVariable("$k", CellKeySort.SORT);
 		for (Identifier id : model.getVocabulary()) {
 			Term value = var(id, 0);
 			if (id.getStaticType() == HeapType.FIELD)
 				result.add(Term.forall(List.of(r), allocated(Term.app("select", ValueSort.SORT, value, r), counter)));
-			else if (id.getStaticType() == HeapType.CELLS) {
-				Term row = Term.app("select", HeapType.FIELD.getSort(), value, r);
-				result.add(Term.forall(List.of(r, i),
-						allocated(Term.app("select", ValueSort.SORT, row, i), counter)));
-			} else if (value.getSort().equals(ValueSort.SORT))
+			else if (id.getStaticType() == HeapType.CELLS)
+				result.add(Term.forall(List.of(k), allocated(Term.app("select", ValueSort.SORT, value, k), counter)));
+			else if (value.getSort().equals(ValueSort.SORT))
 				result.add(allocated(value, counter));
 		}
 		return result;
@@ -636,14 +636,10 @@ public class Unrolling {
 	 */
 	private List<Term> nothingWritten() {
 		List<Term> result = new ArrayList<>();
-		Sort row = HeapType.WRITTEN_FIELD.getSort();
-		Term none = Term.app("(as const " + row.toSmtLib() + ")", row, Term.FALSE);
 		for (Identifier id : model.getVocabulary())
-			if (id.getStaticType() == HeapType.WRITTEN_FIELD)
-				result.add(Term.eq(var(id, 0), none));
-			else if (id.getStaticType() == HeapType.WRITTEN_CELLS) {
-				Sort cells = HeapType.WRITTEN_CELLS.getSort();
-				result.add(Term.eq(var(id, 0), Term.app("(as const " + cells.toSmtLib() + ")", cells, none)));
+			if (id.getStaticType() == HeapType.WRITTEN_FIELD || id.getStaticType() == HeapType.WRITTEN_CELLS) {
+				Sort sort = ((HeapType) id.getStaticType()).getSort();
+				result.add(Term.eq(var(id, 0), Term.app("(as const " + sort.toSmtLib() + ")", sort, Term.FALSE)));
 			}
 		return result;
 	}

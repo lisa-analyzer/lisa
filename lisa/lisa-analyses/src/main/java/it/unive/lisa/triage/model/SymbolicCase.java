@@ -31,6 +31,7 @@ import it.unive.lisa.type.Untyped;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -281,13 +282,12 @@ public final class SymbolicCase {
 						substitute(HeapModel.written(contents), factory, pp),
 						ref, HeapOperators.ReferenceRead.INSTANCE, loc);
 			}
-			SymbolicExpression row = new BinaryExpression(HeapType.FIELD,
-					substitute(HeapModel.CELLS, factory, pp), ref, HeapOperators.ReferenceSelect.INSTANCE, loc);
-			SymbolicExpression writtenRow = new BinaryExpression(HeapType.WRITTEN_FIELD,
-					substitute(HeapModel.WRITTEN_CELLS, factory, pp), ref, HeapOperators.ReferenceSelect.INSTANCE,
-					loc);
-			return new TernaryExpression(access.getStaticType(), row, writtenRow,
-					substitute(access.getChild(), factory, pp), HeapOperators.IndexRead.INSTANCE, loc);
+			SymbolicExpression key = new BinaryExpression(HeapType.CELL_KEY, ref,
+					substitute(access.getChild(), factory, pp), HeapOperators.CellKey.INSTANCE, loc);
+			return new TernaryExpression(access.getStaticType(),
+					substitute(HeapModel.CELLS, factory, pp),
+					substitute(HeapModel.WRITTEN_CELLS, factory, pp),
+					key, HeapOperators.ReferenceRead.INSTANCE, loc);
 		}
 		if (expression instanceof HeapExpression)
 			return summary(expression, SummaryValue.Kind.HEAP, "heap expression " + expression, factory);
@@ -354,11 +354,59 @@ public final class SymbolicCase {
 				|| (type.isPointerType() && type.asPointerType().getInnerType().isArrayType());
 	}
 
+	/**
+	 * The maximum size of the values of the updates of a case (as the number
+	 * of nodes of their trees): larger values are not tracked, since their
+	 * size might grow exponentially (e.g., with repeated writes of the same
+	 * heap contents within one transition).
+	 */
+	public static final long MAX_VALUE_SIZE = 1000;
+
+	/**
+	 * Yields the given value, or a summary if it is too large to be tracked
+	 * (see {@link #MAX_VALUE_SIZE}).
+	 */
+	private static SymbolicExpression bounded(
+			Identifier id,
+			SymbolicExpression value,
+			FreshValueFactory factory) {
+		if (size(value, new IdentityHashMap<>()) <= MAX_VALUE_SIZE)
+			return value;
+		return factory.summary(id.getStaticType(),
+				HeapModel.isHeapState(id) ? SummaryValue.Kind.HEAP : SummaryValue.Kind.UNSUPPORTED,
+				"value of " + id + " too large to track", value.getCodeLocation());
+	}
+
+	/**
+	 * The number of nodes of the tree of the given expression (at most
+	 * {@link #MAX_VALUE_SIZE} plus one), computed over the shared sub-
+	 * expressions.
+	 */
+	private static long size(
+			SymbolicExpression e,
+			Map<SymbolicExpression, Long> memo) {
+		Long known = memo.get(e);
+		if (known != null)
+			return known;
+		long res = 1;
+		if (e instanceof UnaryExpression)
+			res += size(((UnaryExpression) e).getExpression(), memo);
+		else if (e instanceof BinaryExpression)
+			res += size(((BinaryExpression) e).getLeft(), memo) + size(((BinaryExpression) e).getRight(), memo);
+		else if (e instanceof TernaryExpression)
+			res += size(((TernaryExpression) e).getLeft(), memo) + size(((TernaryExpression) e).getMiddle(), memo)
+					+ size(((TernaryExpression) e).getRight(), memo);
+		res = Math.min(res, MAX_VALUE_SIZE + 1);
+		memo.put(e, res);
+		return res;
+	}
+
 	private SymbolicCase update(
 			Identifier id,
-			SymbolicExpression value) {
+			SymbolicExpression value,
+			FreshValueFactory factory) {
 		Map<Identifier, SymbolicExpression> upd = new LinkedHashMap<>(updates);
-		upd.put(id, value);
+		upd.put(id, bounded(id, value, factory));
 		return new SymbolicCase(pathCondition, Collections.unmodifiableMap(upd), forgotten, forgottenIf, heapHavoc,
 				preservedHeap, havocAll);
 	}
@@ -391,25 +439,19 @@ public final class SymbolicCase {
 			Variable contents = HeapModel.field(field);
 			Variable written = HeapModel.written(contents);
 			SymbolicCase res = update(contents, new TernaryExpression(HeapType.FIELD,
-					substitute(contents, factory, pp), ref, v, HeapOperators.ReferenceStore.INSTANCE, loc));
+					substitute(contents, factory, pp), ref, v, HeapOperators.ReferenceStore.INSTANCE, loc), factory);
 			return res.update(written, new TernaryExpression(HeapType.WRITTEN_FIELD,
-					substitute(written, factory, pp), ref, yes, HeapOperators.ReferenceStore.INSTANCE, loc));
+					substitute(written, factory, pp), ref, yes, HeapOperators.ReferenceStore.INSTANCE, loc),
+					factory);
 		}
-		SymbolicExpression index = substitute(target.getChild(), factory, pp);
-		SymbolicExpression cells = substitute(HeapModel.CELLS, factory, pp);
-		SymbolicExpression row = new BinaryExpression(HeapType.FIELD, cells, ref,
-				HeapOperators.ReferenceSelect.INSTANCE, loc);
-		SymbolicExpression newRow = new TernaryExpression(HeapType.FIELD, row, index, v,
-				HeapOperators.IndexStore.INSTANCE, loc);
-		SymbolicExpression writtenCells = substitute(HeapModel.WRITTEN_CELLS, factory, pp);
-		SymbolicExpression writtenRow = new BinaryExpression(HeapType.WRITTEN_FIELD, writtenCells, ref,
-				HeapOperators.ReferenceSelect.INSTANCE, loc);
-		SymbolicExpression newWrittenRow = new TernaryExpression(HeapType.WRITTEN_FIELD, writtenRow, index, yes,
-				HeapOperators.IndexStore.INSTANCE, loc);
-		SymbolicCase res = update(HeapModel.CELLS, new TernaryExpression(HeapType.CELLS, cells, ref, newRow,
-				HeapOperators.ReferenceStore.INSTANCE, loc));
-		return res.update(HeapModel.WRITTEN_CELLS, new TernaryExpression(HeapType.WRITTEN_CELLS, writtenCells, ref,
-				newWrittenRow, HeapOperators.ReferenceStore.INSTANCE, loc));
+		SymbolicExpression key = new BinaryExpression(HeapType.CELL_KEY, ref,
+				substitute(target.getChild(), factory, pp), HeapOperators.CellKey.INSTANCE, loc);
+		SymbolicCase res = update(HeapModel.CELLS, new TernaryExpression(HeapType.CELLS,
+				substitute(HeapModel.CELLS, factory, pp), key, v, HeapOperators.ReferenceStore.INSTANCE, loc),
+				factory);
+		return res.update(HeapModel.WRITTEN_CELLS, new TernaryExpression(HeapType.WRITTEN_CELLS,
+				substitute(HeapModel.WRITTEN_CELLS, factory, pp), key, yes, HeapOperators.ReferenceStore.INSTANCE,
+				loc), factory);
 	}
 
 	/**
@@ -431,9 +473,9 @@ public final class SymbolicCase {
 		CodeLocation loc = allocation.getCodeLocation();
 		SymbolicExpression counter = substitute(HeapModel.ALLOC, factory, pp);
 		SymbolicCase res = update(HeapModel.site(allocation),
-				new UnaryExpression(HeapType.REFERENCE, counter, HeapOperators.NewReference.INSTANCE, loc));
+				new UnaryExpression(HeapType.REFERENCE, counter, HeapOperators.NewReference.INSTANCE, loc), factory);
 		return res.update(HeapModel.ALLOC, new BinaryExpression(HeapType.COUNTER, counter,
-				new Constant(HeapType.COUNTER, 1, loc), NumericNonOverflowingAdd.INSTANCE, loc));
+				new Constant(HeapType.COUNTER, 1, loc), NumericNonOverflowingAdd.INSTANCE, loc), factory);
 	}
 
 	/**
@@ -459,7 +501,7 @@ public final class SymbolicCase {
 			// heapWrite)
 			return this;
 		Map<Identifier, SymbolicExpression> upd = new LinkedHashMap<>(updates);
-		upd.put(id, substitute(value, factory, pp));
+		upd.put(id, bounded(id, substitute(value, factory, pp), factory));
 		Set<Identifier> forg = forgotten;
 		if (forgotten.contains(id)) {
 			forg = new HashSet<>(forgotten);

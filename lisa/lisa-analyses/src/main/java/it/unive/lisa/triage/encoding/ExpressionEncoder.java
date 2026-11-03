@@ -383,10 +383,8 @@ public class ExpressionEncoder
 			Object... params) {
 		BinaryOperator op = expression.getOperator();
 
-		if (op instanceof HeapOperators.ReferenceSelect)
-			return select(left, referenceKey(right, expression), expression);
-		if (op instanceof HeapOperators.IndexSelect)
-			return select(left, coerce(right, Sort.INT, expression), expression);
+		if (op instanceof HeapOperators.CellKey)
+			return CellKeySort.key(referenceKey(left, expression), coerce(right, Sort.INT, expression));
 
 		if (op instanceof LogicalAnd)
 			return Term.and(coerce(left, Sort.BOOL, expression), coerce(right, Sort.BOOL, expression));
@@ -474,13 +472,9 @@ public class ExpressionEncoder
 			Object... params) {
 		TernaryOperator op = expression.getOperator();
 		if (op instanceof HeapOperators.ReferenceRead)
-			return read(left, middle, referenceKey(right, expression), expression);
-		if (op instanceof HeapOperators.IndexRead)
-			return read(left, middle, coerce(right, Sort.INT, expression), expression);
+			return read(left, middle, heapKey(right, expression), expression);
 		if (op instanceof HeapOperators.ReferenceStore)
-			return store(left, referenceKey(middle, expression), right, expression);
-		if (op instanceof HeapOperators.IndexStore)
-			return store(left, coerce(middle, Sort.INT, expression), right, expression);
+			return store(left, heapKey(middle, expression), right, expression);
 		if (op instanceof StringSubstring) {
 			Term from = coerce(middle, Sort.INT, expression);
 			Term to = coerce(right, Sort.INT, expression);
@@ -584,6 +578,18 @@ public class ExpressionEncoder
 			return true;
 		BinaryExpression binary = (BinaryExpression) origin;
 		return sorts.mayBeOpaque(binary.getLeft()) || sorts.mayBeOpaque(binary.getRight());
+	}
+
+	/**
+	 * Encodes the key of a heap map: the key of a cell is used as it is, while
+	 * references are keyed by their identifier.
+	 */
+	private Term heapKey(
+			Term key,
+			SymbolicExpression origin) {
+		if (key.getSort().equals(CellKeySort.SORT))
+			return key;
+		return referenceKey(key, origin);
 	}
 
 	/**

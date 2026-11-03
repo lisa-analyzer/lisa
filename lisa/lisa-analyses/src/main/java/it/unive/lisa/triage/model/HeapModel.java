@@ -32,8 +32,8 @@ import java.util.Set;
  * field {@code f} of the referenced object (properties of arrays, such as their
  * length, are fields too, see {@link #isArrayProperty(String)});</li>
  * <li>the identifier {@code $cells} (of type {@link HeapType#CELLS}) maps the
- * identifier of each reference to the cells of the referenced array, that map
- * indexes to values;</li>
+ * key of each cell of each array (the identifier of the reference to the array
+ * and the index) to its value;</li>
  * <li>for each of the identifiers above, an identifier (of type
  * {@link HeapType#WRITTEN_FIELD} or {@link HeapType#WRITTEN_CELLS}) records
  * which locations have been written by the model: reading a location that has
@@ -259,17 +259,14 @@ public class HeapModel {
 		}
 		if (expression instanceof BinaryExpression) {
 			BinaryExpression b = (BinaryExpression) expression;
-			return b.getOperator() instanceof HeapOperators.ReferenceSelect
-					|| b.getOperator() instanceof HeapOperators.IndexSelect
+			return b.getOperator() instanceof HeapOperators.CellKey
 					|| mentionsHeapModel(b.getLeft())
 					|| mentionsHeapModel(b.getRight());
 		}
 		if (expression instanceof TernaryExpression) {
 			TernaryExpression t = (TernaryExpression) expression;
 			return t.getOperator() instanceof HeapOperators.ReferenceStore
-					|| t.getOperator() instanceof HeapOperators.IndexStore
 					|| t.getOperator() instanceof HeapOperators.ReferenceRead
-					|| t.getOperator() instanceof HeapOperators.IndexRead
 					|| mentionsHeapModel(t.getLeft())
 					|| mentionsHeapModel(t.getMiddle())
 					|| mentionsHeapModel(t.getRight());

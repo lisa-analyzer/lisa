@@ -709,7 +709,8 @@ public class EqualityContractVerificationTest {
 		verify(ErrorViolation.class);
 		verify(VerificationResult.class);
 		verify(ReproducingInput.class);
-		verify(Sort.class);
+		// array sorts refer to their index and element sorts
+		verify(Sort.class, verifier -> verifier.withPrefabValues(Sort.class, Sort.INT, Sort.BOOL));
 		verify(InputSource.class);
 		verify(SymbolicCase.class);
 		// the factory of fresh values and the bound on cases do not affect
