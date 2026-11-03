@@ -29,6 +29,7 @@ import it.unive.lisa.program.cfg.statement.call.CFGCall;
 import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.program.cfg.statement.call.OpenCall;
 import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
+import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
@@ -83,7 +84,7 @@ public class ReplayInterprocedural<A extends AbstractLattice<A>, D extends Abstr
 			AnalyzedCFG<A> result,
 			ReplayDomain<A, D> domain) {
 		this.result = result;
-		this.analysis = new Analysis<>(domain, tool.getConfiguration().shouldSmashError);
+		this.analysis = new ReplayAnalysis<>(domain, tool.getConfiguration().shouldSmashError);
 		this.original = (InterproceduralAnalysis<A, D>) tool.getConfiguration().interproceduralAnalysis;
 		this.policy = tool.getConfiguration().openCallPolicy;
 	}
@@ -158,8 +159,12 @@ public class ReplayInterprocedural<A extends AbstractLattice<A>, D extends Abstr
 					new SummaryMarker(call.getStaticType(), reason, call.getLocation()),
 					context,
 					call);
-		// the callees might have written the heap
-		callres = callres.withExecution(mapState(callres.getExecution(), s -> s.withStore(s.getStore().heapHavoc())));
+		// the callees might have written the heap, except for the immutable
+		// fields they cannot write
+		Set<Identifier> preserved = entryState.getExecutionState().getStore().getFactory().getHeapModel()
+				.preservedBy(call.getTargets());
+		callres = callres.withExecution(mapState(callres.getExecution(),
+				s -> s.withStore(s.getStore().heapHavoc(preserved, call.getLocation()))));
 
 		// errors raised and halts reached inside the callees, as computed by
 		// the analysis, with all values unconstrained

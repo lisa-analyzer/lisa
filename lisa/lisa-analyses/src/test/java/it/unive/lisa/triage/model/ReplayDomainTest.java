@@ -74,7 +74,7 @@ public class ReplayDomainTest {
 	public void setup() {
 		factory = new FreshValueFactory(new InputSourceResolver(List.of(), null));
 		domain = new ReplayDomain<>(DefaultConfiguration.defaultAbstractDomain(), factory, 2);
-		analysis = new Analysis<>(domain);
+		analysis = new ReplayAnalysis<>(domain, null);
 	}
 
 	private AnalysisState<ReplayState<SimpleAbstractState<Monolith,

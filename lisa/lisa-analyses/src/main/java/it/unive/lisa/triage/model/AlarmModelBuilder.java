@@ -83,7 +83,7 @@ public final class AlarmModelBuilder {
 		initial.retainAll(cone);
 
 		InputSourceResolver resolver = new InputSourceResolver(tool);
-		FreshValueFactory factory = new FreshValueFactory(resolver);
+		FreshValueFactory factory = new FreshValueFactory(resolver, new HeapModel(result.getProgram()));
 		TransitionExtractor<A, D> extractor = new TransitionExtractor<>(tool, result, factory, maxCases);
 		Map<Statement, NodeTransitions> transitions = new HashMap<>();
 		Map<Statement, AnalysisState<A>> preStates = new HashMap<>();
@@ -226,8 +226,8 @@ public final class AlarmModelBuilder {
 
 	/**
 	 * Yields the conjuncts of the path conditions of the transitions and of the
-	 * bad cases that do not contain fresh values, that is, the ones that can be
-	 * evaluated in the states computed by the analysis.
+	 * bad cases that do not contain fresh values nor the heap model, that is,
+	 * the ones that can be evaluated in the states computed by the analysis.
 	 */
 	private static Set<SymbolicExpression> conditions(
 			Collection<NodeTransitions> transitions,
@@ -254,7 +254,8 @@ public final class AlarmModelBuilder {
 		if (e instanceof BinaryExpression && ((BinaryExpression) e).getOperator() == LogicalAnd.INSTANCE) {
 			conjuncts(((BinaryExpression) e).getLeft(), result);
 			conjuncts(((BinaryExpression) e).getRight(), result);
-		} else if (!hasFreshValues(e))
+		} else if (!hasFreshValues(e) && !HeapModel.mentionsHeapModel(e))
+			// the analysis cannot evaluate the heap model
 			result.add(e);
 	}
 

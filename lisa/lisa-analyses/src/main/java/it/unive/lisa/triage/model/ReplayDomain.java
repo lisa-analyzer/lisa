@@ -11,6 +11,7 @@ import it.unive.lisa.lattices.Satisfiability;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.program.cfg.protection.ProtectedBlock;
 import it.unive.lisa.symbolic.SymbolicExpression;
+import it.unive.lisa.symbolic.heap.MemoryAllocation;
 import it.unive.lisa.symbolic.value.Identifier;
 import java.util.Collection;
 import org.apache.commons.lang3.tuple.Pair;
@@ -90,7 +91,11 @@ public class ReplayDomain<A extends AbstractLattice<A>, D extends AbstractDomain
 			ScopeId<?> context,
 			ProgramPoint pp)
 			throws SemanticException {
-		return state.withInner(domain.smallStepSemantics(state.getInner(), expression, context, pp));
+		A inner = domain.smallStepSemantics(state.getInner(), expression, context, pp);
+		if (expression instanceof MemoryAllocation && !inner.isBottom())
+			// the allocation yields a new reference
+			return new ReplayState<>(inner, state.getStore().allocate((MemoryAllocation) expression, pp));
+		return state.withInner(inner);
 	}
 
 	@Override

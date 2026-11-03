@@ -14,6 +14,8 @@ import it.unive.lisa.triage.model.AlarmModel;
 import it.unive.lisa.triage.model.BadCase;
 import it.unive.lisa.triage.model.EdgeTransition;
 import it.unive.lisa.triage.model.FreshValue;
+import it.unive.lisa.triage.model.HeapModel;
+import it.unive.lisa.triage.model.HeapType;
 import it.unive.lisa.triage.model.InputValue;
 import it.unive.lisa.triage.model.SummaryValue;
 import it.unive.lisa.triage.model.SymbolicCase;
@@ -599,6 +601,61 @@ public class Unrolling {
 	}
 
 	/**
+	 * Yields the constraints stating that the references existing in the
+	 * initial states (held by identifiers, fields of objects, or cells of
+	 * arrays) have been allocated before the ones that the model allocates,
+	 * that is, their identifiers are smaller than the initial value of the
+	 * counter of allocations (see {@link HeapModel}). These constraints hold
+	 * in every concrete state, for a large enough counter, and they ensure that
+	 * new references never alias existing ones.
+	 */
+	private List<Term> existingReferences() {
+		if (!model.getVocabulary().contains(HeapModel.ALLOC))
+			return List.of();
+		Term counter = var(HeapModel.ALLOC, 0);
+		List<Term> result = new ArrayList<>();
+		Term r = Term.boundVariable("$r", Sort.INT);
+		Term i = Term.boundVariable("$i", Sort.INT);
+		for (Identifier id : model.getVocabulary()) {
+			Term value = var(id, 0);
+			if (id.getStaticType() == HeapType.FIELD)
+				result.add(Term.forall(List.of(r), allocated(Term.app("select", ValueSort.SORT, value, r), counter)));
+			else if (id.getStaticType() == HeapType.CELLS) {
+				Term row = Term.app("select", HeapType.FIELD.getSort(), value, r);
+				result.add(Term.forall(List.of(r, i),
+						allocated(Term.app("select", ValueSort.SORT, row, i), counter)));
+			} else if (value.getSort().equals(ValueSort.SORT))
+				result.add(allocated(value, counter));
+		}
+		return result;
+	}
+
+	/**
+	 * Yields the constraints stating that no location of the heap has been
+	 * written by the model in the initial states (see {@link HeapModel}).
+	 */
+	private List<Term> nothingWritten() {
+		List<Term> result = new ArrayList<>();
+		Sort row = HeapType.WRITTEN_FIELD.getSort();
+		Term none = Term.app("(as const " + row.toSmtLib() + ")", row, Term.FALSE);
+		for (Identifier id : model.getVocabulary())
+			if (id.getStaticType() == HeapType.WRITTEN_FIELD)
+				result.add(Term.eq(var(id, 0), none));
+			else if (id.getStaticType() == HeapType.WRITTEN_CELLS) {
+				Sort cells = HeapType.WRITTEN_CELLS.getSort();
+				result.add(Term.eq(var(id, 0), Term.app("(as const " + cells.toSmtLib() + ")", cells, none)));
+			}
+		return result;
+	}
+
+	private static Term allocated(
+			Term value,
+			Term counter) {
+		return Term.implies(ValueSort.isReference(value),
+				Term.app("<", Sort.BOOL, ValueSort.referenceId(value), counter));
+	}
+
+	/**
 	 * Yields the input values used by the encoding with the given key.
 	 *
 	 * @param key the key
@@ -628,6 +685,8 @@ public class Unrolling {
 		ExpressionEncoder encoder = new ExpressionEncoder(model.getSorts(), new StepSymbols(0, "#init"));
 		for (SymbolicExpression c : model.getInitialConstraints())
 			conj.add(encoder.encodeCondition(c));
+		conj.addAll(existingReferences());
+		conj.addAll(nothingWritten());
 		return Term.and(conj.toArray(Term[]::new));
 	}
 

@@ -32,9 +32,22 @@ public final class Sort {
 
 	private final String smtlib;
 
+	private final Sort index;
+
+	private final Sort element;
+
 	private Sort(
 			String smtlib) {
+		this(smtlib, null, null);
+	}
+
+	private Sort(
+			String smtlib,
+			Sort index,
+			Sort element) {
 		this.smtlib = smtlib;
+		this.index = index;
+		this.element = element;
 	}
 
 	/**
@@ -62,7 +75,7 @@ public final class Sort {
 	public static Sort array(
 			Sort index,
 			Sort element) {
-		return new Sort("(Array " + index.smtlib + " " + element.smtlib + ")");
+		return new Sort("(Array " + index.smtlib + " " + element.smtlib + ")", index, element);
 	}
 
 	/**
@@ -80,6 +93,35 @@ public final class Sort {
 	}
 
 	/**
+	 * Yields whether this is an array sort (see {@link #array(Sort, Sort)}).
+	 *
+	 * @return whether this is an array sort
+	 */
+	public boolean isArray() {
+		return element != null;
+	}
+
+	/**
+	 * Yields the sort of the indexes of this array sort.
+	 *
+	 * @return the sort of the indexes, or {@code null} if this is not an array
+	 *             sort
+	 */
+	public Sort getIndex() {
+		return index;
+	}
+
+	/**
+	 * Yields the sort of the elements of this array sort.
+	 *
+	 * @return the sort of the elements, or {@code null} if this is not an
+	 *             array sort
+	 */
+	public Sort getElement() {
+		return element;
+	}
+
+	/**
 	 * Yields the SMT-LIB representation of this sort.
 	 *
 	 * @return the representation
@@ -90,7 +132,7 @@ public final class Sort {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(smtlib);
+		return Objects.hash(smtlib, index, element);
 	}
 
 	@Override
@@ -103,7 +145,9 @@ public final class Sort {
 		if (getClass() != obj.getClass())
 			return false;
 		Sort other = (Sort) obj;
-		return Objects.equals(smtlib, other.smtlib);
+		return Objects.equals(smtlib, other.smtlib)
+				&& Objects.equals(index, other.index)
+				&& Objects.equals(element, other.element);
 	}
 
 	@Override

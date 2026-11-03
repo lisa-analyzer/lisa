@@ -10,6 +10,7 @@ import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.triage.model.ConstraintExporter;
+import it.unive.lisa.triage.model.HeapModel;
 import it.unive.lisa.triage.reachability.Reachability;
 import java.util.HashMap;
 import java.util.Map;
@@ -69,6 +70,10 @@ public class DomainAbstraction<A extends AbstractLattice<A>, D extends AbstractD
 			preStates.put(location, state);
 		}
 		for (SymbolicExpression lit : cube.getLiterals()) {
+			if (HeapModel.mentionsHeapModel(lit))
+				// the analysis cannot evaluate the heap model: not assuming the
+				// literal only weakens the proposal
+				continue;
 			state = analysis.assume(state, lit, result.getId(), location, location);
 			if (state.getExecution().isBottom())
 				// the domain proves that the cube is excluded by the

@@ -1,6 +1,7 @@
 package it.unive.lisa.triage.smt;
 
 import java.math.BigInteger;
+import java.util.List;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
@@ -204,6 +205,42 @@ public final class Term {
 		for (Term arg : args)
 			sb.append(" ").append(arg.smtlib);
 		return new Term(sb.append(")").toString(), sort);
+	}
+
+	/**
+	 * Builds a variable with the given name and sort, to be bound by a
+	 * quantifier (see {@link #forall(List, Term)}). Bound variables need not be
+	 * declared.
+	 *
+	 * @param name the name of the variable
+	 * @param sort the sort of the variable
+	 *
+	 * @return the variable
+	 */
+	public static Term boundVariable(
+			String name,
+			Sort sort) {
+		return new Term(symbol(name), sort);
+	}
+
+	/**
+	 * Builds the universal quantification of the given boolean term over the
+	 * given variables, built through {@link #boundVariable(String, Sort)}.
+	 *
+	 * @param variables the variables
+	 * @param body      the quantified term
+	 *
+	 * @return the quantification
+	 */
+	public static Term forall(
+			List<Term> variables,
+			Term body) {
+		if (variables.isEmpty())
+			return body;
+		StringBuilder sb = new StringBuilder("(forall (");
+		for (Term v : variables)
+			sb.append("(").append(v.smtlib).append(" ").append(v.sort.toSmtLib()).append(")");
+		return new Term(sb.append(") ").append(body.smtlib).append(")").toString(), Sort.BOOL);
 	}
 
 	/**

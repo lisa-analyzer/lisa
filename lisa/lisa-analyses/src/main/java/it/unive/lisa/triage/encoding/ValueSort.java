@@ -195,6 +195,43 @@ public final class ValueSort {
 	}
 
 	/**
+	 * Yields the boolean term that holds if the given value is a reference.
+	 *
+	 * @param value the value
+	 *
+	 * @return the boolean term
+	 */
+	public static Term isReference(
+			Term value) {
+		return DATATYPE.test(REF, value);
+	}
+
+	/**
+	 * Yields the identifier of the given value, read as a reference (an
+	 * unspecified integer if the value is not a reference).
+	 *
+	 * @param value the value
+	 *
+	 * @return the integer term
+	 */
+	public static Term referenceId(
+			Term value) {
+		return Term.app(Term.symbol(REF_FIELD), Sort.INT, value);
+	}
+
+	/**
+	 * Yields the reference with the given identifier.
+	 *
+	 * @param id the identifier, an integer term
+	 *
+	 * @return the reference
+	 */
+	public static Term reference(
+			Term id) {
+		return DATATYPE.construct(REF, id);
+	}
+
+	/**
 	 * Yields the boolean term that holds if the given value is opaque, that
 	 * is, a value whose meaning is not modeled (e.g., a floating point number,
 	 * or a type token).

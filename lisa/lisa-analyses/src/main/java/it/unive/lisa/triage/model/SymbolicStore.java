@@ -1,8 +1,11 @@
 package it.unive.lisa.triage.model;
 
 import it.unive.lisa.program.SyntheticLocation;
+import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
+import it.unive.lisa.symbolic.heap.AccessChild;
+import it.unive.lisa.symbolic.heap.MemoryAllocation;
 import it.unive.lisa.symbolic.value.Identifier;
 import java.util.Collections;
 import java.util.Iterator;
@@ -178,6 +181,52 @@ public final class SymbolicStore {
 	 */
 	public SymbolicStore heapHavoc() {
 		return map(SymbolicCase::withHeapHavoc);
+	}
+
+	/**
+	 * Makes the heap unconstrained in every case, except for the given heap
+	 * contents (see {@link SymbolicCase#withHeapHavoc(Set, FreshValueFactory, CodeLocation)}).
+	 *
+	 * @param preserved the heap contents that are preserved
+	 * @param location  the location of the transition
+	 *
+	 * @return the resulting store
+	 */
+	public SymbolicStore heapHavoc(
+			Set<Identifier> preserved,
+			CodeLocation location) {
+		return map(c -> c.withHeapHavoc(preserved, factory, location));
+	}
+
+	/**
+	 * Writes the given value in the given heap location in every case.
+	 *
+	 * @param target the written location
+	 * @param value  the written value
+	 * @param pp     the program point of the write (can be {@code null})
+	 *
+	 * @return the resulting store
+	 */
+	public SymbolicStore heapWrite(
+			AccessChild target,
+			SymbolicExpression value,
+			ProgramPoint pp) {
+		return map(c -> c.heapWrite(target, value, factory, pp));
+	}
+
+	/**
+	 * Performs the given allocation in every case.
+	 *
+	 * @param allocation the allocation
+	 * @param pp         the program point of the allocation (can be
+	 *                       {@code null})
+	 *
+	 * @return the resulting store
+	 */
+	public SymbolicStore allocate(
+			MemoryAllocation allocation,
+			ProgramPoint pp) {
+		return map(c -> c.allocate(allocation, factory, pp));
 	}
 
 	/**

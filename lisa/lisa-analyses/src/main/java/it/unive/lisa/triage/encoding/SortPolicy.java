@@ -2,6 +2,7 @@ package it.unive.lisa.triage.encoding;
 
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.triage.model.HeapType;
 import it.unive.lisa.triage.smt.Sort;
 import it.unive.lisa.type.Type;
 import java.util.Collection;
@@ -90,6 +91,8 @@ public class SortPolicy {
 	 */
 	public Sort sortOf(
 			Type type) {
+		if (type instanceof HeapType)
+			return ((HeapType) type).getSort();
 		if (type.isNumericType() && type.asNumericType().isIntegral())
 			return Sort.INT;
 		if (type.isBooleanType())
@@ -130,6 +133,8 @@ public class SortPolicy {
 	 */
 	public Sort sortOf(
 			Identifier id) {
+		if (id.getStaticType() instanceof HeapType)
+			return ((HeapType) id.getStaticType()).getSort();
 		Set<Type> ts = types.get(id);
 		if (ts == null || ts.isEmpty())
 			return ValueSort.SORT;

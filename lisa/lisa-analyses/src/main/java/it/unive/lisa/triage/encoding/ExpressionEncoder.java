@@ -83,6 +83,7 @@ import it.unive.lisa.symbolic.value.operator.unary.NumericAbs;
 import it.unive.lisa.symbolic.value.operator.unary.NumericNegation;
 import it.unive.lisa.symbolic.value.operator.unary.StringLength;
 import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
+import it.unive.lisa.triage.model.HeapOperators;
 import it.unive.lisa.triage.smt.Sort;
 import it.unive.lisa.triage.smt.Term;
 import it.unive.lisa.type.Type;
@@ -357,6 +358,8 @@ public class ExpressionEncoder
 			Term arg,
 			Object... params) {
 		UnaryOperator op = expression.getOperator();
+		if (op instanceof HeapOperators.NewReference)
+			return ValueSort.reference(coerce(arg, Sort.INT, expression));
 		if (op instanceof LogicalNegation)
 			return Term.not(coerce(arg, Sort.BOOL, expression));
 		if (op instanceof NumericNegation)
@@ -379,6 +382,11 @@ public class ExpressionEncoder
 			Term right,
 			Object... params) {
 		BinaryOperator op = expression.getOperator();
+
+		if (op instanceof HeapOperators.ReferenceSelect)
+			return select(left, referenceKey(right, expression), expression);
+		if (op instanceof HeapOperators.IndexSelect)
+			return select(left, coerce(right, Sort.INT, expression), expression);
 
 		if (op instanceof LogicalAnd)
 			return Term.and(coerce(left, Sort.BOOL, expression), coerce(right, Sort.BOOL, expression));
@@ -465,6 +473,14 @@ public class ExpressionEncoder
 			Term right,
 			Object... params) {
 		TernaryOperator op = expression.getOperator();
+		if (op instanceof HeapOperators.ReferenceRead)
+			return read(left, middle, referenceKey(right, expression), expression);
+		if (op instanceof HeapOperators.IndexRead)
+			return read(left, middle, coerce(right, Sort.INT, expression), expression);
+		if (op instanceof HeapOperators.ReferenceStore)
+			return store(left, referenceKey(middle, expression), right, expression);
+		if (op instanceof HeapOperators.IndexStore)
+			return store(left, coerce(middle, Sort.INT, expression), right, expression);
 		if (op instanceof StringSubstring) {
 			Term from = coerce(middle, Sort.INT, expression);
 			Term to = coerce(right, Sort.INT, expression);
@@ -568,6 +584,65 @@ public class ExpressionEncoder
 			return true;
 		BinaryExpression binary = (BinaryExpression) origin;
 		return sorts.mayBeOpaque(binary.getLeft()) || sorts.mayBeOpaque(binary.getRight());
+	}
+
+	/**
+	 * Encodes the key of a heap map for the given reference: the identifier
+	 * of the reference (precise only if the value is a reference, e.g., not
+	 * null).
+	 */
+	private Term referenceKey(
+			Term reference,
+			SymbolicExpression origin) {
+		if (reference.getSort().equals(ValueSort.SORT)) {
+			symbols.exactOnlyIf(ValueSort.isReference(reference), origin);
+			return ValueSort.referenceId(reference);
+		}
+		return symbols.fresh(Sort.INT, origin);
+	}
+
+	/**
+	 * Encodes the value of the given map at the given key (unconstrained if
+	 * the map is not an array).
+	 */
+	private Term select(
+			Term map,
+			Term key,
+			SymbolicExpression origin) {
+		if (!map.getSort().isArray())
+			return symbols.fresh(ValueSort.SORT, origin);
+		return Term.app("select", map.getSort().getElement(), map, key);
+	}
+
+	/**
+	 * Encodes the value of the given map at the given key, as read by the
+	 * program: the read is precise only if the location has been written, as
+	 * recorded by the given map of written locations.
+	 */
+	private Term read(
+			Term map,
+			Term written,
+			Term key,
+			SymbolicExpression origin) {
+		if (written.getSort().isArray() && written.getSort().getElement().equals(Sort.BOOL))
+			symbols.exactOnlyIf(Term.app("select", Sort.BOOL, written, key), origin);
+		else
+			symbols.exactOnlyIf(Term.FALSE, origin);
+		return select(map, key, origin);
+	}
+
+	/**
+	 * Encodes the map obtained by writing the given value at the given key in
+	 * the given map (unconstrained if the map is not an array).
+	 */
+	private Term store(
+			Term map,
+			Term key,
+			Term value,
+			SymbolicExpression origin) {
+		if (!map.getSort().isArray())
+			return symbols.fresh(sorts.sortOf(origin.getStaticType()), origin);
+		return Term.app("store", map.getSort(), map, key, coerce(value, map.getSort().getElement(), origin));
 	}
 
 	private static Term asInt(

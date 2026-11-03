@@ -21,6 +21,8 @@ public class FreshValueFactory {
 
 	private final InputSourceResolver resolver;
 
+	private final HeapModel heap;
+
 	private final Map<String, FreshValue> values;
 
 	private long next;
@@ -33,9 +35,33 @@ public class FreshValueFactory {
 	 */
 	public FreshValueFactory(
 			InputSourceResolver resolver) {
+		this(resolver, new HeapModel());
+	}
+
+	/**
+	 * Builds the factory.
+	 *
+	 * @param resolver the resolver used to find the sources of the unknown
+	 *                     values introduced by the program
+	 * @param heap     the heap model of the program, telling which fields are
+	 *                     immutable
+	 */
+	public FreshValueFactory(
+			InputSourceResolver resolver,
+			HeapModel heap) {
 		this.resolver = resolver;
+		this.heap = heap;
 		this.values = new HashMap<>();
 		this.next = 0;
+	}
+
+	/**
+	 * Yields the heap model of the program.
+	 *
+	 * @return the heap model
+	 */
+	public HeapModel getHeapModel() {
+		return heap;
 	}
 
 	/**
