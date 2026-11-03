@@ -253,15 +253,15 @@ public class PdrEngineTest {
 	}
 
 	@Test
-	public void openCallResultsAreInputs() throws SemanticException {
+	public void openCallResultsAreNotInputs() throws SemanticException {
 		AlarmModel model = model("open", "w = 1");
 		try (SmtSolver s = SmtLibProcessSolver.z3()) {
 			PdrEngine engine = new PdrEngine(model, s);
 			assertEquals(PdrEngine.Status.COUNTEREXAMPLE, engine.run(10, 1000));
-			assertTrue(engine.getCounterexample().stream().flatMap(o -> o.getInputs().values().stream())
-					.anyMatch(v -> v.equals("(Value.Int 3)") || v.equals("3")),
-					engine.getCounterexample()
-							.toString());
+			// the result of the open call is not an input: the counterexample
+			// relies on an imprecise value
+			assertTrue(engine.getCounterexample().stream().anyMatch(o -> !o.isExact()),
+					engine.getCounterexample().toString());
 		}
 	}
 

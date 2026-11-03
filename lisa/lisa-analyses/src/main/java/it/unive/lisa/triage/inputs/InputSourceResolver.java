@@ -11,6 +11,7 @@ import it.unive.lisa.program.cfg.Parameter;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.statement.Statement;
+import it.unive.lisa.program.cfg.statement.UserInput;
 import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.program.cfg.statement.call.OpenCall;
 import it.unive.lisa.symbolic.value.BinaryExpression;
@@ -20,7 +21,6 @@ import it.unive.lisa.util.datastructures.graph.GraphVisitor;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -62,10 +62,6 @@ public class InputSourceResolver {
 
 	private final Map<CodeLocation, Collection<NativeCFG>> natives;
 
-	private final Set<CodeLocation> implemented;
-
-	private final Set<String> cfgNames;
-
 	/**
 	 * Builds the resolver for the program whose results are stored in the given
 	 * tool.
@@ -92,8 +88,6 @@ public class InputSourceResolver {
 		this.parameterOwners = new HashMap<>();
 		this.calls = new HashMap<>();
 		this.natives = new HashMap<>();
-		this.implemented = new HashSet<>();
-		this.cfgNames = new HashSet<>();
 
 		GraphVisitor<CFG, Statement, Edge, Void> visitor = new GraphVisitor<>() {
 
@@ -110,7 +104,6 @@ public class InputSourceResolver {
 		};
 
 		for (CFG cfg : cfgs) {
-			cfgNames.add(cfg.getDescriptor().getName());
 			for (Parameter formal : cfg.getDescriptor().getFormals()) {
 				parameters.putIfAbsent(formal.getLocation(), formal);
 				parameterOwners.putIfAbsent(formal.getLocation(), cfg);
@@ -126,9 +119,6 @@ public class InputSourceResolver {
 					for (Call call : callgraph.getCallSites(cm))
 						natives.computeIfAbsent(call.getLocation(), l -> new TreeSet<>(BY_SIGNATURE))
 								.add((NativeCFG) cm);
-				else if (cm instanceof CFG)
-					for (Call call : callgraph.getCallSites(cm))
-						implemented.add(call.getLocation());
 			}
 	}
 
@@ -162,23 +152,26 @@ public class InputSourceResolver {
 		}
 
 		Collection<NativeCFG> targets = natives.get(location);
-		if (targets != null)
-			return new InputSource(InputSource.Kind.CALL_RESULT, location, value.getStaticType(), constraints,
-					"return of " + targets.stream()
-							.map(t -> t.getDescriptor().getFullSignatureWithParNames())
-							.collect(Collectors.joining(" or ")));
+		if (targets != null) {
+			String description = "return of " + targets.stream()
+					.map(t -> t.getDescriptor().getFullSignatureWithParNames())
+					.collect(Collectors.joining(" or "));
+			// only natives modeling user inputs produce inputs
+			boolean input = targets.stream().anyMatch(t -> UserInput.class.isAssignableFrom(t.getConstruct()));
+			return new InputSource(input ? InputSource.Kind.CALL_RESULT : InputSource.Kind.IMPRECISE_CALL_RESULT,
+					location, value.getStaticType(), constraints, description);
+		}
 
+		// results of other calls (e.g., open calls, whose result is decided
+		// by the open call policy) are not user inputs
 		Call call = calls.get(location);
-		if (call != null && (implemented.contains(location) || cfgNames.contains(call.getTargetName())))
+		if (call != null)
 			return new InputSource(InputSource.Kind.IMPRECISE_CALL_RESULT, location, value.getStaticType(),
 					constraints, "return of " + call.getFullTargetName());
-		if (call != null)
-			return new InputSource(InputSource.Kind.CALL_RESULT, location, value.getStaticType(), constraints,
-					"return of " + call.getFullTargetName());
 		if (pp instanceof OpenCall)
 			// the open call policy produced the value, wherever it is located
-			return new InputSource(InputSource.Kind.CALL_RESULT, location, value.getStaticType(), constraints,
-					"return of " + ((OpenCall) pp).getFullTargetName());
+			return new InputSource(InputSource.Kind.IMPRECISE_CALL_RESULT, location, value.getStaticType(),
+					constraints, "return of " + ((OpenCall) pp).getFullTargetName());
 
 		return new InputSource(InputSource.Kind.UNKNOWN, location, value.getStaticType(), constraints,
 				"unknown value of type " + value.getStaticType()

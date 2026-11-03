@@ -32,6 +32,7 @@ import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.PluggableStatement;
 import it.unive.lisa.program.cfg.statement.Statement;
+import it.unive.lisa.program.cfg.statement.UserInput;
 import it.unive.lisa.program.cfg.statement.UnaryExpression;
 import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.program.type.BoolType;
@@ -75,13 +76,14 @@ public class InputSourceResolverTest {
 	private static final Map<String, Call> calls = new HashMap<>();
 
 	/**
-	 * The construct implementing the native {@code nondet} method.
+	 * The construct implementing the native {@code nondet} method, a user input.
 	 */
 	public static class Nondet
 			extends
 			UnaryExpression
 			implements
-			PluggableStatement {
+			PluggableStatement,
+			UserInput {
 
 		private Statement originating;
 
@@ -208,9 +210,11 @@ public class InputSourceResolverTest {
 
 	@Test
 	public void openCalls() {
+		// the result of an open call is decided by the open call policy, and
+		// it is not a user input
 		Call unknown = calls.get("unknown");
 		InputSource source = resolver.resolve(new PushAny(Untyped.INSTANCE, unknown.getLocation()), unknown);
-		assertEquals(InputSource.Kind.CALL_RESULT, source.getKind());
+		assertEquals(InputSource.Kind.IMPRECISE_CALL_RESULT, source.getKind());
 		assertEquals("return of " + unknown.getFullTargetName(), source.getDescription());
 	}
 

@@ -109,6 +109,19 @@ public final class AlarmModelBuilder {
 			if (c.getViolation() != null)
 				collect(c.getViolation(), vocabulary);
 		}
+		// identifiers that are written but never read cannot influence any
+		// execution of the model: dropping them avoids encoding their values
+		// (e.g., the unused results of calls, that are not computed precisely)
+		Set<Identifier> read = new HashSet<>(parameters.keySet());
+		for (NodeTransitions tr : transitions.values())
+			collectRead(tr, read);
+		for (BadCase c : badCases) {
+			for (SymbolicExpression cond : c.getPathCondition())
+				collect(cond, read);
+			if (c.getViolation() != null)
+				collect(c.getViolation(), read);
+		}
+		vocabulary.retainAll(read);
 
 		ConstraintExporter<A, D> exporter = new ConstraintExporter<>(tool.getAnalysis().domain, result.getId());
 		Map<Statement, Set<SymbolicExpression>> seeds = new HashMap<>();
@@ -292,6 +305,29 @@ public final class AlarmModelBuilder {
 					collect(u.getKey(), ids);
 					collect(u.getValue(), ids);
 				}
+			}
+	}
+
+	/**
+	 * Collects the identifiers read by the given transitions: the ones in
+	 * their path conditions and in the values of their updates (not the
+	 * updated identifiers).
+	 */
+	private static void collectRead(
+			NodeTransitions tr,
+			Set<Identifier> ids) {
+		List<SymbolicStore> stores = new ArrayList<>();
+		for (EdgeTransition e : tr.getOutgoing())
+			stores.add(e.getStore());
+		if (tr.getExit() != null)
+			stores.add(tr.getExit());
+		stores.addAll(tr.getErrors().values());
+		for (SymbolicStore store : stores)
+			for (SymbolicCase c : store.getCases()) {
+				for (SymbolicExpression cond : c.getPathCondition())
+					collect(cond, ids);
+				for (SymbolicExpression value : c.getUpdates().values())
+					collect(value, ids);
 			}
 	}
 

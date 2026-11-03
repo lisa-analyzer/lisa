@@ -29,7 +29,6 @@ import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.type.Int32Type;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
-import it.unive.lisa.triage.inputs.InputSource;
 import it.unive.lisa.triage.inputs.InputSourceResolver;
 import it.unive.lisa.triage.inputs.InputSourceResolverTest;
 import java.nio.file.Files;
@@ -162,13 +161,13 @@ public class ReplayInterproceduralTest {
 	}
 
 	@Test
-	public void openCallsProduceInputs() throws SemanticException {
+	public void openCallsProduceSummaries() throws SemanticException {
+		// the result of an open call is decided by the open call policy, and
+		// it is not a user input
 		SymbolicCase c = replay(" g(");
 		SymbolicExpression b = valueOf(c, "b");
-		assertTrue(b instanceof InputValue, "Not an input: " + b);
-		InputSource source = ((InputValue) b).getSource();
-		assertEquals(InputSource.Kind.CALL_RESULT, source.getKind());
-		assertTrue(source.getDescription().contains("g"), source.getDescription());
+		assertTrue(b instanceof SummaryValue, "Not a summary: " + b);
+		assertTrue(((SummaryValue) b).getReason().contains("g"), ((SummaryValue) b).getReason());
 		assertTrue(!c.isHeapHavoc());
 	}
 

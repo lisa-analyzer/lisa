@@ -38,16 +38,18 @@ public class InputSource {
 		PARAMETER,
 
 		/**
-		 * The value returned by a call whose target is not analyzed, either
-		 * because it is modeled natively or because it cannot be resolved.
+		 * The value returned by a call to native code modeling a user input
+		 * (see {@link it.unive.lisa.program.cfg.statement.UserInput}).
 		 */
 		CALL_RESULT,
 
 		/**
-		 * The value returned by a call that might target code of the program,
-		 * whose result is unknown only because the analysis did not compute it
-		 * precisely (e.g., because calls are analyzed modularly). This is not a
-		 * genuine input: the value is determined by the code of the callee.
+		 * The value returned by a call that does not model a user input:
+		 * native code approximating a computation, code of the program whose
+		 * result has not been computed precisely (e.g., because calls are
+		 * analyzed modularly), or calls that cannot be resolved (whose result
+		 * is decided by the open call policy). This is not a genuine input:
+		 * the value is determined by the code of the callee.
 		 */
 		IMPRECISE_CALL_RESULT,
 

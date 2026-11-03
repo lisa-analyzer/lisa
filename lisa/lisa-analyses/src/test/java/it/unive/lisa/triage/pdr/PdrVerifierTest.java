@@ -253,10 +253,13 @@ public class PdrVerifierTest {
 	}
 
 	@Test
-	public void openCallResultsAreInputs() throws SemanticException {
+	public void openCallResultsAreNotInputs() throws SemanticException {
+		// the result of an open call is decided by the open call policy, and
+		// it is not a user input: the violation is reachable, but it cannot be
+		// confirmed
 		VerificationResult result = verify("open", "w = 1", Violation.reach());
-		assertEquals(VerificationOutcome.CONFIRMED, result.getOutcome(), result.toString());
-		assertEquals("3", valueOf(result, "return of"));
+		assertEquals(VerificationOutcome.POSSIBLE, result.getOutcome(), result.toString());
+		assertTrue(result.getExplanation().contains("imprecise return of g"), result.toString());
 	}
 
 	@Test
