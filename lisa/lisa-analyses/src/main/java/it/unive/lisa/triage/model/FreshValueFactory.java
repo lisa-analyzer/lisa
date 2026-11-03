@@ -122,6 +122,20 @@ public class FreshValueFactory {
 	}
 
 	/**
+	 * Yields a fresh {@link AllocationOffset}.
+	 *
+	 * @param location the location of the code allocating the references
+	 *
+	 * @return the fresh value
+	 */
+	public synchronized AllocationOffset allocationOffset(
+			CodeLocation location) {
+		AllocationOffset offset = new AllocationOffset(location, next++);
+		values.put(offset.getName(), offset);
+		return offset;
+	}
+
+	/**
 	 * Yields all the fresh values created by this factory, indexed by name.
 	 *
 	 * @return the fresh values

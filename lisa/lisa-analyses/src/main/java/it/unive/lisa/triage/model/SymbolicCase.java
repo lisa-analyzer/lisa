@@ -601,8 +601,7 @@ public final class SymbolicCase {
 			FreshValueFactory factory,
 			CodeLocation location) {
 		SymbolicExpression counter = substitute(HeapModel.ALLOC, factory, null);
-		SummaryValue allocated = factory.summary(HeapType.COUNTER, SummaryValue.Kind.HEAP,
-				"objects allocated by unmodeled code", location);
+		AllocationOffset allocated = factory.allocationOffset(location);
 		Set<Identifier> kept = new HashSet<>(preserved);
 		if (heapHavoc)
 			kept.retainAll(preservedHeap);

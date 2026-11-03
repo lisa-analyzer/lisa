@@ -13,15 +13,21 @@ import it.unive.lisa.checks.semantic.SemanticTool;
 import it.unive.lisa.lattices.GenericMapLattice;
 import it.unive.lisa.lattices.GenericSetLattice;
 import it.unive.lisa.program.cfg.edge.Edge;
+import it.unive.lisa.program.cfg.edge.ErrorEdge;
 import it.unive.lisa.program.cfg.fixpoints.forward.ForwardCFGFixpoint;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.triage.reachability.Reachability;
 import it.unive.lisa.type.Type;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Extracts the symbolic transitions performed by the nodes of an analysis
@@ -132,23 +138,70 @@ public class TransitionExtractor<A extends AbstractLattice<A>, D extends Abstrac
 			partial.put(node, post.getExecutionState().getStore());
 
 		List<EdgeTransition> outgoing = new ArrayList<>();
-		for (Edge edge : result.getOutgoingEdges(node)) {
-			AnalysisState<ReplayState<A>> traversed = ForwardCFGFixpoint.traverseEdge(
-					edge,
-					post,
-					result,
-					replay.getAnalysis(),
-					replay.getCurrentContext(),
-					null);
-			if (!traversed.getExecution().isBottom())
-				outgoing.add(new EdgeTransition(edge, traversed.getExecutionState().getStore()));
-		}
+		for (Edge edge : result.getOutgoingEdges(node))
+			traverse(edge, post, outgoing);
+		// errors raised by the node might be caught by the handlers of the
+		// nodes that follow it (frontends might attach handlers only to some
+		// nodes of a protected block, e.g., its last one, letting errors flow
+		// there): the node moves directly to those handlers
+		if (raisesErrors(post))
+			for (Edge handler : downstreamHandlers(node))
+				traverse(handler.newInstance(node, handler.getDestination()), post, outgoing);
 
 		SymbolicStore exit = null;
 		if (result.getAllExitpoints().contains(node) && !post.getExecution().isBottom())
 			exit = post.getExecutionState().getStore();
 
 		return new NodeTransitions(node, outgoing, exit, raisedErrors(node, post), partial);
+	}
+
+	private void traverse(
+			Edge edge,
+			AnalysisState<ReplayState<A>> post,
+			List<EdgeTransition> outgoing)
+			throws SemanticException {
+		AnalysisState<ReplayState<A>> traversed = ForwardCFGFixpoint.traverseEdge(
+				edge,
+				post,
+				result,
+				replay.getAnalysis(),
+				replay.getCurrentContext(),
+				null);
+		if (!traversed.getExecution().isBottom())
+			outgoing.add(new EdgeTransition(edge, traversed.getExecutionState().getStore()));
+	}
+
+	private static boolean raisesErrors(
+			AnalysisState<?> post) {
+		return (!post.getErrors().isBottom() && !post.getErrors().getKeys().isEmpty())
+				|| (!post.getSmashedErrors().isBottom() && !post.getSmashedErrors().getKeys().isEmpty());
+	}
+
+	/**
+	 * Yields the error-handling edges of the nodes that can be reached from
+	 * the given one through edges that are not error-handling ones (excluding
+	 * the ones of the node itself), keeping one edge for each handler and
+	 * protected block.
+	 */
+	private Collection<Edge> downstreamHandlers(
+			Statement node) {
+		Map<List<Object>, Edge> handlers = new LinkedHashMap<>();
+		Set<Statement> seen = new HashSet<>();
+		LinkedList<Statement> ws = new LinkedList<>();
+		ws.add(node);
+		while (!ws.isEmpty()) {
+			Statement current = ws.removeFirst();
+			if (!seen.add(current))
+				continue;
+			for (Edge edge : result.getOutgoingEdges(current))
+				if (!edge.isErrorHandling())
+					ws.add(edge.getDestination());
+				else if (current != node && edge instanceof ErrorEdge)
+					handlers.putIfAbsent(
+							List.of(edge.getDestination(), ((ErrorEdge) edge).getProtectedBlock()),
+							edge);
+		}
+		return handlers.values();
 	}
 
 	/**
