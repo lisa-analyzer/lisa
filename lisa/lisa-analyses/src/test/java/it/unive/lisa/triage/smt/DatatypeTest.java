@@ -27,7 +27,12 @@ public class DatatypeTest {
 		assertEquals("(mk 1 \"a\")", mk.toSmtLib());
 		assertEquals(dt.getSort(), mk.getSort());
 		assertEquals("none", dt.construct("none").toSmtLib());
-		assertEquals("((_ is mk) (mk 1 \"a\"))", dt.test("mk", mk).toSmtLib());
+		Term p = Term.constant("p", dt.getSort());
+		assertEquals("((_ is mk) p)", dt.test("mk", p).toSmtLib());
+		// terms built by a constructor are decided right away
+		assertEquals(Term.TRUE, dt.test("mk", mk));
+		assertEquals(Term.FALSE, dt.test("none", mk));
+		assertEquals(Term.TRUE, dt.test("none", dt.construct("none")));
 		assertEquals(Sort.STRING, dt.select("second", mk).getSort());
 	}
 

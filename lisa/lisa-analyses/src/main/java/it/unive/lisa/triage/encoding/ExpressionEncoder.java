@@ -87,6 +87,7 @@ import it.unive.lisa.triage.model.HeapOperators;
 import it.unive.lisa.triage.smt.Sort;
 import it.unive.lisa.triage.smt.Term;
 import it.unive.lisa.type.Type;
+import it.unive.lisa.type.TypeTokenType;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -461,9 +462,11 @@ public class ExpressionEncoder
 					Term.app("-", Sort.INT, Term.app("str.len", Sort.INT, s), from));
 		}
 
-		if (op instanceof TypeCheck && expression.getRight() instanceof Constant
-				&& ((Constant) expression.getRight()).getValue() instanceof Type)
-			return typeCheck(left, (Type) ((Constant) expression.getRight()).getValue(), expression);
+		if (op instanceof TypeCheck) {
+			Type target = tokenOf(expression.getRight());
+			if (target != null)
+				return typeCheck(left, target, expression);
+		}
 
 		if (op instanceof TypeCast || op instanceof TypeConv)
 			// the value is preserved if it already has the target sort, and
@@ -675,13 +678,35 @@ public class ExpressionEncoder
 	 * Terms that are not values have the type if it covers their sort, and do
 	 * not have it if their sort is different.
 	 */
+	/**
+	 * Yields the type denoted by the given type token: a constant whose value
+	 * is the type, or whose static type is a {@link TypeTokenType} for a
+	 * single type (whatever its value). Yields {@code null} if the expression
+	 * does not denote a unique type.
+	 */
+	private static Type tokenOf(
+			SymbolicExpression token) {
+		if (!(token instanceof Constant))
+			return null;
+		Object value = ((Constant) token).getValue();
+		if (value instanceof Type)
+			return (Type) value;
+		Type type = token.getStaticType();
+		if (type instanceof TypeTokenType && ((TypeTokenType) type).getTypes().size() == 1)
+			return ((TypeTokenType) type).getTypes().iterator().next();
+		return null;
+	}
+
 	private Term typeCheck(
 			Term term,
 			Type target,
 			BinaryExpression origin) {
 		Sort sort = sorts.sortOf(target);
 		if (sort.equals(ValueSort.SORT))
-			return symbols.fresh(Sort.BOOL, origin);
+			// types encoded as values (e.g., references) cannot be told
+			// apart, but the test of a value is deterministic
+			return term.getSort().equals(ValueSort.SORT) ? typeTest(term, target, origin)
+					: symbols.fresh(Sort.BOOL, origin);
 		boolean covers = sorts.covers(target, sort);
 		if (term.getSort().equals(ValueSort.SORT)) {
 			Term constructor = ValueSort.is(term, sort);

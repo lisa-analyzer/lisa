@@ -133,6 +133,19 @@ public class PdrEngine {
 	 */
 	public static final String UNPROJECTED = "unprojected values: fresh values left unconstrained by the projection";
 
+	/**
+	 * The maximum size of the literals of cubes (the number of nodes of their
+	 * trees): larger literals are dropped from predecessors, since literals
+	 * grow with each pre-image.
+	 */
+	public static final long MAX_LITERAL_SIZE = 10_000;
+
+	/**
+	 * The imprecision of predecessors where conditions too large to be
+	 * tracked have been dropped.
+	 */
+	public static final String OVERSIZED = "unprojected values: conditions too large to track";
+
 	private Generalization generalization = Generalization.BOTH;
 
 	private CubeAbstraction abstraction;
@@ -528,8 +541,16 @@ public class PdrEngine {
 					imprecisions.addAll(unrolling.getImprecisions(cubeKey, solver));
 					SymbolicCase c = cases.get(i);
 					List<SymbolicExpression> lits = new ArrayList<>(c.getPathCondition());
-					for (SymbolicExpression lit : cube.getLiterals())
-						lits.add(c.substitute(lit, e.getStore().getFactory(), null));
+					for (SymbolicExpression lit : cube.getLiterals()) {
+						SymbolicExpression image = c.substitute(lit, e.getStore().getFactory(), null);
+						if (SymbolicCase.isTooLarge(image, MAX_LITERAL_SIZE))
+							// literals grow with each pre-image: dropping
+							// one enlarges the predecessor, that is still
+							// sound for blocking, but not for confirming
+							imprecisions.add(OVERSIZED);
+						else
+							lits.add(image);
+					}
 					Map<FreshValue, String> values = freshValues(lits, caseKey);
 					// fresh values of the cube that survived substitution
 					Map<FreshValue, String> fromCube = freshValues(lits, cubeKey);

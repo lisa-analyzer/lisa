@@ -1,6 +1,7 @@
 package it.unive.lisa.triage.smt;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.regex.Pattern;
@@ -252,6 +253,10 @@ public final class Term {
 	 */
 	public static Term not(
 			Term arg) {
+		if (arg.equals(TRUE))
+			return FALSE;
+		if (arg.equals(FALSE))
+			return TRUE;
 		return app("not", Sort.BOOL, arg);
 	}
 
@@ -264,11 +269,7 @@ public final class Term {
 	 */
 	public static Term and(
 			Term... args) {
-		if (args.length == 0)
-			return TRUE;
-		if (args.length == 1)
-			return args[0];
-		return app("and", Sort.BOOL, args);
+		return connective("and", TRUE, FALSE, args);
 	}
 
 	/**
@@ -280,11 +281,30 @@ public final class Term {
 	 */
 	public static Term or(
 			Term... args) {
-		if (args.length == 0)
-			return FALSE;
-		if (args.length == 1)
-			return args[0];
-		return app("or", Sort.BOOL, args);
+		return connective("or", FALSE, TRUE, args);
+	}
+
+	/**
+	 * Builds the application of an associative connective, dropping its
+	 * neutral arguments and yielding its absorbing element if one of the
+	 * arguments is that element.
+	 */
+	private static Term connective(
+			String name,
+			Term neutral,
+			Term absorbing,
+			Term... args) {
+		List<Term> kept = new ArrayList<>(args.length);
+		for (Term arg : args)
+			if (arg.equals(absorbing))
+				return absorbing;
+			else if (!arg.equals(neutral))
+				kept.add(arg);
+		if (kept.isEmpty())
+			return neutral;
+		if (kept.size() == 1)
+			return kept.get(0);
+		return app(name, Sort.BOOL, kept.toArray(Term[]::new));
 	}
 
 	/**

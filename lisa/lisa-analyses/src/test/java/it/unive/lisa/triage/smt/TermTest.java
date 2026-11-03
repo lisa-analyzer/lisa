@@ -36,7 +36,14 @@ public class TermTest {
 		Term x = Term.constant("x", Sort.INT);
 		Term gt = Term.app(">", Sort.BOOL, x, Term.integer(3));
 		assertEquals("(> x 3)", gt.toSmtLib());
-		assertEquals("(and (> x 3) true)", Term.and(gt, Term.TRUE).toSmtLib());
+		Term lt = Term.app("<", Sort.BOOL, x, Term.integer(5));
+		assertEquals("(and (> x 3) (< x 5))", Term.and(gt, lt).toSmtLib());
+		// constants are simplified
+		assertSame(gt, Term.and(gt, Term.TRUE));
+		assertSame(Term.FALSE, Term.and(gt, Term.FALSE));
+		assertSame(gt, Term.or(Term.FALSE, gt));
+		assertSame(Term.TRUE, Term.or(gt, Term.TRUE));
+		assertSame(Term.FALSE, Term.not(Term.TRUE));
 		assertSame(gt, Term.and(gt));
 		assertSame(Term.TRUE, Term.and());
 		assertSame(Term.FALSE, Term.or());

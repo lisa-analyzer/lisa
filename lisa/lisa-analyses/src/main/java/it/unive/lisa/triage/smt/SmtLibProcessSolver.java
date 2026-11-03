@@ -11,8 +11,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -362,21 +364,28 @@ public class SmtLibProcessSolver
 	public Map<Term, String> getValues(
 			Collection<Term> terms) {
 		Map<Term, String> values = new LinkedHashMap<>();
-		if (terms.isEmpty())
+		// constants need no query, and each term is asked once
+		Set<Term> asked = new LinkedHashSet<>();
+		for (Term term : terms)
+			if (term.equals(Term.TRUE) || term.equals(Term.FALSE))
+				values.put(term, term.toSmtLib());
+			else
+				asked.add(term);
+		if (asked.isEmpty())
 			return values;
 
 		StringBuilder cmd = new StringBuilder("(get-value (");
-		for (Term term : terms)
+		for (Term term : asked)
 			cmd.append(term.toSmtLib()).append(" ");
 		cmd.setLength(cmd.length() - 1);
 		cmd.append("))");
 
 		SExpression response = query(cmd.toString());
-		if (response.isAtom() || response.getChildren().size() != terms.size())
+		if (response.isAtom() || response.getChildren().size() != asked.size())
 			throw new SmtException("Unexpected response to get-value: " + response);
 
 		// pairs are returned in the same order of the request
-		Iterator<Term> it = terms.iterator();
+		Iterator<Term> it = asked.iterator();
 		for (SExpression pair : response.getChildren()) {
 			if (pair.isAtom() || pair.getChildren().size() != 2)
 				throw new SmtException("Unexpected response to get-value: " + response);
@@ -419,7 +428,7 @@ public class SmtLibProcessSolver
 			String cmd) {
 		SExpression response = query(cmd);
 		if (!response.isAtom() || !response.getAtom().equals("success"))
-			throw new SmtException("Unexpected response to " + cmd + ": " + response);
+			throw new SmtException("Unexpected response to " + abbreviate(cmd) + ": " + response);
 	}
 
 	/**
@@ -437,7 +446,7 @@ public class SmtLibProcessSolver
 			input.flush();
 		} catch (IOException e) {
 			close();
-			throw new SmtException("Cannot send command to the SMT solver: " + cmd, e);
+			throw new SmtException("Cannot send command to the SMT solver: " + abbreviate(cmd), e);
 		}
 
 		Object response;
@@ -453,18 +462,18 @@ public class SmtLibProcessSolver
 			// the solver is unresponsive: no point in asking it to exit
 			process.destroyForcibly();
 			close();
-			throw new SolverTimeoutException("The SMT solver did not answer to " + cmd + " within "
+			throw new SolverTimeoutException("The SMT solver did not answer to " + abbreviate(cmd) + " within "
 					+ (timeout + GRACE_PERIOD) + "ms, and has been killed");
 		}
 
 		if (response == EOF) {
 			close();
-			throw new SmtException("The SMT solver terminated unexpectedly while executing " + cmd);
+			throw new SmtException("The SMT solver terminated unexpectedly while executing " + abbreviate(cmd));
 		}
 
 		if (response instanceof Exception) {
 			close();
-			throw new SmtException("Cannot read the response of the SMT solver to " + cmd, (Exception) response);
+			throw new SmtException("Cannot read the response of the SMT solver to " + abbreviate(cmd), (Exception) response);
 		}
 
 		SExpression sexpr = (SExpression) response;
@@ -472,7 +481,7 @@ public class SmtLibProcessSolver
 				&& !sexpr.getChildren().isEmpty()
 				&& sexpr.getChildren().get(0).isAtom()
 				&& sexpr.getChildren().get(0).getAtom().equals("error"))
-			throw new SmtException("The SMT solver reported an error while executing " + cmd + ": "
+			throw new SmtException("The SMT solver reported an error while executing " + abbreviate(cmd) + ": "
 					+ (sexpr.getChildren().size() > 1 ? unquote(sexpr.getChildren().get(1).toString()) : sexpr));
 		return sexpr;
 	}
@@ -515,5 +524,18 @@ public class SmtLibProcessSolver
 				String message) {
 			super(message);
 		}
+	}
+
+	/**
+	 * The maximum length of the commands reported in the messages of
+	 * exceptions.
+	 */
+	private static final int MAX_REPORTED_LENGTH = 200;
+
+	private static String abbreviate(
+			String cmd) {
+		if (cmd.length() <= MAX_REPORTED_LENGTH)
+			return cmd;
+		return cmd.substring(0, MAX_REPORTED_LENGTH) + "... (" + cmd.length() + " characters)";
 	}
 }

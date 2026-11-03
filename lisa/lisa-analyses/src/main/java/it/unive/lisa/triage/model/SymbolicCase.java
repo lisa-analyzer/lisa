@@ -239,12 +239,12 @@ public final class SymbolicCase {
 		}
 		if (expression instanceof BinaryExpression) {
 			BinaryExpression b = (BinaryExpression) expression;
-			return new BinaryExpression(
+			return fold(new BinaryExpression(
 					b.getStaticType(),
 					substitute(b.getLeft(), factory, pp),
 					substitute(b.getRight(), factory, pp),
 					b.getOperator(),
-					b.getCodeLocation());
+					b.getCodeLocation()));
 		}
 		if (expression instanceof TernaryExpression) {
 			TernaryExpression t = (TernaryExpression) expression;
@@ -292,6 +292,31 @@ public final class SymbolicCase {
 		if (expression instanceof HeapExpression)
 			return summary(expression, SummaryValue.Kind.HEAP, "heap expression " + expression, factory);
 		return summary(expression, SummaryValue.Kind.UNSUPPORTED, "unsupported expression " + expression, factory);
+	}
+
+	/**
+	 * Folds the constants added to the allocation counter: {@code (c + n) + m}
+	 * becomes {@code c + (n + m)}, so that the counter does not grow with the
+	 * number of allocations (that are composed by substitutions).
+	 */
+	private static BinaryExpression fold(
+			BinaryExpression b) {
+		if (b.getStaticType() != HeapType.COUNTER
+				|| b.getOperator() != NumericNonOverflowingAdd.INSTANCE
+				|| !(b.getLeft() instanceof BinaryExpression)
+				|| !(b.getRight() instanceof Constant)
+				|| !(((Constant) b.getRight()).getValue() instanceof Integer))
+			return b;
+		BinaryExpression left = (BinaryExpression) b.getLeft();
+		if (left.getStaticType() != HeapType.COUNTER
+				|| left.getOperator() != NumericNonOverflowingAdd.INSTANCE
+				|| !(left.getRight() instanceof Constant)
+				|| !(((Constant) left.getRight()).getValue() instanceof Integer))
+			return b;
+		int sum = (Integer) ((Constant) left.getRight()).getValue() + (Integer) ((Constant) b.getRight()).getValue();
+		return new BinaryExpression(HeapType.COUNTER, left.getLeft(),
+				new Constant(HeapType.COUNTER, sum, b.getCodeLocation()), NumericNonOverflowingAdd.INSTANCE,
+				b.getCodeLocation());
 	}
 
 	private static SummaryValue summary(
@@ -370,7 +395,7 @@ public final class SymbolicCase {
 			Identifier id,
 			SymbolicExpression value,
 			FreshValueFactory factory) {
-		if (size(value, new IdentityHashMap<>()) <= MAX_VALUE_SIZE)
+		if (size(value, new IdentityHashMap<>(), MAX_VALUE_SIZE) <= MAX_VALUE_SIZE)
 			return value;
 		return factory.summary(id.getStaticType(),
 				HeapModel.isHeapState(id) ? SummaryValue.Kind.HEAP : SummaryValue.Kind.UNSUPPORTED,
@@ -378,25 +403,43 @@ public final class SymbolicCase {
 	}
 
 	/**
-	 * The number of nodes of the tree of the given expression (at most
-	 * {@link #MAX_VALUE_SIZE} plus one), computed over the shared sub-
-	 * expressions.
+	 * Yields whether the given expression is too large to be tracked: the
+	 * number of nodes of its tree, that is the size of its encoding, exceeds
+	 * the given bound.
+	 *
+	 * @param expression the expression
+	 * @param bound      the bound
+	 *
+	 * @return whether the expression is too large
+	 */
+	public static boolean isTooLarge(
+			SymbolicExpression expression,
+			long bound) {
+		return size(expression, new IdentityHashMap<>(), bound) > bound;
+	}
+
+	/**
+	 * The number of nodes of the tree of the given expression (at most the
+	 * given bound plus one), computed over the shared sub-expressions.
 	 */
 	private static long size(
 			SymbolicExpression e,
-			Map<SymbolicExpression, Long> memo) {
+			Map<SymbolicExpression, Long> memo,
+			long bound) {
 		Long known = memo.get(e);
 		if (known != null)
 			return known;
 		long res = 1;
 		if (e instanceof UnaryExpression)
-			res += size(((UnaryExpression) e).getExpression(), memo);
+			res += size(((UnaryExpression) e).getExpression(), memo, bound);
 		else if (e instanceof BinaryExpression)
-			res += size(((BinaryExpression) e).getLeft(), memo) + size(((BinaryExpression) e).getRight(), memo);
+			res += size(((BinaryExpression) e).getLeft(), memo, bound)
+					+ size(((BinaryExpression) e).getRight(), memo, bound);
 		else if (e instanceof TernaryExpression)
-			res += size(((TernaryExpression) e).getLeft(), memo) + size(((TernaryExpression) e).getMiddle(), memo)
-					+ size(((TernaryExpression) e).getRight(), memo);
-		res = Math.min(res, MAX_VALUE_SIZE + 1);
+			res += size(((TernaryExpression) e).getLeft(), memo, bound)
+					+ size(((TernaryExpression) e).getMiddle(), memo, bound)
+					+ size(((TernaryExpression) e).getRight(), memo, bound);
+		res = Math.min(res, bound + 1);
 		memo.put(e, res);
 		return res;
 	}
@@ -474,8 +517,8 @@ public final class SymbolicCase {
 		SymbolicExpression counter = substitute(HeapModel.ALLOC, factory, pp);
 		SymbolicCase res = update(HeapModel.site(allocation),
 				new UnaryExpression(HeapType.REFERENCE, counter, HeapOperators.NewReference.INSTANCE, loc), factory);
-		return res.update(HeapModel.ALLOC, new BinaryExpression(HeapType.COUNTER, counter,
-				new Constant(HeapType.COUNTER, 1, loc), NumericNonOverflowingAdd.INSTANCE, loc), factory);
+		return res.update(HeapModel.ALLOC, fold(new BinaryExpression(HeapType.COUNTER, counter,
+				new Constant(HeapType.COUNTER, 1, loc), NumericNonOverflowingAdd.INSTANCE, loc)), factory);
 	}
 
 	/**

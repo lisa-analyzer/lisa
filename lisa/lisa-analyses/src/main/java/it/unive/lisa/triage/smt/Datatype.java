@@ -163,6 +163,14 @@ public final class Datatype {
 			Term term) {
 		if (!constructors.containsKey(constructor))
 			throw new IllegalArgumentException("Unknown constructor of datatype " + name + ": " + constructor);
+		if (term.getSort().equals(sort))
+			// terms built by a constructor are decided right away
+			for (String c : constructors.keySet()) {
+				String symbol = Term.symbol(c);
+				String smtlib = term.toSmtLib();
+				if (smtlib.equals(symbol) || smtlib.startsWith("(" + symbol + " "))
+					return c.equals(constructor) ? Term.TRUE : Term.FALSE;
+			}
 		return Term.app("(_ is " + Term.symbol(constructor) + ")", Sort.BOOL, term);
 	}
 
