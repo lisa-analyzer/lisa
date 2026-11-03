@@ -347,6 +347,20 @@ public class Unrolling {
 		}
 
 		@Override
+		public void exactOnlyIfWritten(
+				Term written,
+				SymbolicExpression origin) {
+			// the location might hold a value that the model does not know
+			// (e.g., one existing in the initial states, or written by code
+			// that is not modeled)
+			SymbolicExpression contents = origin instanceof TernaryExpression
+					? ((TernaryExpression) origin).getLeft()
+					: origin;
+			guard(written, SummaryValue.Kind.HEAP.getDescription() + ": contents of " + contents
+					+ " not written by the model");
+		}
+
+		@Override
 		public Term apply(
 				String function,
 				Sort result,
@@ -656,11 +670,24 @@ public class Unrolling {
 	private List<Term> nothingWritten() {
 		List<Term> result = new ArrayList<>();
 		for (Identifier id : model.getVocabulary())
-			if (id.getStaticType() == HeapType.WRITTEN_FIELD || id.getStaticType() == HeapType.WRITTEN_CELLS) {
-				Sort sort = ((HeapType) id.getStaticType()).getSort();
-				result.add(Term.eq(var(id, 0), Term.app("(as const " + sort.toSmtLib() + ")", sort, Term.FALSE)));
-			}
+			if (isWrittenMap(id))
+				result.add(Term.eq(var(id, 0), nothingWritten(id)));
 		return result;
+	}
+
+	private static boolean isWrittenMap(
+			Identifier id) {
+		return id.getStaticType() == HeapType.WRITTEN_FIELD || id.getStaticType() == HeapType.WRITTEN_CELLS;
+	}
+
+	/**
+	 * Yields the map recording that no location has been written, for the
+	 * given identifier of the heap model recording written locations.
+	 */
+	private static Term nothingWritten(
+			Identifier id) {
+		Sort sort = ((HeapType) id.getStaticType()).getSort();
+		return Term.app("(as const " + sort.toSmtLib() + ")", sort, Term.FALSE);
 	}
 
 	private static Term allocated(
@@ -842,6 +869,12 @@ public class Unrolling {
 			Term post = var(id, step + 1);
 			if (value != null)
 				conj.add(Term.eq(post, encoder.encodeAs(value, post.getSort())));
+			else if (c.isUnconstrained(id) && isWrittenMap(id))
+				// the heap is unconstrained after writes that are not
+				// modeled: no location counts as written by the model, so that
+				// reading the unconstrained contents is not precise (as done
+				// for the initial states)
+				conj.add(Term.eq(post, nothingWritten(id)));
 			else if (!c.isUnconstrained(id)) {
 				// the identifier might have been renamed by scoping
 				Identifier pre = c.preIdentifier(id);

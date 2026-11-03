@@ -95,6 +95,23 @@ public interface SymbolTable {
 	}
 
 	/**
+	 * Signals that the encoding being built is precise only if the given
+	 * condition holds, as {@link #exactOnlyIf(Term, SymbolicExpression)},
+	 * because the given expression reads a location of the heap whose value
+	 * is computed precisely only if the location has been written by the
+	 * model (see {@link it.unive.lisa.triage.model.HeapModel}). By default,
+	 * this calls {@link #exactOnlyIf(Term, SymbolicExpression)}.
+	 *
+	 * @param written the condition stating that the location has been written
+	 * @param origin  the expression reading the heap
+	 */
+	default void exactOnlyIfWritten(
+			Term written,
+			SymbolicExpression origin) {
+		exactOnlyIf(written, origin);
+	}
+
+	/**
 	 * Signals that the expression being encoded can be evaluated only if the
 	 * given condition holds, since its operators are not defined otherwise
 	 * (e.g., the operands of numeric operators must be numbers): executions

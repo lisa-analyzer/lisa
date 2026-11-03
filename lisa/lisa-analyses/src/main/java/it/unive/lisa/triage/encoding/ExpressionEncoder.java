@@ -644,9 +644,9 @@ public class ExpressionEncoder
 			Term key,
 			SymbolicExpression origin) {
 		if (written.getSort().isArray() && written.getSort().getElement().equals(Sort.BOOL))
-			symbols.exactOnlyIf(Term.app("select", Sort.BOOL, written, key), origin);
+			symbols.exactOnlyIfWritten(Term.app("select", Sort.BOOL, written, key), origin);
 		else
-			symbols.exactOnlyIf(Term.FALSE, origin);
+			symbols.exactOnlyIfWritten(Term.FALSE, origin);
 		return select(map, key, origin);
 	}
 

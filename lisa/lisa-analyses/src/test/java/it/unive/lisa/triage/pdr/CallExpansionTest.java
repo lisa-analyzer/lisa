@@ -47,6 +47,12 @@ public class CallExpansionTest {
 			+ "  f;\n"
 			+ "  ~A() {}\n"
 			+ "}\n"
+			+ "class B {\n"
+			+ "  f;\n"
+			+ "  ~B(v) {\n"
+			+ "    this.f = v;\n"
+			+ "  }\n"
+			+ "}\n"
 			+ "class test {\n"
 			+ "  inc(a) {\n"
 			+ "    return a + 1;\n"
@@ -93,6 +99,15 @@ public class CallExpansionTest {
 			+ "    }\n"
 			+ "    return w;\n"
 			+ "  }\n"
+			+ "  twice(x) {\n"
+			+ "    def w = 0;\n"
+			+ "    if (x is int) {\n"
+			+ "      def y = this.inc(x) + this.inc(x);\n"
+			+ "      if (y == 10)\n"
+			+ "        w = 1;\n"
+			+ "    }\n"
+			+ "    return w;\n"
+			+ "  }\n"
 			+ "  heapBug(x) {\n"
 			+ "    def w = 0;\n"
 			+ "    if (x is int) {\n"
@@ -119,6 +134,24 @@ public class CallExpansionTest {
 			+ "    def w = 0;\n"
 			+ "    if (arr[0] != 3)\n"
 			+ "      w = 1;\n"
+			+ "    return w;\n"
+			+ "  }\n"
+			+ "  ctorBug(x) {\n"
+			+ "    def w = 0;\n"
+			+ "    if (x is int) {\n"
+			+ "      def b = new B(x);\n"
+			+ "      if (b.f == 3)\n"
+			+ "        w = 1;\n"
+			+ "    }\n"
+			+ "    return w;\n"
+			+ "  }\n"
+			+ "  ctorSafe(x) {\n"
+			+ "    def w = 0;\n"
+			+ "    if (x is int) {\n"
+			+ "      def b = new B(x);\n"
+			+ "      if (b.f != x)\n"
+			+ "        w = 1;\n"
+			+ "    }\n"
 			+ "    return w;\n"
 			+ "  }\n"
 			+ "  heapSafe() {\n"
@@ -239,6 +272,19 @@ public class CallExpansionTest {
 	}
 
 	@Test
+	public void boundedModelCheckingDoesNotTrustHavockedHeaps() throws SemanticException {
+		// without expansion, the heap is unconstrained after the call: the
+		// cell read afterwards is not computed precisely (it used to be
+		// confirmed with any value of x)
+		VerificationResult result = verify(new BoundedModelChecker<>().withMaxRounds(1), "cellBug");
+		assertEquals(VerificationOutcome.POSSIBLE, result.getOutcome(), result.toString());
+		// with expansion, the write of the callee is modeled
+		result = verify(new BoundedModelChecker<>(), "cellBug");
+		assertEquals(VerificationOutcome.CONFIRMED, result.getOutcome(), result.toString());
+		assertEquals("7", valueOf(result, "parameter x of"));
+	}
+
+	@Test
 	public void refutationsRelyOnCallees() throws SemanticException {
 		VerificationResult result = pdr("identity");
 		assertEquals(VerificationOutcome.REFUTED, result.getOutcome(), result.toString());
@@ -249,6 +295,13 @@ public class CallExpansionTest {
 		VerificationResult result = pdr("nested");
 		assertEquals(VerificationOutcome.CONFIRMED, result.getOutcome(), result.toString());
 		assertEquals("8", valueOf(result, "parameter x of"));
+	}
+
+	@Test
+	public void sequentialCallsAreExpanded() throws SemanticException {
+		VerificationResult result = pdr("twice");
+		assertEquals(VerificationOutcome.CONFIRMED, result.getOutcome(), result.toString());
+		assertEquals("4", valueOf(result, "parameter x of"));
 	}
 
 	@Test
@@ -267,13 +320,29 @@ public class CallExpansionTest {
 	}
 
 	@Test
-	public void fieldsWrittenAfterSummarizedConstructorsAreNotRefuted() throws SemanticException {
-		// the constructor of A cannot be expanded (it follows the allocation
-		// of the object), and the heap is unconstrained after it: the write
-		// of the callee is modeled, but the violation is not confirmed
+	public void fieldsWrittenByCalleesAreRead() throws SemanticException {
+		// the constructor of A is expanded too, so the heap is never
+		// unconstrained
 		VerificationResult result = pdr("heapBug");
-		assertEquals(VerificationOutcome.POSSIBLE, result.getOutcome(), result.toString());
+		assertEquals(VerificationOutcome.CONFIRMED, result.getOutcome(), result.toString());
+		assertEquals("7", valueOf(result, "parameter x of"));
 		assertTrue(result.getExplanation().contains("[heapBug > setF]"), result.toString());
+	}
+
+	@Test
+	public void constructorsAreExpanded() throws SemanticException {
+		// the constructor is called after the allocation of the object, in
+		// the same node
+		VerificationResult result = pdr("ctorBug");
+		assertEquals(VerificationOutcome.CONFIRMED, result.getOutcome(), result.toString());
+		assertEquals("3", valueOf(result, "parameter x of"));
+		assertTrue(result.getExplanation().contains("[ctorBug > B]"), result.toString());
+	}
+
+	@Test
+	public void constructorsRefute() throws SemanticException {
+		VerificationResult result = pdr("ctorSafe");
+		assertEquals(VerificationOutcome.REFUTED, result.getOutcome(), result.toString());
 	}
 
 	@Test

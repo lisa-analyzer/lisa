@@ -98,9 +98,12 @@ import org.apache.commons.lang3.tuple.Pair;
  * an expanded call returned, all the expanded calls up to that one (included)
  * have already returned: their result is their meta variable, assigned by the
  * transition returning from the callee, with no effects on the store and no
- * errors raised. Note that this requires the evaluation of the operands that
- * precede the call to yield the same values when the node is replayed after
- * the callees return.<br>
+ * errors raised. When the run reaches the call it resumes after, the store is
+ * reset to the identity, since the effects of the part of the node evaluated
+ * before the call are already part of the transition entering the callees.
+ * The operands evaluated before the call that are still to be used are then
+ * evaluated at the location where the node resumes: this requires them to
+ * yield the same values there.<br>
  * <br>
  * A call is <b>expandable</b> if:
  * <ul>
@@ -110,16 +113,20 @@ import org.apache.commons.lang3.tuple.Pair;
  * of frames leading to the replayed one;</li>
  * <li>it is not part of the node where the property is checked (since the
  * property must be checked on a single location);</li>
- * <li>no side effect happened in the run before the call (i.e., the store
- * contains no update, no lost value, and no unknown value in its path
- * conditions), since the operands preceding the call are evaluated again when
- * the node resumes;</li>
+ * <li>the run did not write the heap before the call, except for allocations
+ * (i.e., the store updates no content of the heap and loses no value), and
+ * produced no unknown value (i.e., it reached no summarized nor open call, and
+ * the store contains no unknown value), since an unknown value evaluated again
+ * when the node resumes would be a different one; assignments to variables
+ * and allocations are allowed, as callees cannot change the variables of
+ * their callers nor the references allocated by them (recursion being
+ * excluded);</li>
  * <li>(<i>operand rule</i>) the operands evaluated in the node before the call
  * that are not actual parameters of the call do not read the heap nor global
  * variables (i.e., their values contain no {@link AccessChild},
  * {@link HeapLocation}, {@link GlobalVariable}, {@link MemoryPointer}, nor
  * {@link MemoryAllocation}), since the callees might change them before the
- * operands are evaluated again.</li>
+ * operands are evaluated again, and contain no unknown value.</li>
  * </ul>
  *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
@@ -178,6 +185,12 @@ public class ReplayInterprocedural<A extends AbstractLattice<A>, D extends Abstr
 	 * Whether or not the current run stopped at an expanded call.
 	 */
 	private boolean stopped;
+
+	/**
+	 * Whether or not the current run produced unknown values through calls
+	 * (since its beginning, or since the call it resumed after).
+	 */
+	private boolean unknown;
 
 	/**
 	 * Builds the analysis, summarizing all calls.
@@ -262,6 +275,7 @@ public class ReplayInterprocedural<A extends AbstractLattice<A>, D extends Abstr
 		this.calls.clear();
 		this.entered.clear();
 		this.stopped = false;
+		this.unknown = false;
 	}
 
 	/**
@@ -364,7 +378,7 @@ public class ReplayInterprocedural<A extends AbstractLattice<A>, D extends Abstr
 				if (last)
 					resumed = null;
 				calls.add(new ReplayedCall(call, frames, obstacle, true));
-				return returned(call, entryState);
+				return returned(call, entryState, last);
 			}
 		} else if (expand && budget.getAsBoolean()) {
 			calls.add(new ReplayedCall(call, frames, obstacle, true));
@@ -382,6 +396,7 @@ public class ReplayInterprocedural<A extends AbstractLattice<A>, D extends Abstr
 			CFGCall call,
 			AnalysisState<ReplayState<A>> entryState)
 			throws SemanticException {
+		unknown = true;
 		ScopeId<ReplayState<A>> context = getCurrentContext();
 		String reason = "result of call to " + call.getFullTargetName();
 		AnalysisState<ReplayState<A>> callres;
@@ -484,11 +499,18 @@ public class ReplayInterprocedural<A extends AbstractLattice<A>, D extends Abstr
 	 * Yields the result of an expanded call whose callees already returned:
 	 * its meta variable, assigned by the transition returning from the
 	 * callees. The abstract state becomes the one computed by the analysis
-	 * after the call, that accounts for the effects of the callees.
+	 * after the call, that accounts for the effects of the callees. If the
+	 * call is the one the run resumes after, the effects of the part of the
+	 * node evaluated before it are already part of the transition entering
+	 * the callees: the store is reset to the identity, so that the rest of the
+	 * run is relative to the location where the node resumes, and the errors
+	 * raised before the call (already raised when entering the callees) are
+	 * discarded.
 	 */
 	private AnalysisState<ReplayState<A>> returned(
 			CFGCall call,
-			AnalysisState<ReplayState<A>> entryState)
+			AnalysisState<ReplayState<A>> entryState,
+			boolean resume)
 			throws SemanticException {
 		ProgramState<ReplayState<A>> exec = entryState.getExecution();
 		if (exec.isBottom())
@@ -507,8 +529,15 @@ public class ReplayInterprocedural<A extends AbstractLattice<A>, D extends Abstr
 				inner = analysis.domain.getDomain().assign(inner, call.getMetaVariable(),
 						new PushAny(call.getStaticType(), call.getLocation()), result.getId(), call);
 		}
-		AnalysisState<ReplayState<A>> state = entryState.withExecution(new ProgramState<>(
-				exec.getState().withInner(inner),
+		ReplayState<A> replayed = exec.getState().withInner(inner);
+		AnalysisState<ReplayState<A>> state = entryState;
+		if (resume) {
+			replayed = replayed.withStore(replayed.getStore().identity());
+			state = state.removeAllErrors(true);
+			unknown = false;
+		}
+		state = state.withExecution(new ProgramState<>(
+				replayed,
 				exec.getComputedExpressions(),
 				exec.getFixpointInformation()));
 		if (call.returnsVoid(entryState))
@@ -534,11 +563,19 @@ public class ReplayInterprocedural<A extends AbstractLattice<A>, D extends Abstr
 			return "no target has a result in the context of the call";
 		if (!expansion)
 			return "call in the node where the property is checked";
-		if (!entryState.getExecution().isBottom())
-			for (SymbolicCase c : entryState.getExecutionState().getStore().getCases())
-				if (!c.getUpdates().isEmpty() || c.isHeapHavoc() || c.isHavocAll()
-						|| c.getPathCondition().stream().anyMatch(ReplayInterprocedural::hasFreshValues))
-					return "side effects before the call";
+		if (unknown)
+			return "unknown values produced before the call";
+		for (SymbolicCase c : entryState.getExecutionState().getStore().getCases()) {
+			if (c.isHeapHavoc() || c.isHavocAll())
+				return "heap written before the call";
+			if (c.getPathCondition().stream().anyMatch(ReplayInterprocedural::hasFreshValues))
+				return "unknown values produced before the call";
+			for (Map.Entry<Identifier, SymbolicExpression> u : c.getUpdates().entrySet())
+				if (HeapModel.isHeapState(u.getKey()) && !u.getKey().equals(HeapModel.ALLOC))
+					return "heap written before the call";
+				else if (hasFreshValues(u.getValue()))
+					return "unknown values produced before the call";
+		}
 
 		// the operand rule
 		Set<SymbolicExpression> actuals = new HashSet<>();
@@ -552,8 +589,11 @@ public class ReplayInterprocedural<A extends AbstractLattice<A>, D extends Abstr
 			if (state.getExecution().isBottom())
 				continue;
 			for (SymbolicExpression e : state.getExecutionExpressions())
-				if (!actuals.contains(e) && readsMemory(e))
-					return "operand reading the heap or globals evaluated before the call";
+				if (!actuals.contains(e))
+					if (readsMemory(e))
+						return "operand reading the heap or globals evaluated before the call";
+					else if (hasUnknownValues(e))
+						return "unknown values produced before the call";
 		}
 		return null;
 	}
@@ -598,6 +638,22 @@ public class ReplayInterprocedural<A extends AbstractLattice<A>, D extends Abstr
 			return readsMemory(((TernaryExpression) e).getLeft())
 					|| readsMemory(((TernaryExpression) e).getMiddle())
 					|| readsMemory(((TernaryExpression) e).getRight());
+		return false;
+	}
+
+	private static boolean hasUnknownValues(
+			SymbolicExpression e) {
+		if (e instanceof PushAny || e instanceof FreshValue)
+			return true;
+		if (e instanceof UnaryExpression)
+			return hasUnknownValues(((UnaryExpression) e).getExpression());
+		if (e instanceof BinaryExpression)
+			return hasUnknownValues(((BinaryExpression) e).getLeft())
+					|| hasUnknownValues(((BinaryExpression) e).getRight());
+		if (e instanceof TernaryExpression)
+			return hasUnknownValues(((TernaryExpression) e).getLeft())
+					|| hasUnknownValues(((TernaryExpression) e).getMiddle())
+					|| hasUnknownValues(((TernaryExpression) e).getRight());
 		return false;
 	}
 
@@ -720,6 +776,7 @@ public class ReplayInterprocedural<A extends AbstractLattice<A>, D extends Abstr
 			ExpressionSet[] parameters,
 			StatementStore<ReplayState<A>> expressions)
 			throws SemanticException {
+		unknown = true;
 		return policy.apply(call, entryState, analysis, getCurrentContext(), parameters);
 	}
 
