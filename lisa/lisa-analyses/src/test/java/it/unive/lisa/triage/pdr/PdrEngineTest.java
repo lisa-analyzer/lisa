@@ -31,6 +31,7 @@ import it.unive.lisa.symbolic.value.operator.binary.ComparisonLe;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonLt;
 import it.unive.lisa.triage.model.AlarmModel;
 import it.unive.lisa.triage.model.AlarmModelBuilder;
+import it.unive.lisa.triage.model.ModelLocation;
 import it.unive.lisa.triage.model.SymbolicStore;
 import it.unive.lisa.triage.smt.SmtLibProcessSolver;
 import it.unive.lisa.triage.smt.SmtSolver;
@@ -162,13 +163,10 @@ public class PdrEngineTest {
 			PdrEngine.Generalization generalization,
 			boolean seeding)
 			throws SemanticException {
-		CFG cfg = program.getAllCFGs().stream().filter(c -> c.getDescriptor().getName().equals(name)).findFirst()
-				.get();
-		AnalyzedCFG result = (AnalyzedCFG) tool.getResultOf(cfg).iterator().next();
 		PdrEngine engine = new PdrEngine(model(name, statement), solver);
 		engine.setGeneralization(generalization);
 		engine.setSeeding(seeding);
-		engine.setAbstraction(new DomainAbstraction(tool.getAnalysis(), result));
+		engine.setAbstraction(new DomainAbstraction(tool.getAnalysis()));
 		return engine;
 	}
 
@@ -208,15 +206,14 @@ public class PdrEngineTest {
 		// the interval [2, +inf], that becomes the proposal 2 <= i
 		CFG cfg = program.getAllCFGs().stream().filter(c -> c.getDescriptor().getName().equals("loop"))
 				.findFirst().get();
-		AnalyzedCFG result = (AnalyzedCFG) tool.getResultOf(cfg).iterator().next();
 		AlarmModel model = model("loop", "w = 1");
 		Identifier i = find(model, "i");
 		Statement guard = cfg.getNodes().stream().filter(n -> n.toString().contains("<(i, 3)")).findFirst().get();
-		DomainAbstraction abs = new DomainAbstraction(tool.getAnalysis(), result);
+		DomainAbstraction abs = new DomainAbstraction(tool.getAnalysis());
 		Cube cube = new Cube(List.of(new BinaryExpression(BoolType.INSTANCE, i,
 				new Constant(Int32Type.INSTANCE, 1, SyntheticLocation.INSTANCE), ComparisonGt.INSTANCE,
 				SyntheticLocation.INSTANCE)));
-		Cube proposal = abs.abstractCube(guard, cube);
+		Cube proposal = abs.abstractCube(new ModelLocation(model.getRootFrame(), guard), cube);
 		assertNotNull(proposal);
 		assertTrue(proposal.getLiterals().stream().anyMatch(c -> c instanceof BinaryExpression
 				&& ((BinaryExpression) c).getOperator() == ComparisonLe.INSTANCE
@@ -227,7 +224,7 @@ public class PdrEngineTest {
 		Cube negative = new Cube(List.of(new BinaryExpression(BoolType.INSTANCE, i,
 				new Constant(Int32Type.INSTANCE, 0, SyntheticLocation.INSTANCE), ComparisonLt.INSTANCE,
 				SyntheticLocation.INSTANCE)));
-		assertNull(abs.abstractCube(guard, negative));
+		assertNull(abs.abstractCube(new ModelLocation(model.getRootFrame(), guard), negative));
 	}
 
 	private static Identifier find(

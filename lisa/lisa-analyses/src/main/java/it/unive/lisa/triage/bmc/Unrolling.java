@@ -1,7 +1,6 @@
 package it.unive.lisa.triage.bmc;
 
 import it.unive.lisa.analysis.SemanticException;
-import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Identifier;
@@ -18,6 +17,7 @@ import it.unive.lisa.triage.model.FreshValue;
 import it.unive.lisa.triage.model.HeapModel;
 import it.unive.lisa.triage.model.HeapType;
 import it.unive.lisa.triage.model.InputValue;
+import it.unive.lisa.triage.model.ModelLocation;
 import it.unive.lisa.triage.model.SummaryValue;
 import it.unive.lisa.triage.model.SymbolicCase;
 import it.unive.lisa.triage.smt.SmtSolver;
@@ -60,9 +60,9 @@ public class Unrolling {
 
 	private final SmtSolver solver;
 
-	private final Map<Statement, Integer> index;
+	private final Map<ModelLocation, Integer> index;
 
-	private final List<Statement> locations;
+	private final List<ModelLocation> locations;
 
 	private final Map<String, Term> constants;
 
@@ -179,7 +179,7 @@ public class Unrolling {
 	 * @return the index
 	 */
 	public int indexOf(
-			Statement location) {
+			ModelLocation location) {
 		return index.get(location);
 	}
 
@@ -190,7 +190,7 @@ public class Unrolling {
 	 *
 	 * @return the location
 	 */
-	public Statement locationAt(
+	public ModelLocation locationAt(
 			int index) {
 		return locations.get(index);
 	}
@@ -251,7 +251,7 @@ public class Unrolling {
 	 */
 	public Term at(
 			int step,
-			Statement location) {
+			ModelLocation location) {
 		return Term.eq(pc(step), Term.integer(index.get(location)));
 	}
 
@@ -674,7 +674,7 @@ public class Unrolling {
 	public Term initial()
 			throws SemanticException {
 		List<Term> locs = new ArrayList<>();
-		for (Statement init : model.getInitialLocations())
+		for (ModelLocation init : model.getInitialLocations())
 			locs.add(at(0, init));
 		List<Term> conj = new ArrayList<>();
 		conj.add(Term.or(locs.toArray(Term[]::new)));
@@ -703,7 +703,7 @@ public class Unrolling {
 		List<Term> locs = new ArrayList<>();
 		List<Term> conj = new ArrayList<>();
 		ExpressionEncoder encoder = new ExpressionEncoder(model.getSorts(), new StepSymbols(step, "#inv"));
-		for (Statement loc : locations) {
+		for (ModelLocation loc : locations) {
 			if (model.getSeeds(loc) == null)
 				// unreachable location
 				continue;
@@ -727,7 +727,7 @@ public class Unrolling {
 	 * @throws SemanticException if an expression cannot be encoded
 	 */
 	public Term seeds(
-			Statement location,
+			ModelLocation location,
 			int step)
 			throws SemanticException {
 		return seeds(location, step,
@@ -735,7 +735,7 @@ public class Unrolling {
 	}
 
 	private Term seeds(
-			Statement location,
+			ModelLocation location,
 			int step,
 			ExpressionEncoder encoder)
 			throws SemanticException {
@@ -762,7 +762,7 @@ public class Unrolling {
 			int step)
 			throws SemanticException {
 		List<Term> edges = new ArrayList<>();
-		for (Statement loc : locations)
+		for (ModelLocation loc : locations)
 			for (EdgeTransition edge : model.getTransitions(loc))
 				edges.add(transition(step, edge));
 		return Term.or(edges.toArray(Term[]::new));
@@ -805,8 +805,8 @@ public class Unrolling {
 		record(key, symbols, guarded);
 		inputs.put(key, symbols.used);
 		return Term.and(
-				at(step, edge.getEdge().getSource()),
-				Term.eq(pc(step + 1), Term.integer(indexOf(edge.getEdge().getDestination()))),
+				at(step, edge.getSource()),
+				Term.eq(pc(step + 1), Term.integer(indexOf(edge.getDestination()))),
 				Term.or(cases.toArray(Term[]::new)));
 	}
 
@@ -941,8 +941,8 @@ public class Unrolling {
 		record(key, symbols, guardedReasons(Term.TRUE, symbols, 0));
 		inputs.put(key, symbols.used);
 		return Term.and(
-				at(step, edge.getEdge().getSource()),
-				Term.eq(pc(step + 1), Term.integer(indexOf(edge.getEdge().getDestination()))),
+				at(step, edge.getSource()),
+				Term.eq(pc(step + 1), Term.integer(indexOf(edge.getDestination()))),
 				c);
 	}
 

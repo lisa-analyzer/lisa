@@ -1,9 +1,9 @@
 package it.unive.lisa.triage.pdr;
 
-import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.triage.model.EdgeTransition;
 import it.unive.lisa.triage.model.InputValue;
+import it.unive.lisa.triage.model.ModelLocation;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -27,7 +27,7 @@ public final class Obligation
 		implements
 		Comparable<Obligation> {
 
-	private final Statement location;
+	private final ModelLocation location;
 
 	private final Cube cube;
 
@@ -67,7 +67,7 @@ public final class Obligation
 	 *                     in the queue
 	 */
 	public Obligation(
-			Statement location,
+			ModelLocation location,
 			Cube cube,
 			int level,
 			Obligation parent,
@@ -92,7 +92,7 @@ public final class Obligation
 	 *
 	 * @return the location
 	 */
-	public Statement getLocation() {
+	public ModelLocation getLocation() {
 		return location;
 	}
 

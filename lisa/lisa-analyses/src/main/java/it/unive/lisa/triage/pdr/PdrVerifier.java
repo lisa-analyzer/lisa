@@ -17,6 +17,7 @@ import it.unive.lisa.triage.inputs.ReproducingInputs;
 import it.unive.lisa.triage.model.AlarmModel;
 import it.unive.lisa.triage.model.AlarmModelBuilder;
 import it.unive.lisa.triage.model.InputValue;
+import it.unive.lisa.triage.model.ModelLocation;
 import it.unive.lisa.triage.model.SymbolicStore;
 import it.unive.lisa.triage.reachability.ReachabilityVerifier;
 import it.unive.lisa.triage.smt.SmtException;
@@ -218,13 +219,13 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 			return new VerificationResult(VerificationOutcome.REFUTED, "the violation cannot happen");
 
 		inexact = false;
-		VerificationResult res = search(model, result, false);
+		VerificationResult res = search(model, false);
 		if (inexact) {
 			// look for a counterexample where all values are computed
 			// precisely: since the strict encoding under-approximates the
 			// executions, only its counterexamples are meaningful
 			Map<String, Integer> first = statistics;
-			VerificationResult strict = search(model, result, true);
+			VerificationResult strict = search(model, true);
 			Map<String, Integer> merged = new HashMap<>(first);
 			merged.merge("queries", statistics.getOrDefault("queries", 0), Integer::sum);
 			statistics = merged;
@@ -236,7 +237,6 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 
 	private VerificationResult search(
 			AlarmModel model,
-			AnalyzedCFG<A> result,
 			boolean strict)
 			throws SemanticException {
 		SmtSolver solver;
@@ -250,7 +250,7 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 			PdrEngine engine = new PdrEngine(model, s, strict);
 			engine.setGeneralization(generalization);
 			engine.setSeeding(seeding);
-			engine.setAbstraction(new DomainAbstraction<>(tool.getAnalysis(), result));
+			engine.setAbstraction(new DomainAbstraction<>(tool.getAnalysis()));
 			PdrEngine.Status status = engine.run(maxLevel, maxQueries, maxMillis);
 			statistics = Map.of("queries", engine.getQueries(), "level", engine.getFrames().depth(), "proposals",
 					engine.getProposals(), "accepted", engine.getAcceptedProposals());
@@ -289,12 +289,12 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 		}
 
 		Set<String> imprecisions = new LinkedHashSet<>();
-		List<Statement> trace = new ArrayList<>();
+		List<ModelLocation> trace = new ArrayList<>();
 		for (Obligation o : cex) {
 			imprecisions.addAll(o.getImprecisions());
 			// obligations restricting their parent to initial states do not
 			// correspond to a step
-			if (trace.isEmpty() || trace.get(trace.size() - 1) != o.getLocation())
+			if (trace.isEmpty() || !trace.get(trace.size() - 1).equals(o.getLocation()))
 				trace.add(o.getLocation());
 			for (Map.Entry<InputValue, String> input : o.getInputs().entrySet())
 				inputs.add(input.getKey().getSource(), input.getValue());

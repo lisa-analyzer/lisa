@@ -78,21 +78,34 @@ public final class AlarmModelBuilder {
 				? rootOf(((ConditionViolation) violation).getWhere())
 				: rootOf(st);
 
-		Set<Statement> cone = cone(result, bad);
-		Set<Statement> initial = new LinkedHashSet<>(result.getEntrypoints());
-		initial.retainAll(cone);
+		Frame frame = Frame.root(result);
+		ModelLocation badLocation = new ModelLocation(frame, bad);
+		Set<ModelLocation> cone = new LinkedHashSet<>();
+		for (Statement node : cone(result, bad))
+			cone.add(new ModelLocation(frame, node));
+		Set<ModelLocation> initial = new LinkedHashSet<>();
+		for (Statement entry : result.getEntrypoints()) {
+			ModelLocation loc = new ModelLocation(frame, entry);
+			if (cone.contains(loc))
+				initial.add(loc);
+		}
 
 		InputSourceResolver resolver = new InputSourceResolver(tool);
 		FreshValueFactory factory = new FreshValueFactory(resolver, new HeapModel(result.getProgram()));
-		TransitionExtractor<A, D> extractor = new TransitionExtractor<>(tool, result, factory, maxCases);
-		Map<Statement, NodeTransitions> transitions = new HashMap<>();
-		Map<Statement, AnalysisState<A>> preStates = new HashMap<>();
-		for (Statement node : cone) {
-			transitions.put(node, extractor.extract(node));
-			preStates.put(node, extractor.preStateOf(node));
+		TransitionExtractor<A, D> extractor = new TransitionExtractor<>(tool, frame, factory, maxCases);
+		// the transitions are also kept by node, since the order in which
+		// they are visited determines the order of the vocabulary
+		Map<Statement, NodeTransitions> byNode = new HashMap<>();
+		Map<ModelLocation, NodeTransitions> transitions = new HashMap<>();
+		Map<ModelLocation, AnalysisState<A>> preStates = new HashMap<>();
+		for (ModelLocation loc : cone) {
+			NodeTransitions tr = extractor.extract(loc.getNode());
+			byNode.put(loc.getNode(), tr);
+			transitions.put(loc, tr);
+			preStates.put(loc, extractor.preStateOf(loc.getNode()));
 		}
 
-		List<BadCase> badCases = badCases(transitions.get(bad), violation, factory);
+		List<BadCase> badCases = badCases(transitions.get(badLocation), violation, factory);
 
 		Map<Identifier, InputSource> parameters = new HashMap<>();
 		for (Parameter formal : result.getDescriptor().getFormals()) {
@@ -101,7 +114,7 @@ public final class AlarmModelBuilder {
 		}
 
 		Set<Identifier> vocabulary = new LinkedHashSet<>(parameters.keySet());
-		for (NodeTransitions tr : transitions.values())
+		for (NodeTransitions tr : byNode.values())
 			collect(tr, vocabulary);
 		for (BadCase c : badCases) {
 			for (SymbolicExpression cond : c.getPathCondition())
@@ -113,7 +126,7 @@ public final class AlarmModelBuilder {
 		// execution of the model: dropping them avoids encoding their values
 		// (e.g., the unused results of calls, that are not computed precisely)
 		Set<Identifier> read = new HashSet<>(parameters.keySet());
-		for (NodeTransitions tr : transitions.values())
+		for (NodeTransitions tr : byNode.values())
 			collectRead(tr, read);
 		for (BadCase c : badCases) {
 			for (SymbolicExpression cond : c.getPathCondition())
@@ -127,7 +140,7 @@ public final class AlarmModelBuilder {
 		boolean grown = true;
 		while (grown) {
 			grown = false;
-			for (NodeTransitions tr : transitions.values())
+			for (NodeTransitions tr : byNode.values())
 				for (SymbolicStore store : storesOf(tr))
 					for (SymbolicCase c : store.getCases())
 						for (Identifier id : new ArrayList<>(vocabulary))
@@ -135,11 +148,13 @@ public final class AlarmModelBuilder {
 								grown |= vocabulary.add(c.preIdentifier(id));
 		}
 
-		ConstraintExporter<A, D> exporter = new ConstraintExporter<>(tool.getAnalysis().domain, result.getId());
-		Map<Statement, Set<SymbolicExpression>> seeds = new HashMap<>();
-		Set<SymbolicExpression> conditions = conditions(transitions.values(), badCases);
-		for (Statement node : cone) {
-			Set<SymbolicExpression> cs = exporter.constraints(preStates.get(node), vocabulary, node);
+		ConstraintExporter<A, D> exporter = new ConstraintExporter<>(tool.getAnalysis().domain,
+				frame.getResult().getId());
+		Map<ModelLocation, Set<SymbolicExpression>> seeds = new HashMap<>();
+		Set<SymbolicExpression> conditions = conditions(byNode.values(), badCases);
+		for (ModelLocation loc : cone) {
+			Statement node = loc.getNode();
+			Set<SymbolicExpression> cs = exporter.constraints(preStates.get(loc), vocabulary, node);
 			if (cs == null)
 				continue;
 			// conditions of the model whose truth is decided by the analysis
@@ -147,8 +162,8 @@ public final class AlarmModelBuilder {
 			// constraints
 			for (SymbolicExpression cond : conditions)
 				try {
-					Satisfiability sat = tool.getAnalysis().satisfies(preStates.get(node), cond, result.getId(),
-							node);
+					Satisfiability sat = tool.getAnalysis().satisfies(preStates.get(loc), cond,
+							loc.getFrame().getResult().getId(), node);
 					if (sat == Satisfiability.SATISFIED)
 						cs.add(cond);
 					else if (sat == Satisfiability.NOT_SATISFIED)
@@ -157,25 +172,26 @@ public final class AlarmModelBuilder {
 				} catch (SemanticException e) {
 					// the condition cannot be evaluated in this state
 				}
-			seeds.put(node, cs);
+			seeds.put(loc, cs);
 		}
 		Set<SymbolicExpression> init = new HashSet<>();
 		if (!initial.isEmpty()) {
 			Set<SymbolicExpression> cs = exporter.constraints(result.getEntryState(), vocabulary,
-					initial.iterator().next());
+					initial.iterator().next().getNode());
 			if (cs != null)
 				init.addAll(cs);
 		}
 
 		Map<Identifier, Set<Type>> types = new HashMap<>();
-		for (Statement node : cone) {
-			AnalysisState<A> pre = preStates.get(node);
+		for (ModelLocation loc : cone) {
+			AnalysisState<A> pre = preStates.get(loc);
 			if (pre.getExecution().isBottom())
 				continue;
 			for (Identifier id : vocabulary)
 				if (pre.getExecutionState().knowsIdentifier(id))
 					types.computeIfAbsent(id, i -> new HashSet<>())
-							.addAll(extractor.getAnalysis().getRuntimeTypesOf(pre, id, result.getId(), node));
+							.addAll(extractor.getAnalysis().getRuntimeTypesOf(pre, id,
+									loc.getFrame().getResult().getId(), loc.getNode()));
 		}
 		for (FreshValue fresh : factory.getValues().values())
 			if (!fresh.getStaticType().isUntyped())
@@ -186,8 +202,8 @@ public final class AlarmModelBuilder {
 						.anyMatch(cfg -> cfg.getDescriptor().equals(result.getDescriptor()));
 
 		return new AlarmModel(
-				result,
-				bad,
+				frame,
+				badLocation,
 				cone,
 				initial,
 				transitions,

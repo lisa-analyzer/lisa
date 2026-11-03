@@ -1,7 +1,6 @@
 package it.unive.lisa.triage.pdr;
 
 import it.unive.lisa.analysis.SemanticException;
-import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.triage.bmc.Unrolling;
@@ -10,6 +9,7 @@ import it.unive.lisa.triage.model.BadCase;
 import it.unive.lisa.triage.model.EdgeTransition;
 import it.unive.lisa.triage.model.FreshValue;
 import it.unive.lisa.triage.model.InputValue;
+import it.unive.lisa.triage.model.ModelLocation;
 import it.unive.lisa.triage.model.SymbolicCase;
 import it.unive.lisa.triage.smt.SmtResult;
 import it.unive.lisa.triage.smt.SmtSolver;
@@ -164,9 +164,9 @@ public class PdrEngine {
 
 	private final TypeSystem types;
 
-	private final Frames<Statement, Lemma> frames = new Frames<>();
+	private final Frames<ModelLocation, Lemma> frames = new Frames<>();
 
-	private final Map<Statement, List<EdgeTransition>> incoming = new HashMap<>();
+	private final Map<ModelLocation, List<EdgeTransition>> incoming = new HashMap<>();
 
 	private final List<Identifier> state = new ArrayList<>();
 
@@ -234,10 +234,10 @@ public class PdrEngine {
 		this.model = model;
 		this.solver = solver;
 		this.unrolling = new Unrolling(model, solver, strict);
-		this.types = model.getBadLocation().getProgram().getTypes();
-		for (Statement loc : model.getLocations())
+		this.types = model.getBadLocation().getNode().getProgram().getTypes();
+		for (ModelLocation loc : model.getLocations())
 			for (EdgeTransition e : model.getTransitions(loc))
-				incoming.computeIfAbsent(e.getEdge().getDestination(), d -> new ArrayList<>()).add(e);
+				incoming.computeIfAbsent(e.getDestination(), d -> new ArrayList<>()).add(e);
 		for (Identifier id : model.getVocabulary())
 			if (!(id instanceof FreshValue))
 				state.add(id);
@@ -304,7 +304,7 @@ public class PdrEngine {
 	 *
 	 * @return the frames
 	 */
-	public Frames<Statement, Lemma> getFrames() {
+	public Frames<ModelLocation, Lemma> getFrames() {
 		return frames;
 	}
 
@@ -345,7 +345,7 @@ public class PdrEngine {
 	 *
 	 * @return the invariant, or {@code null}
 	 */
-	public Map<Statement, Set<Lemma>> getInvariant() {
+	public Map<ModelLocation, Set<Lemma>> getInvariant() {
 		return invariantLevel < 0 ? null : frames.invariant(invariantLevel);
 	}
 
@@ -428,7 +428,7 @@ public class PdrEngine {
 			int level)
 			throws SemanticException,
 			Stop {
-		Statement bad = model.getBadLocation();
+		ModelLocation bad = model.getBadLocation();
 		for (BadCase c : model.getBadCases()) {
 			List<SymbolicExpression> lits = new ArrayList<>(c.getPathCondition());
 			if (c.getViolation() != null)
@@ -505,7 +505,7 @@ public class PdrEngine {
 	 * union of the unsat cores of the queries).
 	 */
 	private Obligation predecessor(
-			Statement location,
+			ModelLocation location,
 			Cube cube,
 			int level,
 			Obligation parent,
@@ -523,7 +523,7 @@ public class PdrEngine {
 			solver.pop();
 		}
 		for (EdgeTransition e : incoming.getOrDefault(location, Collections.emptyList())) {
-			Statement src = e.getEdge().getSource();
+			ModelLocation src = e.getSource();
 			if (!model.getLocations().contains(src))
 				continue;
 			List<SymbolicCase> cases = unrolling.cases(e);
@@ -581,7 +581,7 @@ public class PdrEngine {
 	 * the queries that blocked it.
 	 */
 	private Cube generalize(
-			Statement location,
+			ModelLocation location,
 			Cube cube,
 			Set<SymbolicExpression> core,
 			int level)
@@ -620,20 +620,20 @@ public class PdrEngine {
 			throws SemanticException,
 			Stop {
 		for (int i = 1; i <= k; i++)
-			for (Statement loc : model.getLocations())
+			for (ModelLocation loc : model.getLocations())
 				for (Lemma lemma : frames.exactly(loc, i))
 					if (preserved(loc, lemma, i))
 						frames.add(loc, lemma, i + 1);
 	}
 
 	private boolean preserved(
-			Statement location,
+			ModelLocation location,
 			Lemma lemma,
 			int level)
 			throws SemanticException,
 			Stop {
 		for (EdgeTransition e : incoming.getOrDefault(location, Collections.emptyList())) {
-			Statement src = e.getEdge().getSource();
+			ModelLocation src = e.getSource();
 			if (!model.getLocations().contains(src))
 				continue;
 			Term pre = frame(src, level);
@@ -652,7 +652,7 @@ public class PdrEngine {
 	 * including the program counter.
 	 */
 	private Term frame(
-			Statement location,
+			ModelLocation location,
 			int level)
 			throws SemanticException {
 		if (level == 0)

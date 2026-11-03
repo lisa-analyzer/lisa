@@ -175,7 +175,7 @@ public class TransitionExtractorTest {
 		SemanticTool t = tool;
 		TransitionExtractor extractor = new TransitionExtractor(
 				t,
-				(AnalyzedCFG) t.getResultOf(cfg).iterator().next(),
+				Frame.root((AnalyzedCFG) t.getResultOf(cfg).iterator().next()),
 				new FreshValueFactory(new InputSourceResolver(t)),
 				SymbolicStore.DEFAULT_MAX_CASES);
 		return extractor.extract(node);

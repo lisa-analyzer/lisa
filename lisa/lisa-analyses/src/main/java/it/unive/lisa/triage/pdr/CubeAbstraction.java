@@ -1,7 +1,7 @@
 package it.unive.lisa.triage.pdr;
 
 import it.unive.lisa.analysis.SemanticException;
-import it.unive.lisa.program.cfg.statement.Statement;
+import it.unive.lisa.triage.model.ModelLocation;
 
 /**
  * A strategy proposing, for a cube that has been blocked at a location, a more
@@ -28,7 +28,7 @@ public interface CubeAbstraction {
 	 *                               proposal
 	 */
 	Cube abstractCube(
-			Statement location,
+			ModelLocation location,
 			Cube cube)
 			throws SemanticException;
 }

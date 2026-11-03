@@ -121,6 +121,8 @@ import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.HeapLocation;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.triage.inputs.InputSource;
+import it.unive.lisa.triage.model.Frame;
+import it.unive.lisa.triage.model.ModelLocation;
 import it.unive.lisa.triage.model.SymbolicCase;
 import it.unive.lisa.triage.model.SymbolicStore;
 import it.unive.lisa.triage.pdr.Cube;
@@ -704,6 +706,7 @@ public class EqualityContractVerificationTest {
 	}
 
 	@Test
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void testVerification() throws ClassNotFoundException {
 		verify(ConditionViolation.class);
 		verify(ErrorViolation.class);
@@ -715,6 +718,18 @@ public class EqualityContractVerificationTest {
 		verify(SymbolicCase.class);
 		// the scopes pushed and popped by cases are private
 		verify(Class.forName(SymbolicCase.class.getName() + "$Scoping"), false);
+		// results are identified by their cfg and context, and the depth is
+		// derived from the parent
+		AnalyzedCFG<?> result1 = new AnalyzedCFG(cfg1, new UniqueScope(), (AnalysisState) null);
+		AnalyzedCFG<?> result2 = new AnalyzedCFG(cfg2, new UniqueScope(), (AnalysisState) null);
+		verify(Frame.class, verifier -> verifier
+				.withPrefabValues(AnalyzedCFG.class, result1, result2)
+				.withPrefabValues(Frame.class, Frame.root(result1), Frame.root(result2))
+				.withIgnoredFields("depth")
+				.suppress(Warning.ALL_FIELDS_SHOULD_BE_USED));
+		verify(ModelLocation.class, verifier -> verifier
+				.withPrefabValues(AnalyzedCFG.class, result1, result2)
+				.withPrefabValues(Frame.class, Frame.root(result1), Frame.root(result2)));
 		// the factory of fresh values and the bound on cases do not affect
 		// the represented transition
 		verify(SymbolicStore.class, verifier -> verifier.withIgnoredFields("factory", "maxCases"));

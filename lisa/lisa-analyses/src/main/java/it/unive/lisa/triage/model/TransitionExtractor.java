@@ -45,6 +45,8 @@ import java.util.Set;
  */
 public class TransitionExtractor<A extends AbstractLattice<A>, D extends AbstractDomain<A>> {
 
+	private final Frame frame;
+
 	private final AnalyzedCFG<A> result;
 
 	private final Analysis<A, D> analysis;
@@ -57,17 +59,18 @@ public class TransitionExtractor<A extends AbstractLattice<A>, D extends Abstrac
 	 * Builds the extractor.
 	 *
 	 * @param tool     the tool containing the results of the analysis
-	 * @param result   the result whose nodes are replayed
+	 * @param frame    the frame whose nodes are replayed
 	 * @param factory  the factory of the fresh values used in the transitions
 	 * @param maxCases the maximum number of cases of each transition
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public TransitionExtractor(
 			SemanticTool<A, D> tool,
-			AnalyzedCFG<A> result,
+			Frame frame,
 			FreshValueFactory factory,
 			int maxCases) {
-		this.result = result;
+		this.frame = frame;
+		this.result = (AnalyzedCFG<A>) frame.getResult();
 		// we use an analysis without events, as the replay is not part of
 		// the fixpoint computation
 		this.analysis = new Analysis(tool.getConfiguration().analysis, tool.getConfiguration().shouldSmashError);
@@ -83,6 +86,15 @@ public class TransitionExtractor<A extends AbstractLattice<A>, D extends Abstrac
 	 */
 	public Analysis<A, D> getAnalysis() {
 		return analysis;
+	}
+
+	/**
+	 * Yields the frame whose nodes are replayed.
+	 *
+	 * @return the frame
+	 */
+	public Frame getFrame() {
+		return frame;
 	}
 
 	/**
@@ -137,25 +149,27 @@ public class TransitionExtractor<A extends AbstractLattice<A>, D extends Abstrac
 		if (!post.getExecution().isBottom())
 			partial.put(node, post.getExecutionState().getStore());
 
+		ModelLocation location = new ModelLocation(frame, node);
 		List<EdgeTransition> outgoing = new ArrayList<>();
 		for (Edge edge : result.getOutgoingEdges(node))
-			traverse(edge, post, outgoing);
+			traverse(location, edge, post, outgoing);
 		// errors raised by the node might be caught by the handlers of the
 		// nodes that follow it (frontends might attach handlers only to some
 		// nodes of a protected block, e.g., its last one, letting errors flow
 		// there): the node moves directly to those handlers
 		if (raisesErrors(post))
 			for (Edge handler : downstreamHandlers(node))
-				traverse(handler.newInstance(node, handler.getDestination()), post, outgoing);
+				traverse(location, handler.newInstance(node, handler.getDestination()), post, outgoing);
 
 		SymbolicStore exit = null;
 		if (result.getAllExitpoints().contains(node) && !post.getExecution().isBottom())
 			exit = post.getExecutionState().getStore();
 
-		return new NodeTransitions(node, outgoing, exit, raisedErrors(node, post), partial);
+		return new NodeTransitions(location, outgoing, exit, raisedErrors(node, post), partial);
 	}
 
 	private void traverse(
+			ModelLocation source,
 			Edge edge,
 			AnalysisState<ReplayState<A>> post,
 			List<EdgeTransition> outgoing)
@@ -168,7 +182,11 @@ public class TransitionExtractor<A extends AbstractLattice<A>, D extends Abstrac
 				replay.getCurrentContext(),
 				null);
 		if (!traversed.getExecution().isBottom())
-			outgoing.add(new EdgeTransition(edge, traversed.getExecutionState().getStore()));
+			outgoing.add(new EdgeTransition(
+					source,
+					new ModelLocation(frame, edge.getDestination()),
+					edge,
+					traversed.getExecutionState().getStore()));
 	}
 
 	private static boolean raisesErrors(

@@ -16,6 +16,7 @@ import it.unive.lisa.triage.model.AlarmModel;
 import it.unive.lisa.triage.model.AlarmModelBuilder;
 import it.unive.lisa.triage.model.EdgeTransition;
 import it.unive.lisa.triage.model.InputValue;
+import it.unive.lisa.triage.model.ModelLocation;
 import it.unive.lisa.triage.model.SymbolicStore;
 import it.unive.lisa.triage.smt.SmtException;
 import it.unive.lisa.triage.smt.SmtLibProcessSolver;
@@ -222,7 +223,7 @@ public class BoundedModelChecker<A extends AbstractLattice<A>, D extends Abstrac
 		for (int t = 0; t <= length; t++)
 			pcs.add(unrolling.pc(t));
 		Map<Term, String> pcValues = solver.getValues(pcs);
-		List<Statement> trace = new ArrayList<>();
+		List<ModelLocation> trace = new ArrayList<>();
 		for (Term pc : pcs)
 			trace.add(unrolling.locationAt(Integer.parseInt(pcValues.get(pc))));
 
@@ -238,7 +239,7 @@ public class BoundedModelChecker<A extends AbstractLattice<A>, D extends Abstrac
 
 		for (int t = 0; t < length; t++)
 			for (EdgeTransition edge : model.getTransitions(trace.get(t)))
-				if (edge.getEdge().getDestination() == trace.get(t + 1)) {
+				if (edge.getDestination().equals(trace.get(t + 1))) {
 					String key = unrolling.edgeKey(t, edge);
 					imprecisions.addAll(unrolling.getImprecisions(key, solver));
 					collectInputs(unrolling, key, solver, inputs);

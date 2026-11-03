@@ -11,6 +11,7 @@ import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.triage.model.ConstraintExporter;
 import it.unive.lisa.triage.model.HeapModel;
+import it.unive.lisa.triage.model.ModelLocation;
 import it.unive.lisa.triage.reachability.Reachability;
 import java.util.HashMap;
 import java.util.Map;
@@ -20,7 +21,7 @@ import java.util.Set;
  * A {@link CubeAbstraction} driven by the abstract domain of the analysis. The
  * cube is abstracted in the domain by assuming each of its literals, through
  * the semantics of the analysis, on the state computed by the analysis at the
- * location: the result over-approximates the states of the cube that satisfy
+ * location (in the context of its frame): the result over-approximates the states of the cube that satisfy
  * the invariant of the location. The abstract state is then exported as
  * constraints over the identifiers of the cube ({@link ConstraintExporter}).
  * The proposal has thus the shape of the elements of the domain (e.g., bounds
@@ -39,34 +40,29 @@ public class DomainAbstraction<A extends AbstractLattice<A>, D extends AbstractD
 
 	private final Analysis<A, D> analysis;
 
-	private final AnalyzedCFG<A> result;
-
-	private final ConstraintExporter<A, D> exporter;
-
-	private final Map<Statement, AnalysisState<A>> preStates = new HashMap<>();
+	private final Map<ModelLocation, AnalysisState<A>> preStates = new HashMap<>();
 
 	/**
 	 * Builds the abstraction.
 	 *
-	 * @param analysis the analysis that computed the result
-	 * @param result   the result
+	 * @param analysis the analysis that computed the results of the frames
 	 */
 	public DomainAbstraction(
-			Analysis<A, D> analysis,
-			AnalyzedCFG<A> result) {
+			Analysis<A, D> analysis) {
 		this.analysis = analysis;
-		this.result = result;
-		this.exporter = new ConstraintExporter<>(analysis.domain, result.getId());
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public Cube abstractCube(
-			Statement location,
+			ModelLocation location,
 			Cube cube)
 			throws SemanticException {
+		AnalyzedCFG<A> result = (AnalyzedCFG<A>) location.getFrame().getResult();
+		Statement node = location.getNode();
 		AnalysisState<A> state = preStates.get(location);
 		if (state == null) {
-			state = Reachability.preStateOf(result, location, analysis);
+			state = Reachability.preStateOf(result, node, analysis);
 			preStates.put(location, state);
 		}
 		for (SymbolicExpression lit : cube.getLiterals()) {
@@ -74,14 +70,15 @@ public class DomainAbstraction<A extends AbstractLattice<A>, D extends AbstractD
 				// the analysis cannot evaluate the heap model: not assuming the
 				// literal only weakens the proposal
 				continue;
-			state = analysis.assume(state, lit, result.getId(), location, location);
+			state = analysis.assume(state, lit, result.getId(), node, node);
 			if (state.getExecution().isBottom())
 				// the domain proves that the cube is excluded by the
 				// invariant: there is nothing to generalize
 				return null;
 		}
 		Set<Identifier> ids = Projection.identifiers(cube.getLiterals());
-		Set<SymbolicExpression> constraints = exporter.constraints(state, ids, location);
+		ConstraintExporter<A, D> exporter = new ConstraintExporter<>(analysis.domain, result.getId());
+		Set<SymbolicExpression> constraints = exporter.constraints(state, ids, node);
 		if (constraints == null || constraints.isEmpty())
 			return null;
 		return new Cube(constraints);

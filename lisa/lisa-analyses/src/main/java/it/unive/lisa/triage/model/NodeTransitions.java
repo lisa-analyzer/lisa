@@ -30,7 +30,7 @@ import java.util.Map;
  */
 public class NodeTransitions {
 
-	private final Statement node;
+	private final ModelLocation location;
 
 	private final List<EdgeTransition> outgoing;
 
@@ -43,23 +43,32 @@ public class NodeTransitions {
 	/**
 	 * Builds the transitions.
 	 *
-	 * @param node     the node
+	 * @param location the location of the node
 	 * @param outgoing the transitions through the outgoing edges
 	 * @param exit     the transition to the end of the cfg, or {@code null}
 	 * @param errors   the transitions to the errors raised by the node
 	 * @param partial  the transitions to the end of each sub-expression
 	 */
 	public NodeTransitions(
-			Statement node,
+			ModelLocation location,
 			List<EdgeTransition> outgoing,
 			SymbolicStore exit,
 			Map<Error, SymbolicStore> errors,
 			Map<Statement, SymbolicStore> partial) {
-		this.node = node;
+		this.location = location;
 		this.outgoing = Collections.unmodifiableList(outgoing);
 		this.exit = exit;
 		this.errors = Collections.unmodifiableMap(errors);
 		this.partial = Collections.unmodifiableMap(partial);
+	}
+
+	/**
+	 * Yields the location of the node.
+	 *
+	 * @return the location
+	 */
+	public ModelLocation getLocation() {
+		return location;
 	}
 
 	/**
@@ -68,7 +77,7 @@ public class NodeTransitions {
 	 * @return the node
 	 */
 	public Statement getNode() {
-		return node;
+		return location.getNode();
 	}
 
 	/**
@@ -117,7 +126,7 @@ public class NodeTransitions {
 
 	@Override
 	public String toString() {
-		return node + ": " + outgoing + (exit == null ? "" : " exit " + exit)
+		return location + ": " + outgoing + (exit == null ? "" : " exit " + exit)
 				+ (errors.isEmpty() ? "" : " errors " + errors);
 	}
 }

@@ -28,6 +28,7 @@ import it.unive.lisa.symbolic.value.operator.binary.ComparisonEq;
 import it.unive.lisa.triage.bmc.Unrolling;
 import it.unive.lisa.triage.model.AlarmModel;
 import it.unive.lisa.triage.model.AlarmModelBuilder;
+import it.unive.lisa.triage.model.ModelLocation;
 import it.unive.lisa.triage.model.EdgeTransition;
 import it.unive.lisa.triage.model.SymbolicStore;
 import it.unive.lisa.triage.smt.SmtLibProcessSolver;
@@ -106,7 +107,7 @@ public class TwoStateQueryTest {
 	// the true edge of the guard x == 42
 	private static EdgeTransition trueEdge(
 			AlarmModel model) {
-		for (Statement loc : model.getLocations())
+		for (ModelLocation loc : model.getLocations())
 			for (EdgeTransition e : model.getTransitions(loc))
 				if (e.getEdge() instanceof TrueEdge && e.getEdge().getSource().toString().contains("42"))
 					return e;
@@ -122,7 +123,7 @@ public class TwoStateQueryTest {
 			Lemma lemma,
 			Cube cube)
 			throws SemanticException {
-		Statement src = edge.getEdge().getSource();
+		ModelLocation src = edge.getSource();
 		List<Term> query = List.of(u.at(0, src), u.seeds(src, 0),
 				lemma == null ? Term.TRUE : lemma.at(u, 0), u.transition(0, edge), cube.at(u, 1, "#cube"));
 		s.push();

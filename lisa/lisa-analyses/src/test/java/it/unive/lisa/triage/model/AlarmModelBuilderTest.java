@@ -120,6 +120,12 @@ public class AlarmModelBuilderTest {
 		return AlarmModelBuilder.build(t, result, st, violation, SymbolicStore.DEFAULT_MAX_CASES);
 	}
 
+	private static ModelLocation at(
+			AlarmModel model,
+			Statement node) {
+		return new ModelLocation(model.getRootFrame(), node);
+	}
+
 	private static Identifier find(
 			AlarmModel model,
 			String name) {
@@ -137,16 +143,16 @@ public class AlarmModelBuilderTest {
 				SyntheticLocation.INSTANCE);
 		AlarmModel model = build(loop, ret, Violation.condition(ret, tooBig));
 
-		assertEquals(ret, model.getBadLocation());
+		assertEquals(at(model, ret), model.getBadLocation());
 		assertEquals(4, model.getLocations().size());
-		assertEquals(Set.of(node(loop, "i = 0")), model.getInitialLocations());
+		assertEquals(Set.of(at(model, node(loop, "i = 0"))), model.getInitialLocations());
 		assertTrue(model.isConfirmable());
 
 		// the guard leads both to the body and to the return
 		Statement guard = node(loop, "<(i, 10)");
-		assertEquals(2, model.getTransitions(guard).size());
+		assertEquals(2, model.getTransitions(at(model, guard)).size());
 		// the return has no successors in the model
-		assertTrue(model.getTransitions(ret).isEmpty());
+		assertTrue(model.getTransitions(at(model, ret)).isEmpty());
 
 		// the violation is evaluated over the values at the beginning of the
 		// return
@@ -154,7 +160,7 @@ public class AlarmModelBuilderTest {
 		assertEquals(tooBig, model.getBadCases().get(0).getViolation());
 
 		// intervals give 0 <= i at the loop guard
-		Set<SymbolicExpression> seeds = model.getSeeds(guard);
+		Set<SymbolicExpression> seeds = model.getSeeds(at(model, guard));
 		assertNotNull(seeds);
 		assertTrue(seeds.stream().anyMatch(c -> c instanceof BinaryExpression
 				&& ((BinaryExpression) c).getOperator() == ComparisonLe.INSTANCE
@@ -187,11 +193,11 @@ public class AlarmModelBuilderTest {
 		CFG main = cfg("main");
 		AlarmModel model = build(main, node(main, "return"), Violation.reach());
 		Statement guard = node(main, ">(y, 10)");
-		SymbolicExpression condition = model.getTransitions(guard).stream()
+		SymbolicExpression condition = model.getTransitions(at(model, guard)).stream()
 				.filter(e -> e.getEdge() instanceof TrueEdge)
 				.findFirst().get().getStore().getCases().iterator().next().getPathCondition().get(0);
 		// in the true branch, the analysis knows that the guard holds
-		Set<SymbolicExpression> seeds = model.getSeeds(node(main, "y = 0"));
+		Set<SymbolicExpression> seeds = model.getSeeds(at(model, node(main, "y = 0")));
 		assertTrue(seeds.contains(condition), condition + " not in " + seeds);
 	}
 
@@ -200,10 +206,10 @@ public class AlarmModelBuilderTest {
 		CFG thrower = cfg("thrower");
 		Statement thr = node(thrower, "throw");
 		AlarmModel model = build(thrower, thr, Violation.error());
-		assertEquals(thr, model.getBadLocation());
+		assertEquals(at(model, thr), model.getBadLocation());
 		assertFalse(model.getBadCases().isEmpty(), "No bad cases");
 		// the return cannot reach the throw: it is not part of the model
-		assertFalse(model.getLocations().contains(node(thrower, "return")));
+		assertFalse(model.getLocations().contains(at(model, node(thrower, "return"))));
 		// raising errors of an unrelated type is not a violation
 		AlarmModel unrelated = build(thrower, thr, Violation.error(Int32Type.INSTANCE));
 		assertTrue(unrelated.getBadCases().isEmpty());

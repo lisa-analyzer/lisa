@@ -1,7 +1,6 @@
 package it.unive.lisa.triage.model;
 
 import it.unive.lisa.analysis.AnalyzedCFG;
-import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.triage.encoding.SortPolicy;
@@ -15,13 +14,13 @@ import java.util.Set;
 /**
  * A model of the executions of a cfg (in a given context) that might lead to
  * the violation of a property, built by {@link AlarmModelBuilder}. The model is
- * a control-flow automaton whose locations are the beginnings of the nodes of
- * the cfg that can reach the node where the property is checked (the <i>bad
+ * a control-flow automaton whose locations (see {@link ModelLocation}) are the
+ * beginnings of the nodes of the cfg that can reach the node where the property is checked (the <i>bad
  * location</i>), and whose edges carry the symbolic transitions extracted from
  * the results of the analysis. The model contains:
  * <ul>
  * <li>the locations ({@link #getLocations()}) and their transitions
- * ({@link #getTransitions(Statement)}, restricted to edges between
+ * ({@link #getTransitions(ModelLocation)}, restricted to edges between
  * locations);</li>
  * <li>the initial locations ({@link #getInitialLocations()}), where the
  * executions start in a state satisfying the initial constraints
@@ -29,7 +28,7 @@ import java.util.Set;
  * <li>the bad location and the ways of violating the property there
  * ({@link #getBadCases()});</li>
  * <li>the invariants computed by the analysis at each location, as constraints
- * ({@link #getSeeds(Statement)});</li>
+ * ({@link #getSeeds(ModelLocation)});</li>
  * <li>the identifiers used in the model, with the sorts to encode them, the
  * fresh values used in the transitions, and the sources of the parameters of
  * the cfg.</li>
@@ -42,21 +41,21 @@ import java.util.Set;
  */
 public class AlarmModel {
 
-	private final AnalyzedCFG<?> result;
+	private final Frame root;
 
-	private final Statement badLocation;
+	private final ModelLocation badLocation;
 
-	private final Set<Statement> locations;
+	private final Set<ModelLocation> locations;
 
-	private final Set<Statement> initial;
+	private final Set<ModelLocation> initial;
 
-	private final Map<Statement, NodeTransitions> transitions;
+	private final Map<ModelLocation, NodeTransitions> transitions;
 
 	private final Set<SymbolicExpression> initialConstraints;
 
 	private final List<BadCase> badCases;
 
-	private final Map<Statement, Set<SymbolicExpression>> seeds;
+	private final Map<ModelLocation, Set<SymbolicExpression>> seeds;
 
 	private final Set<Identifier> vocabulary;
 
@@ -71,7 +70,8 @@ public class AlarmModel {
 	/**
 	 * Builds the model.
 	 *
-	 * @param result             the analysis result the model is built from
+	 * @param root               the root frame of the model, whose result is
+	 *                               the one the model is built from
 	 * @param badLocation        the bad location
 	 * @param locations          the locations
 	 * @param initial            the initial locations
@@ -88,20 +88,20 @@ public class AlarmModel {
 	 * @param confirmable        whether or not the model is confirmable
 	 */
 	public AlarmModel(
-			AnalyzedCFG<?> result,
-			Statement badLocation,
-			Set<Statement> locations,
-			Set<Statement> initial,
-			Map<Statement, NodeTransitions> transitions,
+			Frame root,
+			ModelLocation badLocation,
+			Set<ModelLocation> locations,
+			Set<ModelLocation> initial,
+			Map<ModelLocation, NodeTransitions> transitions,
 			Set<SymbolicExpression> initialConstraints,
 			List<BadCase> badCases,
-			Map<Statement, Set<SymbolicExpression>> seeds,
+			Map<ModelLocation, Set<SymbolicExpression>> seeds,
 			Set<Identifier> vocabulary,
 			SortPolicy sorts,
 			Map<String, FreshValue> freshValues,
 			Map<Identifier, InputSource> parameters,
 			boolean confirmable) {
-		this.result = result;
+		this.root = root;
 		this.badLocation = badLocation;
 		this.locations = Collections.unmodifiableSet(locations);
 		this.initial = Collections.unmodifiableSet(initial);
@@ -117,12 +117,23 @@ public class AlarmModel {
 	}
 
 	/**
-	 * Yields the analysis result the model is built from.
+	 * Yields the root frame of the model, that is, the one of the cfg where the
+	 * model starts.
+	 *
+	 * @return the root frame
+	 */
+	public Frame getRootFrame() {
+		return root;
+	}
+
+	/**
+	 * Yields the analysis result the model is built from, that is, the one of
+	 * its root frame.
 	 *
 	 * @return the result
 	 */
 	public AnalyzedCFG<?> getResult() {
-		return result;
+		return root.getResult();
 	}
 
 	/**
@@ -130,7 +141,7 @@ public class AlarmModel {
 	 *
 	 * @return the bad location
 	 */
-	public Statement getBadLocation() {
+	public ModelLocation getBadLocation() {
 		return badLocation;
 	}
 
@@ -139,7 +150,7 @@ public class AlarmModel {
 	 *
 	 * @return the locations
 	 */
-	public Set<Statement> getLocations() {
+	public Set<ModelLocation> getLocations() {
 		return locations;
 	}
 
@@ -148,7 +159,7 @@ public class AlarmModel {
 	 *
 	 * @return the initial locations
 	 */
-	public Set<Statement> getInitialLocations() {
+	public Set<ModelLocation> getInitialLocations() {
 		return initial;
 	}
 
@@ -157,11 +168,11 @@ public class AlarmModel {
 	 *
 	 * @param location the location
 	 *
-	 * @return the transitions, or {@code null} if the given node is not a
+	 * @return the transitions, or {@code null} if the given location is not a
 	 *             location of the model
 	 */
 	public NodeTransitions getNodeTransitions(
-			Statement location) {
+			ModelLocation location) {
 		return transitions.get(location);
 	}
 
@@ -174,12 +185,12 @@ public class AlarmModel {
 	 * @return the transitions
 	 */
 	public List<EdgeTransition> getTransitions(
-			Statement location) {
+			ModelLocation location) {
 		NodeTransitions tr = transitions.get(location);
 		List<EdgeTransition> result = new ArrayList<>();
 		if (tr != null)
 			for (EdgeTransition e : tr.getOutgoing())
-				if (locations.contains(e.getEdge().getDestination()))
+				if (locations.contains(e.getDestination()))
 					result.add(e);
 		return result;
 	}
@@ -213,7 +224,7 @@ public class AlarmModel {
 	 *             location unreachable
 	 */
 	public Set<SymbolicExpression> getSeeds(
-			Statement location) {
+			ModelLocation location) {
 		return seeds.get(location);
 	}
 
@@ -274,9 +285,10 @@ public class AlarmModel {
 	 */
 	public String dump() {
 		StringBuilder sb = new StringBuilder();
+		AnalyzedCFG<?> result = root.getResult();
 		sb.append("model of ").append(result.getDescriptor().getFullSignature()).append(" in ")
 				.append(result.getId()).append(confirmable ? " (confirmable)" : " (not confirmable)").append("\n");
-		sb.append("bad location: ").append(badLocation).append(" at ").append(badLocation.getLocation())
+		sb.append("bad location: ").append(badLocation).append(" at ").append(badLocation.getNode().getLocation())
 				.append("\n");
 
 		sb.append("vocabulary:\n");
@@ -300,13 +312,13 @@ public class AlarmModel {
 		sb.append("initial locations: ").append(initial).append("\n");
 		sb.append("initial constraints: ").append(initialConstraints).append("\n");
 
-		List<Statement> sorted = new ArrayList<>(locations);
+		List<ModelLocation> sorted = new ArrayList<>(locations);
 		sorted.sort((
 				l,
-				r) -> l.getLocation().compareTo(r.getLocation()));
-		for (Statement loc : sorted) {
-			sb.append("location ").append(loc).append(" at ").append(loc.getLocation());
-			if (loc == badLocation)
+				r) -> l.getNode().getLocation().compareTo(r.getNode().getLocation()));
+		for (ModelLocation loc : sorted) {
+			sb.append("location ").append(loc).append(" at ").append(loc.getNode().getLocation());
+			if (loc.equals(badLocation))
 				sb.append(" [bad]");
 			if (initial.contains(loc))
 				sb.append(" [initial]");
@@ -314,8 +326,9 @@ public class AlarmModel {
 			Set<SymbolicExpression> inv = seeds.get(loc);
 			sb.append("  invariant: ").append(inv == null ? "unreachable" : inv).append("\n");
 			for (EdgeTransition edge : getTransitions(loc)) {
-				sb.append("  -> ").append(edge.getEdge().getDestination()).append(" (")
-						.append(edge.getEdge().getClass().getSimpleName()).append(")\n");
+				sb.append("  -> ").append(edge.getDestination()).append(" (")
+						.append(edge.getEdge() == null ? "synthetic" : edge.getEdge().getClass().getSimpleName())
+						.append(")\n");
 				for (SymbolicCase c : edge.getStore().getCases())
 					sb.append("     | ").append(c).append("\n");
 			}
