@@ -54,8 +54,7 @@ import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -158,7 +157,7 @@ public class ReplayInterprocedural<A extends AbstractLattice<A>, D extends Abstr
 	/**
 	 * The results of the callees of each call, in the context of the call.
 	 */
-	private final Map<CFGCall, List<AnalyzedCFG<A>>> callees = new HashMap<>();
+	private final Map<CFGCall, List<AnalyzedCFG<A>>> callees = new LinkedHashMap<>();
 
 	/**
 	 * The node replayed by the current run.
@@ -575,7 +574,7 @@ public class ReplayInterprocedural<A extends AbstractLattice<A>, D extends Abstr
 		}
 
 		// the operand rule
-		Set<SymbolicExpression> actuals = new HashSet<>();
+		Set<SymbolicExpression> actuals = new LinkedHashSet<>();
 		for (ExpressionSet param : parameters)
 			for (SymbolicExpression e : param)
 				actuals.add(e);

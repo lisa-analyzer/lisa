@@ -18,8 +18,6 @@ import it.unive.lisa.type.TypeSystem;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -166,7 +164,7 @@ public class PdrEngine {
 
 	private final Frames<ModelLocation, Lemma> frames = new Frames<>();
 
-	private final Map<ModelLocation, List<EdgeTransition>> incoming = new HashMap<>();
+	private final Map<ModelLocation, List<EdgeTransition>> incoming = new LinkedHashMap<>();
 
 	private final List<Identifier> state = new ArrayList<>();
 
@@ -476,7 +474,7 @@ public class PdrEngine {
 			if (res == SmtResult.UNSAT)
 				continue;
 
-			Set<SymbolicExpression> core = new HashSet<>();
+			Set<SymbolicExpression> core = new LinkedHashSet<>();
 			Obligation pred = predecessor(o.getLocation(), o.getCube(), o.getLevel(), o, core);
 			if (pred != null) {
 				queue.add(pred);

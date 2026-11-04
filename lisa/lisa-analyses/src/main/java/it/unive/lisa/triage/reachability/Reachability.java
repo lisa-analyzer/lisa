@@ -45,7 +45,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -304,7 +303,7 @@ public class Reachability<A extends AbstractLattice<A>, D extends AbstractDomain
 				Call resolved = site instanceof UnresolvedCall ? resolve((UnresolvedCall) site, caller) : site;
 				if (resolved == null)
 					continue;
-				Set<CFGCall> calls = new HashSet<>();
+				Set<CFGCall> calls = new LinkedHashSet<>();
 				cfgCallsOf(resolved, calls);
 				CompoundState<A> state = null;
 				for (CFGCall call : calls) {
@@ -489,7 +488,7 @@ public class Reachability<A extends AbstractLattice<A>, D extends AbstractDomain
 			}
 
 			// errors raised by st
-			Set<Type> raised = new HashSet<>();
+			Set<Type> raised = new LinkedHashSet<>();
 			for (Entry<Error, ProgramState<A>> error : state.getErrors())
 				if (rootOf(error.getKey().getThrower()) == st)
 					raised.add(error.getKey().getType());

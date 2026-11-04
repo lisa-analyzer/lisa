@@ -7,7 +7,8 @@ import it.unive.lisa.triage.smt.SmtException;
 import it.unive.lisa.triage.smt.Sort;
 import it.unive.lisa.triage.smt.Term;
 import it.unive.lisa.type.Type;
-import java.util.HashMap;
+import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -173,13 +174,13 @@ public final class ValueSort {
 		return null;
 	}
 
-	private static final Map<String, Integer> TYPE_TOKENS = new HashMap<>();
-
 	/**
 	 * Yields the value representing the given type when used as a type token
 	 * (e.g., the right operand of a type check): an opaque value whose
 	 * identifier is unique for each type name, so that tokens of the same type
-	 * are equal and tokens of different types are different.
+	 * are equal and tokens of different types are different. The identifier is
+	 * the (negated) number whose bytes are the ones of the name of the type, so
+	 * that it does not depend on the order in which types are encoded.
 	 *
 	 * @param type the type
 	 *
@@ -187,11 +188,8 @@ public final class ValueSort {
 	 */
 	public static Term typeToken(
 			Type type) {
-		int id;
-		synchronized (TYPE_TOKENS) {
-			id = TYPE_TOKENS.computeIfAbsent(type.toString(), k -> TYPE_TOKENS.size());
-		}
-		return DATATYPE.construct(OPAQUE, Term.integer(-1 - id));
+		BigInteger id = new BigInteger(1, type.toString().getBytes(StandardCharsets.UTF_8));
+		return DATATYPE.construct(OPAQUE, Term.integer(id.negate().subtract(BigInteger.ONE)));
 	}
 
 	/**

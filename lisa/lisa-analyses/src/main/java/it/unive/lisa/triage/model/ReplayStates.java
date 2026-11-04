@@ -10,8 +10,8 @@ import it.unive.lisa.lattices.GenericMapLattice;
 import it.unive.lisa.lattices.GenericSetLattice;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.type.Type;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -58,9 +58,9 @@ public final class ReplayStates {
 
 		GenericMapLattice<Type, GenericSetLattice<Statement>> smashed = state.getSmashedErrors();
 		if (!smashed.isBottom() && !smashed.isTop() && !state.getSmashedErrorsState().isBottom()) {
-			Map<Type, Set<Statement>> throwers = new HashMap<>();
+			Map<Type, Set<Statement>> throwers = new LinkedHashMap<>();
 			for (Type type : smashed.getKeys()) {
-				Set<Statement> sts = new HashSet<>();
+				Set<Statement> sts = new LinkedHashSet<>();
 				for (Statement st : smashed.getState(type))
 					sts.add(st);
 				throwers.put(type, sts);

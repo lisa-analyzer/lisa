@@ -15,8 +15,7 @@ import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.symbolic.value.Variable;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.Map;
@@ -147,19 +146,19 @@ public class HeapModel {
 			Program program,
 			Set<String> arrayProperties) {
 		this.arrayProperties = arrayProperties;
-		Map<String, Set<Unit>> declaring = new HashMap<>();
-		Set<String> mutable = new HashSet<>();
+		Map<String, Set<Unit>> declaring = new LinkedHashMap<>();
+		Set<String> mutable = new LinkedHashSet<>();
 		for (Unit unit : program.getUnits())
 			if (unit instanceof CompilationUnit)
 				for (Global g : ((CompilationUnit) unit).getInstanceGlobals(false)) {
-					declaring.computeIfAbsent(g.getName(), n -> new HashSet<>()).add(unit);
+					declaring.computeIfAbsent(g.getName(), n -> new LinkedHashSet<>()).add(unit);
 					if (!g.isFinal())
 						mutable.add(g.getName());
 				}
 		// properties of arrays cannot change (unless a mutable field shares
 		// their name)
 		for (String property : arrayProperties)
-			declaring.computeIfAbsent(property, n -> new HashSet<>());
+			declaring.computeIfAbsent(property, n -> new LinkedHashSet<>());
 		declaring.keySet().removeAll(mutable);
 		this.immutable = declaring;
 	}
@@ -301,7 +300,7 @@ public class HeapModel {
 	 */
 	public Set<Identifier> preservedBy(
 			Collection<? extends CodeMember> targets) {
-		Set<Unit> writers = new HashSet<>();
+		Set<Unit> writers = new LinkedHashSet<>();
 		for (CodeMember target : targets) {
 			Unit unit = target.getDescriptor().getUnit();
 			writers.add(unit);
@@ -320,7 +319,7 @@ public class HeapModel {
 
 	private static Set<CompilationUnit> ancestors(
 			CompilationUnit unit) {
-		Set<CompilationUnit> result = new HashSet<>();
+		Set<CompilationUnit> result = new LinkedHashSet<>();
 		LinkedList<CompilationUnit> ws = new LinkedList<>(unit.getImmediateAncestors());
 		while (!ws.isEmpty()) {
 			CompilationUnit current = ws.removeFirst();

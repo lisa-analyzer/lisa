@@ -15,7 +15,7 @@ import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 /**
@@ -73,7 +73,7 @@ public class ConstraintExporter<A extends AbstractLattice<A>, D extends Abstract
 		if (state.getExecution().isBottom())
 			return null;
 
-		Set<SymbolicExpression> result = new HashSet<>();
+		Set<SymbolicExpression> result = new LinkedHashSet<>();
 		A exec = state.getExecutionState();
 		if (!(domain instanceof SimpleAbstractDomain) || !(exec instanceof SimpleAbstractState))
 			return result;

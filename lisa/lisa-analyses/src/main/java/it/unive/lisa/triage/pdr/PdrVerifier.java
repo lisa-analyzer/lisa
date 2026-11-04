@@ -26,8 +26,7 @@ import it.unive.lisa.triage.smt.SmtLibProcessSolver;
 import it.unive.lisa.triage.smt.SmtSolver;
 import it.unive.lisa.triage.smt.SmtSolverUnavailableException;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -270,7 +269,7 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 						"refuted by the results of the analysis"
 								+ (res.getExplanation() == null ? "" : ": " + res.getExplanation()));
 		}
-		Set<Frame> expanded = new HashSet<>();
+		Set<Frame> expanded = new LinkedHashSet<>();
 		int queries = 0;
 		for (int round = 1;; round++) {
 			AlarmModel model = AlarmModelBuilder.build(tool, result, st, violation, maxCases, expanded,
@@ -297,7 +296,7 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 				queries += statistics.getOrDefault("queries", 0);
 			}
 			if (!last.isEmpty() || queries > 0) {
-				Map<String, Integer> merged = new HashMap<>(last);
+				Map<String, Integer> merged = new LinkedHashMap<>(last);
 				merged.put("queries", queries);
 				statistics = merged;
 			}

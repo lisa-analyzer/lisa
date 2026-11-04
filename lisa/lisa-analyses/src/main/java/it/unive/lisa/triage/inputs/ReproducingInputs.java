@@ -5,7 +5,7 @@ import it.unive.lisa.interprocedural.ScopeId;
 import it.unive.lisa.triage.encoding.ValueSort;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -24,7 +24,7 @@ public class ReproducingInputs {
 
 	private final List<ReproducingInput> inputs = new ArrayList<>();
 
-	private final Map<InputSource, Integer> occurrences = new HashMap<>();
+	private final Map<InputSource, Integer> occurrences = new LinkedHashMap<>();
 
 	/**
 	 * Builds the builder.

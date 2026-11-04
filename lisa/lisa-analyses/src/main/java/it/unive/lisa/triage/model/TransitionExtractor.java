@@ -25,8 +25,7 @@ import it.unive.lisa.type.Type;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -244,7 +243,7 @@ public class TransitionExtractor<A extends AbstractLattice<A>, D extends Abstrac
 		if (replay.hasStopped())
 			post = stopped(post);
 
-		Map<Statement, SymbolicStore> partial = new HashMap<>();
+		Map<Statement, SymbolicStore> partial = new LinkedHashMap<>();
 		for (Statement sub : expressions.getKeys()) {
 			AnalysisState<ReplayState<A>> state = expressions.getState(sub);
 			if (replay.hasStopped())
@@ -442,7 +441,7 @@ public class TransitionExtractor<A extends AbstractLattice<A>, D extends Abstrac
 	private Collection<Edge> downstreamHandlers(
 			Statement node) {
 		Map<List<Object>, Edge> handlers = new LinkedHashMap<>();
-		Set<Statement> seen = new HashSet<>();
+		Set<Statement> seen = new LinkedHashSet<>();
 		LinkedList<Statement> ws = new LinkedList<>();
 		ws.add(node);
 		while (!ws.isEmpty()) {
@@ -467,7 +466,7 @@ public class TransitionExtractor<A extends AbstractLattice<A>, D extends Abstrac
 	private Map<Error, SymbolicStore> raisedErrors(
 			Statement node,
 			AnalysisState<ReplayState<A>> post) {
-		Map<Error, SymbolicStore> errors = new HashMap<>();
+		Map<Error, SymbolicStore> errors = new LinkedHashMap<>();
 		for (Map.Entry<Error, ProgramState<ReplayState<A>>> e : raised(node, post).entrySet())
 			errors.put(e.getKey(), e.getValue().getState().getStore());
 		return errors;

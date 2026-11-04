@@ -27,8 +27,7 @@ import it.unive.lisa.triage.smt.SmtSolver;
 import it.unive.lisa.triage.smt.SmtSolverUnavailableException;
 import it.unive.lisa.triage.smt.Term;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -171,7 +170,7 @@ public class BoundedModelChecker<A extends AbstractLattice<A>, D extends Abstrac
 			Statement st,
 			Violation violation)
 			throws SemanticException {
-		Set<Frame> expanded = new HashSet<>();
+		Set<Frame> expanded = new LinkedHashSet<>();
 		for (int round = 1;; round++) {
 			AlarmModel model = AlarmModelBuilder.build(tool, result, st, violation, maxCases, expanded,
 					maxLocations);
@@ -299,7 +298,7 @@ public class BoundedModelChecker<A extends AbstractLattice<A>, D extends Abstrac
 		Set<String> imprecisions = new LinkedHashSet<>();
 		ReproducingInputs inputs = new ReproducingInputs(model.getResult().getId());
 
-		Map<Term, Identifier> params = new HashMap<>();
+		Map<Term, Identifier> params = new LinkedHashMap<>();
 		for (Identifier id : model.getParameters().keySet())
 			params.put(unrolling.var(id, 0), id);
 		if (!params.isEmpty())

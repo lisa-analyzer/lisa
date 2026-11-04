@@ -13,7 +13,7 @@ import it.unive.lisa.triage.model.ConstraintExporter;
 import it.unive.lisa.triage.model.HeapModel;
 import it.unive.lisa.triage.model.ModelLocation;
 import it.unive.lisa.triage.reachability.Reachability;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -40,7 +40,7 @@ public class DomainAbstraction<A extends AbstractLattice<A>, D extends AbstractD
 
 	private final Analysis<A, D> analysis;
 
-	private final Map<ModelLocation, AnalysisState<A>> preStates = new HashMap<>();
+	private final Map<ModelLocation, AnalysisState<A>> preStates = new LinkedHashMap<>();
 
 	/**
 	 * Builds the abstraction.

@@ -32,8 +32,7 @@ import it.unive.lisa.type.Type;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -183,10 +182,10 @@ public final class AlarmModelBuilder {
 			truncated[0] = true;
 			return false;
 		};
-		Map<Frame, TransitionExtractor<A, D>> extractors = new HashMap<>();
+		Map<Frame, TransitionExtractor<A, D>> extractors = new LinkedHashMap<>();
 		extractors.put(frame, new TransitionExtractor<>(tool, frame, factory, maxCases, expanded, budget, null));
-		Map<ModelLocation, NodeTransitions> transitions = new HashMap<>();
-		Map<ModelLocation, AnalysisState<A>> preStates = new HashMap<>();
+		Map<ModelLocation, NodeTransitions> transitions = new LinkedHashMap<>();
+		Map<ModelLocation, AnalysisState<A>> preStates = new LinkedHashMap<>();
 		boolean expansion = false;
 		while (!ws.isEmpty()) {
 			ModelLocation loc = ws.removeFirst();
@@ -264,7 +263,7 @@ public final class AlarmModelBuilder {
 		// order in which they are visited determines the order of the
 		// vocabulary; the ones of other locations follow, in the order they
 		// have been discovered
-		Map<Statement, NodeTransitions> byNode = new HashMap<>();
+		Map<Statement, NodeTransitions> byNode = new LinkedHashMap<>();
 		List<NodeTransitions> others = new ArrayList<>();
 		for (ModelLocation loc : locations)
 			if (loc.getFrame().isRoot() && loc.getResumed() == null)
@@ -277,7 +276,7 @@ public final class AlarmModelBuilder {
 		if (badCases == null)
 			badCases = badCases(transitions.get(badLocation), violation, factory);
 
-		Map<Identifier, InputSource> parameters = new HashMap<>();
+		Map<Identifier, InputSource> parameters = new LinkedHashMap<>();
 		for (Parameter formal : result.getDescriptor().getFormals()) {
 			InputSource source = resolver.resolve(new PushAny(formal.getStaticType(), formal.getLocation()), null);
 			parameters.put(formal.toSymbolicVariable(), source);
@@ -295,7 +294,7 @@ public final class AlarmModelBuilder {
 		// identifiers that are written but never read cannot influence any
 		// execution of the model: dropping them avoids encoding their values
 		// (e.g., the unused results of calls, that are not computed precisely)
-		Set<Identifier> read = new HashSet<>(parameters.keySet());
+		Set<Identifier> read = new LinkedHashSet<>(parameters.keySet());
 		for (NodeTransitions tr : all)
 			collectRead(tr, read);
 		for (BadCase c : badCases) {
@@ -310,7 +309,7 @@ public final class AlarmModelBuilder {
 		// when callees are expanded, only the identifiers that are visible in
 		// some frame are relevant (e.g., popping a scope renames any
 		// identifier, even the ones that are already out of that scope)
-		Set<List<ScopeToken>> scopes = new HashSet<>();
+		Set<List<ScopeToken>> scopes = new LinkedHashSet<>();
 		for (Frame f : extractors.keySet())
 			scopes.addAll(scopesOf(f));
 		boolean grown = true;
@@ -328,8 +327,8 @@ public final class AlarmModelBuilder {
 		}
 
 		// each frame exports constraints in its own context
-		Map<Frame, ConstraintExporter<A, D>> exporters = new HashMap<>();
-		Map<ModelLocation, Set<SymbolicExpression>> seeds = new HashMap<>();
+		Map<Frame, ConstraintExporter<A, D>> exporters = new LinkedHashMap<>();
+		Map<ModelLocation, Set<SymbolicExpression>> seeds = new LinkedHashMap<>();
 		Set<SymbolicExpression> conditions = conditions(all, badCases);
 		for (ModelLocation loc : locations) {
 			Statement node = loc.getNode();
@@ -341,7 +340,7 @@ public final class AlarmModelBuilder {
 			if (loc.getResumed() != null || loc.isRaised()) {
 				// the state before the node does not describe the values
 				// after the callees returned
-				seeds.put(loc, new HashSet<>());
+				seeds.put(loc, new LinkedHashSet<>());
 				continue;
 			}
 			// conditions of the model whose truth is decided by the analysis
@@ -361,7 +360,7 @@ public final class AlarmModelBuilder {
 				}
 			seeds.put(loc, cs);
 		}
-		Set<SymbolicExpression> init = new HashSet<>();
+		Set<SymbolicExpression> init = new LinkedHashSet<>();
 		if (!initial.isEmpty()) {
 			Set<SymbolicExpression> cs = exporters.get(frame).constraints(result.getEntryState(), vocabulary,
 					initial.iterator().next().getNode());
@@ -369,7 +368,7 @@ public final class AlarmModelBuilder {
 				init.addAll(cs);
 		}
 
-		Map<Identifier, Set<Type>> types = new HashMap<>();
+		Map<Identifier, Set<Type>> types = new LinkedHashMap<>();
 		for (ModelLocation loc : locations) {
 			AnalysisState<A> pre = preStates.get(loc);
 			if (pre.getExecution().isBottom())
@@ -377,7 +376,7 @@ public final class AlarmModelBuilder {
 			TransitionExtractor<A, D> extractor = extractors.get(loc.getFrame());
 			for (Identifier id : vocabulary)
 				if (pre.getExecutionState().knowsIdentifier(id))
-					types.computeIfAbsent(id, i -> new HashSet<>())
+					types.computeIfAbsent(id, i -> new LinkedHashSet<>())
 							.addAll(extractor.getAnalysis().getRuntimeTypesOf(pre, id,
 									loc.getFrame().getResult().getId(), loc.getNode()));
 		}
@@ -420,7 +419,7 @@ public final class AlarmModelBuilder {
 	 */
 	private static Set<List<ScopeToken>> scopesOf(
 			Frame frame) {
-		Set<List<ScopeToken>> result = new HashSet<>();
+		Set<List<ScopeToken>> result = new LinkedHashSet<>();
 		List<ScopeToken> chain = new ArrayList<>();
 		result.add(new ArrayList<>(chain));
 		for (Frame f = frame; !f.isRoot(); f = f.getParent()) {
@@ -482,12 +481,12 @@ public final class AlarmModelBuilder {
 			ModelLocation target,
 			Set<ModelLocation> locations,
 			Map<ModelLocation, NodeTransitions> transitions) {
-		Map<ModelLocation, Set<ModelLocation>> predecessors = new HashMap<>();
+		Map<ModelLocation, Set<ModelLocation>> predecessors = new LinkedHashMap<>();
 		for (ModelLocation loc : locations)
 			for (EdgeTransition e : transitions.get(loc).getOutgoing())
 				if (locations.contains(e.getDestination()))
-					predecessors.computeIfAbsent(e.getDestination(), d -> new HashSet<>()).add(loc);
-		Set<ModelLocation> reached = new HashSet<>();
+					predecessors.computeIfAbsent(e.getDestination(), d -> new LinkedHashSet<>()).add(loc);
+		Set<ModelLocation> reached = new LinkedHashSet<>();
 		LinkedList<ModelLocation> ws = new LinkedList<>();
 		ws.add(target);
 		while (!ws.isEmpty()) {

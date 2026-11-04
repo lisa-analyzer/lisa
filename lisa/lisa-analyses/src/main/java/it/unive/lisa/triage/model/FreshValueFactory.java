@@ -7,7 +7,7 @@ import it.unive.lisa.triage.inputs.InputSource;
 import it.unive.lisa.triage.inputs.InputSourceResolver;
 import it.unive.lisa.type.Type;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -51,7 +51,7 @@ public class FreshValueFactory {
 			HeapModel heap) {
 		this.resolver = resolver;
 		this.heap = heap;
-		this.values = new HashMap<>();
+		this.values = new LinkedHashMap<>();
 		this.next = 0;
 	}
 
@@ -141,6 +141,6 @@ public class FreshValueFactory {
 	 * @return the fresh values
 	 */
 	public synchronized Map<String, FreshValue> getValues() {
-		return Collections.unmodifiableMap(new HashMap<>(values));
+		return Collections.unmodifiableMap(new LinkedHashMap<>(values));
 	}
 }

@@ -33,7 +33,7 @@ import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -665,7 +665,7 @@ public final class SymbolicCase {
 		upd.put(id, bounded(id, substitute(value, factory, pp), factory));
 		Set<Identifier> forg = forgotten;
 		if (forgotten.contains(id)) {
-			forg = new HashSet<>(forgotten);
+			forg = new LinkedHashSet<>(forgotten);
 			forg.remove(id);
 			forg = Collections.unmodifiableSet(forg);
 		}
@@ -705,7 +705,7 @@ public final class SymbolicCase {
 	public SymbolicCase forget(
 			Iterable<Identifier> ids) {
 		Map<Identifier, SymbolicExpression> upd = new LinkedHashMap<>(updates);
-		Set<Identifier> forg = new HashSet<>(forgotten);
+		Set<Identifier> forg = new LinkedHashSet<>(forgotten);
 		for (Identifier id : ids) {
 			upd.remove(id);
 			forg.add(id);
@@ -763,7 +763,7 @@ public final class SymbolicCase {
 			CodeLocation location) {
 		SymbolicExpression counter = substitute(HeapModel.ALLOC, factory, null);
 		AllocationOffset allocated = factory.allocationOffset(location);
-		Set<Identifier> kept = new HashSet<>(preserved);
+		Set<Identifier> kept = new LinkedHashSet<>(preserved);
 		if (heapHavoc)
 			kept.retainAll(preservedHeap);
 		List<SymbolicExpression> pc = new ArrayList<>(pathCondition);
@@ -803,7 +803,7 @@ public final class SymbolicCase {
 			if (renamed != null)
 				upd.put(renamed, u.getValue());
 		}
-		Set<Identifier> forg = new HashSet<>();
+		Set<Identifier> forg = new LinkedHashSet<>();
 		for (Identifier id : forgotten) {
 			Identifier renamed = scoping.rename(id);
 			if (renamed != null)
@@ -854,10 +854,10 @@ public final class SymbolicCase {
 		List<SymbolicExpression> pc = new ArrayList<>(first.pathCondition);
 		pc.retainAll(second.pathCondition);
 
-		Set<Identifier> keys = new HashSet<>(first.updates.keySet());
+		Set<Identifier> keys = new LinkedHashSet<>(first.updates.keySet());
 		keys.addAll(second.updates.keySet());
 		Map<Identifier, SymbolicExpression> upd = new LinkedHashMap<>();
-		Set<Identifier> forg = new HashSet<>(first.forgotten);
+		Set<Identifier> forg = new LinkedHashSet<>(first.forgotten);
 		forg.addAll(second.forgotten);
 		// identifiers that are not updated keep their values only if both
 		// cases rename them in the same way
@@ -893,7 +893,7 @@ public final class SymbolicCase {
 			SymbolicCase first,
 			SymbolicCase second) {
 		if (first.heapHavoc && second.heapHavoc) {
-			Set<Identifier> kept = new HashSet<>(first.preservedHeap);
+			Set<Identifier> kept = new LinkedHashSet<>(first.preservedHeap);
 			kept.retainAll(second.preservedHeap);
 			return Collections.unmodifiableSet(kept);
 		}

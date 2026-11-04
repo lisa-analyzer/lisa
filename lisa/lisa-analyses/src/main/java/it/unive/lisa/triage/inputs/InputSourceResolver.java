@@ -20,7 +20,7 @@ import it.unive.lisa.symbolic.value.PushFromConstraints;
 import it.unive.lisa.util.datastructures.graph.GraphVisitor;
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -84,10 +84,10 @@ public class InputSourceResolver {
 	public InputSourceResolver(
 			Collection<CFG> cfgs,
 			CallGraph callgraph) {
-		this.parameters = new HashMap<>();
-		this.parameterOwners = new HashMap<>();
-		this.calls = new HashMap<>();
-		this.natives = new HashMap<>();
+		this.parameters = new LinkedHashMap<>();
+		this.parameterOwners = new LinkedHashMap<>();
+		this.calls = new LinkedHashMap<>();
+		this.natives = new LinkedHashMap<>();
 
 		GraphVisitor<CFG, Statement, Edge, Void> visitor = new GraphVisitor<>() {
 

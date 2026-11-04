@@ -25,7 +25,7 @@ import it.unive.lisa.triage.smt.Sort;
 import it.unive.lisa.triage.smt.Term;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.IdentityHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -66,24 +66,24 @@ public class Unrolling {
 
 	private final Map<String, Term> constants;
 
-	private final Map<String, String> functions = new HashMap<>();
+	private final Map<String, String> functions = new LinkedHashMap<>();
 
 	private final Map<String, Boolean> exactness;
 
-	private final Map<String, List<Term>> guards = new HashMap<>();
+	private final Map<String, List<Term>> guards = new LinkedHashMap<>();
 
 	/**
 	 * The reasons why the encoding with each key is not exact, regardless of
 	 * the model (see {@link #getImprecisions(String, SmtSolver)})
 	 */
-	private final Map<String, Set<String>> reasons = new HashMap<>();
+	private final Map<String, Set<String>> reasons = new LinkedHashMap<>();
 
 	/**
 	 * The reasons why the encoding with each key is not exact in models where
 	 * a condition holds and a guard does not (see
 	 * {@link #getImprecisions(String, SmtSolver)})
 	 */
-	private final Map<String, List<GuardedReason>> guardedReasons = new HashMap<>();
+	private final Map<String, List<GuardedReason>> guardedReasons = new LinkedHashMap<>();
 
 	/**
 	 * A reason of imprecision that holds when {@code when} holds and
@@ -149,13 +149,13 @@ public class Unrolling {
 		this.strict = strict;
 		this.model = model;
 		this.solver = solver;
-		this.index = new HashMap<>();
+		this.index = new LinkedHashMap<>();
 		this.locations = new ArrayList<>(model.getLocations());
 		for (int i = 0; i < locations.size(); i++)
 			index.put(locations.get(i), i);
-		this.constants = new HashMap<>();
-		this.exactness = new HashMap<>();
-		this.inputs = new HashMap<>();
+		this.constants = new LinkedHashMap<>();
+		this.exactness = new LinkedHashMap<>();
+		this.inputs = new LinkedHashMap<>();
 		this.edgeIds = new IdentityHashMap<>();
 		solver.declareDatatype(ValueSort.DATATYPE);
 		solver.declareDatatype(CellKeySort.DATATYPE);

@@ -1,7 +1,7 @@
 package it.unive.lisa.triage.pdr;
 
 import java.util.Collections;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
@@ -142,7 +142,7 @@ public class Frames<P, L> {
 		Map<L, Integer> map = lemmas.get(location);
 		if (map == null)
 			return Collections.emptySet();
-		Set<L> result = new HashSet<>();
+		Set<L> result = new LinkedHashSet<>();
 		for (Map.Entry<L, Integer> e : map.entrySet())
 			if (exact ? e.getValue() == level : e.getValue() >= level)
 				result.add(e.getKey());

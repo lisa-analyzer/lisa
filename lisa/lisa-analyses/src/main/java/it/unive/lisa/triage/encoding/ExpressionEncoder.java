@@ -90,7 +90,7 @@ import it.unive.lisa.type.Type;
 import it.unive.lisa.type.TypeTokenType;
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -127,7 +127,7 @@ public class ExpressionEncoder
 		implements
 		ExpressionVisitor<Term> {
 
-	private static final Map<Class<?>, Integer> BIT_WIDTHS = new HashMap<>();
+	private static final Map<Class<?>, Integer> BIT_WIDTHS = new LinkedHashMap<>();
 
 	static {
 		for (Class<?> c : List.of(Numeric8BitAdd.class, Numeric8BitSub.class, Numeric8BitMul.class,
