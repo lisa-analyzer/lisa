@@ -234,7 +234,10 @@ public class ReplayDomainTest {
 		var merged = joined.lub(three);
 		SymbolicCase c = single(merged);
 		assertTrue(c.getUpdates().get(X) instanceof SummaryValue);
-		assertTrue(c.getPathCondition().isEmpty());
+		// the condition on y is lost, and replaced by an unknown condition
+		assertEquals(1, c.getPathCondition().size());
+		SummaryValue lost = (SummaryValue) c.getPathCondition().get(0);
+		assertEquals(SummaryValue.MERGED_CONDITIONS, lost.getReason());
 	}
 
 	@Test

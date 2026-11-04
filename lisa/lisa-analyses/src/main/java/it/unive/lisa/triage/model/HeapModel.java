@@ -317,6 +317,23 @@ public class HeapModel {
 		return preserved;
 	}
 
+	/**
+	 * Yields the identifiers of the contents of all the immutable fields: the
+	 * values of final fields of existing objects cannot be changed by any
+	 * code, as they are only written when objects are initialized.
+	 *
+	 * @return the identifiers of the immutable field contents
+	 */
+	public Set<Identifier> immutableContents() {
+		Set<Identifier> preserved = new LinkedHashSet<>();
+		for (String name : immutable.keySet()) {
+			Variable contents = field(name);
+			preserved.add(contents);
+			preserved.add(written(contents));
+		}
+		return preserved;
+	}
+
 	private static Set<CompilationUnit> ancestors(
 			CompilationUnit unit) {
 		Set<CompilationUnit> result = new LinkedHashSet<>();

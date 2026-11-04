@@ -14,6 +14,7 @@ import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.type.Type;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -80,13 +81,22 @@ public class ConstraintExporter<A extends AbstractLattice<A>, D extends Abstract
 
 		ValueDomain valueDomain = ((SimpleAbstractDomain) domain).valueDomain;
 		ValueLattice valueState = ((SimpleAbstractState) exec).valueState;
+		if (valueState.isBottom())
+			return null;
 		SemanticOracle oracle = domain.makeOracle(exec, context);
 		for (Identifier id : ids) {
 			if (!exec.knowsIdentifier(id))
 				continue;
 			Set<BinaryExpression> cs = valueDomain.constraints(null, valueState, id, pp, oracle);
-			if (cs == null)
+			if (cs == null) {
+				Type type = id.getStaticType();
+				if (type.isPointerType() || type.isReferenceType())
+					// value domains might map references, that they do not
+					// track, to bottom: this does not make the state
+					// unreachable
+					continue;
 				return null;
+			}
 			result.addAll(cs);
 		}
 		return result;

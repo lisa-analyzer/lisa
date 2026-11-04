@@ -83,6 +83,7 @@ import it.unive.lisa.symbolic.value.operator.unary.NumericAbs;
 import it.unive.lisa.symbolic.value.operator.unary.NumericNegation;
 import it.unive.lisa.symbolic.value.operator.unary.StringLength;
 import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
+import it.unive.lisa.triage.model.SummaryValue;
 import it.unive.lisa.triage.model.InputValue;
 import it.unive.lisa.triage.model.HeapOperators;
 import it.unive.lisa.triage.smt.Sort;
@@ -357,6 +358,12 @@ public class ExpressionEncoder
 			Identifier expression,
 			Object... params) {
 		Term term = symbols.constant(expression, sorts.sortOf(expression));
+		if (expression instanceof SummaryValue
+				&& ((SummaryValue) expression).getReason().equals(SummaryValue.MERGED_CONDITIONS))
+			// the conditions lost by merging cases do not constrain the
+			// executions, but their use is recorded as an imprecision by
+			// declaring the summary
+			return Term.TRUE;
 		if (expression instanceof InputValue && constraining.add((InputValue) expression))
 			try {
 				// inputs can only take values satisfying the constraints of

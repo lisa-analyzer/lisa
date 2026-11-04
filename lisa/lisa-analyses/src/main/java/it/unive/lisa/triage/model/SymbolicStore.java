@@ -176,12 +176,15 @@ public final class SymbolicStore {
 	}
 
 	/**
-	 * Makes the heap unconstrained in every case.
+	 * Makes the heap unconstrained in every case, except for the contents of
+	 * immutable fields (see {@link HeapModel#immutableContents()}).
 	 *
 	 * @return the resulting store
 	 */
 	public SymbolicStore heapHavoc() {
-		return map(SymbolicCase::withHeapHavoc);
+		// the values of final fields of existing objects cannot change
+		Set<Identifier> immutable = factory.getHeapModel().immutableContents();
+		return map(c -> c.withHeapHavoc(immutable));
 	}
 
 	/**

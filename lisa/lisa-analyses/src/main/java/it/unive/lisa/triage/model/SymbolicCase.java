@@ -591,7 +591,7 @@ public final class SymbolicCase {
 			ProgramPoint pp) {
 		String field = fieldOf(target, factory, pp);
 		if (field == UNDECIDED)
-			return withHeapHavoc();
+			return withHeapHavoc(factory.getHeapModel().immutableContents());
 		SymbolicExpression v = substitute(value, factory, pp);
 		SymbolicExpression ref = substitute(target.getContainer(), factory, pp);
 		CodeLocation loc = target.getCodeLocation();
@@ -745,6 +745,27 @@ public final class SymbolicCase {
 	}
 
 	/**
+	 * Yields this case, where the heap is unconstrained after the transition
+	 * (e.g., because of a write that the heap model does not represent),
+	 * except for the given heap contents.
+	 *
+	 * @param preserved the heap contents that are preserved
+	 *
+	 * @return the resulting case
+	 */
+	public SymbolicCase withHeapHavoc(
+			Set<Identifier> preserved) {
+		Set<Identifier> kept = new LinkedHashSet<>(preserved);
+		if (heapHavoc)
+			kept.retainAll(preservedHeap);
+		Map<Identifier, SymbolicExpression> upd = new LinkedHashMap<>(updates);
+		// heap contents that are not preserved are no longer updated
+		upd.keySet().removeIf(id -> HeapModel.isHeapState(id) && !kept.contains(id));
+		return new SymbolicCase(pathCondition, Collections.unmodifiableMap(upd), forgotten, forgottenIf, true,
+				Collections.unmodifiableSet(kept), havocAll, scopings);
+	}
+
+	/**
 	 * Yields this case, where the heap is unconstrained after the transition,
 	 * except for the given heap contents, as after a call whose callees are
 	 * not modeled. The callees might allocate objects: the counter of
@@ -836,8 +857,10 @@ public final class SymbolicCase {
 	/**
 	 * Merges two cases into a single one that over-approximates both. The
 	 * resulting path condition contains only the conjuncts common to both
-	 * cases, and identifiers whose values differ between the cases become
-	 * unconstrained (they are assigned a fresh {@link SummaryValue}).
+	 * cases, plus an unknown condition (a fresh {@link SummaryValue}) if some
+	 * conjuncts are not common, and identifiers whose values differ between
+	 * the cases become unconstrained (they are assigned a fresh
+	 * {@link SummaryValue}).
 	 *
 	 * @param first    the first case
 	 * @param second   the second case
@@ -853,6 +876,19 @@ public final class SymbolicCase {
 			CodeLocation location) {
 		List<SymbolicExpression> pc = new ArrayList<>(first.pathCondition);
 		pc.retainAll(second.pathCondition);
+		// the conditions that are not common are replaced by an unknown one:
+		// the merged case over-approximates both, and executions relying on
+		// it are not represented precisely
+		SymbolicExpression dropped = null;
+		for (SymbolicExpression cond : first.pathCondition)
+			if (!pc.contains(cond))
+				dropped = cond;
+		for (SymbolicExpression cond : second.pathCondition)
+			if (!pc.contains(cond))
+				dropped = cond;
+		if (dropped != null)
+			pc.add(factory.summary(dropped.getStaticType(), SummaryValue.Kind.MERGE, SummaryValue.MERGED_CONDITIONS,
+					location));
 
 		Set<Identifier> keys = new LinkedHashSet<>(first.updates.keySet());
 		keys.addAll(second.updates.keySet());

@@ -72,6 +72,15 @@ public class SummaryValue
 		}
 	}
 
+	/**
+	 * The reason of the unknown conditions replacing the path conditions lost
+	 * when merging cases (see
+	 * {@link SymbolicCase#merge(SymbolicCase, SymbolicCase, FreshValueFactory, it.unive.lisa.program.cfg.CodeLocation)}).
+	 * Such conditions are encoded as {@code true}, but executions relying on
+	 * them are not represented precisely.
+	 */
+	public static final String MERGED_CONDITIONS = "merged path conditions";
+
 	private final Kind kind;
 
 	private final String reason;

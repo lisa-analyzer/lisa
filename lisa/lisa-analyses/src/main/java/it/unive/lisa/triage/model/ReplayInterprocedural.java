@@ -51,6 +51,8 @@ import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.triage.reachability.Reachability;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
+import it.unive.lisa.util.datastructures.graph.GraphVisitor;
+import it.unive.lisa.program.cfg.edge.Edge;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -699,11 +701,96 @@ public class ReplayInterprocedural<A extends AbstractLattice<A>, D extends Abstr
 						match = candidate;
 			} else if (candidates.size() == 1)
 				match = candidates.iterator().next();
+			if (match != null && candidates.size() > 1 && dependsOnStates(call, pushed))
+				match = merge(target, candidates, match.getId());
 			if (match != null)
 				res.add(match);
 		}
 		callees.put(call, res);
 		return res;
+	}
+
+	/**
+	 * Yields a result of the given cfg, with the given context, whose states
+	 * are the lubs of the ones of the given results. The executions of a callee
+	 * reached by an expanded call might not be all described by the result of
+	 * the context of the call (e.g., with contexts depending on the states at
+	 * the calls, the call of a loop leads to several results, one for each
+	 * state reached by the fixpoint): the states of all the results of the
+	 * callee soundly describe them.
+	 */
+	private AnalyzedCFG<A> merge(
+			CFG cfg,
+			Collection<AnalyzedCFG<A>> results,
+			ScopeId<A> id) {
+		try {
+			Map<Statement, AnalysisState<A>> after = new LinkedHashMap<>();
+			GraphVisitor<CFG, Statement, Edge, Void> collector = new GraphVisitor<>() {
+
+				@Override
+				public boolean visit(
+						Void tool,
+						CFG graph,
+						Statement node) {
+					after.put(node, null);
+					return true;
+				}
+
+			};
+			for (Statement node : cfg.getNodes())
+				node.accept(collector, null);
+			AnalysisState<A> template = null;
+			for (Map.Entry<Statement, AnalysisState<A>> entry : after.entrySet()) {
+				AnalysisState<A> lub = null;
+				for (AnalyzedCFG<A> r : results) {
+					AnalysisState<A> state = r.getAnalysisStateAfter(entry.getKey());
+					if (state != null)
+						lub = lub == null ? state : lub.lub(state);
+				}
+				entry.setValue(lub);
+				if (template == null && lub != null)
+					template = lub;
+			}
+			after.values().removeIf(state -> state == null);
+			Map<Statement, AnalysisState<A>> entries = new LinkedHashMap<>();
+			for (Statement entry : cfg.getEntrypoints()) {
+				AnalysisState<A> lub = null;
+				for (AnalyzedCFG<A> r : results) {
+					AnalysisState<A> state = r.getAnalysisStateBefore(entry);
+					if (state != null)
+						lub = lub == null ? state : lub.lub(state);
+				}
+				if (lub != null) {
+					entries.put(entry, lub);
+					if (template == null)
+						template = lub;
+				}
+			}
+			if (template == null)
+				return results.iterator().next();
+			return new AnalyzedCFG<>(cfg, id, template.bottom(), entries, after);
+		} catch (SemanticException e) {
+			// the states cannot be merged: the callee is not expanded
+			return null;
+		}
+	}
+
+	/**
+	 * Yields {@code true} if the contexts of the analysis depend on the states
+	 * at the calls (and not only on the calls), that is, if pushing the given
+	 * call without a state does not yield the given context: in that case, the
+	 * callee might have several results for the same call (e.g., one for each
+	 * state reached by the fixpoint at a call in a loop), and the one of the
+	 * last state might not describe all the executions.
+	 */
+	private boolean dependsOnStates(
+			CFGCall call,
+			ScopeId<A> pushed) {
+		try {
+			return !pushed.equals(result.getId().push(call, null));
+		} catch (RuntimeException e) {
+			return true;
+		}
 	}
 
 	private ScopeId<A> pushedContext(
