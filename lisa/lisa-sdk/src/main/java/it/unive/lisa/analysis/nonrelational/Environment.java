@@ -210,7 +210,8 @@ public abstract class Environment<L extends Lattice<L>,
 	@Override
 	public boolean knowsIdentifier(
 			Identifier id) {
-		return getKeys().contains(id);
+		// a lookup, instead of building the set of keys
+		return function != null && function.containsKey(id);
 	}
 
 }
