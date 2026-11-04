@@ -138,6 +138,11 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 	 */
 	private int queries;
 
+	/**
+	 * The time by which the verification of the current warning must end.
+	 */
+	private long deadline;
+
 	private int maxChains = DEFAULT_MAX_CHAINS;
 
 	/**
@@ -322,6 +327,8 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 								+ (res.getExplanation() == null ? "" : ": " + res.getExplanation()));
 		}
 		queries = 0;
+		// the time budget is shared by all the models built for the violation
+		deadline = System.currentTimeMillis() + maxMillis;
 		VerificationResult res = refine(result, st, violation, List.of());
 		if (res.getOutcome() != VerificationOutcome.POSSIBLE || !fromCallee || maxChains <= 0)
 			return res;
@@ -331,6 +338,8 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 		// callers can confirm it (but not refute it, since they only consider
 		// the executions through specific chains of calls)
 		for (List<Triple<AnalyzedCFG<A>, Statement, CFGCall>> chain : chainsTo(result)) {
+			if (System.currentTimeMillis() >= deadline)
+				break;
 			VerificationResult confirmed = refine(result, st, violation, chain);
 			if (confirmed.getOutcome() == VerificationOutcome.CONFIRMED)
 				return confirmed;
@@ -353,7 +362,8 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 		LinkedList<List<Triple<AnalyzedCFG<A>, Statement, CFGCall>>> ws = new LinkedList<>();
 		ws.add(List.of());
 		int explored = 0;
-		while (!ws.isEmpty() && chains.size() < maxChains && explored++ < MAX_EXPLORED_CALLERS) {
+		while (!ws.isEmpty() && chains.size() < maxChains && explored++ < MAX_EXPLORED_CALLERS
+				&& System.currentTimeMillis() < deadline) {
 			List<Triple<AnalyzedCFG<A>, Statement, CFGCall>> chain = ws.removeFirst();
 			AnalyzedCFG<A> callee = chain.isEmpty() ? result : chain.get(0).getLeft();
 			for (Triple<AnalyzedCFG<A>, Statement, CFGCall> site : reachability.getReachability()
@@ -396,7 +406,7 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 		Set<Frame> expanded = new LinkedHashSet<>();
 		for (int round = 1;; round++) {
 			AlarmModel model = AlarmModelBuilder.build(tool, result, st, violation, maxCases, expanded,
-					maxLocations, chain);
+					maxLocations, chain, deadline);
 			if (model.getSeeds(model.getBadLocation()) == null)
 				return new VerificationResult(VerificationOutcome.REFUTED, "the statement is unreachable");
 			if (model.getBadCases().isEmpty())
@@ -428,7 +438,7 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 				return strict;
 
 			if (res.getOutcome() != VerificationOutcome.POSSIBLE || trace == null || round >= maxRounds
-					|| model.isTruncated())
+					|| model.isTruncated() || System.currentTimeMillis() >= deadline)
 				return res;
 			Set<Frame> more = model.getExpandableFrames(trace, expanded);
 			if (more.isEmpty())
@@ -453,7 +463,9 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 			engine.setGeneralization(generalization);
 			engine.setSeeding(seeding);
 			engine.setAbstraction(new DomainAbstraction<>(tool.getAnalysis()));
-			PdrEngine.Status status = engine.run(maxLevel, maxQueries, maxMillis);
+			PdrEngine.Status status = engine.run(maxLevel, maxQueries,
+					// at least one millisecond, as 0 means no limit
+					Math.max(1, deadline - System.currentTimeMillis()));
 			statistics = Map.of("queries", engine.getQueries(), "level", engine.getFrames().depth(), "proposals",
 					engine.getProposals(), "accepted", engine.getAcceptedProposals());
 			switch (status) {

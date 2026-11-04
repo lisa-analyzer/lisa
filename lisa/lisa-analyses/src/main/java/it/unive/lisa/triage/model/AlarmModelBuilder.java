@@ -202,6 +202,46 @@ public final class AlarmModelBuilder {
 			int maxLocations,
 			List<Triple<AnalyzedCFG<A>, Statement, CFGCall>> chain)
 			throws SemanticException {
+		return build(tool, result, st, violation, maxCases, expanded, maxLocations, chain, Long.MAX_VALUE);
+	}
+
+	/**
+	 * Builds the model of the given violation as
+	 * {@link #build(SemanticTool, AnalyzedCFG, Statement, Violation, int, Set, int, List)}
+	 * does, expanding calls only until the given time.
+	 *
+	 * @param <A>          the type of the abstract states of the analysis
+	 * @param <D>          the type of the domain of the analysis
+	 * @param tool         the tool containing the results of the analysis
+	 * @param result       the result containing the statement
+	 * @param st           the statement on which the warning would be issued
+	 * @param violation    the violation
+	 * @param maxCases     the maximum number of cases of each transition
+	 * @param expanded     the frames of the callees to expand
+	 * @param maxLocations the maximum number of locations of the model, beyond
+	 *                         which calls are no longer expanded
+	 * @param chain        the chain of calls, from the first caller (see
+	 *                         {@link #build(SemanticTool, AnalyzedCFG, Statement, Violation, int, Set, int, List)})
+	 * @param deadline     the time (as given by
+	 *                         {@link System#currentTimeMillis()}) after which
+	 *                         calls are no longer expanded
+	 *
+	 * @return the model
+	 *
+	 * @throws SemanticException if something goes wrong while building the
+	 *                               model
+	 */
+	public static <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AlarmModel build(
+			SemanticTool<A, D> tool,
+			AnalyzedCFG<A> result,
+			Statement st,
+			Violation violation,
+			int maxCases,
+			Set<Frame> expanded,
+			int maxLocations,
+			List<Triple<AnalyzedCFG<A>, Statement, CFGCall>> chain,
+			long deadline)
+			throws SemanticException {
 		Statement bad = violation instanceof ConditionViolation
 				? rootOf(((ConditionViolation) violation).getWhere())
 				: rootOf(st);
@@ -231,7 +271,7 @@ public final class AlarmModelBuilder {
 		LinkedList<ModelLocation> ws = new LinkedList<>(cone);
 		boolean[] truncated = { false };
 		BooleanSupplier budget = () -> {
-			if (locations.size() < maxLocations)
+			if (locations.size() < maxLocations && System.currentTimeMillis() < deadline)
 				return true;
 			truncated[0] = true;
 			return false;
