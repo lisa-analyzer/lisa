@@ -29,6 +29,8 @@ import it.unive.lisa.triage.encoding.SortPolicy;
 import it.unive.lisa.triage.inputs.InputSource;
 import it.unive.lisa.triage.inputs.InputSourceResolver;
 import it.unive.lisa.type.Type;
+import org.apache.commons.lang3.tuple.Triple;
+import it.unive.lisa.program.cfg.statement.call.CFGCall;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -158,18 +160,70 @@ public final class AlarmModelBuilder {
 			Set<Frame> expanded,
 			int maxLocations)
 			throws SemanticException {
+		return build(tool, result, st, violation, maxCases, expanded, maxLocations, Collections.emptyList());
+	}
+
+	/**
+	 * Builds the model of the given violation starting from a caller of the
+	 * result containing the statement, reached through the given chain of
+	 * calls: the root frame of the model is the one of the first caller, and
+	 * the calls of the chain are expanded, so that the bad location is in the
+	 * frame of the result. Since the model only considers the executions
+	 * going through the chain, it can confirm the violation, but not refute
+	 * it. With an empty chain, the model starts from the result itself.
+	 *
+	 * @param <A>          the type of the abstract states of the analysis
+	 * @param <D>          the type of the domain of the analysis
+	 * @param tool         the tool containing the results of the analysis
+	 * @param result       the result containing the statement
+	 * @param st           the statement on which the warning would be issued
+	 * @param violation    the violation
+	 * @param maxCases     the maximum number of cases of each transition
+	 * @param expanded     the frames of the callees to expand
+	 * @param maxLocations the maximum number of locations of the model, beyond
+	 *                         which calls are no longer expanded
+	 * @param chain        the chain of calls, from the first caller: for each
+	 *                         call, the result of the caller, its node
+	 *                         containing the call, and the call (the callee
+	 *                         of the last call is the result)
+	 *
+	 * @return the model
+	 *
+	 * @throws SemanticException if something goes wrong while building the
+	 *                               model
+	 */
+	public static <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AlarmModel build(
+			SemanticTool<A, D> tool,
+			AnalyzedCFG<A> result,
+			Statement st,
+			Violation violation,
+			int maxCases,
+			Set<Frame> expanded,
+			int maxLocations,
+			List<Triple<AnalyzedCFG<A>, Statement, CFGCall>> chain)
+			throws SemanticException {
 		Statement bad = violation instanceof ConditionViolation
 				? rootOf(((ConditionViolation) violation).getWhere())
 				: rootOf(st);
 
-		Frame frame = Frame.root(result);
-		ModelLocation badLocation = new ModelLocation(frame, bad);
+		AnalyzedCFG<A> root = chain.isEmpty() ? result : chain.get(0).getLeft();
+		Frame frame = Frame.root(root);
+		// the calls of the chain are always expanded
+		Frame badFrame = frame;
+		Set<Frame> forced = new LinkedHashSet<>(expanded);
+		for (int i = 0; i < chain.size(); i++) {
+			AnalyzedCFG<A> callee = i + 1 < chain.size() ? chain.get(i + 1).getLeft() : result;
+			badFrame = badFrame.enter(chain.get(i).getRight(), callee);
+			forced.add(badFrame);
+		}
+		Frame target = badFrame;
+		ModelLocation badLocation = new ModelLocation(badFrame, bad);
 		Set<ModelLocation> cone = new LinkedHashSet<>();
-		for (Statement node : cone(result, bad))
+		for (Statement node : cone(root, chain.isEmpty() ? bad : chain.get(0).getMiddle()))
 			cone.add(new ModelLocation(frame, node));
 
 		InputSourceResolver resolver = new InputSourceResolver(tool);
-		FreshValueFactory factory = new FreshValueFactory(resolver, new HeapModel(result.getProgram()));
+		FreshValueFactory factory = new FreshValueFactory(resolver, new HeapModel(root.getProgram()));
 		// the locations are extracted once, in the order they are discovered:
 		// the ones of the cone first, then the ones of the expanded callees
 		// and the ones where callers resume
@@ -183,7 +237,7 @@ public final class AlarmModelBuilder {
 			return false;
 		};
 		Map<Frame, TransitionExtractor<A, D>> extractors = new LinkedHashMap<>();
-		extractors.put(frame, new TransitionExtractor<>(tool, frame, factory, maxCases, expanded, budget, null));
+		extractors.put(frame, new TransitionExtractor<>(tool, frame, factory, maxCases, forced, budget, null));
 		Map<ModelLocation, NodeTransitions> transitions = new LinkedHashMap<>();
 		Map<ModelLocation, AnalysisState<A>> preStates = new LinkedHashMap<>();
 		boolean expansion = false;
@@ -194,7 +248,8 @@ public final class AlarmModelBuilder {
 			// checked at a single location, unless the violation is about the
 			// errors they raise
 			NodeTransitions tr = extractor.extract(loc,
-					!loc.getNode().equals(bad) || violation instanceof ErrorViolation);
+					!(loc.getFrame().equals(target) && loc.getNode().equals(bad))
+							|| violation instanceof ErrorViolation);
 			transitions.put(loc, tr);
 			preStates.put(loc, extractor.preStateOf(loc.getNode()));
 			for (EdgeTransition e : tr.getOutgoing()) {
@@ -210,7 +265,7 @@ public final class AlarmModelBuilder {
 					// a new callee frame, with all its nodes: the ones that
 					// cannot return to the caller nor raise errors leaving
 					// the callee are pruned later
-					extractors.put(callee, new TransitionExtractor<>(tool, callee, factory, maxCases, expanded,
+					extractors.put(callee, new TransitionExtractor<>(tool, callee, factory, maxCases, forced,
 							budget, loc.getNode(), extractor));
 					for (Statement node : callee.getResult().getNodes())
 						add(new ModelLocation(callee, node), locations, ws);
@@ -253,7 +308,7 @@ public final class AlarmModelBuilder {
 		}
 
 		Set<ModelLocation> initial = new LinkedHashSet<>();
-		for (Statement entry : result.getEntrypoints()) {
+		for (Statement entry : root.getEntrypoints()) {
 			ModelLocation loc = new ModelLocation(frame, entry);
 			if (locations.contains(loc))
 				initial.add(loc);
@@ -274,10 +329,14 @@ public final class AlarmModelBuilder {
 		all.addAll(others);
 
 		if (badCases == null)
-			badCases = badCases(transitions.get(badLocation), violation, factory);
+			// the bad location might be missing if the calls of the chain
+			// could not be expanded
+			badCases = transitions.containsKey(badLocation)
+					? badCases(transitions.get(badLocation), violation, factory)
+					: new ArrayList<>();
 
 		Map<Identifier, InputSource> parameters = new LinkedHashMap<>();
-		for (Parameter formal : result.getDescriptor().getFormals()) {
+		for (Parameter formal : root.getDescriptor().getFormals()) {
 			InputSource source = resolver.resolve(new PushAny(formal.getStaticType(), formal.getLocation()), null);
 			parameters.put(formal.toSymbolicVariable(), source);
 		}
@@ -362,7 +421,7 @@ public final class AlarmModelBuilder {
 		}
 		Set<SymbolicExpression> init = new LinkedHashSet<>();
 		if (!initial.isEmpty()) {
-			Set<SymbolicExpression> cs = exporters.get(frame).constraints(result.getEntryState(), vocabulary,
+			Set<SymbolicExpression> cs = exporters.get(frame).constraints(root.getEntryState(), vocabulary,
 					initial.iterator().next().getNode());
 			if (cs != null)
 				init.addAll(cs);
@@ -384,9 +443,9 @@ public final class AlarmModelBuilder {
 			if (!fresh.getStaticType().isUntyped())
 				types.put(fresh, Set.of(fresh.getStaticType()));
 
-		boolean confirmable = result.getId().isStartingId()
-				&& result.getProgram().getEntryPoints().stream()
-						.anyMatch(cfg -> cfg.getDescriptor().equals(result.getDescriptor()));
+		boolean confirmable = root.getId().isStartingId()
+				&& root.getProgram().getEntryPoints().stream()
+						.anyMatch(cfg -> cfg.getDescriptor().equals(root.getDescriptor()));
 
 		Set<Frame> frames = new LinkedHashSet<>();
 		for (ModelLocation loc : locations)

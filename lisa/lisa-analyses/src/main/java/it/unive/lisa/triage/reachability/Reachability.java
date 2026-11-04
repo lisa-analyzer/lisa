@@ -52,6 +52,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.tuple.Triple;
 
 /**
  * An algorithm computing the reachability of program points from the results of
@@ -288,6 +289,28 @@ public class Reachability<A extends AbstractLattice<A>, D extends AbstractDomain
 			AnalyzedCFG<A> result)
 			throws SemanticException {
 		List<Pair<AnalyzedCFG<A>, Statement>> callers = new ArrayList<>();
+		for (Triple<AnalyzedCFG<A>, Statement, CFGCall> site : callSitesOf(result))
+			callers.add(Pair.of(site.getLeft(), site.getMiddle()));
+		return callers;
+	}
+
+	/**
+	 * Yields the call sites that reach the given result: for each result of a
+	 * caller whose context, pushed with the call, is the one of the given
+	 * result, the result of the caller, the node of the caller containing the
+	 * call, and the call itself.
+	 *
+	 * @param result the result
+	 *
+	 * @return the call sites
+	 *
+	 * @throws SemanticException if something goes wrong while computing the
+	 *                               contexts of the calls
+	 */
+	public List<Triple<AnalyzedCFG<A>, Statement, CFGCall>> callSitesOf(
+			AnalyzedCFG<A> result)
+			throws SemanticException {
+		List<Triple<AnalyzedCFG<A>, Statement, CFGCall>> callers = new ArrayList<>();
 		CFG cfg = owners.get(result);
 		if (cfg == null || callgraph == null || result.getId() == null)
 			return callers;
@@ -313,7 +336,7 @@ public class Reachability<A extends AbstractLattice<A>, D extends AbstractDomain
 						state = callState(caller, site, node);
 					ScopeId<A> pushed = caller.getId().push(call, state);
 					if (result.getId().equals(pushed)) {
-						callers.add(Pair.of(caller, node));
+						callers.add(Triple.of(caller, node, call));
 						break;
 					}
 				}

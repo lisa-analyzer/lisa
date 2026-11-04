@@ -366,7 +366,8 @@ public class ReplayInterprocedural<A extends AbstractLattice<A>, D extends Abstr
 		for (AnalyzedCFG<A> callee : results)
 			frames.add(frame.enter(call, callee));
 		String obstacle = obstacle(call, results, entryState, parameters, expressions);
-		boolean expand = obstacle == null && expanded.containsAll(frames);
+		// the callees of a call are expanded together
+		boolean expand = obstacle == null && !frames.isEmpty() && frames.stream().anyMatch(expanded::contains);
 
 		if (resumed != null) {
 			// the run resumes after an expanded call: the ones reached before

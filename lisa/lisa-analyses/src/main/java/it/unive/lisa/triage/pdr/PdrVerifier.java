@@ -31,6 +31,9 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.apache.commons.lang3.tuple.Triple;
+import it.unive.lisa.program.cfg.statement.call.CFGCall;
+import java.util.LinkedList;
 import java.util.function.Supplier;
 
 /**
@@ -124,6 +127,37 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 	private List<ModelLocation> callTrace;
 
 	/**
+	 * Whether the last counterexample found is precise, but starts from states
+	 * that are not the initial ones of the program.
+	 */
+	private boolean fromCallee;
+
+	/**
+	 * The number of queries issued while verifying the current warning.
+	 */
+	private int queries;
+
+	private int maxChains = DEFAULT_MAX_CHAINS;
+
+	/**
+	 * The default maximum number of chains of calls tried when a
+	 * counterexample starts from the states of a callee.
+	 */
+	public static final int DEFAULT_MAX_CHAINS = 3;
+
+	/**
+	 * The maximum length of the chains of calls tried when a counterexample
+	 * starts from the states of a callee.
+	 */
+	private static final int MAX_CHAIN_LENGTH = 20;
+
+	/**
+	 * The maximum number of partial chains explored when looking for chains of
+	 * calls.
+	 */
+	private static final int MAX_EXPLORED_CALLERS = 1000;
+
+	/**
 	 * Builds the verifier, with default budgets, using z3 (as configured in
 	 * {@link SmtLibProcessSolver}).
 	 */
@@ -183,6 +217,23 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 	public PdrVerifier<A, D> withSeeding(
 			boolean seeding) {
 		this.seeding = seeding;
+		return this;
+	}
+
+	/**
+	 * Sets the maximum number of chains of calls from the beginning of the
+	 * program tried when a counterexample is precise, but starts from the
+	 * states of a callee (default: {@link #DEFAULT_MAX_CHAINS}; {@code 0}
+	 * never tries them). Models starting from the callers can only confirm
+	 * violations.
+	 *
+	 * @param maxChains the maximum number of chains
+	 *
+	 * @return this verifier
+	 */
+	public PdrVerifier<A, D> withMaxChains(
+			int maxChains) {
+		this.maxChains = maxChains;
 		return this;
 	}
 
@@ -269,17 +320,89 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 						"refuted by the results of the analysis"
 								+ (res.getExplanation() == null ? "" : ": " + res.getExplanation()));
 		}
+		queries = 0;
+		VerificationResult res = refine(result, st, violation, List.of());
+		if (res.getOutcome() != VerificationOutcome.POSSIBLE || !fromCallee || maxChains <= 0)
+			return res;
+
+		// the counterexample starts from the states of the result, that are
+		// not the initial ones of the program: models starting from the
+		// callers can confirm it (but not refute it, since they only consider
+		// the executions through specific chains of calls)
+		for (List<Triple<AnalyzedCFG<A>, Statement, CFGCall>> chain : chainsTo(result)) {
+			VerificationResult confirmed = refine(result, st, violation, chain);
+			if (confirmed.getOutcome() == VerificationOutcome.CONFIRMED)
+				return confirmed;
+		}
+		return res;
+	}
+
+	/**
+	 * Yields the chains of calls reaching the given result from the beginning
+	 * of the program (from the first caller, see
+	 * {@link AlarmModelBuilder#build(SemanticTool, AnalyzedCFG, Statement, Violation, int, Set, int, List)}),
+	 * at most {@link #maxChains} of them, shortest first, without recursion.
+	 */
+	private List<List<Triple<AnalyzedCFG<A>, Statement, CFGCall>>> chainsTo(
+			AnalyzedCFG<A> result)
+			throws SemanticException {
+		ReachabilityVerifier<A, D> reachability = new ReachabilityVerifier<>();
+		reachability.init(tool);
+		List<List<Triple<AnalyzedCFG<A>, Statement, CFGCall>>> chains = new ArrayList<>();
+		LinkedList<List<Triple<AnalyzedCFG<A>, Statement, CFGCall>>> ws = new LinkedList<>();
+		ws.add(List.of());
+		int explored = 0;
+		while (!ws.isEmpty() && chains.size() < maxChains && explored++ < MAX_EXPLORED_CALLERS) {
+			List<Triple<AnalyzedCFG<A>, Statement, CFGCall>> chain = ws.removeFirst();
+			AnalyzedCFG<A> callee = chain.isEmpty() ? result : chain.get(0).getLeft();
+			for (Triple<AnalyzedCFG<A>, Statement, CFGCall> site : reachability.getReachability()
+					.callSitesOf(callee)) {
+				AnalyzedCFG<A> caller = site.getLeft();
+				if (caller == result || chain.stream().anyMatch(link -> link.getLeft() == caller))
+					// recursion
+					continue;
+				List<Triple<AnalyzedCFG<A>, Statement, CFGCall>> longer = new ArrayList<>();
+				longer.add(site);
+				longer.addAll(chain);
+				if (isProgramStart(caller))
+					chains.add(longer);
+				else if (longer.size() < MAX_CHAIN_LENGTH)
+					ws.add(longer);
+			}
+		}
+		return chains;
+	}
+
+	private static boolean isProgramStart(
+			AnalyzedCFG<?> result) {
+		return result.getId().isStartingId()
+				&& result.getProgram().getEntryPoints().stream()
+						.anyMatch(cfg -> cfg.getDescriptor().equals(result.getDescriptor()));
+	}
+
+	/**
+	 * Verifies the violation on models expanding more and more calls, as long
+	 * as counterexamples are imprecise because of calls (see
+	 * {@link #withMaxRounds(int)}), starting from the given chain of calls (see
+	 * {@link AlarmModelBuilder#build(SemanticTool, AnalyzedCFG, Statement, Violation, int, Set, int, List)}).
+	 */
+	private VerificationResult refine(
+			AnalyzedCFG<A> result,
+			Statement st,
+			Violation violation,
+			List<Triple<AnalyzedCFG<A>, Statement, CFGCall>> chain)
+			throws SemanticException {
 		Set<Frame> expanded = new LinkedHashSet<>();
-		int queries = 0;
 		for (int round = 1;; round++) {
 			AlarmModel model = AlarmModelBuilder.build(tool, result, st, violation, maxCases, expanded,
-					maxLocations);
+					maxLocations, chain);
 			if (model.getSeeds(model.getBadLocation()) == null)
 				return new VerificationResult(VerificationOutcome.REFUTED, "the statement is unreachable");
 			if (model.getBadCases().isEmpty())
 				return new VerificationResult(VerificationOutcome.REFUTED, "the violation cannot happen");
 
 			inexact = false;
+			fromCallee = false;
 			callTrace = null;
 			statistics = Map.of();
 			VerificationResult res = search(model, false);
@@ -385,9 +508,11 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 			inexact = true;
 			return new VerificationResult(VerificationOutcome.POSSIBLE, path + ", " + Unrolling.explain(imprecisions));
 		}
-		if (!model.isConfirmable())
+		if (!model.isConfirmable()) {
+			fromCallee = true;
 			return new VerificationResult(VerificationOutcome.POSSIBLE,
 					path + ", from states that are not the initial ones of the program");
+		}
 		return new VerificationResult(VerificationOutcome.CONFIRMED,
 				path + " (not yet certified by execution)", inputs.get());
 	}
