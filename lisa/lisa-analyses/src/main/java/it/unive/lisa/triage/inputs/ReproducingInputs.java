@@ -45,6 +45,22 @@ public class ReproducingInputs {
 	public void add(
 			InputSource source,
 			String value) {
+		add(source, value, context);
+	}
+
+	/**
+	 * Adds an input taking the given value, produced in the given context
+	 * (e.g., the one of a callee whose code produces the input), after the
+	 * ones added so far.
+	 *
+	 * @param source  the source of the input
+	 * @param value   the value, in SMT-LIB syntax
+	 * @param context the context where the input is produced
+	 */
+	public void add(
+			InputSource source,
+			String value,
+			ScopeId<?> context) {
 		int occurrence = occurrences.merge(source, 1, Integer::sum) - 1;
 		inputs.add(source.toReproducingInput(context, occurrence, ValueSort.display(value)));
 	}

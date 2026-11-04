@@ -9,6 +9,7 @@ import it.unive.lisa.checks.verification.IndividualWarningVerifier;
 import it.unive.lisa.checks.verification.VerificationOutcome;
 import it.unive.lisa.checks.verification.VerificationResult;
 import it.unive.lisa.checks.verification.Violation;
+import it.unive.lisa.interprocedural.ScopeId;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.triage.bmc.Unrolling;
@@ -497,8 +498,12 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 			// correspond to a step
 			if (trace.isEmpty() || !trace.get(trace.size() - 1).equals(o.getLocation()))
 				trace.add(o.getLocation());
+			// inputs are produced in the context of the frame of the
+			// transition producing them
+			ScopeId<?> context = (o.getEdge() == null ? o.getLocation() : o.getEdge().getSource()).getFrame()
+					.getResult().getId();
 			for (Map.Entry<InputValue, String> input : o.getInputs().entrySet())
-				inputs.add(input.getKey().getSource(), input.getValue());
+				inputs.add(input.getKey().getSource(), input.getValue(), context);
 		}
 
 		String path = "violation reached in " + (trace.size() - 1) + " steps through " + trace;

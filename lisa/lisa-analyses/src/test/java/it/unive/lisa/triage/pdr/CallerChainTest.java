@@ -118,6 +118,9 @@ public class CallerChainTest {
 			}
 		assertTrue(found, result.toString());
 		assertTrue(result.getExplanation().contains("[main > helper]"), result.toString());
+		// the value returned by the call is produced in the context of main
+		for (ReproducingInput input : result.getReproducingInputs())
+			assertEquals("<empty>", input.getContext(), result.toString());
 	}
 
 	@Test

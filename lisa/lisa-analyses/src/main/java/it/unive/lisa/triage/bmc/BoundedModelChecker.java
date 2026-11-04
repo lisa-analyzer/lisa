@@ -9,6 +9,7 @@ import it.unive.lisa.checks.verification.IndividualWarningVerifier;
 import it.unive.lisa.checks.verification.VerificationOutcome;
 import it.unive.lisa.checks.verification.VerificationResult;
 import it.unive.lisa.checks.verification.Violation;
+import it.unive.lisa.interprocedural.ScopeId;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.triage.inputs.ReproducingInputs;
@@ -310,11 +311,14 @@ public class BoundedModelChecker<A extends AbstractLattice<A>, D extends Abstrac
 				if (edge.getDestination().equals(trace.get(t + 1))) {
 					String key = unrolling.edgeKey(t, edge);
 					imprecisions.addAll(unrolling.getImprecisions(key, solver));
-					collectInputs(unrolling, key, solver, inputs);
+					// inputs are produced in the context of the frame of the
+					// transition producing them
+					collectInputs(unrolling, key, solver, inputs, edge.getSource().getFrame().getResult().getId());
 				}
 		String badKey = unrolling.badKey(length);
 		imprecisions.addAll(unrolling.getImprecisions(badKey, solver));
-		collectInputs(unrolling, badKey, solver, inputs);
+		collectInputs(unrolling, badKey, solver, inputs,
+				trace.get(length).getFrame().getResult().getId());
 
 		String path = "violation reached in " + length + " steps through " + trace;
 		if (!imprecisions.isEmpty()) {
@@ -334,7 +338,8 @@ public class BoundedModelChecker<A extends AbstractLattice<A>, D extends Abstrac
 			Unrolling unrolling,
 			String key,
 			SmtSolver solver,
-			ReproducingInputs inputs) {
+			ReproducingInputs inputs,
+			ScopeId<?> context) {
 		List<InputValue> values = Unrolling.inputsOf(unrolling.getFreshValues(key));
 		if (values.isEmpty())
 			return;
@@ -343,6 +348,6 @@ public class BoundedModelChecker<A extends AbstractLattice<A>, D extends Abstrac
 			terms.add(unrolling.freshConstant(v, key));
 		Map<Term, String> model = solver.getValues(terms);
 		for (int i = 0; i < values.size(); i++)
-			inputs.add(values.get(i).getSource(), model.get(terms.get(i)));
+			inputs.add(values.get(i).getSource(), model.get(terms.get(i)), context);
 	}
 }
