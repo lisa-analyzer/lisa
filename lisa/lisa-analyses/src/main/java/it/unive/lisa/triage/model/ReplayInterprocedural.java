@@ -113,14 +113,13 @@ import org.apache.commons.lang3.tuple.Pair;
  * of frames leading to the replayed one;</li>
  * <li>it is not part of the node where the property is checked (since the
  * property must be checked on a single location);</li>
- * <li>the run did not write the heap before the call, except for allocations
- * (i.e., the store updates no content of the heap and loses no value), and
- * produced no unknown value (i.e., it reached no summarized nor open call, and
- * the store contains no unknown value), since an unknown value evaluated again
- * when the node resumes would be a different one; assignments to variables
- * and allocations are allowed, as callees cannot change the variables of
- * their callers nor the references allocated by them (recursion being
- * excluded);</li>
+ * <li>the run lost no value and produced no unknown value before the call
+ * (i.e., it reached no summarized nor open call, and the store contains no
+ * unknown value in its path conditions and in the values of variables), since
+ * an unknown value evaluated again when the node resumes would be a different
+ * one; the effects of the part of the node evaluated before the call (e.g.,
+ * assignments, allocations, writes of the heap) are allowed, as they are only
+ * part of the transition entering the callees;</li>
  * <li>(<i>operand rule</i>) the operands evaluated in the node before the call
  * that are not actual parameters of the call do not read the heap nor global
  * variables (i.e., their values contain no {@link AccessChild},
@@ -564,15 +563,17 @@ public class ReplayInterprocedural<A extends AbstractLattice<A>, D extends Abstr
 			return "call in the node where the property is checked";
 		if (unknown)
 			return "unknown values produced before the call";
+		// the effects of the part of the node evaluated before the call (e.g.,
+		// writes of the heap) are only part of the transition entering the
+		// callee, as the store is reset when the node resumes: only the values
+		// they compute and that are used afterwards matter
 		for (SymbolicCase c : entryState.getExecutionState().getStore().getCases()) {
-			if (c.isHeapHavoc() || c.isHavocAll())
-				return "heap written before the call";
+			if (c.isHavocAll())
+				return "values lost before the call";
 			if (c.getPathCondition().stream().anyMatch(ReplayInterprocedural::hasFreshValues))
 				return "unknown values produced before the call";
 			for (Map.Entry<Identifier, SymbolicExpression> u : c.getUpdates().entrySet())
-				if (HeapModel.isHeapState(u.getKey()) && !u.getKey().equals(HeapModel.ALLOC))
-					return "heap written before the call";
-				else if (hasFreshValues(u.getValue()))
+				if (!HeapModel.isHeapState(u.getKey()) && hasFreshValues(u.getValue()))
 					return "unknown values produced before the call";
 		}
 

@@ -128,12 +128,6 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 	private List<ModelLocation> callTrace;
 
 	/**
-	 * Whether the last counterexample found is precise, but starts from states
-	 * that are not the initial ones of the program.
-	 */
-	private boolean fromCallee;
-
-	/**
 	 * The number of queries issued while verifying the current warning.
 	 */
 	private int queries;
@@ -146,14 +140,14 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 	private int maxChains = DEFAULT_MAX_CHAINS;
 
 	/**
-	 * The default maximum number of chains of calls tried when a
-	 * counterexample starts from the states of a callee.
+	 * The default maximum number of chains of calls tried when a violation in
+	 * a callee is neither confirmed nor refuted.
 	 */
 	public static final int DEFAULT_MAX_CHAINS = 3;
 
 	/**
-	 * The maximum length of the chains of calls tried when a counterexample
-	 * starts from the states of a callee.
+	 * The maximum length of the chains of calls tried when a violation in a
+	 * callee is neither confirmed nor refuted.
 	 */
 	private static final int MAX_CHAIN_LENGTH = 20;
 
@@ -228,8 +222,9 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 
 	/**
 	 * Sets the maximum number of chains of calls from the beginning of the
-	 * program tried when a counterexample is precise, but starts from the
-	 * states of a callee (default: {@link #DEFAULT_MAX_CHAINS}; {@code 0}
+	 * program tried when a violation in a callee (i.e., in a result that is not
+	 * the one of the beginning of the program) is neither confirmed nor
+	 * refuted (default: {@link #DEFAULT_MAX_CHAINS}; {@code 0}
 	 * never tries them). Models starting from the callers can only confirm
 	 * violations.
 	 *
@@ -330,13 +325,14 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 		// the time budget is shared by all the models built for the violation
 		deadline = System.currentTimeMillis() + maxMillis;
 		VerificationResult res = refine(result, st, violation, List.of());
-		if (res.getOutcome() != VerificationOutcome.POSSIBLE || !fromCallee || maxChains <= 0)
+		if (res.getOutcome() != VerificationOutcome.POSSIBLE || isProgramStart(result) || maxChains <= 0)
 			return res;
 
-		// the counterexample starts from the states of the result, that are
-		// not the initial ones of the program: models starting from the
-		// callers can confirm it (but not refute it, since they only consider
-		// the executions through specific chains of calls)
+		// the model starts from the states of the result, that are not the
+		// initial ones of the program (e.g., the contents of the heap are
+		// unknown): models starting from the callers can confirm the violation
+		// (but not refute it, since they only consider the executions through
+		// specific chains of calls)
 		for (List<Triple<AnalyzedCFG<A>, Statement, CFGCall>> chain : chainsTo(result)) {
 			if (System.currentTimeMillis() >= deadline)
 				break;
@@ -413,7 +409,6 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 				return new VerificationResult(VerificationOutcome.REFUTED, "the violation cannot happen");
 
 			inexact = false;
-			fromCallee = false;
 			callTrace = null;
 			statistics = Map.of();
 			VerificationResult res = search(model, false);
@@ -525,11 +520,9 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 			inexact = true;
 			return new VerificationResult(VerificationOutcome.POSSIBLE, path + ", " + Unrolling.explain(imprecisions));
 		}
-		if (!model.isConfirmable()) {
-			fromCallee = true;
+		if (!model.isConfirmable())
 			return new VerificationResult(VerificationOutcome.POSSIBLE,
 					path + ", from states that are not the initial ones of the program");
-		}
 		return new VerificationResult(VerificationOutcome.CONFIRMED,
 				path + " (not yet certified by execution)", inputs.get());
 	}
