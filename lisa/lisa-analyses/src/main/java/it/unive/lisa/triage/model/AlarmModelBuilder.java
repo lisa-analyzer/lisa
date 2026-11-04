@@ -191,7 +191,11 @@ public final class AlarmModelBuilder {
 		while (!ws.isEmpty()) {
 			ModelLocation loc = ws.removeFirst();
 			TransitionExtractor<A, D> extractor = extractors.get(loc.getFrame());
-			NodeTransitions tr = extractor.extract(loc, !loc.equals(badLocation));
+			// calls in the bad node are not expanded, so that the property is
+			// checked at a single location, unless the violation is about the
+			// errors they raise
+			NodeTransitions tr = extractor.extract(loc,
+					!loc.getNode().equals(bad) || violation instanceof ErrorViolation);
 			transitions.put(loc, tr);
 			preStates.put(loc, extractor.preStateOf(loc.getNode()));
 			for (EdgeTransition e : tr.getOutgoing()) {
@@ -204,18 +208,42 @@ public final class AlarmModelBuilder {
 					// the location where the caller resumes
 					add(dest, locations, ws);
 				else if (!extractors.containsKey(callee)) {
-					// a new callee frame: its nodes that can reach an exit
+					// a new callee frame, with all its nodes: the ones that
+					// cannot return to the caller nor raise errors leaving
+					// the callee are pruned later
 					extractors.put(callee, new TransitionExtractor<>(tool, callee, factory, maxCases, expanded,
-							budget, loc.getNode()));
-					// the location where the caller resumes is added only if
-					// some exit point can return to it
-					Set<Statement> exits = new LinkedHashSet<>();
-					for (Statement exit : callee.getResult().getAllExitpoints())
-						exits.addAll(cone(callee.getResult(), exit));
-					for (Statement node : exits)
+							budget, loc.getNode(), extractor));
+					for (Statement node : callee.getResult().getNodes())
 						add(new ModelLocation(callee, node), locations, ws);
 				}
 			}
+		}
+
+		List<BadCase> badCases = null;
+		if (violation instanceof ErrorViolation && expansion && entersCallees(transitions, frame, bad)) {
+			// the errors raised by the bad node, either by itself or by the
+			// callees it enters, reach a synthetic location that is the bad
+			// one
+			ErrorViolation err = (ErrorViolation) violation;
+			ModelLocation raised = ModelLocation.raised(frame, bad);
+			for (ModelLocation loc : new ArrayList<>(locations)) {
+				NodeTransitions tr = transitions.get(loc);
+				List<EdgeTransition> more = new ArrayList<>();
+				if (loc.getFrame().isRoot() && loc.getNode().equals(bad))
+					for (Map.Entry<Error, SymbolicStore> e : tr.getErrors().entrySet())
+						if (err.matches(e.getKey().getType()))
+							more.add(new EdgeTransition(loc, raised, null, e.getValue()));
+				for (NodeTransitions.EscapingError e : tr.getEscaping())
+					if (e.getNode().equals(bad) && err.matches(e.getError().getType()))
+						more.add(new EdgeTransition(loc, raised, null, e.getStore()));
+				transitions.put(loc, tr.withOutgoing(more));
+			}
+			locations.add(raised);
+			transitions.put(raised, new NodeTransitions(raised, List.of(), null, Map.of(), Map.of()));
+			preStates.put(raised, preStates.get(badLocation));
+			badLocation = raised;
+			// reaching the location is the violation
+			badCases = List.of(new BadCase(List.of(), null));
 		}
 
 		if (expansion) {
@@ -246,7 +274,8 @@ public final class AlarmModelBuilder {
 		List<NodeTransitions> all = new ArrayList<>(byNode.values());
 		all.addAll(others);
 
-		List<BadCase> badCases = badCases(transitions.get(badLocation), violation, factory);
+		if (badCases == null)
+			badCases = badCases(transitions.get(badLocation), violation, factory);
 
 		Map<Identifier, InputSource> parameters = new HashMap<>();
 		for (Parameter formal : result.getDescriptor().getFormals()) {
@@ -309,7 +338,7 @@ public final class AlarmModelBuilder {
 			Set<SymbolicExpression> cs = exporter.constraints(preStates.get(loc), vocabulary, node);
 			if (cs == null)
 				continue;
-			if (loc.getResumed() != null) {
+			if (loc.getResumed() != null || loc.isRaised()) {
 				// the state before the node does not describe the values
 				// after the callees returned
 				seeds.put(loc, new HashSet<>());
@@ -419,6 +448,22 @@ public final class AlarmModelBuilder {
 			}
 		}
 		return chain;
+	}
+
+	/**
+	 * Yields {@code true} if some location of the given node, in the given
+	 * frame, enters the frame of a callee.
+	 */
+	private static boolean entersCallees(
+			Map<ModelLocation, NodeTransitions> transitions,
+			Frame frame,
+			Statement node) {
+		for (Map.Entry<ModelLocation, NodeTransitions> tr : transitions.entrySet())
+			if (tr.getKey().getFrame().equals(frame) && tr.getKey().getNode().equals(node))
+				for (EdgeTransition e : tr.getValue().getOutgoing())
+					if (e.getEdge() == null && !e.getDestination().getFrame().equals(frame))
+						return true;
+		return false;
 	}
 
 	private static void add(

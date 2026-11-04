@@ -19,6 +19,7 @@ import it.unive.lisa.program.cfg.fixpoints.forward.ForwardCFGFixpoint;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.call.CFGCall;
+import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.triage.reachability.Reachability;
 import it.unive.lisa.type.Type;
 import java.util.ArrayList;
@@ -67,6 +68,8 @@ public class TransitionExtractor<A extends AbstractLattice<A>, D extends Abstrac
 
 	private final ReplayInterprocedural<A, D> replay;
 
+	private final TransitionExtractor<A, D> parent;
+
 	private final Statement resumeNode;
 
 	/**
@@ -109,6 +112,37 @@ public class TransitionExtractor<A extends AbstractLattice<A>, D extends Abstrac
 			Set<Frame> expanded,
 			BooleanSupplier budget,
 			Statement resumeNode) {
+		this(tool, frame, factory, maxCases, expanded, budget, resumeNode, null);
+	}
+
+	/**
+	 * Builds the extractor.
+	 *
+	 * @param tool       the tool containing the results of the analysis
+	 * @param frame      the frame whose nodes are replayed
+	 * @param factory    the factory of the fresh values used in the
+	 *                       transitions
+	 * @param maxCases   the maximum number of cases of each transition
+	 * @param expanded   the frames of the callees to expand
+	 * @param budget     tells whether more calls can be expanded
+	 * @param resumeNode the node of the caller containing the call that
+	 *                       reaches the frame, where the caller resumes after
+	 *                       the call returns ({@code null} for the root frame)
+	 * @param parent     the extractor of the frame of the caller, that
+	 *                       handles the errors leaving the frame
+	 *                       ({@code null} for the root frame)
+	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public TransitionExtractor(
+			SemanticTool<A, D> tool,
+			Frame frame,
+			FreshValueFactory factory,
+			int maxCases,
+			Set<Frame> expanded,
+			BooleanSupplier budget,
+			Statement resumeNode,
+			TransitionExtractor<A, D> parent) {
+		this.parent = parent;
 		this.frame = frame;
 		this.result = (AnalyzedCFG<A>) frame.getResult();
 		// we use an analysis without events, as the replay is not part of
@@ -262,7 +296,107 @@ public class TransitionExtractor<A extends AbstractLattice<A>, D extends Abstrac
 			}
 		}
 
-		return new NodeTransitions(location, outgoing, exit, raisedErrors(node, post), partial, replay.getCalls());
+		// errors raised in a callee frame that are not caught by the callee
+		// leave it, and are handled by its callers
+		List<NodeTransitions.EscapingError> escaping = new ArrayList<>();
+		if (parent != null)
+			for (Map.Entry<Error, ProgramState<ReplayState<A>>> e : raised(node, post).entrySet())
+				if (!caught(node, e.getKey()))
+					leave(location, e.getKey(), e.getValue(), outgoing, escaping);
+
+		return new NodeTransitions(location, outgoing, exit, raisedErrors(node, post), partial, replay.getCalls(),
+				escaping);
+	}
+
+	/**
+	 * Moves an error raised in the frame of this extractor, and not caught
+	 * there, to the caller: the scope of the callee is popped, and the error
+	 * is raised by the call, as the analysis does when an error leaves a
+	 * callee.
+	 */
+	private void leave(
+			ModelLocation source,
+			Error error,
+			ProgramState<ReplayState<A>> state,
+			List<EdgeTransition> outgoing,
+			List<NodeTransitions.EscapingError> escaping)
+			throws SemanticException {
+		CFGCall call = frame.getCall();
+		ProgramState<ReplayState<A>> popped = state.popScope(new ScopeToken(call), call);
+		Call thrower = call;
+		while (thrower.getSource() != null)
+			thrower = thrower.getSource();
+		parent.raise(source, new Error(error.getType(), thrower), popped, outgoing, escaping);
+	}
+
+	/**
+	 * Handles an error raised by a node of the frame of this extractor
+	 * through one of its calls: the error goes to the handlers of the node
+	 * that catch it, or leaves the frame if none catches it (to the caller, or
+	 * out of the model if this is the root frame).
+	 */
+	private void raise(
+			ModelLocation source,
+			Error error,
+			ProgramState<ReplayState<A>> state,
+			List<EdgeTransition> outgoing,
+			List<NodeTransitions.EscapingError> escaping)
+			throws SemanticException {
+		Statement node = rootOf(error.getThrower());
+		AnalysisState<ReplayState<A>> raised = new AnalysisState<>(state).bottom().addError(error, state);
+		for (Edge handler : handlersOf(node))
+			traverse(source, handler, raised, outgoing);
+		if (caught(node, error))
+			return;
+		if (parent == null)
+			escaping.add(new NodeTransitions.EscapingError(node, error, state.getState().getStore()));
+		else
+			leave(source, error, state, outgoing, escaping);
+	}
+
+	/**
+	 * Yields the error-handling edges that might catch the errors raised by
+	 * the given node: its own ones, and the ones of the nodes that follow it
+	 * (see {@link #downstreamHandlers(Statement)}).
+	 */
+	private List<Edge> handlersOf(
+			Statement node) {
+		List<Edge> handlers = new ArrayList<>();
+		for (Edge edge : result.getOutgoingEdges(node))
+			if (edge.isErrorHandling())
+				handlers.add(edge);
+		for (Edge handler : downstreamHandlers(node))
+			handlers.add(handler.newInstance(node, handler.getDestination()));
+		return handlers;
+	}
+
+	/**
+	 * Yields {@code true} if the given error, raised by the given node, is
+	 * surely caught by one of the handlers of the node (see
+	 * {@link #handlersOf(Statement)}): its type can be assigned to one of the
+	 * types caught by the handler (and to none of the excluded ones), and its
+	 * thrower is protected by the handler.
+	 */
+	private boolean caught(
+			Statement node,
+			Error error) {
+		Type type = error.getType();
+		for (Edge edge : handlersOf(node)) {
+			if (!(edge instanceof ErrorEdge))
+				continue;
+			ErrorEdge handler = (ErrorEdge) edge;
+			if (!handler.getProtectedBlock().getBody().contains(node))
+				continue;
+			boolean excluded = false;
+			for (Type ex : handler.getExcludedTypes())
+				excluded |= type.canBeAssignedTo(ex);
+			if (excluded)
+				continue;
+			for (Type t : handler.getTypes())
+				if (type.canBeAssignedTo(t))
+					return true;
+		}
+		return false;
 	}
 
 	private void traverse(
@@ -334,12 +468,25 @@ public class TransitionExtractor<A extends AbstractLattice<A>, D extends Abstrac
 			Statement node,
 			AnalysisState<ReplayState<A>> post) {
 		Map<Error, SymbolicStore> errors = new HashMap<>();
+		for (Map.Entry<Error, ProgramState<ReplayState<A>>> e : raised(node, post).entrySet())
+			errors.put(e.getKey(), e.getValue().getState().getStore());
+		return errors;
+	}
+
+	/**
+	 * Collects the errors in the given state that have been raised by the given
+	 * node or by its sub-expressions, with their states.
+	 */
+	private Map<Error, ProgramState<ReplayState<A>>> raised(
+			Statement node,
+			AnalysisState<ReplayState<A>> post) {
+		Map<Error, ProgramState<ReplayState<A>>> errors = new LinkedHashMap<>();
 		GenericMapLattice<Error, ProgramState<ReplayState<A>>> map = post.getErrors();
 		if (!map.isBottom() && !map.isTop())
 			for (Error error : map.getKeys()) {
 				ProgramState<ReplayState<A>> state = map.getState(error);
 				if (!state.isBottom() && rootOf(error.getThrower()) == node)
-					errors.put(error, state.getState().getStore());
+					errors.put(error, state);
 			}
 
 		GenericMapLattice<Type, GenericSetLattice<Statement>> smashed = post.getSmashedErrors();
@@ -348,7 +495,7 @@ public class TransitionExtractor<A extends AbstractLattice<A>, D extends Abstrac
 			for (Type type : smashed.getKeys())
 				for (Statement thrower : smashed.getState(type))
 					if (rootOf(thrower) == node)
-						errors.put(new Error(type, thrower), smashedState.getState().getStore());
+						errors.put(new Error(type, thrower), smashedState);
 		return errors;
 	}
 

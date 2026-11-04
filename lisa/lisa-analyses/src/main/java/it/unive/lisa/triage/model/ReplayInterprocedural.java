@@ -93,8 +93,7 @@ import org.apache.commons.lang3.tuple.Pair;
  * (scoping the state and assigning the parameters), and its store is recorded
  * as the transition entering the frame of the callee (see
  * {@link #getEntered()}), while the run stops at the call (errors raised by the
- * callees are still taken from the results of the analysis, as for summarized
- * calls). When the run starts from the location where the node resumes after
+ * callees are propagated from their frames, see {@link TransitionExtractor}). When the run starts from the location where the node resumes after
  * an expanded call returned, all the expanded calls up to that one (included)
  * have already returned: their result is their meta variable, assigned by the
  * transition returning from the callee, with no effects on the store and no
@@ -487,12 +486,10 @@ public class ReplayInterprocedural<A extends AbstractLattice<A>, D extends Abstr
 		}
 
 		// no computed expression is left, as it would make the execution
-		// non-bottom
-		AnalysisState<ReplayState<A>> callres = entryState.bottomExecution();
-		// errors raised inside the callees are not yet propagated from their
-		// frames: they are taken from the results of the analysis as for
-		// summarized calls
-		return withCalleeFailures(call, entryState, callres);
+		// non-bottom; errors raised inside the callees are propagated from
+		// their frames, and executions halting inside them reach no other
+		// location
+		return entryState.bottomExecution();
 	}
 
 	/**
