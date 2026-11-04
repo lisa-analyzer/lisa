@@ -83,12 +83,15 @@ import it.unive.lisa.symbolic.value.operator.unary.NumericAbs;
 import it.unive.lisa.symbolic.value.operator.unary.NumericNegation;
 import it.unive.lisa.symbolic.value.operator.unary.StringLength;
 import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
+import it.unive.lisa.triage.model.InputValue;
 import it.unive.lisa.triage.model.HeapOperators;
 import it.unive.lisa.triage.smt.Sort;
 import it.unive.lisa.triage.smt.Term;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.TypeTokenType;
 import java.math.BigInteger;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -353,8 +356,33 @@ public class ExpressionEncoder
 	public Term visit(
 			Identifier expression,
 			Object... params) {
-		return symbols.constant(expression, sorts.sortOf(expression));
+		Term term = symbols.constant(expression, sorts.sortOf(expression));
+		if (expression instanceof InputValue && constraining.add((InputValue) expression))
+			try {
+				// inputs can only take values satisfying the constraints of
+				// their sources, given in the form "constant OP value"
+				Set<BinaryExpression> constraints = ((InputValue) expression).getSource().getConstraints();
+				if (constraints != null)
+					for (BinaryExpression constraint : constraints)
+						symbols.require(encodeCondition(new BinaryExpression(
+								constraint.getStaticType(),
+								constraint.getLeft(),
+								expression,
+								constraint.getOperator(),
+								constraint.getCodeLocation())));
+			} catch (SemanticException e) {
+				// the constraint cannot be encoded: not requiring it is sound
+			} finally {
+				constraining.remove(expression);
+			}
+		return term;
 	}
+
+	/**
+	 * The inputs whose constraints are being encoded, whose encoding must not
+	 * encode their constraints again.
+	 */
+	private final Set<InputValue> constraining = new HashSet<>();
 
 	@Override
 	public Term visit(
