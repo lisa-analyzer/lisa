@@ -290,8 +290,27 @@ public class TransitionExtractor<A extends AbstractLattice<A>, D extends Abstrac
 			partial.put(node, post.getExecutionState().getStore());
 
 		List<EdgeTransition> outgoing = new ArrayList<>();
-		for (Edge edge : result.getOutgoingEdges(node))
+		// a node with several unconditional successors is an
+		// over-approximation of the control flow of the program (e.g., a
+		// finally block shared by the paths reaching it, that continues to
+		// all their destinations): which successor is taken depends on an
+		// unknown condition
+		long unconditional = result.getOutgoingEdges(node).stream()
+				.filter(e -> e.isUnconditional() && !(e instanceof ErrorEdge))
+				.count();
+		for (Edge edge : result.getOutgoingEdges(node)) {
+			int from = outgoing.size();
 			traverse(location, edge, post, outgoing);
+			if (unconditional > 1 && edge.isUnconditional() && !(edge instanceof ErrorEdge))
+				for (int i = from; i < outgoing.size(); i++) {
+					EdgeTransition e = outgoing.get(i);
+					SummaryMarker choice = new SummaryMarker(node.getProgram().getTypes().getBooleanType(),
+							"choice among the successors of " + node, node.getLocation(),
+							SummaryValue.Kind.CONTROL);
+					outgoing.set(i, new EdgeTransition(e.getSource(), e.getDestination(), e.getEdge(),
+							e.getStore().assume(choice, node)));
+				}
+		}
 		// errors raised by the node might be caught by the handlers of the
 		// nodes that follow it (frontends might attach handlers only to some
 		// nodes of a protected block, e.g., its last one, letting errors flow
@@ -535,6 +554,12 @@ public class TransitionExtractor<A extends AbstractLattice<A>, D extends Abstrac
 
 	private static Statement rootOf(
 			Statement st) {
-		return st instanceof Expression ? ((Expression) st).getRootStatement() : st;
+		// expressions synthesized by the semantics of other statements might
+		// have no root in the cfg
+		Statement root = st instanceof Expression ? ((Expression) st).getRootStatement() : st;
+		if (st.getCFG() == null || st.getCFG().containsNode(root))
+			return root;
+		Statement node = Reachability.nodeOf(st);
+		return node == null ? root : node;
 	}
 }

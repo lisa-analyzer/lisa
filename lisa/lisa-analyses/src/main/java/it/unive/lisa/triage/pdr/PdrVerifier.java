@@ -96,7 +96,7 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 	 * The default maximum number of models built per candidate violation, each
 	 * expanding more calls than the previous one.
 	 */
-	public static final int DEFAULT_MAX_ROUNDS = 5;
+	public static final int DEFAULT_MAX_ROUNDS = 10;
 
 	private final int maxLevel;
 

@@ -373,7 +373,19 @@ public class Reachability<A extends AbstractLattice<A>, D extends AbstractDomain
 		return CompoundState.of(state.withExecutionExpressions(new ExpressionSet()), store);
 	}
 
-	private static Statement nodeOf(
+	/**
+	 * Yields the node of the cfg of the given statement that contains it, that
+	 * is, its root statement. Expressions synthesized by the semantics of other
+	 * statements (e.g., the calls to constructors of object creations) might
+	 * have no root in the cfg: in that case, the node containing an expression
+	 * at the same location is returned.
+	 *
+	 * @param st the statement
+	 *
+	 * @return the node containing the statement, or {@code null} if it cannot
+	 *             be found
+	 */
+	public static Statement nodeOf(
 			Statement st) {
 		Statement root = rootOf(st);
 		CFG cfg = st.getCFG();

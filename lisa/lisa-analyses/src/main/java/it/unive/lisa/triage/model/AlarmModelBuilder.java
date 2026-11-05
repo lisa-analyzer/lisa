@@ -28,6 +28,7 @@ import it.unive.lisa.symbolic.value.operator.unary.LogicalNegation;
 import it.unive.lisa.triage.encoding.SortPolicy;
 import it.unive.lisa.triage.inputs.InputSource;
 import it.unive.lisa.triage.inputs.InputSourceResolver;
+import it.unive.lisa.triage.reachability.Reachability;
 import it.unive.lisa.type.Type;
 import org.apache.commons.lang3.tuple.Triple;
 import it.unive.lisa.program.cfg.statement.call.CFGCall;
@@ -771,7 +772,13 @@ public final class AlarmModelBuilder {
 
 	private static Statement rootOf(
 			Statement st) {
-		return st instanceof Expression ? ((Expression) st).getRootStatement() : st;
+		// expressions synthesized by the semantics of other statements might
+		// have no root in the cfg
+		Statement root = st instanceof Expression ? ((Expression) st).getRootStatement() : st;
+		if (st.getCFG() == null || st.getCFG().containsNode(root))
+			return root;
+		Statement node = Reachability.nodeOf(st);
+		return node == null ? root : node;
 	}
 
 	/**

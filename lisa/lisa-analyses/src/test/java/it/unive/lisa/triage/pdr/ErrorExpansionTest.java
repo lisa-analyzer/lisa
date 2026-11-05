@@ -43,6 +43,15 @@ public class ErrorExpansionTest {
 	private static final String PROGRAM = "class E {\n"
 			+ "  ~E() {}\n"
 			+ "}\n"
+			+ "class G {\n"
+			+ "  ~G() {}\n"
+			+ "}\n"
+			+ "class T {\n"
+			+ "  ~T(a) {\n"
+			+ "    if (a > 0)\n"
+			+ "      throw new E();\n"
+			+ "  }\n"
+			+ "}\n"
 			+ "class test {\n"
 			+ "  check(a) {\n"
 			+ "    if (a > 0)\n"
@@ -91,6 +100,27 @@ public class ErrorExpansionTest {
 			+ "    }\n"
 			+ "    return w;\n"
 			+ "  }\n"
+			+ "  creates(x) {\n"
+			+ "    if (x is int) {\n"
+			+ "      def o = new T(x);\n"
+			+ "    }\n"
+			+ "    return 0;\n"
+			+ "  }\n"
+			+ "  shared(x) {\n"
+			+ "    if (x is int) {\n"
+			+ "      if (x < 0) {\n"
+			+ "        try {\n"
+			+ "          if (x > 0)\n"
+			+ "            throw new E();\n"
+			+ "        } catch (G g) {\n"
+			+ "          def c = 1;\n"
+			+ "        } finally {\n"
+			+ "          def f = 1;\n"
+			+ "        }\n"
+			+ "      }\n"
+			+ "    }\n"
+			+ "    return 0;\n"
+			+ "  }\n"
 			+ "}";
 
 	private static Program program;
@@ -127,13 +157,21 @@ public class ErrorExpansionTest {
 		assertNotNull(tool);
 	}
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private static VerificationResult verify(
 			String name,
 			String node,
 			Violation violation)
 			throws SemanticException {
-		PdrVerifier verifier = new PdrVerifier<>().withFixpointCheck(false);
+		return verify(new PdrVerifier<>().withFixpointCheck(false), name, node, violation);
+	}
+
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private static VerificationResult verify(
+			PdrVerifier verifier,
+			String name,
+			String node,
+			Violation violation)
+			throws SemanticException {
 		verifier.init(tool);
 		CFG cfg = program.getAllCFGs().stream().filter(c -> c.getDescriptor().getName().equals(name)).findFirst()
 				.get();
@@ -178,6 +216,31 @@ public class ErrorExpansionTest {
 		assertEquals(VerificationOutcome.CONFIRMED, result.getOutcome(), result.toString());
 		assertTrue(valueOf(result, "parameter x of") > 0, result.toString());
 		assertTrue(result.getExplanation().contains("[caught > deep > check] throw"), result.toString());
+	}
+
+	@Test
+	public void errorsOfConstructorsAreNotLostWhenSummarized() throws SemanticException {
+		// the errors leaving the constructor called by the object creation
+		// are attached to the states after the whole node by the analysis
+		VerificationResult result = verify(new PdrVerifier<>().withFixpointCheck(false).withMaxRounds(1), "creates",
+				"o = ", Violation.error());
+		assertNotEquals(VerificationOutcome.REFUTED, result.getOutcome(), result.toString());
+	}
+
+	@Test
+	public void errorsOfConstructorsAreConfirmed() throws SemanticException {
+		VerificationResult result = verify("creates", "o = ", Violation.error());
+		assertEquals(VerificationOutcome.CONFIRMED, result.getOutcome(), result.toString());
+		assertTrue(valueOf(result, "parameter x of") > 0, result.toString());
+	}
+
+	@Test
+	public void sharedFinallyBlocksDoNotConfirm() throws SemanticException {
+		// the finally block is shared by the normal and the exceptional
+		// paths, and the cfg continues from it to both their destinations:
+		// the rethrow reached after a normal completion is not an execution
+		VerificationResult result = verify("shared", "throw", Violation.error());
+		assertNotEquals(VerificationOutcome.CONFIRMED, result.getOutcome(), result.toString());
 	}
 
 	@Test

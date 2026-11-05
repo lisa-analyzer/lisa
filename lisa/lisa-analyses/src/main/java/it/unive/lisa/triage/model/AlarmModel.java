@@ -1,6 +1,7 @@
 package it.unive.lisa.triage.model;
 
 import it.unive.lisa.analysis.AnalyzedCFG;
+import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.triage.encoding.SortPolicy;
@@ -416,9 +417,15 @@ public class AlarmModel {
 		sb.append("initial constraints: ").append(initialConstraints).append("\n");
 
 		List<ModelLocation> sorted = new ArrayList<>(locations);
+		// locations of different kinds are not comparable with each other
 		sorted.sort((
 				l,
-				r) -> l.getNode().getLocation().compareTo(r.getNode().getLocation()));
+				r) -> {
+			CodeLocation left = l.getNode().getLocation();
+			CodeLocation right = r.getNode().getLocation();
+			int cmp = left.getClass().getName().compareTo(right.getClass().getName());
+			return cmp != 0 ? cmp : left.compareTo(right);
+		});
 		for (ModelLocation loc : sorted) {
 			sb.append("location ").append(loc).append(" at ").append(loc.getNode().getLocation());
 			if (loc.equals(badLocation))

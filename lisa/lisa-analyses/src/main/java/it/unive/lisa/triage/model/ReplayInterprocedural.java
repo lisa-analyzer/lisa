@@ -459,16 +459,30 @@ public class ReplayInterprocedural<A extends AbstractLattice<A>, D extends Abstr
 		Call thrower = call;
 		while (thrower.getSource() != null)
 			thrower = thrower.getSource();
-		GenericMapLattice<Error, ProgramState<A>> errors = post.getErrors();
-		if (!errors.isBottom() && !errors.isTop())
-			for (Error error : errors.getKeys())
-				if (error.getThrower().equals(thrower) && !errors.getState(error).isBottom())
-					callres = callres.addError(error, lift(errors.getState(error), lost));
-		GenericMapLattice<Type, GenericSetLattice<Statement>> smashed = post.getSmashedErrors();
-		if (!smashed.isBottom() && !smashed.isTop() && !post.getSmashedErrorsState().isBottom())
-			for (Type type : smashed.getKeys())
-				if (smashed.getState(type).contains(thrower))
-					callres = callres.addError(new Error(type, thrower), lift(post.getSmashedErrorsState(), lost));
+		// the errors raised by a call that is part of a larger expression
+		// (e.g., the constructor call of an object creation) might be added
+		// to the states of the enclosing expressions only: the errors of the
+		// call are also looked for in the state after the node
+		List<AnalysisState<A>> posts = new ArrayList<>(2);
+		posts.add(post);
+		if (node != null && node != call && result.containsNode(node))
+			posts.add(result.getAnalysisStateAfter(node));
+		Set<Error> added = new LinkedHashSet<>();
+		for (AnalysisState<A> state : posts) {
+			if (state == null)
+				continue;
+			GenericMapLattice<Error, ProgramState<A>> errors = state.getErrors();
+			if (!errors.isBottom() && !errors.isTop())
+				for (Error error : errors.getKeys())
+					if (error.getThrower().equals(thrower) && !errors.getState(error).isBottom() && added.add(error))
+						callres = callres.addError(error, lift(errors.getState(error), lost));
+			GenericMapLattice<Type, GenericSetLattice<Statement>> smashed = state.getSmashedErrors();
+			if (!smashed.isBottom() && !smashed.isTop() && !state.getSmashedErrorsState().isBottom())
+				for (Type type : smashed.getKeys())
+					if (smashed.getState(type).contains(thrower) && added.add(new Error(type, thrower)))
+						callres = callres.addError(new Error(type, thrower),
+								lift(state.getSmashedErrorsState(), lost));
+		}
 		if (!post.getHalt().isBottom())
 			callres = callres.withHalt(callres.getHalt().lub(lift(post.getHalt(), lost)));
 		return callres;

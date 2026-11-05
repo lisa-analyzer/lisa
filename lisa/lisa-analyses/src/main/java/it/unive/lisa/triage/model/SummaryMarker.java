@@ -20,8 +20,10 @@ public class SummaryMarker
 
 	private final String reason;
 
+	private final SummaryValue.Kind kind;
+
 	/**
-	 * Builds the marker.
+	 * Builds the marker of the result of a summarized call.
 	 *
 	 * @param staticType the static type of the unknown value
 	 * @param reason     a human-readable description of why the value is
@@ -32,8 +34,35 @@ public class SummaryMarker
 			Type staticType,
 			String reason,
 			CodeLocation location) {
+		this(staticType, reason, location, SummaryValue.Kind.CALL_RESULT);
+	}
+
+	/**
+	 * Builds the marker.
+	 *
+	 * @param staticType the static type of the unknown value
+	 * @param reason     a human-readable description of why the value is
+	 *                       unknown
+	 * @param location   the location where the value is introduced
+	 * @param kind       the kind of the summary value replacing the marker
+	 */
+	public SummaryMarker(
+			Type staticType,
+			String reason,
+			CodeLocation location,
+			SummaryValue.Kind kind) {
 		super(staticType, location);
 		this.reason = reason;
+		this.kind = kind;
+	}
+
+	/**
+	 * Yields the kind of the summary value replacing this marker.
+	 *
+	 * @return the kind
+	 */
+	public SummaryValue.Kind getKind() {
+		return kind;
 	}
 
 	/**
@@ -47,7 +76,7 @@ public class SummaryMarker
 
 	@Override
 	public int hashCode() {
-		return 31 * super.hashCode() + Objects.hashCode(reason);
+		return 31 * (31 * super.hashCode() + Objects.hashCode(reason)) + Objects.hashCode(kind);
 	}
 
 	@Override
@@ -57,6 +86,6 @@ public class SummaryMarker
 			return true;
 		if (!super.equals(obj))
 			return false;
-		return Objects.equals(reason, ((SummaryMarker) obj).reason);
+		return Objects.equals(reason, ((SummaryMarker) obj).reason) && kind == ((SummaryMarker) obj).kind;
 	}
 }
