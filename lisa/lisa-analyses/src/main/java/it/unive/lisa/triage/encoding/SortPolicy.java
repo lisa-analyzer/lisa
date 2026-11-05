@@ -204,6 +204,23 @@ public class SortPolicy {
 	}
 
 	/**
+	 * Yields {@code true} if the given identifier only holds floating point
+	 * numbers, according to its runtime types (or to its static type, if they
+	 * are not known).
+	 *
+	 * @param id the identifier
+	 *
+	 * @return whether or not the identifier only holds floating point numbers
+	 */
+	public boolean holdsOnlyFloats(
+			Identifier id) {
+		Set<Type> ts = types.get(id);
+		if (ts == null || ts.isEmpty())
+			return isFloat(id.getStaticType());
+		return ts.stream().allMatch(SortPolicy::isFloat);
+	}
+
+	/**
 	 * Yields {@code true} if the given type is a floating point type.
 	 *
 	 * @param type the type

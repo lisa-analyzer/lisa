@@ -592,9 +592,9 @@ public class ExpressionEncoder
 			// type tokens, used by type operators
 			return ValueSort.typeToken((Type) value);
 		if (value instanceof Double)
-			return FloatingPoints.literal((Double) value);
+			return sorts.encodesFloats() ? FloatingPoints.literal((Double) value) : havoc(expression);
 		if (value instanceof Float)
-			return FloatingPoints.literal((Float) value);
+			return sorts.encodesFloats() ? FloatingPoints.literal((Float) value) : havoc(expression);
 		if (value instanceof Character)
 			return Term.integer((Character) value);
 		return havoc(expression);
@@ -605,6 +605,10 @@ public class ExpressionEncoder
 			Identifier expression,
 			Object... params) {
 		Term term = symbols.constant(expression, sorts.sortOf(expression));
+		if (!sorts.encodesFloats() && term.getSort().equals(ValueSort.SORT) && sorts.holdsOnlyFloats(expression))
+			// floating point numbers that are not encoded are opaque values,
+			// so that operations over them are never precise
+			symbols.require(ValueSort.isOpaque(term));
 		if (expression instanceof SummaryValue
 				&& ((SummaryValue) expression).getReason().equals(SummaryValue.MERGED_CONDITIONS))
 			// the conditions lost by merging cases do not constrain the
