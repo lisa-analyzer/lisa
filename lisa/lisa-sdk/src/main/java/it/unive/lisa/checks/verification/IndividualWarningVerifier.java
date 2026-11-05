@@ -57,30 +57,6 @@ public abstract class IndividualWarningVerifier<A extends AbstractLattice<A>, D 
 	private static final Logger LOG = LogManager.getLogger(IndividualWarningVerifier.class);
 
 	/**
-	 * The explanation of the warnings that are not verified since the deadline
-	 * of the verification passed (see {@link #setDeadline(long)}).
-	 */
-	public static final String DEADLINE_PASSED = "not verified: the time of the verification is exhausted";
-
-	private long deadline = Long.MAX_VALUE;
-
-	@Override
-	public void setDeadline(
-			long deadline) {
-		this.deadline = deadline;
-	}
-
-	/**
-	 * Yields the time after which this verifier stops verifying warnings (see
-	 * {@link #setDeadline(long)}).
-	 *
-	 * @return the time, as given by {@link System#currentTimeMillis()}
-	 */
-	public long getDeadline() {
-		return deadline;
-	}
-
-	/**
 	 * Initializes this verifier with the given tool, that contains the results
 	 * of the analysis. A call to this method should effectively re-initialize
 	 * the verifier as if it is yet to be used, discarding any information
@@ -266,8 +242,7 @@ public abstract class IndividualWarningVerifier<A extends AbstractLattice<A>, D 
 	 * <br>
 	 * This verifier is initialized with the given tool, and then each warning
 	 * is verified independently through
-	 * {@link #verify(SemanticTool, StatementMessage)}, until the deadline of
-	 * the verification passes (see {@link #setDeadline(long)}).
+	 * {@link #verify(SemanticTool, StatementMessage)}.
 	 */
 	@Override
 	public Map<StatementMessage, VerificationResult> verify(
@@ -277,9 +252,7 @@ public abstract class IndividualWarningVerifier<A extends AbstractLattice<A>, D 
 		init(tool);
 		Map<StatementMessage, VerificationResult> results = new LinkedHashMap<>();
 		for (StatementMessage warning : warnings)
-			results.put(warning, System.currentTimeMillis() >= deadline
-					? new VerificationResult(VerificationOutcome.POSSIBLE, DEADLINE_PASSED)
-					: verify(tool, warning));
+			results.put(warning, verify(tool, warning));
 		return results;
 	}
 }

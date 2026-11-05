@@ -53,8 +53,6 @@ public class FirstViolationVerifier<A extends AbstractLattice<A>, D extends Abst
 
 	private final IndividualWarningVerifier<A, D> expensive;
 
-	private long deadline = Long.MAX_VALUE;
-
 	/**
 	 * Builds the verifier, first using a {@link ReachabilityVerifier} and then
 	 * a {@link PdrVerifier} with default parameters. The latter does not check
@@ -99,23 +97,10 @@ public class FirstViolationVerifier<A extends AbstractLattice<A>, D extends Abst
 			Collection<StatementMessage> warnings)
 			throws SemanticException {
 		Map<StatementMessage, VerificationResult> results = new LinkedHashMap<>();
-		if (phase(cheap, tool, warnings, results, deadline))
+		if (phase(cheap, tool, warnings, results))
 			return results;
-		phase(expensive, tool, warnings, results, deadline);
+		phase(expensive, tool, warnings, results);
 		return results;
-	}
-
-	/**
-	 * {@inheritDoc}<br>
-	 * <br>
-	 * The deadline applies to both phases.
-	 */
-	@Override
-	public void setDeadline(
-			long deadline) {
-		this.deadline = deadline;
-		cheap.setDeadline(deadline);
-		expensive.setDeadline(deadline);
 	}
 
 	/**
@@ -132,8 +117,7 @@ public class FirstViolationVerifier<A extends AbstractLattice<A>, D extends Abst
 					IndividualWarningVerifier<A, D> verifier,
 					SemanticTool<A, D> tool,
 					Collection<StatementMessage> warnings,
-					Map<StatementMessage, VerificationResult> results,
-					long deadline)
+					Map<StatementMessage, VerificationResult> results)
 					throws SemanticException {
 		verifier.init(tool);
 		boolean confirmed = false;
@@ -144,11 +128,6 @@ public class FirstViolationVerifier<A extends AbstractLattice<A>, D extends Abst
 				continue;
 			if (confirmed) {
 				results.put(warning, new VerificationResult(VerificationOutcome.POSSIBLE, NOT_VERIFIED));
-				continue;
-			}
-			if (System.currentTimeMillis() >= deadline) {
-				results.put(warning,
-						new VerificationResult(VerificationOutcome.POSSIBLE, IndividualWarningVerifier.DEADLINE_PASSED));
 				continue;
 			}
 			VerificationResult result = verifier.verify(tool, warning);

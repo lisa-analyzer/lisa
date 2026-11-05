@@ -47,17 +47,4 @@ public interface WarningVerifier<A extends AbstractLattice<A>, D extends Abstrac
 			SemanticTool<A, D> tool,
 			Collection<StatementMessage> warnings)
 			throws SemanticException;
-
-	/**
-	 * Sets the time after which this verifier should stop verifying warnings
-	 * (e.g., to bound the time of the whole verification): warnings that are
-	 * not verified by then are left possible. The default implementation
-	 * ignores the deadline.
-	 *
-	 * @param deadline the time, as given by {@link System#currentTimeMillis()}
-	 *                     ({@link Long#MAX_VALUE} means no deadline)
-	 */
-	default void setDeadline(
-			long deadline) {
-	}
 }
