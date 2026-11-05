@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import it.unive.lisa.witness.v2.InvalidWitnessException;
+import it.unive.lisa.witness.v2.UnsupportedWitnessVersionException;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
@@ -64,7 +65,8 @@ public final class Metadata {
 	 * @param producer      the tool that produced the entry
 	 * @param task          the task the entry refers to
 	 * 
-	 * @throws InvalidWitnessException if the format version is not supported
+	 * @throws UnsupportedWitnessVersionException if the format version is not
+	 *                                                supported
 	 */
 	public Metadata(
 			String formatVersion,
@@ -74,8 +76,8 @@ public final class Metadata {
 			Task task) {
 		this.formatVersion = Objects.requireNonNull(formatVersion, "formatVersion");
 		if (!FORMAT_VERSION.equals(formatVersion))
-			throw new InvalidWitnessException(
-					"Only format version " + FORMAT_VERSION + " is supported, not " + formatVersion);
+			throw new UnsupportedWitnessVersionException(
+					"Unsupported witness format " + formatVersion + ". Supported versions: " + FORMAT_VERSION);
 		this.uuid = Objects.requireNonNull(uuid, "uuid");
 		this.creationTime = Objects.requireNonNull(creationTime, "creationTime");
 		this.producer = Objects.requireNonNull(producer, "producer");
