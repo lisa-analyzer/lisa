@@ -148,7 +148,9 @@ public abstract class IndividualWarningVerifier<A extends AbstractLattice<A>, D 
 				if (outcome.getOutcome() == VerificationOutcome.CONFIRMED)
 					break;
 			}
-		} catch (SemanticException | RuntimeException e) {
+		} catch (SemanticException | RuntimeException | AssertionError e) {
+			// assertions of the semantics of the statements might fail on the
+			// states used by the verifier (e.g., when replaying statements)
 			LOG.warn("Unable to verify " + violation + " at " + st.getLocation() + ", deeming it possible", e);
 			return new VerificationResult(VerificationOutcome.POSSIBLE, "the verification failed: " + e.getMessage());
 		}

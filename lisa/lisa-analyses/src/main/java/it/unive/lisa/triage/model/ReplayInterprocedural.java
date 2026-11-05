@@ -113,13 +113,14 @@ import org.apache.commons.lang3.tuple.Pair;
  * of frames leading to the replayed one;</li>
  * <li>it is not part of the node where the property is checked (since the
  * property must be checked on a single location);</li>
- * <li>the run lost no value and produced no unknown value before the call
- * (i.e., it reached no summarized nor open call, and the store contains no
- * unknown value in its path conditions and in the values of variables), since
- * an unknown value evaluated again when the node resumes would be a different
- * one; the effects of the part of the node evaluated before the call (e.g.,
- * assignments, allocations, writes of the heap) are allowed, as they are only
- * part of the transition entering the callees;</li>
+ * <li>the run lost no value and the store contains no unknown value (except
+ * for the amounts of objects allocated by summarized calls) in its path
+ * conditions and in the values of variables before the call, since an unknown
+ * value evaluated again when the node resumes would be a different one; the
+ * effects of the part of the node evaluated before the call (e.g.,
+ * assignments, allocations, writes of the heap, summarized calls whose results
+ * are not used afterwards) are allowed, as they are only part of the
+ * transition entering the callees;</li>
  * <li>(<i>operand rule</i>) the operands evaluated in the node before the call
  * that are not actual parameters of the call do not read the heap nor global
  * variables (i.e., their values contain no {@link AccessChild},
@@ -184,12 +185,6 @@ public class ReplayInterprocedural<A extends AbstractLattice<A>, D extends Abstr
 	 * Whether or not the current run stopped at an expanded call.
 	 */
 	private boolean stopped;
-
-	/**
-	 * Whether or not the current run produced unknown values through calls
-	 * (since its beginning, or since the call it resumed after).
-	 */
-	private boolean unknown;
 
 	/**
 	 * Builds the analysis, summarizing all calls.
@@ -274,7 +269,6 @@ public class ReplayInterprocedural<A extends AbstractLattice<A>, D extends Abstr
 		this.calls.clear();
 		this.entered.clear();
 		this.stopped = false;
-		this.unknown = false;
 	}
 
 	/**
@@ -396,7 +390,6 @@ public class ReplayInterprocedural<A extends AbstractLattice<A>, D extends Abstr
 			CFGCall call,
 			AnalysisState<ReplayState<A>> entryState)
 			throws SemanticException {
-		unknown = true;
 		ScopeId<ReplayState<A>> context = getCurrentContext();
 		String reason = "result of call to " + call.getFullTargetName();
 		AnalysisState<ReplayState<A>> callres;
@@ -532,7 +525,6 @@ public class ReplayInterprocedural<A extends AbstractLattice<A>, D extends Abstr
 		if (resume) {
 			replayed = replayed.withStore(replayed.getStore().identity());
 			state = state.removeAllErrors(true);
-			unknown = false;
 		}
 		state = state.withExecution(new ProgramState<>(
 				replayed,
@@ -561,8 +553,6 @@ public class ReplayInterprocedural<A extends AbstractLattice<A>, D extends Abstr
 			return "no target has a result in the context of the call";
 		if (!expansion)
 			return "call in the node where the property is checked";
-		if (unknown)
-			return "unknown values produced before the call";
 		// the effects of the part of the node evaluated before the call (e.g.,
 		// writes of the heap) are only part of the transition entering the
 		// callee, as the store is reset when the node resumes: only the values
@@ -659,6 +649,10 @@ public class ReplayInterprocedural<A extends AbstractLattice<A>, D extends Abstr
 
 	private static boolean hasFreshValues(
 			SymbolicExpression e) {
+		if (e instanceof AllocationOffset)
+			// the amount of objects allocated by summarized calls only
+			// affects the counter of allocations
+			return false;
 		if (e instanceof FreshValue)
 			return true;
 		if (e instanceof UnaryExpression)
@@ -702,8 +696,18 @@ public class ReplayInterprocedural<A extends AbstractLattice<A>, D extends Abstr
 						match = candidate;
 			} else if (candidates.size() == 1)
 				match = candidates.iterator().next();
-			if (match != null && candidates.size() > 1 && dependsOnStates(call, pushed))
-				match = merge(target, candidates, match.getId());
+			if (pushed != null && dependsOnStates(call, pushed)) {
+				// the context depends on the state at the call, that the
+				// replay might not compute exactly as the analysis did (e.g.,
+				// for calls synthesized by the semantics of other
+				// statements): the states of all the results describe the
+				// executions of the callee
+				if (match == null)
+					match = candidates.size() == 1 ? candidates.iterator().next()
+							: merge(target, candidates, pushed);
+				else if (candidates.size() > 1)
+					match = merge(target, candidates, match.getId());
+			}
 			if (match != null)
 				res.add(match);
 		}
@@ -861,7 +865,6 @@ public class ReplayInterprocedural<A extends AbstractLattice<A>, D extends Abstr
 			ExpressionSet[] parameters,
 			StatementStore<ReplayState<A>> expressions)
 			throws SemanticException {
-		unknown = true;
 		return policy.apply(call, entryState, analysis, getCurrentContext(), parameters);
 	}
 
