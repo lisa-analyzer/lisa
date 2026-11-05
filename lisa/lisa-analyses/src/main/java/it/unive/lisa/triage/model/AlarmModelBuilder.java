@@ -208,7 +208,8 @@ public final class AlarmModelBuilder {
 	/**
 	 * Builds the model of the given violation as
 	 * {@link #build(SemanticTool, AnalyzedCFG, Statement, Violation, int, Set, int, List)}
-	 * does, expanding calls only until the given time.
+	 * does, expanding calls only until the given time, and abandoning the
+	 * construction of the model after it.
 	 *
 	 * @param <A>          the type of the abstract states of the analysis
 	 * @param <D>          the type of the domain of the analysis
@@ -224,9 +225,11 @@ public final class AlarmModelBuilder {
 	 *                         {@link #build(SemanticTool, AnalyzedCFG, Statement, Violation, int, Set, int, List)})
 	 * @param deadline     the time (as given by
 	 *                         {@link System#currentTimeMillis()}) after which
-	 *                         calls are no longer expanded
+	 *                         calls are no longer expanded, and the
+	 *                         construction of the model is abandoned
 	 *
-	 * @return the model
+	 * @return the model, or {@code null} if the deadline passed before the
+	 *             model could be built
 	 *
 	 * @throws SemanticException if something goes wrong while building the
 	 *                               model
@@ -241,6 +244,137 @@ public final class AlarmModelBuilder {
 			int maxLocations,
 			List<Triple<AnalyzedCFG<A>, Statement, CFGCall>> chain,
 			long deadline)
+			throws SemanticException {
+		return build(tool, result, st, violation, maxCases, expanded, maxLocations, chain, deadline,
+				new ResultCache<>());
+	}
+
+	/**
+	 * Builds the model of the given violation as
+	 * {@link #build(SemanticTool, AnalyzedCFG, Statement, Violation, int, Set, int, List, long)}
+	 * does, using the given cache of the information computed from the results
+	 * of the analysis, that can be shared by all the models built over the
+	 * same results. If the given time passes before all the transitions of the
+	 * model have been extracted, no model is built.
+	 *
+	 * @param <A>          the type of the abstract states of the analysis
+	 * @param <D>          the type of the domain of the analysis
+	 * @param tool         the tool containing the results of the analysis
+	 * @param result       the result containing the statement
+	 * @param st           the statement on which the warning would be issued
+	 * @param violation    the violation
+	 * @param maxCases     the maximum number of cases of each transition
+	 * @param expanded     the frames of the callees to expand
+	 * @param maxLocations the maximum number of locations of the model, beyond
+	 *                         which calls are no longer expanded
+	 * @param chain        the chain of calls, from the first caller (see
+	 *                         {@link #build(SemanticTool, AnalyzedCFG, Statement, Violation, int, Set, int, List)})
+	 * @param deadline     the time (as given by
+	 *                         {@link System#currentTimeMillis()}) after which
+	 *                         calls are no longer expanded, and the
+	 *                         construction of the model is abandoned
+	 * @param cache        the cache
+	 *
+	 * @return the model, or {@code null} if the deadline passed before the
+	 *             model could be built
+	 *
+	 * @throws SemanticException if something goes wrong while building the
+	 *                               model
+	 */
+	public static <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AlarmModel build(
+			SemanticTool<A, D> tool,
+			AnalyzedCFG<A> result,
+			Statement st,
+			Violation violation,
+			int maxCases,
+			Set<Frame> expanded,
+			int maxLocations,
+			List<Triple<AnalyzedCFG<A>, Statement, CFGCall>> chain,
+			long deadline,
+			ResultCache<A> cache)
+			throws SemanticException {
+		return build(tool, result, st, violation, maxCases, expanded, maxLocations, chain, deadline, cache, null);
+	}
+
+	/**
+	 * The transitions extracted while building a model, that can be reused by
+	 * the next models built for the same violation and chain of calls, which
+	 * only expand more calls (see
+	 * {@link AlarmModelBuilder#build(SemanticTool, AnalyzedCFG, Statement, Violation, int, Set, int, List, long, ResultCache, Reuse)}):
+	 * the transitions of a location are reused unless the location reaches
+	 * calls whose callees are expanded by the next model and not by the
+	 * previous one. The fresh values used by the models are produced by the
+	 * same factory, so that they are never confused.
+	 */
+	public static final class Reuse {
+
+		private FreshValueFactory factory;
+
+		private final Map<ModelLocation, NodeTransitions> transitions = new LinkedHashMap<>();
+
+		/**
+		 * Discards the transitions of the locations reaching calls to the
+		 * given frames, that are going to be expanded.
+		 *
+		 * @param frames the frames
+		 */
+		public void expand(
+				Collection<Frame> frames) {
+			transitions.values().removeIf(tr -> {
+				for (ReplayedCall call : tr.getCalls())
+					for (Frame f : call.getCalleeFrames())
+						if (frames.contains(f))
+							return true;
+				return false;
+			});
+		}
+	}
+
+	/**
+	 * Builds the model of the given violation as
+	 * {@link #build(SemanticTool, AnalyzedCFG, Statement, Violation, int, Set, int, List, long, ResultCache)}
+	 * does, reusing the transitions extracted by a previous model built for
+	 * the same violation and chain of calls, but expanding fewer calls.
+	 *
+	 * @param <A>          the type of the abstract states of the analysis
+	 * @param <D>          the type of the domain of the analysis
+	 * @param tool         the tool containing the results of the analysis
+	 * @param result       the result containing the statement
+	 * @param st           the statement on which the warning would be issued
+	 * @param violation    the violation
+	 * @param maxCases     the maximum number of cases of each transition
+	 * @param expanded     the frames of the callees to expand
+	 * @param maxLocations the maximum number of locations of the model, beyond
+	 *                         which calls are no longer expanded
+	 * @param chain        the chain of calls, from the first caller (see
+	 *                         {@link #build(SemanticTool, AnalyzedCFG, Statement, Violation, int, Set, int, List)})
+	 * @param deadline     the time (as given by
+	 *                         {@link System#currentTimeMillis()}) after which
+	 *                         calls are no longer expanded, and the
+	 *                         construction of the model is abandoned
+	 * @param cache        the cache
+	 * @param reuse        the transitions of the previous models, updated
+	 *                         with the ones of this model ({@code null}
+	 *                         means that nothing is reused)
+	 *
+	 * @return the model, or {@code null} if the deadline passed before the
+	 *             model could be built
+	 *
+	 * @throws SemanticException if something goes wrong while building the
+	 *                               model
+	 */
+	public static <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AlarmModel build(
+			SemanticTool<A, D> tool,
+			AnalyzedCFG<A> result,
+			Statement st,
+			Violation violation,
+			int maxCases,
+			Set<Frame> expanded,
+			int maxLocations,
+			List<Triple<AnalyzedCFG<A>, Statement, CFGCall>> chain,
+			long deadline,
+			ResultCache<A> cache,
+			Reuse reuse)
 			throws SemanticException {
 		Statement bad = violation instanceof ConditionViolation
 				? rootOf(((ConditionViolation) violation).getWhere())
@@ -263,7 +397,10 @@ public final class AlarmModelBuilder {
 			cone.add(new ModelLocation(frame, node));
 
 		InputSourceResolver resolver = new InputSourceResolver(tool);
-		FreshValueFactory factory = new FreshValueFactory(resolver, new HeapModel(root.getProgram()));
+		FreshValueFactory factory = reuse != null && reuse.factory != null ? reuse.factory
+				: new FreshValueFactory(resolver, new HeapModel(root.getProgram()));
+		if (reuse != null)
+			reuse.factory = factory;
 		// the locations are extracted once, in the order they are discovered:
 		// the ones of the cone first, then the ones of the expanded callees
 		// and the ones where callers resume
@@ -277,19 +414,27 @@ public final class AlarmModelBuilder {
 			return false;
 		};
 		Map<Frame, TransitionExtractor<A, D>> extractors = new LinkedHashMap<>();
-		extractors.put(frame, new TransitionExtractor<>(tool, frame, factory, maxCases, forced, budget, null));
+		extractors.put(frame, new TransitionExtractor<>(tool, frame, factory, maxCases, forced, budget, null, null,
+				cache));
 		Map<ModelLocation, NodeTransitions> transitions = new LinkedHashMap<>();
 		Map<ModelLocation, AnalysisState<A>> preStates = new LinkedHashMap<>();
 		boolean expansion = false;
 		while (!ws.isEmpty()) {
+			if (System.currentTimeMillis() >= deadline)
+				return null;
 			ModelLocation loc = ws.removeFirst();
 			TransitionExtractor<A, D> extractor = extractors.get(loc.getFrame());
 			// calls in the bad node are not expanded, so that the property is
 			// checked at a single location, unless the violation is about the
 			// errors they raise
-			NodeTransitions tr = extractor.extract(loc,
-					!(loc.getFrame().equals(target) && loc.getNode().equals(bad))
-							|| violation instanceof ErrorViolation);
+			NodeTransitions tr = reuse == null ? null : reuse.transitions.get(loc);
+			if (tr == null) {
+				tr = extractor.extract(loc,
+						!(loc.getFrame().equals(target) && loc.getNode().equals(bad))
+								|| violation instanceof ErrorViolation);
+				if (reuse != null)
+					reuse.transitions.put(loc, tr);
+			}
 			transitions.put(loc, tr);
 			preStates.put(loc, extractor.preStateOf(loc.getNode()));
 			for (EdgeTransition e : tr.getOutgoing()) {
@@ -306,7 +451,7 @@ public final class AlarmModelBuilder {
 					// cannot return to the caller nor raise errors leaving
 					// the callee are pruned later
 					extractors.put(callee, new TransitionExtractor<>(tool, callee, factory, maxCases, forced,
-							budget, loc.getNode(), extractor));
+							budget, loc.getNode(), extractor, cache));
 					for (Statement node : callee.getResult().getNodes())
 						add(new ModelLocation(callee, node), locations, ws);
 				}
@@ -411,24 +556,35 @@ public final class AlarmModelBuilder {
 		Set<List<ScopeToken>> scopes = new LinkedHashSet<>();
 		for (Frame f : extractors.keySet())
 			scopes.addAll(scopesOf(f));
-		boolean grown = true;
+		// only the cases pushing or popping scopes rename identifiers
+		List<SymbolicCase> scoping = new ArrayList<>();
+		for (NodeTransitions tr : all)
+			for (SymbolicStore store : storesOf(tr))
+				for (SymbolicCase c : store.getCases())
+					if (c.hasScopings())
+						scoping.add(c);
+		boolean grown = !scoping.isEmpty();
 		while (grown) {
 			grown = false;
-			for (NodeTransitions tr : all)
-				for (SymbolicStore store : storesOf(tr))
-					for (SymbolicCase c : store.getCases())
-						for (Identifier id : new ArrayList<>(vocabulary))
-							if (!c.getUpdates().containsKey(id) && !c.isUnconstrained(id)) {
-								Identifier pre = c.preIdentifier(id);
-								if (!expansion || scopes.contains(scopesOf(pre)))
-									grown |= vocabulary.add(pre);
-							}
+			for (SymbolicCase c : scoping)
+				for (Identifier id : new ArrayList<>(vocabulary))
+					if (!c.getUpdates().containsKey(id) && !c.isUnconstrained(id)) {
+						Identifier pre = c.preIdentifier(id);
+						if (!expansion || scopes.contains(scopesOf(pre)))
+							grown |= vocabulary.add(pre);
+					}
 		}
 
 		// each frame exports constraints in its own context
 		Map<Frame, ConstraintExporter<A, D>> exporters = new LinkedHashMap<>();
 		Map<ModelLocation, Set<SymbolicExpression>> seeds = new LinkedHashMap<>();
 		Set<SymbolicExpression> conditions = conditions(all, badCases);
+		Map<SymbolicExpression, Set<Identifier>> conditionIds = new LinkedHashMap<>();
+		for (SymbolicExpression cond : conditions) {
+			Set<Identifier> ids = new LinkedHashSet<>();
+			collect(cond, ids);
+			conditionIds.put(cond, ids);
+		}
 		for (ModelLocation loc : locations) {
 			Statement node = loc.getNode();
 			ConstraintExporter<A, D> exporter = exporters.computeIfAbsent(loc.getFrame(),
@@ -445,9 +601,16 @@ public final class AlarmModelBuilder {
 			// conditions of the model whose truth is decided by the analysis
 			// are invariants, even if the domain cannot express them as
 			// constraints
-			for (SymbolicExpression cond : conditions)
+			AnalysisState<A> pre = preStates.get(loc);
+			for (SymbolicExpression cond : conditions) {
+				// conditions over identifiers unknown to the state cannot be
+				// decided by the analysis
+				if (!knowsAll(pre, conditionIds.get(cond)))
+					continue;
 				try {
-					Satisfiability sat = tool.getAnalysis().satisfies(preStates.get(loc), cond,
+					// an analysis without events, as the queries are not part
+					// of the fixpoint computation
+					Satisfiability sat = extractors.get(loc.getFrame()).getAnalysis().satisfies(pre, cond,
 							loc.getFrame().getResult().getId(), node);
 					if (sat == Satisfiability.SATISFIED)
 						cs.add(cond);
@@ -457,6 +620,7 @@ public final class AlarmModelBuilder {
 				} catch (SemanticException e) {
 					// the condition cannot be evaluated in this state
 				}
+			}
 			seeds.put(loc, cs);
 		}
 		Set<SymbolicExpression> init = new LinkedHashSet<>();
@@ -508,6 +672,15 @@ public final class AlarmModelBuilder {
 				confirmable,
 				frames,
 				truncated[0]);
+	}
+
+	private static boolean knowsAll(
+			AnalysisState<?> state,
+			Set<Identifier> ids) {
+		for (Identifier id : ids)
+			if (!state.getExecutionState().knowsIdentifier(id))
+				return false;
+		return true;
 	}
 
 	/**

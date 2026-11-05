@@ -2,6 +2,7 @@ package it.unive.lisa.triage.pdr;
 
 import it.unive.lisa.analysis.AbstractDomain;
 import it.unive.lisa.analysis.AbstractLattice;
+import it.unive.lisa.analysis.Analysis;
 import it.unive.lisa.analysis.AnalyzedCFG;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.checks.semantic.SemanticTool;
@@ -10,6 +11,7 @@ import it.unive.lisa.checks.verification.VerificationOutcome;
 import it.unive.lisa.checks.verification.VerificationResult;
 import it.unive.lisa.checks.verification.Violation;
 import it.unive.lisa.interprocedural.ScopeId;
+import it.unive.lisa.outputs.messages.StatementMessage;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.triage.bmc.Unrolling;
@@ -20,6 +22,7 @@ import it.unive.lisa.triage.model.AlarmModelBuilder;
 import it.unive.lisa.triage.model.Frame;
 import it.unive.lisa.triage.model.InputValue;
 import it.unive.lisa.triage.model.ModelLocation;
+import it.unive.lisa.triage.model.ResultCache;
 import it.unive.lisa.triage.model.SymbolicStore;
 import it.unive.lisa.triage.reachability.ReachabilityVerifier;
 import it.unive.lisa.triage.smt.SmtException;
@@ -133,9 +136,39 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 	private int queries;
 
 	/**
-	 * The time by which the verification of the current warning must end.
+	 * The time by which the verification of the current violation must end.
 	 */
 	private long deadline;
+
+	/**
+	 * The time by which the verification of the current warning must end, if
+	 * one is being verified (see
+	 * {@link #verify(SemanticTool, StatementMessage)}), or {@code 0}.
+	 */
+	private long warningDeadline;
+
+	/**
+	 * The verifier checking violations against the results of the analysis,
+	 * and finding the chains of calls reaching a result.
+	 */
+	private ReachabilityVerifier<A, D> reachability;
+
+	/**
+	 * The information computed from the results of the analysis, shared by
+	 * all the models built over them.
+	 */
+	private ResultCache<A> cache;
+
+	/**
+	 * The solver used by the searches of the current warning or violation (see
+	 * {@link #acquire()}).
+	 */
+	private SmtSolver solver;
+
+	/**
+	 * The analysis used to query the results, without events.
+	 */
+	private Analysis<A, D> analysis;
 
 	private int maxChains = DEFAULT_MAX_CHAINS;
 
@@ -301,8 +334,46 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 
 	@Override
 	public void init(
-			SemanticTool<A, D> tool) {
+			SemanticTool<A, D> tool)
+			throws SemanticException {
 		this.tool = tool;
+		this.reachability = new ReachabilityVerifier<>();
+		this.reachability.init(tool);
+		this.cache = new ResultCache<>();
+		this.analysis = newAnalysis(tool);
+	}
+
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private static <A extends AbstractLattice<A>, D extends AbstractDomain<A>> Analysis<A, D> newAnalysis(
+			SemanticTool<A, D> tool) {
+		// queries are not part of the fixpoint computation
+		return new Analysis(tool.getConfiguration().analysis, tool.getConfiguration().shouldSmashError);
+	}
+
+	/**
+	 * {@inheritDoc}<br>
+	 * <br>
+	 * The time budget of this verifier (see
+	 * {@link #PdrVerifier(int, int, long, Supplier, int)}) is shared by all the
+	 * violations verified for the warning (e.g., in different results, or at
+	 * different statements raising the errors it reports).
+	 */
+	@Override
+	public VerificationResult verify(
+			SemanticTool<A, D> tool,
+			StatementMessage warning)
+			throws SemanticException {
+		warningDeadline = deadlineFromNow();
+		try {
+			return super.verify(tool, warning);
+		} finally {
+			warningDeadline = 0;
+			release();
+		}
+	}
+
+	private long deadlineFromNow() {
+		return maxMillis > 0 ? System.currentTimeMillis() + maxMillis : Long.MAX_VALUE;
 	}
 
 	@Override
@@ -311,10 +382,22 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 			Statement st,
 			Violation violation)
 			throws SemanticException {
+		try {
+			return verifyViolation(result, st, violation);
+		} finally {
+			if (warningDeadline == 0)
+				// no warning is being verified
+				release();
+		}
+	}
+
+	private VerificationResult verifyViolation(
+			AnalyzedCFG<A> result,
+			Statement st,
+			Violation violation)
+			throws SemanticException {
 		statistics = Map.of();
 		if (fixpointCheck) {
-			ReachabilityVerifier<A, D> reachability = new ReachabilityVerifier<>();
-			reachability.init(tool);
 			VerificationResult res = reachability.verify(result, st, violation);
 			if (res.getOutcome() == VerificationOutcome.REFUTED)
 				return new VerificationResult(VerificationOutcome.REFUTED,
@@ -323,7 +406,8 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 		}
 		queries = 0;
 		// the time budget is shared by all the models built for the violation
-		deadline = System.currentTimeMillis() + maxMillis;
+		// (and for the warning, if one is being verified)
+		deadline = warningDeadline != 0 ? warningDeadline : deadlineFromNow();
 		VerificationResult res = refine(result, st, violation, List.of());
 		if (res.getOutcome() != VerificationOutcome.POSSIBLE || isProgramStart(result) || maxChains <= 0)
 			return res;
@@ -352,8 +436,6 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 	private List<List<Triple<AnalyzedCFG<A>, Statement, CFGCall>>> chainsTo(
 			AnalyzedCFG<A> result)
 			throws SemanticException {
-		ReachabilityVerifier<A, D> reachability = new ReachabilityVerifier<>();
-		reachability.init(tool);
 		List<List<Triple<AnalyzedCFG<A>, Statement, CFGCall>>> chains = new ArrayList<>();
 		LinkedList<List<Triple<AnalyzedCFG<A>, Statement, CFGCall>>> ws = new LinkedList<>();
 		ws.add(List.of());
@@ -400,9 +482,18 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 			List<Triple<AnalyzedCFG<A>, Statement, CFGCall>> chain)
 			throws SemanticException {
 		Set<Frame> expanded = new LinkedHashSet<>();
+		// the transitions of the locations that are not affected by the calls
+		// expanded by each round are extracted once
+		AlarmModelBuilder.Reuse reuse = new AlarmModelBuilder.Reuse();
+		// the result of the previous round
+		VerificationResult previous = null;
 		for (int round = 1;; round++) {
 			AlarmModel model = AlarmModelBuilder.build(tool, result, st, violation, maxCases, expanded,
-					maxLocations, chain, deadline);
+					maxLocations, chain, deadline, cache, reuse);
+			if (model == null)
+				return previous != null ? previous
+						: new VerificationResult(VerificationOutcome.POSSIBLE,
+								"time budget exhausted while building the model");
 			if (model.getSeeds(model.getBadLocation()) == null)
 				return new VerificationResult(VerificationOutcome.REFUTED, "the statement is unreachable");
 			if (model.getBadCases().isEmpty())
@@ -439,6 +530,8 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 			if (more.isEmpty())
 				return res;
 			expanded.addAll(more);
+			reuse.expand(more);
+			previous = res;
 		}
 	}
 
@@ -446,18 +539,18 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 			AlarmModel model,
 			boolean strict)
 			throws SemanticException {
-		SmtSolver solver;
+		SmtSolver s;
 		try {
-			solver = solvers.get();
+			s = acquire();
 		} catch (SmtSolverUnavailableException e) {
 			return new VerificationResult(VerificationOutcome.POSSIBLE, "no SMT solver available: " + e.getMessage());
 		}
 
-		try (SmtSolver s = solver) {
+		try {
 			PdrEngine engine = new PdrEngine(model, s, strict);
 			engine.setGeneralization(generalization);
 			engine.setSeeding(seeding);
-			engine.setAbstraction(new DomainAbstraction<>(tool.getAnalysis()));
+			engine.setAbstraction(new DomainAbstraction<>(analysis, cache));
 			PdrEngine.Status status = engine.run(maxLevel, maxQueries,
 					// at least one millisecond, as 0 means no limit
 					Math.max(1, deadline - System.currentTimeMillis()));
@@ -482,7 +575,38 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 						"the solver could not decide a query: " + s.getReasonUnknown());
 			}
 		} catch (SmtException e) {
+			// the solver might be unusable
+			release();
 			return new VerificationResult(VerificationOutcome.POSSIBLE, "the solver failed: " + e.getMessage());
+		}
+	}
+
+	/**
+	 * Yields a solver for a new search: the one of the previous search, if it
+	 * can be reset, or a new one. Solvers are kept for the whole verification
+	 * of a warning (or of a violation, if no warning is being verified), to
+	 * avoid starting a new solver for each model.
+	 */
+	private SmtSolver acquire() {
+		if (solver != null)
+			try {
+				if (solver.reset())
+					return solver;
+			} catch (SmtException e) {
+				// a new solver is used
+			}
+		release();
+		solver = solvers.get();
+		return solver;
+	}
+
+	/**
+	 * Closes the solver kept by this verifier, if any.
+	 */
+	private void release() {
+		if (solver != null) {
+			solver.close();
+			solver = null;
 		}
 	}
 

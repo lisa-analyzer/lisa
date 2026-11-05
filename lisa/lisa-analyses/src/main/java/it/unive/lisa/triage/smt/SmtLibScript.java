@@ -83,6 +83,16 @@ public class SmtLibScript
 	}
 
 	@Override
+	public Term define(
+			String name,
+			Term body) {
+		Term constant = Term.constant(name, body.getSort());
+		command("(define-fun " + constant.toSmtLib() + " () " + body.getSort().toSmtLib() + " " + body.toSmtLib()
+				+ ")");
+		return constant;
+	}
+
+	@Override
 	public void assertTerm(
 			Term term) {
 		command("(assert " + term.toSmtLib() + ")");

@@ -19,6 +19,7 @@ import it.unive.lisa.triage.model.EdgeTransition;
 import it.unive.lisa.triage.model.Frame;
 import it.unive.lisa.triage.model.InputValue;
 import it.unive.lisa.triage.model.ModelLocation;
+import it.unive.lisa.triage.model.ResultCache;
 import it.unive.lisa.triage.model.SymbolicStore;
 import it.unive.lisa.triage.smt.SmtException;
 import it.unive.lisa.triage.smt.SmtLibProcessSolver;
@@ -88,6 +89,12 @@ public class BoundedModelChecker<A extends AbstractLattice<A>, D extends Abstrac
 	private final Supplier<SmtSolver> solvers;
 
 	private final int maxCases;
+
+	/**
+	 * The information computed from the results of the analysis, shared by
+	 * all the models built over them.
+	 */
+	private ResultCache<A> cache;
 
 	private SemanticTool<A, D> tool;
 
@@ -163,6 +170,7 @@ public class BoundedModelChecker<A extends AbstractLattice<A>, D extends Abstrac
 	public void init(
 			SemanticTool<A, D> tool) {
 		this.tool = tool;
+		this.cache = new ResultCache<>();
 	}
 
 	@Override
@@ -172,9 +180,12 @@ public class BoundedModelChecker<A extends AbstractLattice<A>, D extends Abstrac
 			Violation violation)
 			throws SemanticException {
 		Set<Frame> expanded = new LinkedHashSet<>();
+		// the transitions of the locations that are not affected by the calls
+		// expanded by each round are extracted once
+		AlarmModelBuilder.Reuse reuse = new AlarmModelBuilder.Reuse();
 		for (int round = 1;; round++) {
 			AlarmModel model = AlarmModelBuilder.build(tool, result, st, violation, maxCases, expanded,
-					maxLocations);
+					maxLocations, List.of(), Long.MAX_VALUE, cache, reuse);
 			if (model.getSeeds(model.getBadLocation()) == null)
 				return new VerificationResult(VerificationOutcome.REFUTED, "the statement is unreachable");
 			if (model.getBadCases().isEmpty())
@@ -199,6 +210,7 @@ public class BoundedModelChecker<A extends AbstractLattice<A>, D extends Abstrac
 			if (more.isEmpty())
 				return res;
 			expanded.addAll(more);
+			reuse.expand(more);
 		}
 	}
 

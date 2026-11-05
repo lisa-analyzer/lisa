@@ -55,7 +55,11 @@ import java.util.Set;
  * be inductive with respect to the encoding of the transitions.<br>
  * <br>
  * Queries are two-state: the pre-state is step {@code 0} of an
- * {@link Unrolling}, the post-state is step {@code 1}.
+ * {@link Unrolling}, the post-state is step {@code 1}. A single query covers
+ * all the cases of all the transitions entering a location (the model tells
+ * which one is taken), and the terms used by many queries (the invariants of
+ * the analysis, the lemmas, the transitions and the initial condition) are
+ * sent to the solver once, as definitions.
  *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
@@ -181,6 +185,13 @@ public class PdrEngine {
 	private long literalNames = 0;
 
 	private List<Obligation> counterexample;
+
+	/**
+	 * The terms sent to the solver once, as definitions, since they are used
+	 * by many queries: the seeds of each location, the initial condition, the
+	 * lemmas and the transitions, at the steps they are used at.
+	 */
+	private final Map<Object, Term> definitions = new LinkedHashMap<>();
 
 	private int invariantLevel = -1;
 
@@ -440,8 +451,9 @@ public class PdrEngine {
 				Cube projected = project(cube.getLiterals(), values);
 				if (!Projection.freshValues(projected.getLiterals()).isEmpty())
 					imprecisions.add(UNPROJECTED);
+				// the values of the state are only needed for initial states
 				Obligation o = new Obligation(bad, projected, level, null, null, inputs(values), imprecisions,
-						point(), created++);
+						level == 0 ? point() : Collections.emptyMap(), created++);
 				solver.pop();
 				return o;
 			}
@@ -520,57 +532,114 @@ public class PdrEngine {
 			}
 			solver.pop();
 		}
+		// a single query for all the cases of all the transitions entering the
+		// location, whose model tells which one is taken
+		List<EdgeTransition> edges = new ArrayList<>();
+		List<Integer> indexes = new ArrayList<>();
+		List<Term> steps = new ArrayList<>();
 		for (EdgeTransition e : incoming.getOrDefault(location, Collections.emptyList())) {
 			ModelLocation src = e.getSource();
 			if (!model.getLocations().contains(src))
 				continue;
-			List<SymbolicCase> cases = unrolling.cases(e);
-			for (int i = 0; i < cases.size(); i++) {
-				Term pre = frame(src, level - 1);
-				Term trans = unrolling.transition(0, e, i);
-				String caseKey = unrolling.caseKey(0, e, i);
-				String cubeKey = "cond@1" + CUBE;
-				if (check(List.of(pre, trans), cube, 1, core) == SmtResult.SAT) {
-					// the cube is encoded as a whole (literals might have
-					// been encoded one by one) to compute its exactness in
-					// the model
-					cube.at(unrolling, 1, CUBE);
-					Set<String> imprecisions = new LinkedHashSet<>(unrolling.getImprecisions(caseKey, solver));
-					imprecisions.addAll(unrolling.getImprecisions(cubeKey, solver));
-					SymbolicCase c = cases.get(i);
-					List<SymbolicExpression> lits = new ArrayList<>(c.getPathCondition());
-					for (SymbolicExpression lit : cube.getLiterals()) {
-						SymbolicExpression image = c.substitute(lit, e.getStore().getFactory(), null);
-						if (SymbolicCase.isTooLarge(image, MAX_LITERAL_SIZE))
-							// literals grow with each pre-image: dropping
-							// one enlarges the predecessor, that is still
-							// sound for blocking, but not for confirming
-							imprecisions.add(OVERSIZED);
-						else
-							lits.add(image);
-					}
-					Map<FreshValue, String> values = freshValues(lits, caseKey);
-					// fresh values of the cube that survived substitution
-					Map<FreshValue, String> fromCube = freshValues(lits, cubeKey);
-					fromCube.keySet().removeAll(values.keySet());
-					Map<FreshValue, String> all = new LinkedHashMap<>(values);
-					all.putAll(fromCube);
-					// every input of the case, even if not in the cube, is
-					// needed to reproduce the transition
-					Map<FreshValue, String> caseInputs = freshValues(unrolling.getFreshValues(caseKey), caseKey);
-					Cube projected = project(lits, all);
-					// values that could not be projected are left unconstrained
-					if (!Projection.freshValues(projected.getLiterals()).isEmpty())
-						imprecisions.add(UNPROJECTED);
-					Obligation pred = new Obligation(src, projected, level - 1, parent, e, inputs(caseInputs),
-							imprecisions, point(), created++);
-					solver.pop();
-					return pred;
-				}
-				solver.pop();
+			Term pre = frame(src, level - 1);
+			for (int i = 0; i < unrolling.cases(e).size(); i++) {
+				edges.add(e);
+				indexes.add(i);
+				steps.add(Term.and(pre, transition(e, i)));
 			}
 		}
-		return null;
+		if (steps.isEmpty())
+			return null;
+		if (check(List.of(Term.or(steps.toArray(Term[]::new))), cube, 1, core) != SmtResult.SAT) {
+			solver.pop();
+			return null;
+		}
+		int taken = 0;
+		if (steps.size() > 1) {
+			Map<Term, String> holding = solver.getValues(steps);
+			while (taken < steps.size() - 1 && !"true".equals(holding.get(steps.get(taken))))
+				taken++;
+		}
+		EdgeTransition e = edges.get(taken);
+		int i = indexes.get(taken);
+		ModelLocation src = e.getSource();
+		String caseKey = unrolling.caseKey(0, e, i);
+		String cubeKey = "cond@1" + CUBE;
+		// the cube is encoded as a whole (literals might have been encoded one
+		// by one) to compute its exactness in the model
+		cube.at(unrolling, 1, CUBE);
+		Set<String> imprecisions = new LinkedHashSet<>(unrolling.getImprecisions(caseKey, solver));
+		imprecisions.addAll(unrolling.getImprecisions(cubeKey, solver));
+		SymbolicCase c = unrolling.cases(e).get(i);
+		List<SymbolicExpression> lits = new ArrayList<>(c.getPathCondition());
+		for (SymbolicExpression lit : cube.getLiterals()) {
+			SymbolicExpression image = c.substitute(lit, e.getStore().getFactory(), null);
+			if (SymbolicCase.isTooLarge(image, MAX_LITERAL_SIZE))
+				// literals grow with each pre-image: dropping one enlarges
+				// the predecessor, that is still sound for blocking, but not
+				// for confirming
+				imprecisions.add(OVERSIZED);
+			else
+				lits.add(image);
+		}
+		Map<FreshValue, String> values = freshValues(lits, caseKey);
+		// fresh values of the cube that survived substitution
+		Map<FreshValue, String> fromCube = freshValues(lits, cubeKey);
+		fromCube.keySet().removeAll(values.keySet());
+		Map<FreshValue, String> all = new LinkedHashMap<>(values);
+		all.putAll(fromCube);
+		// every input of the case, even if not in the cube, is needed to
+		// reproduce the transition
+		Map<FreshValue, String> caseInputs = freshValues(unrolling.getFreshValues(caseKey), caseKey);
+		Cube projected = project(lits, all);
+		// values that could not be projected are left unconstrained
+		if (!Projection.freshValues(projected.getLiterals()).isEmpty())
+			imprecisions.add(UNPROJECTED);
+		// the values of the state are only needed for initial states
+		Obligation pred = new Obligation(src, projected, level - 1, parent, e, inputs(caseInputs),
+				imprecisions, level - 1 == 0 ? point() : Collections.emptyMap(), created++);
+		solver.pop();
+		return pred;
+	}
+
+	/**
+	 * Yields the relation of the case with the given index of the given
+	 * transition, from step {@code 0} to step {@code 1}, sent to the solver
+	 * once (see {@link Unrolling#transition(int, EdgeTransition, int)}).
+	 */
+	private Term transition(
+			EdgeTransition edge,
+			int index)
+			throws SemanticException {
+		return define(List.of(edge, index), () -> unrolling.transition(0, edge, index));
+	}
+
+	/**
+	 * Yields the given term, sent to the solver once as a definition, and
+	 * identified by the given key.
+	 */
+	private Term define(
+			Object key,
+			Encoding encoding)
+			throws SemanticException {
+		Term defined = definitions.get(key);
+		if (defined == null) {
+			Term body = encoding.encode();
+			defined = body.equals(Term.TRUE) || body.equals(Term.FALSE) ? body
+					: solver.define("def!" + definitions.size(), body);
+			definitions.put(key, defined);
+		}
+		return defined;
+	}
+
+	/**
+	 * The encoding of a term.
+	 */
+	@FunctionalInterface
+	private interface Encoding {
+
+		Term encode()
+				throws SemanticException;
 	}
 
 	/**
@@ -630,19 +699,20 @@ public class PdrEngine {
 			int level)
 			throws SemanticException,
 			Stop {
+		List<Term> steps = new ArrayList<>();
 		for (EdgeTransition e : incoming.getOrDefault(location, Collections.emptyList())) {
 			ModelLocation src = e.getSource();
 			if (!model.getLocations().contains(src))
 				continue;
-			Term pre = frame(src, level);
-			Term trans = unrolling.transition(0, e);
-			Term post = Term.not(lemma.at(unrolling, 1));
-			SmtResult res = check(pre, trans, post);
-			solver.pop();
-			if (res != SmtResult.UNSAT)
-				return false;
+			steps.add(Term.and(frame(src, level),
+					define(List.of(e), () -> unrolling.transition(0, e))));
 		}
-		return true;
+		if (steps.isEmpty())
+			return true;
+		Term post = Term.not(define(List.of(lemma, 1), () -> lemma.at(unrolling, 1)));
+		SmtResult res = check(Term.or(steps.toArray(Term[]::new)), post);
+		solver.pop();
+		return res == SmtResult.UNSAT;
 	}
 
 	/**
@@ -654,13 +724,13 @@ public class PdrEngine {
 			int level)
 			throws SemanticException {
 		if (level == 0)
-			return Term.and(unrolling.at(0, location), unrolling.initial());
+			return Term.and(unrolling.at(0, location), define("init", () -> unrolling.initial()));
 		List<Term> conj = new ArrayList<>();
 		conj.add(unrolling.at(0, location));
 		if (seeding)
-			conj.add(unrolling.seeds(location, 0));
+			conj.add(define(location, () -> unrolling.seeds(location, 0)));
 		for (Lemma lemma : frames.frame(location, level))
-			conj.add(lemma.at(unrolling, 0));
+			conj.add(define(List.of(lemma, 0), () -> lemma.at(unrolling, 0)));
 		return Term.and(conj.toArray(Term[]::new));
 	}
 

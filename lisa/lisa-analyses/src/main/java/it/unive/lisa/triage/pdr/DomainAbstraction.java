@@ -12,9 +12,7 @@ import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.triage.model.ConstraintExporter;
 import it.unive.lisa.triage.model.HeapModel;
 import it.unive.lisa.triage.model.ModelLocation;
-import it.unive.lisa.triage.reachability.Reachability;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import it.unive.lisa.triage.model.ResultCache;
 import java.util.Set;
 
 /**
@@ -40,7 +38,7 @@ public class DomainAbstraction<A extends AbstractLattice<A>, D extends AbstractD
 
 	private final Analysis<A, D> analysis;
 
-	private final Map<ModelLocation, AnalysisState<A>> preStates = new LinkedHashMap<>();
+	private final ResultCache<A> cache;
 
 	/**
 	 * Builds the abstraction.
@@ -49,7 +47,20 @@ public class DomainAbstraction<A extends AbstractLattice<A>, D extends AbstractD
 	 */
 	public DomainAbstraction(
 			Analysis<A, D> analysis) {
+		this(analysis, new ResultCache<>());
+	}
+
+	/**
+	 * Builds the abstraction.
+	 *
+	 * @param analysis the analysis that computed the results of the frames
+	 * @param cache    the cache of the states before the nodes of the results
+	 */
+	public DomainAbstraction(
+			Analysis<A, D> analysis,
+			ResultCache<A> cache) {
 		this.analysis = analysis;
+		this.cache = cache;
 	}
 
 	@Override
@@ -60,11 +71,7 @@ public class DomainAbstraction<A extends AbstractLattice<A>, D extends AbstractD
 			throws SemanticException {
 		AnalyzedCFG<A> result = (AnalyzedCFG<A>) location.getFrame().getResult();
 		Statement node = location.getNode();
-		AnalysisState<A> state = preStates.get(location);
-		if (state == null) {
-			state = Reachability.preStateOf(result, node, analysis);
-			preStates.put(location, state);
-		}
+		AnalysisState<A> state = cache.preStateOf(result, node, analysis);
 		for (SymbolicExpression lit : cube.getLiterals()) {
 			if (HeapModel.mentionsHeapModel(lit))
 				// the analysis cannot evaluate the heap model: not assuming the

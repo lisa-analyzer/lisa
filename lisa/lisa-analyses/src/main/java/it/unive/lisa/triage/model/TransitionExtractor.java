@@ -71,6 +71,8 @@ public class TransitionExtractor<A extends AbstractLattice<A>, D extends Abstrac
 
 	private final Statement resumeNode;
 
+	private final ResultCache<A> cache;
+
 	/**
 	 * Builds the extractor, summarizing all calls.
 	 *
@@ -131,7 +133,6 @@ public class TransitionExtractor<A extends AbstractLattice<A>, D extends Abstrac
 	 *                       handles the errors leaving the frame
 	 *                       ({@code null} for the root frame)
 	 */
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public TransitionExtractor(
 			SemanticTool<A, D> tool,
 			Frame frame,
@@ -141,14 +142,48 @@ public class TransitionExtractor<A extends AbstractLattice<A>, D extends Abstrac
 			BooleanSupplier budget,
 			Statement resumeNode,
 			TransitionExtractor<A, D> parent) {
+		this(tool, frame, factory, maxCases, expanded, budget, resumeNode, parent, new ResultCache<>());
+	}
+
+	/**
+	 * Builds the extractor.
+	 *
+	 * @param tool       the tool containing the results of the analysis
+	 * @param frame      the frame whose nodes are replayed
+	 * @param factory    the factory of the fresh values used in the
+	 *                       transitions
+	 * @param maxCases   the maximum number of cases of each transition
+	 * @param expanded   the frames of the callees to expand
+	 * @param budget     tells whether more calls can be expanded
+	 * @param resumeNode the node of the caller containing the call that
+	 *                       reaches the frame, where the caller resumes after
+	 *                       the call returns ({@code null} for the root frame)
+	 * @param parent     the extractor of the frame of the caller, that
+	 *                       handles the errors leaving the frame
+	 *                       ({@code null} for the root frame)
+	 * @param cache      the cache of the information computed from the
+	 *                       results of the analysis
+	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public TransitionExtractor(
+			SemanticTool<A, D> tool,
+			Frame frame,
+			FreshValueFactory factory,
+			int maxCases,
+			Set<Frame> expanded,
+			BooleanSupplier budget,
+			Statement resumeNode,
+			TransitionExtractor<A, D> parent,
+			ResultCache<A> cache) {
 		this.parent = parent;
+		this.cache = cache;
 		this.frame = frame;
 		this.result = (AnalyzedCFG<A>) frame.getResult();
 		// we use an analysis without events, as the replay is not part of
 		// the fixpoint computation
 		this.analysis = new Analysis(tool.getConfiguration().analysis, tool.getConfiguration().shouldSmashError);
 		this.domain = new ReplayDomain<>(analysis.domain, factory, maxCases);
-		this.replay = new ReplayInterprocedural<>(tool, frame, domain, expanded, budget);
+		this.replay = new ReplayInterprocedural<>(tool, frame, domain, expanded, budget, cache);
 		this.resumeNode = resumeNode;
 	}
 
@@ -192,7 +227,7 @@ public class TransitionExtractor<A extends AbstractLattice<A>, D extends Abstrac
 	public AnalysisState<A> preStateOf(
 			Statement node)
 			throws SemanticException {
-		return Reachability.preStateOf(result, node, analysis);
+		return cache.preStateOf(result, node, analysis);
 	}
 
 	/**

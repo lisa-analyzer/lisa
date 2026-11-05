@@ -90,6 +90,40 @@ public class SmtLibProcessSolverTest {
 	}
 
 	@Test
+	public void definitionsSurvivePop() {
+		onEachSolver(s -> {
+			Term x = s.declare("x", Sort.INT);
+			s.push();
+			Term positive = s.define("positive", Term.app(">", Sort.BOOL, x, Term.integer(0)));
+			s.pop();
+			s.push();
+			s.assertTerm(positive);
+			s.assertTerm(Term.app("<", Sort.BOOL, x, Term.integer(1)));
+			assertEquals(SmtResult.UNSAT, s.check());
+			s.pop();
+			s.assertTerm(positive);
+			assertEquals(SmtResult.SAT, s.check());
+			assertEquals("true", s.getValues(List.of(positive)).get(positive));
+		});
+	}
+
+	@Test
+	public void resetDiscardsEverything() {
+		onEachSolver(s -> {
+			s.declare("x", Sort.INT);
+			s.assertTerm(Term.FALSE);
+			assertEquals(SmtResult.UNSAT, s.check());
+			if (!s.reset())
+				return;
+			// x can be declared again, with another sort
+			Term x = s.declare("x", Sort.BOOL);
+			s.assertTerm(x);
+			assertEquals(SmtResult.SAT, s.check());
+			assertEquals("true", s.getValues(List.of(x)).get(x));
+		});
+	}
+
+	@Test
 	public void stringsAndBitVectors() {
 		onEachSolver(s -> {
 			Term str = s.declare("s", Sort.STRING);
@@ -110,9 +144,12 @@ public class SmtLibProcessSolverTest {
 	public void errorsDoNotBreakTheSolver() {
 		onEachSolver(s -> {
 			Term x = s.declare("x", Sort.INT);
-			// undeclared constant
-			assertThrows(SmtException.class,
-					() -> s.assertTerm(Term.app(">", Sort.BOOL, Term.constant("y", Sort.INT), x)));
+			// undeclared constant: the failure is reported, at the latest, by
+			// the next request answering something
+			assertThrows(SmtException.class, () -> {
+				s.assertTerm(Term.app(">", Sort.BOOL, Term.constant("y", Sort.INT), x));
+				s.check();
+			});
 			s.assertTerm(Term.app(">", Sort.BOOL, x, Term.integer(0)));
 			assertEquals(SmtResult.SAT, s.check());
 		});

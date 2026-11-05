@@ -7,8 +7,10 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Deque;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -72,6 +74,18 @@ public class SmtLibProcessSolver
 	private final Thread reader;
 
 	private boolean closed;
+
+	/**
+	 * The commands that have been sent, but whose answers have not been read
+	 * yet: commands answering {@code success} are pipelined, and their answers
+	 * are read before the next request answering something else.
+	 */
+	private final Deque<String> pending = new ArrayDeque<>();
+
+	/**
+	 * The commands initializing the solver, sent again after each reset.
+	 */
+	private final List<String> initialization;
 
 	/**
 	 * Sets the path to the z3 executable used by {@link #z3()},
@@ -227,6 +241,7 @@ public class SmtLibProcessSolver
 			long timeoutMillis) {
 		this.command = List.copyOf(command);
 		this.timeout = timeoutMillis;
+		this.initialization = List.copyOf(initialization);
 		try {
 			this.process = new ProcessBuilder(command).redirectErrorStream(true).start();
 		} catch (IOException e) {
@@ -244,17 +259,48 @@ public class SmtLibProcessSolver
 			// print-success makes every command answer, so that errors are
 			// reported synchronously
 			command("(set-option :print-success true)");
-			command("(set-option :produce-models true)");
-			command("(set-option :produce-unsat-cores true)");
-			command("(set-option :global-declarations true)");
-			for (String init : initialization)
-				command(init);
-			command("(set-logic ALL)");
+			initialize();
+			sync();
 		} catch (SmtException e) {
 			close();
 			throw new SmtSolverUnavailableException("The SMT solver started with " + command
 					+ " cannot be initialized", e);
 		}
+	}
+
+	private void initialize() {
+		command("(set-option :produce-models true)");
+		command("(set-option :produce-unsat-cores true)");
+		command("(set-option :global-declarations true)");
+		for (String init : initialization)
+			command(init);
+		command("(set-logic ALL)");
+	}
+
+	/**
+	 * {@inheritDoc}<br>
+	 * <br>
+	 * The solver is reset through the {@code reset} command, and initialized
+	 * again with the same options it has been started with.
+	 */
+	@Override
+	public boolean reset() {
+		command("(reset)");
+		// options are reset as well
+		command("(set-option :print-success true)");
+		initialize();
+		sync();
+		return true;
+	}
+
+	@Override
+	public Term define(
+			String name,
+			Term body) {
+		Term constant = Term.constant(name, body.getSort());
+		command("(define-fun " + constant.toSmtLib() + " () " + body.getSort().toSmtLib() + " " + body.toSmtLib()
+				+ ")");
+		return constant;
 	}
 
 	private void readResponses(
@@ -422,24 +468,71 @@ public class SmtLibProcessSolver
 	}
 
 	/**
-	 * Sends a command that is expected to answer with {@code success}.
+	 * Sends a command that is expected to answer with {@code success}, without
+	 * waiting for the answer (see {@link #sync()}).
 	 */
 	private void command(
 			String cmd) {
-		SExpression response = query(cmd);
-		if (!response.isAtom() || !response.getAtom().equals("success"))
-			throw new SmtException("Unexpected response to " + abbreviate(cmd) + ": " + response);
+		if (closed)
+			throw new SmtException("The SMT solver has been closed");
+		try {
+			input.write(cmd);
+			input.write("\n");
+		} catch (IOException e) {
+			close();
+			throw new SmtException("Cannot send command to the SMT solver: " + abbreviate(cmd), e);
+		}
+		pending.add(abbreviate(cmd));
 	}
 
 	/**
-	 * Sends a command and waits for its response, failing if the solver reports
-	 * an error.
+	 * Reads the answers of the commands sent through {@link #command(String)},
+	 * throwing an exception for the first one that did not succeed, after all
+	 * the answers have been read (so that the solver can still be used).
+	 */
+	private void sync() {
+		flush();
+		SmtException failure = null;
+		while (!pending.isEmpty()) {
+			String cmd = pending.removeFirst();
+			try {
+				SExpression response = next(cmd);
+				if (failure == null && (!response.isAtom() || !response.getAtom().equals("success")))
+					failure = new SmtException("Unexpected response to " + cmd + ": " + response);
+			} catch (SolverTimeoutException e) {
+				pending.clear();
+				throw e;
+			} catch (SmtException e) {
+				if (closed) {
+					pending.clear();
+					throw e;
+				}
+				if (failure == null)
+					failure = e;
+			}
+		}
+		if (failure != null)
+			throw failure;
+	}
+
+	private void flush() {
+		if (closed)
+			throw new SmtException("The SMT solver has been closed");
+		try {
+			input.flush();
+		} catch (IOException e) {
+			close();
+			throw new SmtException("Cannot send commands to the SMT solver", e);
+		}
+	}
+
+	/**
+	 * Sends a request and waits for its answer, after the ones of the pending
+	 * commands.
 	 */
 	private SExpression query(
 			String cmd) {
-		if (closed)
-			throw new SmtException("The SMT solver has been closed");
-
+		sync();
 		try {
 			input.write(cmd);
 			input.write("\n");
@@ -448,7 +541,15 @@ public class SmtLibProcessSolver
 			close();
 			throw new SmtException("Cannot send command to the SMT solver: " + abbreviate(cmd), e);
 		}
+		return next(abbreviate(cmd));
+	}
 
+	/**
+	 * Waits for the next answer of the solver, to the given (abbreviated)
+	 * command.
+	 */
+	private SExpression next(
+			String cmd) {
 		Object response;
 		try {
 			response = responses.poll(timeout + GRACE_PERIOD, TimeUnit.MILLISECONDS);
@@ -462,18 +563,18 @@ public class SmtLibProcessSolver
 			// the solver is unresponsive: no point in asking it to exit
 			process.destroyForcibly();
 			close();
-			throw new SolverTimeoutException("The SMT solver did not answer to " + abbreviate(cmd) + " within "
+			throw new SolverTimeoutException("The SMT solver did not answer to " + cmd + " within "
 					+ (timeout + GRACE_PERIOD) + "ms, and has been killed");
 		}
 
 		if (response == EOF) {
 			close();
-			throw new SmtException("The SMT solver terminated unexpectedly while executing " + abbreviate(cmd));
+			throw new SmtException("The SMT solver terminated unexpectedly while executing " + cmd);
 		}
 
 		if (response instanceof Exception) {
 			close();
-			throw new SmtException("Cannot read the response of the SMT solver to " + abbreviate(cmd), (Exception) response);
+			throw new SmtException("Cannot read the response of the SMT solver to " + cmd, (Exception) response);
 		}
 
 		SExpression sexpr = (SExpression) response;
@@ -481,7 +582,7 @@ public class SmtLibProcessSolver
 				&& !sexpr.getChildren().isEmpty()
 				&& sexpr.getChildren().get(0).isAtom()
 				&& sexpr.getChildren().get(0).getAtom().equals("error"))
-			throw new SmtException("The SMT solver reported an error while executing " + abbreviate(cmd) + ": "
+			throw new SmtException("The SMT solver reported an error while executing " + cmd + ": "
 					+ (sexpr.getChildren().size() > 1 ? unquote(sexpr.getChildren().get(1).toString()) : sexpr));
 		return sexpr;
 	}

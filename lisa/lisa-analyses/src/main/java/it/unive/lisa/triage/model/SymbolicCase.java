@@ -275,6 +275,16 @@ public final class SymbolicCase {
 	}
 
 	/**
+	 * Yields {@code true} if the transition pushes or pops scopes, that is, if
+	 * {@link #preIdentifier(Identifier)} might rename identifiers.
+	 *
+	 * @return whether or not the transition pushes or pops scopes
+	 */
+	public boolean hasScopings() {
+		return !scopings.isEmpty();
+	}
+
+	/**
 	 * Yields {@code true} if this case writes the heap, making it unconstrained
 	 * after the transition.
 	 *

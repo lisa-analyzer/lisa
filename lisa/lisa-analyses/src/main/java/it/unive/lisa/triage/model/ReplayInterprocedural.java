@@ -48,7 +48,6 @@ import it.unive.lisa.symbolic.value.PushAny;
 import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.symbolic.value.TernaryExpression;
 import it.unive.lisa.symbolic.value.UnaryExpression;
-import it.unive.lisa.triage.reachability.Reachability;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
 import it.unive.lisa.util.datastructures.graph.GraphVisitor;
@@ -156,6 +155,8 @@ public class ReplayInterprocedural<A extends AbstractLattice<A>, D extends Abstr
 
 	private final BooleanSupplier budget;
 
+	private final ResultCache<A> cache;
+
 	/**
 	 * The results of the callees of each call, in the context of the call.
 	 */
@@ -211,13 +212,36 @@ public class ReplayInterprocedural<A extends AbstractLattice<A>, D extends Abstr
 	 *                     if the model has room for their locations); it is
 	 *                     queried only when an expanded call is entered
 	 */
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public ReplayInterprocedural(
 			SemanticTool<A, D> tool,
 			Frame frame,
 			ReplayDomain<A, D> domain,
 			Set<Frame> expanded,
 			BooleanSupplier budget) {
+		this(tool, frame, domain, expanded, budget, new ResultCache<>());
+	}
+
+	/**
+	 * Builds the analysis.
+	 *
+	 * @param tool     the tool containing the results of the analysis
+	 * @param frame    the frame whose statements are replayed
+	 * @param domain   the domain used for the replay
+	 * @param expanded the frames of the callees to expand
+	 * @param budget   tells whether or not new callees can be entered (e.g.,
+	 *                     if the model has room for their locations); it is
+	 *                     queried only when an expanded call is entered
+	 * @param cache    the cache of the information computed from the results
+	 *                     of the analysis
+	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public ReplayInterprocedural(
+			SemanticTool<A, D> tool,
+			Frame frame,
+			ReplayDomain<A, D> domain,
+			Set<Frame> expanded,
+			BooleanSupplier budget,
+			ResultCache<A> cache) {
 		this.tool = tool;
 		this.frame = frame;
 		this.result = (AnalyzedCFG<A>) frame.getResult();
@@ -229,6 +253,7 @@ public class ReplayInterprocedural<A extends AbstractLattice<A>, D extends Abstr
 		this.policy = tool.getConfiguration().openCallPolicy;
 		this.expanded = expanded;
 		this.budget = budget;
+		this.cache = cache;
 	}
 
 	/**
@@ -696,6 +721,7 @@ public class ReplayInterprocedural<A extends AbstractLattice<A>, D extends Abstr
 						match = candidate;
 			} else if (candidates.size() == 1)
 				match = candidates.iterator().next();
+			ScopeId<A> context = pushed;
 			if (pushed != null && dependsOnStates(call, pushed)) {
 				// the context depends on the state at the call, that the
 				// replay might not compute exactly as the analysis did (e.g.,
@@ -704,9 +730,12 @@ public class ReplayInterprocedural<A extends AbstractLattice<A>, D extends Abstr
 				// executions of the callee
 				if (match == null)
 					match = candidates.size() == 1 ? candidates.iterator().next()
-							: merge(target, candidates, pushed);
+							: cache.merged(candidates, pushed, () -> merge(target, candidates, context));
 				else if (candidates.size() > 1)
-					match = merge(target, candidates, match.getId());
+					{
+					ScopeId<A> id = match.getId();
+					match = cache.merged(candidates, id, () -> merge(target, candidates, id));
+				}
 			}
 			if (match != null)
 				res.add(match);
@@ -826,7 +855,7 @@ public class ReplayInterprocedural<A extends AbstractLattice<A>, D extends Abstr
 			// states of its expressions are not part of the results: we use
 			// the state before the node containing it
 			return CompoundState.of(
-					Reachability.preStateOf(result, root, plain).withExecutionExpressions(new ExpressionSet()),
+					cache.preStateOf(result, root, plain).withExecutionExpressions(new ExpressionSet()),
 					store);
 		Expression[] params = site.getParameters();
 		for (Expression param : params)
@@ -834,7 +863,7 @@ public class ReplayInterprocedural<A extends AbstractLattice<A>, D extends Abstr
 		AnalysisState<A> state;
 		if (params.length == 0) {
 			Statement pred = site.getEvaluationPredecessor();
-			state = pred == null ? Reachability.preStateOf(result, root, plain) : result.getAnalysisStateAfter(pred);
+			state = pred == null ? cache.preStateOf(result, root, plain) : result.getAnalysisStateAfter(pred);
 		} else
 			state = result.getAnalysisStateAfter(params[site.getOrder().last(params.length)]);
 		return CompoundState.of(state.withExecutionExpressions(new ExpressionSet()), store);
