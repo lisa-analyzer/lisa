@@ -75,7 +75,7 @@ public final class Metadata {
 		this.formatVersion = Objects.requireNonNull(formatVersion, "formatVersion");
 		if (!FORMAT_VERSION.equals(formatVersion))
 			throw new InvalidWitnessException(
-					"Only format version " + FORMAT_VERSION + " is supported, not " + formatVersion);
+					"Unsupported witness format " + formatVersion + ". Supported versions: " + FORMAT_VERSION);
 		this.uuid = Objects.requireNonNull(uuid, "uuid");
 		this.creationTime = Objects.requireNonNull(creationTime, "creationTime");
 		this.producer = Objects.requireNonNull(producer, "producer");
