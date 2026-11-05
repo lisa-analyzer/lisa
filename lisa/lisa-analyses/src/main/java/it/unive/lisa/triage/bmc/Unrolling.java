@@ -3,12 +3,14 @@ package it.unive.lisa.triage.bmc;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.BinaryExpression;
+import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.TernaryExpression;
 import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.triage.encoding.CellKeySort;
 import it.unive.lisa.triage.encoding.ExpressionEncoder;
 import it.unive.lisa.triage.encoding.ExpressionEncoderFactory;
+import it.unive.lisa.triage.encoding.SortPolicy;
 import it.unive.lisa.triage.encoding.SymbolTable;
 import it.unive.lisa.triage.encoding.ValueSort;
 import it.unive.lisa.triage.model.AlarmModel;
@@ -169,7 +171,9 @@ public class Unrolling {
 			ExpressionEncoderFactory encoders) {
 		this.strict = strict;
 		this.encoders = encoders;
-		this.model = model;
+		// floating point numbers are encoded only if they might be used, since
+		// the theory of floating point numbers can make queries much slower
+		this.model = involvesFloats(model) ? model : model.withSorts(model.getSorts().withoutFloats());
 		this.solver = solver;
 		this.index = new LinkedHashMap<>();
 		this.locations = new ArrayList<>(model.getLocations());
@@ -179,8 +183,78 @@ public class Unrolling {
 		this.exactness = new LinkedHashMap<>();
 		this.inputs = new LinkedHashMap<>();
 		this.edgeIds = new IdentityHashMap<>();
-		solver.declareDatatype(ValueSort.DATATYPE);
+		// the constructors of floating point values are declared only if
+		// they might be used
+		solver.declareDatatype(
+				this.model.getSorts().encodesFloats() ? ValueSort.DATATYPE : ValueSort.DATATYPE_WITHOUT_FLOATS);
 		solver.declareDatatype(CellKeySort.DATATYPE);
+	}
+
+	/**
+	 * Yields {@code true} if the encoding of the given model might involve
+	 * floating point numbers: they are encoded by the sorts of the model, and
+	 * some identifier of the vocabulary or fresh value might hold them, or
+	 * some expression that is encoded has a floating point type or is a
+	 * floating point constant.
+	 *
+	 * @param model the model
+	 *
+	 * @return whether or not the encoding might involve floating point numbers
+	 */
+	public static boolean involvesFloats(
+			AlarmModel model) {
+		SortPolicy sorts = model.getSorts();
+		if (!sorts.encodesFloats())
+			return false;
+		for (Identifier id : model.getVocabulary())
+			if (sorts.sortOf(id).isFloatingPoint() || sorts.mayBeFloat(id))
+				return true;
+		for (FreshValue v : model.getFreshValues().values())
+			if (SortPolicy.isFloat(v.getStaticType()))
+				return true;
+		List<SymbolicExpression> encoded = new ArrayList<>(model.getInitialConstraints());
+		for (ModelLocation loc : model.getLocations()) {
+			Set<SymbolicExpression> seeds = model.getSeeds(loc);
+			if (seeds != null)
+				encoded.addAll(seeds);
+			for (EdgeTransition e : model.getTransitions(loc))
+				for (SymbolicCase c : e.getStore().getCases()) {
+					encoded.addAll(c.getPathCondition());
+					for (Map.Entry<Identifier, SymbolicExpression> u : c.getUpdates().entrySet())
+						if (model.getVocabulary().contains(u.getKey()))
+							encoded.add(u.getValue());
+				}
+		}
+		for (BadCase c : model.getBadCases()) {
+			encoded.addAll(c.getPathCondition());
+			if (c.getViolation() != null)
+				encoded.add(c.getViolation());
+		}
+		for (SymbolicExpression e : encoded)
+			if (involvesFloats(e, sorts))
+				return true;
+		return false;
+	}
+
+	private static boolean involvesFloats(
+			SymbolicExpression e,
+			SortPolicy sorts) {
+		if (SortPolicy.isFloat(e.getStaticType()))
+			return true;
+		if (e instanceof Constant)
+			return ((Constant) e).getValue() instanceof Double || ((Constant) e).getValue() instanceof Float;
+		if (e instanceof Identifier)
+			return sorts.sortOf((Identifier) e).isFloatingPoint() || sorts.mayBeFloat((Identifier) e);
+		if (e instanceof UnaryExpression)
+			return involvesFloats(((UnaryExpression) e).getExpression(), sorts);
+		if (e instanceof BinaryExpression)
+			return involvesFloats(((BinaryExpression) e).getLeft(), sorts)
+					|| involvesFloats(((BinaryExpression) e).getRight(), sorts);
+		if (e instanceof TernaryExpression)
+			return involvesFloats(((TernaryExpression) e).getLeft(), sorts)
+					|| involvesFloats(((TernaryExpression) e).getMiddle(), sorts)
+					|| involvesFloats(((TernaryExpression) e).getRight(), sorts);
+		return false;
 	}
 
 	/**
@@ -757,7 +831,8 @@ public class Unrolling {
 		conj.add(Term.or(locs.toArray(Term[]::new)));
 		ExpressionEncoder encoder = encoder(new StepSymbols(0, "#init"));
 		for (SymbolicExpression c : model.getInitialConstraints())
-			conj.add(encoder.encodeCondition(c));
+			if (!floating(c))
+				conj.add(encoder.encodeCondition(c));
 		conj.addAll(existingReferences());
 		conj.addAll(nothingWritten());
 		return Term.and(conj.toArray(Term[]::new));
@@ -821,8 +896,39 @@ public class Unrolling {
 			return Term.FALSE;
 		List<Term> inv = new ArrayList<>();
 		for (SymbolicExpression c : seeds)
-			inv.add(encoder.encodeCondition(c));
+			if (!floating(c))
+				inv.add(encoder.encodeCondition(c));
 		return Term.and(inv.toArray(Term[]::new));
+	}
+
+	/**
+	 * Yields {@code true} if the given constraint computed by the analysis
+	 * (an invariant, or an initial constraint) involves floating point
+	 * numbers. Such constraints are not encoded: analyses often reason about
+	 * floating point numbers as real numbers (e.g., ignoring NaN, or rounding),
+	 * and their constraints are not sound with respect to the IEEE 754
+	 * semantics of the encoding (e.g., the constraint {@code x == NaN}, stating
+	 * that {@code x} is NaN, never holds in IEEE 754). Not encoding them is
+	 * sound, since they only restrict the states.
+	 */
+	private boolean floating(
+			SymbolicExpression constraint) {
+		if (constraint instanceof Identifier)
+			return model.getSorts().sortOf((Identifier) constraint).isFloatingPoint()
+					|| model.getSorts().sortOf(constraint.getStaticType()).isFloatingPoint();
+		if (constraint instanceof Constant)
+			return ((Constant) constraint).getValue() instanceof Double
+					|| ((Constant) constraint).getValue() instanceof Float;
+		if (constraint instanceof UnaryExpression)
+			return floating(((UnaryExpression) constraint).getExpression());
+		if (constraint instanceof BinaryExpression)
+			return floating(((BinaryExpression) constraint).getLeft())
+					|| floating(((BinaryExpression) constraint).getRight());
+		if (constraint instanceof TernaryExpression)
+			return floating(((TernaryExpression) constraint).getLeft())
+					|| floating(((TernaryExpression) constraint).getMiddle())
+					|| floating(((TernaryExpression) constraint).getRight());
+		return false;
 	}
 
 	/**

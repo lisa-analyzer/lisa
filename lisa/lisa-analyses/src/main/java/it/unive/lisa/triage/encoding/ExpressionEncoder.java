@@ -383,12 +383,15 @@ public class ExpressionEncoder
 		if (term.getSort().equals(ValueSort.SORT)) {
 			// values holding integers are converted as integers, and the
 			// ones holding numbers of the given sort are read as they are
+			Sort other = fp.equals(Sort.FLOAT64) ? Sort.FLOAT32 : Sort.FLOAT64;
 			Term isInt = ValueSort.is(term, Sort.INT);
 			Term isFloat = ValueSort.is(term, fp);
-			symbols.exactOnlyIf(Term.or(isInt, isFloat), origin);
+			Term isOther = ValueSort.is(term, other);
+			symbols.exactOnlyIf(Term.or(isInt, isFloat, isOther), origin);
 			return Term.ite(isInt,
 					Term.app(convert, fp, rne(), Term.app("to_real", Sort.REAL, ValueSort.unwrap(term, Sort.INT))),
-					ValueSort.unwrap(term, fp));
+					Term.ite(isOther, Term.app(convert, fp, rne(), ValueSort.unwrap(term, other)),
+							ValueSort.unwrap(term, fp)));
 		}
 		return symbols.fresh(fp, origin);
 	}
@@ -830,10 +833,23 @@ public class ExpressionEncoder
 
 		if (op instanceof TypeCast || op instanceof TypeConv) {
 			Sort target = sorts.sortOf(expression.getStaticType());
-			if (target.isFloatingPoint() && (left.getSort().equals(Sort.INT) || left.getSort().isFloatingPoint()))
+			if (target.isFloatingPoint() && (left.getSort().equals(Sort.INT) || left.getSort().isFloatingPoint()
+					|| left.getSort().equals(ValueSort.SORT)))
 				return toFloat(left, target, expression);
 			if (target.equals(Sort.INT) && left.getSort().isFloatingPoint())
 				return toIntegral(left, expression.getStaticType());
+			if (target.equals(Sort.INT) && left.getSort().equals(ValueSort.SORT) && sorts.encodesFloats()) {
+				// values holding floating point numbers are converted as
+				// floating point numbers, and the ones holding integers are
+				// read as they are
+				Term isInt = ValueSort.is(left, Sort.INT);
+				Term is32 = ValueSort.is(left, Sort.FLOAT32);
+				Term is64 = ValueSort.is(left, Sort.FLOAT64);
+				symbols.exactOnlyIf(Term.or(isInt, is32, is64), expression);
+				return Term.ite(is64, toIntegral(ValueSort.unwrap(left, Sort.FLOAT64), expression.getStaticType()),
+						Term.ite(is32, toIntegral(ValueSort.unwrap(left, Sort.FLOAT32), expression.getStaticType()),
+								ValueSort.unwrap(left, Sort.INT)));
+			}
 			// the value is preserved if it already has the target sort, and
 			// read as the target sort otherwise
 			return coerce(left, target, expression);
@@ -943,9 +959,11 @@ public class ExpressionEncoder
 		if (!opaque)
 			return Term.eq(l, r);
 		// floating point numbers are not equal by identity (e.g., NaN)
-		Term modeled = Term.not(Term.or(ValueSort.isOpaque(l), ValueSort.isOpaque(r),
-				ValueSort.is(l, Sort.FLOAT32), ValueSort.is(r, Sort.FLOAT32),
-				ValueSort.is(l, Sort.FLOAT64), ValueSort.is(r, Sort.FLOAT64)));
+		Term modeled = sorts.encodesFloats()
+				? Term.not(Term.or(ValueSort.isOpaque(l), ValueSort.isOpaque(r),
+						ValueSort.is(l, Sort.FLOAT32), ValueSort.is(r, Sort.FLOAT32),
+						ValueSort.is(l, Sort.FLOAT64), ValueSort.is(r, Sort.FLOAT64)))
+				: Term.not(Term.or(ValueSort.isOpaque(l), ValueSort.isOpaque(r)));
 		return Term.ite(modeled, Term.eq(l, r),
 				symbols.apply("$==", Sort.BOOL, List.of(l, r), origin, modeled));
 	}
@@ -1154,7 +1172,7 @@ public class ExpressionEncoder
 	protected void requireNumeric(
 			Term term) {
 		if (term.getSort().equals(ValueSort.SORT))
-			symbols.require(ValueSort.isNumeric(term));
+			symbols.require(ValueSort.isNumeric(term, sorts.encodesFloats()));
 	}
 
 	private static boolean numericOrValue(

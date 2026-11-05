@@ -91,6 +91,16 @@ public final class ValueSort {
 	 */
 	public static final Datatype DATATYPE;
 
+	/**
+	 * The {@link Datatype} of values without the constructors of floating
+	 * point numbers: the sort and the other constructors are the same as the
+	 * ones of {@link #DATATYPE}, so that the terms not involving floating
+	 * point numbers are the same with both. Declaring this datatype when
+	 * floating point numbers are not used avoids involving the theory of
+	 * floating point numbers in the queries, that can make them much slower.
+	 */
+	public static final Datatype DATATYPE_WITHOUT_FLOATS;
+
 	static {
 		Map<String, List<Field>> constructors = new LinkedHashMap<>();
 		constructors.put(INT, List.of(new Field(INT_FIELD, Sort.INT)));
@@ -99,6 +109,7 @@ public final class ValueSort {
 		constructors.put(NULL, List.of());
 		constructors.put(REF, List.of(new Field(REF_FIELD, Sort.INT)));
 		constructors.put(OPAQUE, List.of(new Field(OPAQUE_FIELD, Sort.INT)));
+		DATATYPE_WITHOUT_FLOATS = new Datatype("Value", new LinkedHashMap<>(constructors));
 		constructors.put(FLOAT32, List.of(new Field(FLOAT32_FIELD, Sort.FLOAT32)));
 		constructors.put(FLOAT64, List.of(new Field(FLOAT64_FIELD, Sort.FLOAT64)));
 		DATATYPE = new Datatype("Value", constructors);
@@ -283,6 +294,25 @@ public final class ValueSort {
 	 */
 	public static Term isNumeric(
 			Term value) {
+		return isNumeric(value, true);
+	}
+
+	/**
+	 * Yields the condition stating that the given value is a number, as
+	 * {@link #isNumeric(Term)}, considering floating point values only if the
+	 * given flag is set (that is, if the constructors of floating point values
+	 * are declared, see {@link #DATATYPE_WITHOUT_FLOATS}).
+	 *
+	 * @param value  the value
+	 * @param floats whether or not floating point values are considered
+	 *
+	 * @return the condition
+	 */
+	public static Term isNumeric(
+			Term value,
+			boolean floats) {
+		if (!floats)
+			return Term.or(DATATYPE.test(INT, value), DATATYPE.test(OPAQUE, value));
 		return Term.or(DATATYPE.test(INT, value), DATATYPE.test(OPAQUE, value), DATATYPE.test(FLOAT32, value),
 				DATATYPE.test(FLOAT64, value));
 	}

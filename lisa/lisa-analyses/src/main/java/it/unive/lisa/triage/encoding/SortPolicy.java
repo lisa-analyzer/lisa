@@ -26,6 +26,8 @@ public class SortPolicy {
 
 	private final Collection<Type> programTypes;
 
+	private final boolean floats;
+
 	/**
 	 * Builds the policy, with no knowledge of the types of the program.
 	 *
@@ -51,6 +53,14 @@ public class SortPolicy {
 	public SortPolicy(
 			Map<Identifier, Set<Type>> types,
 			Collection<Type> programTypes) {
+		this(types, programTypes, true);
+	}
+
+	private SortPolicy(
+			Map<Identifier, Set<Type>> types,
+			Collection<Type> programTypes,
+			boolean floats) {
+		this.floats = floats;
 		this.types = types;
 		this.programTypes = programTypes;
 	}
@@ -96,9 +106,9 @@ public class SortPolicy {
 			return ((HeapType) type).getSort();
 		if (type.isNumericType() && type.asNumericType().isIntegral())
 			return Sort.INT;
-		if (type.isNumericType() && type.asNumericType().is32Bits())
+		if (floats && type.isNumericType() && type.asNumericType().is32Bits())
 			return Sort.FLOAT32;
-		if (type.isNumericType() && type.asNumericType().is64Bits())
+		if (floats && type.isNumericType() && type.asNumericType().is64Bits())
 			return Sort.FLOAT64;
 		if (type.isBooleanType())
 			return Sort.BOOL;
@@ -157,6 +167,54 @@ public class SortPolicy {
 	 *
 	 * @return whether the values might be opaque
 	 */
+	/**
+	 * Yields a policy deciding the same sorts as this one, except that
+	 * floating point numbers are not encoded as such, but as opaque values of
+	 * the {@link ValueSort} datatype (whose meaning is not modeled), and the
+	 * constructors of floating point values of {@link ValueSort} are not used.
+	 *
+	 * @return the policy
+	 */
+	public SortPolicy withoutFloats() {
+		return new SortPolicy(types, programTypes, false);
+	}
+
+	/**
+	 * Yields {@code true} if floating point numbers are encoded as such (see
+	 * {@link #withoutFloats()}).
+	 *
+	 * @return whether or not floating point numbers are encoded
+	 */
+	public boolean encodesFloats() {
+		return floats;
+	}
+
+	/**
+	 * Yields {@code true} if the given identifier might hold floating point
+	 * numbers, according to its runtime types.
+	 *
+	 * @param id the identifier
+	 *
+	 * @return whether or not the identifier might hold floating point numbers
+	 */
+	public boolean mayBeFloat(
+			Identifier id) {
+		Set<Type> ts = types.get(id);
+		return ts != null && ts.stream().anyMatch(SortPolicy::isFloat);
+	}
+
+	/**
+	 * Yields {@code true} if the given type is a floating point type.
+	 *
+	 * @param type the type
+	 *
+	 * @return whether or not the type is a floating point type
+	 */
+	public static boolean isFloat(
+			Type type) {
+		return type.isNumericType() && !type.asNumericType().isIntegral();
+	}
+
 	public boolean mayBeOpaque(
 			SymbolicExpression expression) {
 		if (expression instanceof Identifier) {

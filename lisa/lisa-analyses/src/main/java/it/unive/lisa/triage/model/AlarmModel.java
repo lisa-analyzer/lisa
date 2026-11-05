@@ -174,6 +174,20 @@ public class AlarmModel {
 	}
 
 	/**
+	 * Yields a copy of this model whose identifiers are encoded with the given
+	 * policy.
+	 *
+	 * @param sorts the policy
+	 *
+	 * @return the copy
+	 */
+	public AlarmModel withSorts(
+			SortPolicy sorts) {
+		return new AlarmModel(root, badLocation, locations, initial, transitions, initialConstraints, badCases,
+				seeds, vocabulary, sorts, freshValues, parameters, confirmable, frames, truncated);
+	}
+
+	/**
 	 * Yields the frames of the expanded callees that have locations in this
 	 * model (the root frame excluded).
 	 *

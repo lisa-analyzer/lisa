@@ -591,6 +591,11 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 								+ engine.getFrames().depth());
 			case UNKNOWN:
 			default:
+				if (Unrolling.involvesFloats(model))
+					// queries over floating point numbers are often hard to
+					// decide: the model is searched again without encoding
+					// them (they become opaque values)
+					return search(model.withSorts(model.getSorts().withoutFloats()), strict);
 				return new VerificationResult(VerificationOutcome.POSSIBLE,
 						"the solver could not decide a query: " + s.getReasonUnknown());
 			}
