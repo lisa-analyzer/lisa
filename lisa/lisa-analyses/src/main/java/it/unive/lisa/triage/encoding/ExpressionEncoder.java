@@ -84,6 +84,7 @@ import it.unive.lisa.symbolic.value.operator.unary.NumericNegation;
 import it.unive.lisa.symbolic.value.operator.unary.StringLength;
 import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
 import it.unive.lisa.triage.model.SummaryValue;
+import it.unive.lisa.triage.model.FreshValue;
 import it.unive.lisa.triage.model.InputValue;
 import it.unive.lisa.triage.model.HeapOperators;
 import it.unive.lisa.triage.smt.FloatingPoints;
@@ -308,6 +309,23 @@ public class ExpressionEncoder
 	}
 
 	/**
+	 * Yields an unknown opaque value, standing for a floating point number
+	 * produced by the given expression when floating point numbers are not
+	 * encoded. As for {@link #havoc(SymbolicExpression)}, the value is not
+	 * precise.
+	 *
+	 * @param expression the expression producing the number
+	 *
+	 * @return the opaque value
+	 */
+	protected Term opaque(
+			SymbolicExpression expression) {
+		Term value = symbols.fresh(ValueSort.SORT, expression);
+		symbols.require(ValueSort.isOpaque(value));
+		return value;
+	}
+
+	/**
 	 * Yields an auxiliary constant of the given sort, used to encode the
 	 * expression precisely: the caller must constrain it, through
 	 * {@link SymbolTable#require(Term)}, so that its value is determined by
@@ -373,13 +391,35 @@ public class ExpressionEncoder
 			Term term,
 			Sort fp,
 			SymbolicExpression origin) {
+		return toFloat(term, fp, null, origin);
+	}
+
+	/**
+	 * Converts the given term to a floating point number of the given sort, as
+	 * {@link #toFloat(Term, Sort, SymbolicExpression)}, using the static type
+	 * of the expression that produced the term (if known) to encode integer
+	 * conversions more efficiently.
+	 *
+	 * @param term    the term to convert
+	 * @param fp      the floating point sort
+	 * @param operand the expression whose encoding is the term, or
+	 *                    {@code null} if unknown
+	 * @param origin  the expression being encoded
+	 *
+	 * @return the floating point number
+	 */
+	protected Term toFloat(
+			Term term,
+			Sort fp,
+			SymbolicExpression operand,
+			SymbolicExpression origin) {
 		if (term.getSort().equals(fp))
 			return term;
 		String convert = "(_ to_fp " + fp.getExponentBits() + " " + fp.getSignificandBits() + ")";
 		if (term.getSort().isFloatingPoint())
 			return Term.app(convert, fp, rne(), term);
 		if (term.getSort().equals(Sort.INT))
-			return Term.app(convert, fp, rne(), Term.app("to_real", Sort.REAL, term));
+			return intToFloat(term, fp, bitsOf(operand), origin);
 		if (term.getSort().equals(ValueSort.SORT)) {
 			// values holding integers are converted as integers, and the
 			// ones holding numbers of the given sort are read as they are
@@ -388,12 +428,49 @@ public class ExpressionEncoder
 			Term isFloat = ValueSort.is(term, fp);
 			Term isOther = ValueSort.is(term, other);
 			symbols.exactOnlyIf(Term.or(isInt, isFloat, isOther), origin);
-			return Term.ite(isInt,
-					Term.app(convert, fp, rne(), Term.app("to_real", Sort.REAL, ValueSort.unwrap(term, Sort.INT))),
+			return Term.ite(isInt, intToFloat(ValueSort.unwrap(term, Sort.INT), fp, bitsOf(operand), origin),
 					Term.ite(isOther, Term.app(convert, fp, rne(), ValueSort.unwrap(term, other)),
 							ValueSort.unwrap(term, fp)));
 		}
 		return symbols.fresh(fp, origin);
+	}
+
+	private static int bitsOf(
+			SymbolicExpression operand) {
+		if (operand != null && operand.getStaticType().isNumericType()
+				&& operand.getStaticType().asNumericType().isIntegral()
+				&& operand.getStaticType().asNumericType().getNBits() <= 32)
+			return 32;
+		return 64;
+	}
+
+	/**
+	 * Converts the given integer to a floating point number of the given sort,
+	 * rounding to the nearest one. The conversion goes through a bit-vector
+	 * of the given width (smaller ones are much cheaper for solvers), since
+	 * solvers often fail to decide conversions from real numbers: integers
+	 * outside of the range of signed integers of that width yield an
+	 * imprecise value.
+	 *
+	 * @param term   the integer
+	 * @param fp     the floating point sort
+	 * @param bits   the width of the bit-vector
+	 * @param origin the expression being encoded
+	 *
+	 * @return the floating point number
+	 */
+	protected Term intToFloat(
+			Term term,
+			Sort fp,
+			int bits,
+			SymbolicExpression origin) {
+		BigInteger bound = BigInteger.ONE.shiftLeft(bits - 1);
+		Term inRange = Term.and(Term.app(">=", Sort.BOOL, term, Term.integer(bound.negate())),
+				Term.app("<", Sort.BOOL, term, Term.integer(bound)));
+		Term bv = Term.app("(_ int2bv " + bits + ")", Sort.bitVector(bits), term);
+		Term converted = Term.app("(_ to_fp " + fp.getExponentBits() + " " + fp.getSignificandBits() + ")", fp,
+				rne(), bv);
+		return Term.ite(inRange, converted, symbols.fresh(fp, origin, inRange));
 	}
 
 	/**
@@ -415,17 +492,23 @@ public class ExpressionEncoder
 		int bits = isLong ? 64 : 32;
 		BigInteger max = BigInteger.ONE.shiftLeft(bits - 1).subtract(BigInteger.ONE);
 		BigInteger min = BigInteger.ONE.shiftLeft(bits - 1).negate();
-		Term truncated = Term.app("to_int", Sort.INT, Term.app("fp.to_real", Sort.REAL,
-				Term.app("fp.roundToIntegral", term.getSort(), Term.value("RTZ", Sort.ROUNDING_MODE), term)));
-		Term real = Term.app("fp.to_real", Sort.REAL, term);
+		// the conversion goes through a bit-vector, since solvers often fail
+		// to decide conversions through real numbers
+		Sort bvSort = Sort.bitVector(bits);
+		Term bv = Term.app("(_ fp.to_sbv " + bits + ")", bvSort, Term.value("RTZ", Sort.ROUNDING_MODE), term);
+		Term unsigned = Term.app("bv2int", Sort.INT, bv);
+		Term truncated = Term.ite(Term.app("bvslt", Sort.BOOL, bv, Term.value("(_ bv0 " + bits + ")", bvSort)),
+				Term.app("-", Sort.INT, unsigned, Term.integer(BigInteger.ONE.shiftLeft(bits))), unsigned);
+		// numbers beyond the bounds (including infinities) are saturated:
+		// the bounds might not be representable, but no number lies between
+		// them and their rounding
+		String convert = "(_ to_fp " + term.getSort().getExponentBits() + " " + term.getSort().getSignificandBits()
+				+ ")";
+		Term fpMax = Term.app(convert, term.getSort(), rne(), Term.app("to_real", Sort.REAL, Term.integer(max)));
+		Term fpMin = Term.app(convert, term.getSort(), rne(), Term.app("to_real", Sort.REAL, Term.integer(min)));
 		Term result = Term.ite(Term.app("fp.isNaN", Sort.BOOL, term), Term.integer(0),
-				Term.ite(Term.app("fp.isInfinite", Sort.BOOL, term),
-						Term.ite(Term.app("fp.isPositive", Sort.BOOL, term), Term.integer(max), Term.integer(min)),
-						Term.ite(Term.app(">=", Sort.BOOL, real, Term.app("to_real", Sort.REAL, Term.integer(max))),
-								Term.integer(max),
-								Term.ite(Term.app("<=", Sort.BOOL, real,
-										Term.app("to_real", Sort.REAL, Term.integer(min))), Term.integer(min),
-										truncated))));
+				Term.ite(Term.app("fp.geq", Sort.BOOL, term, fpMax), Term.integer(max),
+						Term.ite(Term.app("fp.leq", Sort.BOOL, term, fpMin), Term.integer(min), truncated)));
 		if (type.isNumericType() && (type.asNumericType().is8Bits() || type.asNumericType().is16Bits()))
 			result = wrap(result, type.asNumericType().is8Bits() ? 8 : 16, type.asNumericType().isUnsigned());
 		return result;
@@ -592,9 +675,9 @@ public class ExpressionEncoder
 			// type tokens, used by type operators
 			return ValueSort.typeToken((Type) value);
 		if (value instanceof Double)
-			return sorts.encodesFloats() ? FloatingPoints.literal((Double) value) : havoc(expression);
+			return sorts.encodesFloats() ? FloatingPoints.literal((Double) value) : opaque(expression);
 		if (value instanceof Float)
-			return sorts.encodesFloats() ? FloatingPoints.literal((Float) value) : havoc(expression);
+			return sorts.encodesFloats() ? FloatingPoints.literal((Float) value) : opaque(expression);
 		if (value instanceof Character)
 			return Term.integer((Character) value);
 		return havoc(expression);
@@ -605,9 +688,16 @@ public class ExpressionEncoder
 			Identifier expression,
 			Object... params) {
 		Term term = symbols.constant(expression, sorts.sortOf(expression));
-		if (!sorts.encodesFloats() && term.getSort().equals(ValueSort.SORT) && sorts.holdsOnlyFloats(expression))
+		if (expression instanceof FreshValue && !sorts.encodesFloats() && term.getSort().equals(ValueSort.SORT)
+				&& sorts.holdsOnlyFloats(expression))
 			// floating point numbers that are not encoded are opaque values,
-			// so that operations over them are never precise
+			// so that operations over them are never precise: this only
+			// constrains unknown values (variables get them from initial
+			// states, from fresh values, and from the expressions producing
+			// floating point numbers, see opaque), as requiring it on any
+			// identifier would exclude executions where an imprecise
+			// encoding (e.g., of a library function) yields another kind of
+			// value
 			symbols.require(ValueSort.isOpaque(term));
 		if (expression instanceof SummaryValue
 				&& ((SummaryValue) expression).getReason().equals(SummaryValue.MERGED_CONDITIONS))
@@ -744,8 +834,8 @@ public class ExpressionEncoder
 		if (fp != null) {
 			// operations over floating point numbers, where the other operand
 			// is converted to a floating point number as by numeric promotion
-			Term l = toFloat(left, fp, expression);
-			Term r = toFloat(right, fp, expression);
+			Term l = toFloat(left, fp, expression.getLeft(), expression);
+			Term r = toFloat(right, fp, expression.getRight(), expression);
 			if (op instanceof ComparisonEq)
 				return Term.app("fp.eq", Sort.BOOL, l, r);
 			if (op instanceof ComparisonNe)
@@ -836,10 +926,13 @@ public class ExpressionEncoder
 		}
 
 		if (op instanceof TypeCast || op instanceof TypeConv) {
+			if (!sorts.encodesFloats() && SortPolicy.isFloat(expression.getStaticType()))
+				// conversions to floating point numbers that are not encoded
+				return opaque(expression);
 			Sort target = sorts.sortOf(expression.getStaticType());
 			if (target.isFloatingPoint() && (left.getSort().equals(Sort.INT) || left.getSort().isFloatingPoint()
 					|| left.getSort().equals(ValueSort.SORT)))
-				return toFloat(left, target, expression);
+				return toFloat(left, target, expression.getLeft(), expression);
 			if (target.equals(Sort.INT) && left.getSort().isFloatingPoint())
 				return toIntegral(left, expression.getStaticType());
 			if (target.equals(Sort.INT) && left.getSort().equals(ValueSort.SORT) && sorts.encodesFloats()) {

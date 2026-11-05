@@ -833,6 +833,14 @@ public class Unrolling {
 		for (SymbolicExpression c : model.getInitialConstraints())
 			if (!floating(c))
 				conj.add(encoder.encodeCondition(c));
+		SortPolicy sorts = model.getSorts();
+		if (!sorts.encodesFloats())
+			// floating point numbers that are not encoded are opaque values,
+			// so that operations over them are never precise
+			for (Identifier id : model.getVocabulary())
+				if (!(id instanceof FreshValue) && sorts.sortOf(id).equals(ValueSort.SORT)
+						&& sorts.holdsOnlyFloats(id))
+					conj.add(ValueSort.isOpaque(encoder.encode(id)));
 		conj.addAll(existingReferences());
 		conj.addAll(nothingWritten());
 		return Term.and(conj.toArray(Term[]::new));

@@ -559,6 +559,44 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 			AlarmModel model,
 			boolean strict)
 			throws SemanticException {
+		if (!Unrolling.involvesFloats(model) || !model.getSorts().encodesFloats())
+			return searchOnce(model, strict);
+
+		// queries over floating point numbers are often hard to decide, and
+		// many violations do not depend on them: the model is first searched
+		// without encoding them (they become opaque values, that is sound for
+		// refutations), and then with them only if the first search was not
+		// conclusive
+		VerificationResult res = searchOnce(model.withSorts(model.getSorts().withoutFloats()), strict);
+		// strict searches under-approximate the executions, so only their
+		// confirmations are conclusive
+		boolean conclusive = strict ? res.getOutcome() == VerificationOutcome.CONFIRMED
+				: res.getOutcome() != VerificationOutcome.POSSIBLE;
+		if (conclusive || System.currentTimeMillis() >= deadline)
+			return res;
+		boolean wasInexact = inexact;
+		List<ModelLocation> trace = callTrace;
+		Map<String, Integer> stats = statistics;
+		VerificationResult precise = searchOnce(model, strict);
+		int total = stats.getOrDefault("queries", 0) + statistics.getOrDefault("queries", 0);
+		if (precise.getOutcome() == VerificationOutcome.POSSIBLE) {
+			// the first search is kept, as it is not affected by the solver
+			// failing on floating point queries
+			inexact = wasInexact;
+			callTrace = trace;
+			statistics = stats;
+		} else
+			res = precise;
+		Map<String, Integer> merged = new LinkedHashMap<>(statistics);
+		merged.put("queries", total);
+		statistics = merged;
+		return res;
+	}
+
+	private VerificationResult searchOnce(
+			AlarmModel model,
+			boolean strict)
+			throws SemanticException {
 		SmtSolver s;
 		try {
 			s = acquire();
@@ -591,11 +629,6 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 								+ engine.getFrames().depth());
 			case UNKNOWN:
 			default:
-				if (Unrolling.involvesFloats(model))
-					// queries over floating point numbers are often hard to
-					// decide: the model is searched again without encoding
-					// them (they become opaque values)
-					return search(model.withSorts(model.getSorts().withoutFloats()), strict);
 				return new VerificationResult(VerificationOutcome.POSSIBLE,
 						"the solver could not decide a query: " + s.getReasonUnknown());
 			}
