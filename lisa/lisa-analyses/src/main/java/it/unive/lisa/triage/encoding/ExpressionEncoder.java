@@ -431,6 +431,11 @@ public class ExpressionEncoder
 
 		if (op instanceof HeapOperators.CellKey)
 			return CellKeySort.key(referenceKey(left, expression), coerce(right, Sort.INT, expression));
+		if (op instanceof HeapOperators.WrittenAt)
+			// locations of maps that do not track writes are never written
+			return left.getSort().isArray() && left.getSort().getElement().equals(Sort.BOOL)
+					? Term.app("select", Sort.BOOL, left, heapKey(right, expression))
+					: Term.FALSE;
 
 		if (op instanceof LogicalAnd)
 			return Term.and(coerce(left, Sort.BOOL, expression), coerce(right, Sort.BOOL, expression));

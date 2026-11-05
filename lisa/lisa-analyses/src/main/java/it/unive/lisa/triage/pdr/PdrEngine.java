@@ -2,12 +2,16 @@ package it.unive.lisa.triage.pdr;
 
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.symbolic.SymbolicExpression;
+import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.symbolic.value.TernaryExpression;
+import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.triage.bmc.Unrolling;
 import it.unive.lisa.triage.model.AlarmModel;
 import it.unive.lisa.triage.model.BadCase;
 import it.unive.lisa.triage.model.EdgeTransition;
 import it.unive.lisa.triage.model.FreshValue;
+import it.unive.lisa.triage.model.HeapOperators;
 import it.unive.lisa.triage.model.InputValue;
 import it.unive.lisa.triage.model.ModelLocation;
 import it.unive.lisa.triage.model.SymbolicCase;
@@ -166,6 +170,8 @@ public class PdrEngine {
 
 	private final TypeSystem types;
 
+	private final boolean strict;
+
 	private final Frames<ModelLocation, Lemma> frames = new Frames<>();
 
 	private final Map<ModelLocation, List<EdgeTransition>> incoming = new LinkedHashMap<>();
@@ -242,6 +248,7 @@ public class PdrEngine {
 			boolean strict) {
 		this.model = model;
 		this.solver = solver;
+		this.strict = strict;
 		this.unrolling = new Unrolling(model, solver, strict);
 		this.types = model.getBadLocation().getNode().getProgram().getTypes();
 		for (ModelLocation loc : model.getLocations())
@@ -442,6 +449,7 @@ public class PdrEngine {
 			List<SymbolicExpression> lits = new ArrayList<>(c.getPathCondition());
 			if (c.getViolation() != null)
 				lits.add(c.getViolation());
+			lits.addAll(written(lits));
 			Cube cube = new Cube(lits);
 			Term query = cube.at(unrolling, 0, CUBE);
 			String key = "cond@0" + CUBE;
@@ -582,6 +590,11 @@ public class PdrEngine {
 			else
 				lits.add(image);
 		}
+		List<SymbolicExpression> read = new ArrayList<>(lits);
+		for (Map.Entry<Identifier, SymbolicExpression> update : c.getUpdates().entrySet())
+			if (model.getVocabulary().contains(update.getKey()))
+				read.add(update.getValue());
+		lits.addAll(written(read));
 		Map<FreshValue, String> values = freshValues(lits, caseKey);
 		// fresh values of the cube that survived substitution
 		Map<FreshValue, String> fromCube = freshValues(lits, cubeKey);
@@ -600,6 +613,47 @@ public class PdrEngine {
 				imprecisions, level - 1 == 0 ? point() : Collections.emptyMap(), created++);
 		solver.pop();
 		return pred;
+	}
+
+	/**
+	 * In strict mode, yields the conditions stating that the heap locations
+	 * read by the given expressions have been written (see
+	 * {@link HeapOperators.WrittenAt}), that are added to the obligations: a
+	 * read is precise only if its location has been written, and this is a
+	 * property of the whole execution reaching the read, not only of the
+	 * step performing it. Adding the conditions to the obligations makes the
+	 * predecessors computed for them satisfy them too, until the writes are
+	 * reached. Strict queries require the reads to be precise, so the
+	 * conditions hold in the models of the queries yielding the obligations.
+	 * Outside strict mode, no condition is yielded.
+	 */
+	private List<SymbolicExpression> written(
+			Collection<SymbolicExpression> expressions) {
+		if (!strict)
+			return List.of();
+		Set<SymbolicExpression> result = new LinkedHashSet<>();
+		for (SymbolicExpression e : expressions)
+			written(e, result);
+		return new ArrayList<>(result);
+	}
+
+	private void written(
+			SymbolicExpression e,
+			Set<SymbolicExpression> result) {
+		if (e instanceof UnaryExpression)
+			written(((UnaryExpression) e).getExpression(), result);
+		else if (e instanceof BinaryExpression) {
+			written(((BinaryExpression) e).getLeft(), result);
+			written(((BinaryExpression) e).getRight(), result);
+		} else if (e instanceof TernaryExpression) {
+			TernaryExpression t = (TernaryExpression) e;
+			written(t.getLeft(), result);
+			written(t.getMiddle(), result);
+			written(t.getRight(), result);
+			if (t.getOperator() instanceof HeapOperators.ReferenceRead)
+				result.add(new BinaryExpression(types.getBooleanType(), t.getMiddle(), t.getRight(),
+						HeapOperators.WrittenAt.INSTANCE, t.getCodeLocation()));
+		}
 	}
 
 	/**

@@ -721,6 +721,11 @@ public class ReplayInterprocedural<A extends AbstractLattice<A>, D extends Abstr
 		ScopeId<A> pushed = null;
 		boolean computed = false;
 		for (CFG target : call.getTargetedCFGs()) {
+			AnalyzedCFG<A> forced = expandedResult(call, target);
+			if (forced != null) {
+				res.add(forced);
+				continue;
+			}
 			Collection<AnalyzedCFG<A>> candidates = tool.getResultOf(target);
 			if (candidates == null || candidates.isEmpty())
 				continue;
@@ -756,6 +761,29 @@ public class ReplayInterprocedural<A extends AbstractLattice<A>, D extends Abstr
 		}
 		callees.put(call, res);
 		return res;
+	}
+
+	/**
+	 * Yields the result of the given target of the given call in the frames
+	 * to expand, if any. The frames to expand might come from a chain of
+	 * calls computed from the results of the analysis (see
+	 * {@link AlarmModelBuilder}), whose contexts might depend on states at the
+	 * calls that the replay does not compute exactly as the analysis did: the
+	 * result of the frame is used, so that the frames of the chain are
+	 * entered. The result describes some of the executions of the callee from
+	 * the call, as found by the analysis.
+	 */
+	@SuppressWarnings("unchecked")
+	private AnalyzedCFG<A> expandedResult(
+			CFGCall call,
+			CFG target) {
+		for (Frame f : expanded)
+			if (!f.isRoot()
+					&& frame.equals(f.getParent())
+					&& call.equals(f.getCall())
+					&& f.getResult().getDescriptor().equals(target.getDescriptor()))
+				return (AnalyzedCFG<A>) f.getResult();
+		return null;
 	}
 
 	/**

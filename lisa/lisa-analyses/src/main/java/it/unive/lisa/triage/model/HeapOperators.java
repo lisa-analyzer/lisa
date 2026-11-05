@@ -126,6 +126,40 @@ public final class HeapOperators {
 	}
 
 	/**
+	 * Whether a location has been written: the left operand is a map of
+	 * written locations (see {@link ReferenceRead}), and the right one is the
+	 * key of the location (a reference for the contents of fields, or the key
+	 * of a cell for the cells of arrays).
+	 *
+	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+	 */
+	public static final class WrittenAt
+			implements
+			BinaryOperator {
+
+		/**
+		 * The singleton instance of this class.
+		 */
+		public static final WrittenAt INSTANCE = new WrittenAt();
+
+		private WrittenAt() {
+		}
+
+		@Override
+		public Set<Type> typeInference(
+				TypeSystem types,
+				Set<Type> left,
+				Set<Type> right) {
+			return Collections.singleton(types.getBooleanType());
+		}
+
+		@Override
+		public String toString() {
+			return "written";
+		}
+	}
+
+	/**
 	 * The reference whose identifier is the operand (an integer).
 	 *
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>

@@ -302,6 +302,7 @@ public class HeapModel {
 		if (expression instanceof BinaryExpression) {
 			BinaryExpression b = (BinaryExpression) expression;
 			return b.getOperator() instanceof HeapOperators.CellKey
+					|| b.getOperator() instanceof HeapOperators.WrittenAt
 					|| mentionsHeapModel(b.getLeft())
 					|| mentionsHeapModel(b.getRight());
 		}
