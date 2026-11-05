@@ -636,28 +636,29 @@ public class Unrolling {
 	}
 
 	/**
-	 * Yields the constraints stating that the references existing in the
-	 * initial states (held by identifiers, fields of objects, or cells of
-	 * arrays) have been allocated before the ones that the model allocates,
-	 * that is, their identifiers are smaller than the initial value of the
-	 * counter of allocations (see {@link HeapModel}). These constraints hold
-	 * in every concrete state, for a large enough counter, and they ensure that
-	 * new references never alias existing ones.
+	 * Yields the constraints stating that the references held by identifiers
+	 * in the initial states have been allocated before the ones that the model
+	 * allocates, that is, their identifiers are smaller than the initial value
+	 * of the counter of allocations (see {@link HeapModel}). These constraints
+	 * hold in every concrete state, for a large enough counter, and they
+	 * ensure that new references never alias the ones of identifiers. The
+	 * references stored in fields of objects and in cells of arrays in the
+	 * initial states are not constrained, as this would need quantifiers, that
+	 * solvers often cannot decide: this is sound, as the contents of the heap
+	 * in the initial states are not written by the model, so that executions
+	 * reading them are never considered precise (see
+	 * {@link SymbolTable#exactOnlyIfWritten}).
 	 */
 	private List<Term> existingReferences() {
 		if (!model.getVocabulary().contains(HeapModel.ALLOC))
 			return List.of();
 		Term counter = var(HeapModel.ALLOC, 0);
 		List<Term> result = new ArrayList<>();
-		Term r = Term.boundVariable("$r", Sort.INT);
-		Term k = Term.boundVariable("$k", CellKeySort.SORT);
 		for (Identifier id : model.getVocabulary()) {
+			if (HeapModel.isHeapState(id))
+				continue;
 			Term value = var(id, 0);
-			if (id.getStaticType() == HeapType.FIELD)
-				result.add(Term.forall(List.of(r), allocated(Term.app("select", ValueSort.SORT, value, r), counter)));
-			else if (id.getStaticType() == HeapType.CELLS)
-				result.add(Term.forall(List.of(k), allocated(Term.app("select", ValueSort.SORT, value, k), counter)));
-			else if (value.getSort().equals(ValueSort.SORT))
+			if (value.getSort().equals(ValueSort.SORT))
 				result.add(allocated(value, counter));
 		}
 		return result;

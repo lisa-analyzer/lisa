@@ -31,6 +31,8 @@ import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.triage.pdr.PdrVerifier;
 import it.unive.lisa.triage.smt.SmtLibProcessSolver;
 import it.unive.lisa.type.Untyped;
+import it.unive.lisa.imp.types.ClassType;
+import it.unive.lisa.type.ReferenceType;
 import java.nio.file.Files;
 import java.util.Set;
 import org.junit.jupiter.api.BeforeAll;
@@ -256,5 +258,56 @@ public class HeapModelTest {
 		Set<?> byA = heap.preservedBy(a.getInstanceCodeMembers(false));
 		assertFalse(byA.contains(HeapModel.field("k")), byA.toString());
 		assertTrue(byA.contains(HeapModel.field("len")), byA.toString());
+	}
+
+	@Test
+	public void fieldsAreQualifiedByTheirClasses() throws Exception {
+		Program p = IMPFrontend.processText("class QA { f; }\n"
+				+ "class QB extends QA { g; m() { def x = 0; } }\n"
+				+ "class QC { f; m() { def x = 0; } }");
+		ClassUnit qa = (ClassUnit) p.getUnit("QA");
+		ClassUnit qb = (ClassUnit) p.getUnit("QB");
+		ClassUnit qc = (ClassUnit) p.getUnit("QC");
+		// h is final in QA, but not in QC
+		qa.addInstanceGlobal(new Global(SyntheticLocation.INSTANCE, qa, "h", true, Untyped.INSTANCE,
+				new Annotations(), true));
+		qc.addInstanceGlobal(new Global(SyntheticLocation.INSTANCE, qc, "h", true, Untyped.INSTANCE));
+		HeapModel heap = new HeapModel(p);
+
+		// fields are resolved statically, from the class of the static type
+		// through its ancestors
+		assertEquals("QA::f", heap.qualify(ClassType.lookup("QB"), "f"));
+		assertEquals("QA::f", heap.qualify(new ReferenceType(ClassType.lookup("QB")), "f"));
+		assertEquals("QB::g", heap.qualify(ClassType.lookup("QB"), "g"));
+		assertEquals("QC::f", heap.qualify(ClassType.lookup("QC"), "f"));
+		// unknown static types and fields are not qualified
+		assertEquals(null, heap.qualify(Untyped.INSTANCE, "f"));
+		assertEquals(null, heap.qualify(ClassType.lookup("QB"), "unknown"));
+
+		// a qualified field is immutable if it is final, while a field name is
+		// immutable if all the fields with that name are final
+		assertTrue(heap.isImmutable(HeapModel.field("QA::h")));
+		assertFalse(heap.isImmutable(HeapModel.field("QC::h")));
+		assertFalse(heap.isImmutable(HeapModel.field("h")));
+		// only the code of QA and of its subclasses can write QA::h
+		Set<?> byQC = heap.preservedBy(qc.getInstanceCodeMembers(false));
+		assertTrue(byQC.contains(HeapModel.field("QA::h")), byQC.toString());
+		assertFalse(byQC.contains(HeapModel.field("QC::h")), byQC.toString());
+		Set<?> byQB = heap.preservedBy(qb.getInstanceCodeMembers(false));
+		assertFalse(byQB.contains(HeapModel.field("QA::h")), byQB.toString());
+		assertTrue(heap.immutableContents().contains(HeapModel.field("QA::h")));
+
+		// the same field accessed in the other way
+		assertEquals(Set.of(HeapModel.field("f"), HeapModel.written(HeapModel.field("f"))),
+				heap.aliasesOf("QA::f", ClassType.lookup("QB")));
+		assertEquals(Set.of(HeapModel.field("QA::f"), HeapModel.written(HeapModel.field("QA::f")),
+				HeapModel.field("QC::f"), HeapModel.written(HeapModel.field("QC::f"))),
+				heap.aliasesOf("f", Untyped.INSTANCE));
+		// objects of QC cannot have the fields of QA, that is not related to
+		// QC, while objects of QB have the ones of QA
+		assertEquals(Set.of(HeapModel.field("QC::f"), HeapModel.written(HeapModel.field("QC::f"))),
+				heap.aliasesOf("f", ClassType.lookup("QC")));
+		assertEquals(Set.of(HeapModel.field("QA::f"), HeapModel.written(HeapModel.field("QA::f"))),
+				heap.aliasesOf("f", new ReferenceType(ClassType.lookup("QB"))));
 	}
 }

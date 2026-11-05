@@ -13,6 +13,7 @@ import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.TernaryExpression;
 import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.symbolic.value.Variable;
+import it.unive.lisa.type.Type;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -46,12 +47,19 @@ import java.util.Set;
  * {@link HeapType#REFERENCE}) holds the reference most recently allocated by
  * the site.</li>
  * </ul>
- * Fields are identified by their name, regardless of the class declaring them:
- * since different objects have different references, fields with the same
- * name of different classes never interfere. A field name is immutable if all
- * the fields with that name in the program are final: its contents can only be
- * written by the code of the classes declaring it (e.g., their constructors),
- * and they are preserved by calls to other code.
+ * Fields are identified by the class declaring them and their name
+ * ({@code $field:C::f}, see {@link #qualify(Type, String)}) when the static
+ * type of the accessed object tells the class, and by their name only
+ * ({@code $field:f}) otherwise (e.g., in dynamically typed languages): since
+ * different objects have different references, fields with the same name of
+ * different classes never interfere in the latter case. Since the same field
+ * might be accessed in both ways, writing a field in one way makes the
+ * contents of the field with the same name in the other way unknown (see
+ * {@link #aliasesOf(String)}). A field identified by its class is immutable if
+ * it is final, while a field identified by its name only is immutable if all
+ * the fields with that name in the program are final: their contents can only
+ * be written by the code of the classes declaring them (e.g., their
+ * constructors), and they are preserved by calls to other code.
  *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
@@ -114,16 +122,42 @@ public class HeapModel {
 	private final Map<String, Set<Unit>> immutable;
 
 	/**
+	 * For each field name, the names (qualified by the class declaring them,
+	 * see {@link #qualify(Type, String)}) of the fields with that name.
+	 */
+	private final Map<String, Set<String>> qualified;
+
+	/**
+	 * For each qualified name of an immutable field, the unit declaring it.
+	 */
+	private final Map<String, Unit> finals;
+
+	/**
+	 * For each qualified name of a field, the unit declaring it.
+	 */
+	private final Map<String, CompilationUnit> declarers;
+
+	/**
+	 * The separator between the name of a class and the name of a field in
+	 * qualified field names.
+	 */
+	public static final String QUALIFIER = "::";
+
+	/**
 	 * Builds a heap model where no field is immutable.
 	 */
 	public HeapModel() {
 		this.immutable = Collections.emptyMap();
+		this.qualified = Collections.emptyMap();
+		this.finals = Collections.emptyMap();
+		this.declarers = Collections.emptyMap();
 		this.arrayProperties = DEFAULT_ARRAY_PROPERTIES;
 	}
 
 	/**
-	 * Builds the heap model of the given program, where the field names that
-	 * are only used by final instance fields are immutable.
+	 * Builds the heap model of the given program, where final instance fields
+	 * (and the field names that are only used by final instance fields) are
+	 * immutable.
 	 *
 	 * @param program the program
 	 */
@@ -133,9 +167,10 @@ public class HeapModel {
 	}
 
 	/**
-	 * Builds the heap model of the given program, where the field names that
-	 * are only used by final instance fields are immutable, and the variables
-	 * with the given names denote properties of arrays.
+	 * Builds the heap model of the given program, where final instance fields
+	 * (and the field names that are only used by final instance fields) are
+	 * immutable, and the variables with the given names denote properties of
+	 * arrays.
 	 *
 	 * @param program         the program
 	 * @param arrayProperties the names of the variables that, when accessed
@@ -148,11 +183,19 @@ public class HeapModel {
 		this.arrayProperties = arrayProperties;
 		Map<String, Set<Unit>> declaring = new LinkedHashMap<>();
 		Set<String> mutable = new LinkedHashSet<>();
+		this.qualified = new LinkedHashMap<>();
+		this.finals = new LinkedHashMap<>();
+		this.declarers = new LinkedHashMap<>();
 		for (Unit unit : program.getUnits())
 			if (unit instanceof CompilationUnit)
 				for (Global g : ((CompilationUnit) unit).getInstanceGlobals(false)) {
 					declaring.computeIfAbsent(g.getName(), n -> new LinkedHashSet<>()).add(unit);
-					if (!g.isFinal())
+					String name = unit.getName() + QUALIFIER + g.getName();
+					qualified.computeIfAbsent(g.getName(), n -> new LinkedHashSet<>()).add(name);
+					declarers.put(name, (CompilationUnit) unit);
+					if (g.isFinal())
+						finals.put(name, unit);
+					else
 						mutable.add(g.getName());
 				}
 		// properties of arrays cannot change (unless a mutable field shares
@@ -283,9 +326,115 @@ public class HeapModel {
 	 */
 	public boolean isImmutable(
 			Identifier field) {
-		return field.getStaticType() == HeapType.FIELD
-				&& field.getName().startsWith(FIELD_PREFIX)
-				&& immutable.containsKey(field.getName().substring(FIELD_PREFIX.length()));
+		if (field.getStaticType() != HeapType.FIELD || !field.getName().startsWith(FIELD_PREFIX))
+			return false;
+		String name = field.getName().substring(FIELD_PREFIX.length());
+		return finals.containsKey(name) || immutable.containsKey(name);
+	}
+
+	/**
+	 * Yields the name of the field with the given name accessed on objects of
+	 * the given static type, qualified by the class declaring it (as
+	 * {@code C::f}): the first class declaring an instance field with that name
+	 * among the class of the static type and its ancestors, as fields are
+	 * resolved statically. Yields {@code null} if the static type does not
+	 * tell the class (e.g., it is unknown), or if no such class exists.
+	 *
+	 * @param type the static type of the accessed object (or of a reference or
+	 *                 pointer to it)
+	 * @param name the name of the field
+	 *
+	 * @return the qualified name, or {@code null}
+	 */
+	public String qualify(
+			Type type,
+			String name) {
+		if (!qualified.containsKey(name))
+			return null;
+		CompilationUnit unit = unitOf(type);
+		if (unit == null)
+			return null;
+		for (CompilationUnit current : hierarchy(unit))
+			if (current.getInstanceGlobal(name, false) != null)
+				return current.getName() + QUALIFIER + name;
+		return null;
+	}
+
+	/**
+	 * Yields the unit of the class of the given static type (of an object, or
+	 * of a reference or pointer to it), or {@code null} if the type does not
+	 * tell it.
+	 */
+	private static CompilationUnit unitOf(
+			Type type) {
+		Type inner = type;
+		if (inner.isPointerType())
+			inner = inner.asPointerType().getInnerType();
+		else if (inner.isReferenceType())
+			inner = inner.asReferenceType().getInnerType();
+		return inner.isUnitType() ? inner.asUnitType().getUnit() : null;
+	}
+
+	/**
+	 * Yields the given unit and its ancestors, from the closest ones.
+	 */
+	private static Set<CompilationUnit> hierarchy(
+			CompilationUnit unit) {
+		Set<CompilationUnit> seen = new LinkedHashSet<>();
+		LinkedList<CompilationUnit> ws = new LinkedList<>();
+		ws.add(unit);
+		while (!ws.isEmpty()) {
+			CompilationUnit current = ws.removeFirst();
+			if (seen.add(current))
+				ws.addAll(current.getImmediateAncestors());
+		}
+		return seen;
+	}
+
+	/**
+	 * Yields the identifiers of the contents of the fields that might denote
+	 * the same fields as the given one, accessed in the other way (see
+	 * {@link #qualify(Type, String)}), and the ones recording which locations
+	 * have been written: for a qualified name {@code C::f}, the field named
+	 * {@code f}, and for a name {@code f}, the fields named {@code f}
+	 * qualified by their classes, if these might be the class of the accessed
+	 * object (i.e., they are related to the class of its static type, or the
+	 * static type is unknown).
+	 *
+	 * @param name the name of the field, possibly qualified
+	 * @param type the static type of the accessed object (or of a reference or
+	 *                 pointer to it)
+	 *
+	 * @return the identifiers
+	 */
+	public Set<Identifier> aliasesOf(
+			String name,
+			Type type) {
+		Set<Identifier> result = new LinkedHashSet<>();
+		int sep = name.lastIndexOf(QUALIFIER);
+		Collection<String> others;
+		if (sep >= 0)
+			others = Collections.singleton(name.substring(sep + QUALIFIER.length()));
+		else {
+			others = new LinkedHashSet<>(qualified.getOrDefault(name, Collections.emptySet()));
+			CompilationUnit unit = unitOf(type);
+			if (unit != null) {
+				Set<CompilationUnit> ancestors = hierarchy(unit);
+				// fields of classes that are neither ancestors nor
+				// descendants of the class of the object are not its fields
+				others.removeIf(other -> {
+					CompilationUnit declarer = declarers.get(other);
+					return declarer != null && !ancestors.contains(declarer)
+							&& !hierarchy(declarer).contains(unit);
+				});
+			}
+		}
+		for (String other : others) {
+			Variable contents = field(other);
+			result.add(contents);
+			result.add(written(contents));
+		}
+		return result;
 	}
 
 	/**
@@ -314,6 +463,12 @@ public class HeapModel {
 				preserved.add(contents);
 				preserved.add(written(contents));
 			}
+		for (Map.Entry<String, Unit> e : finals.entrySet())
+			if (!writers.contains(e.getValue())) {
+				Variable contents = field(e.getKey());
+				preserved.add(contents);
+				preserved.add(written(contents));
+			}
 		return preserved;
 	}
 
@@ -326,7 +481,9 @@ public class HeapModel {
 	 */
 	public Set<Identifier> immutableContents() {
 		Set<Identifier> preserved = new LinkedHashSet<>();
-		for (String name : immutable.keySet()) {
+		Set<String> names = new LinkedHashSet<>(immutable.keySet());
+		names.addAll(finals.keySet());
+		for (String name : names) {
 			Variable contents = field(name);
 			preserved.add(contents);
 			preserved.add(written(contents));

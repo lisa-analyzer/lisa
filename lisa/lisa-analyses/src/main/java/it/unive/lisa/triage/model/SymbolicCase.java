@@ -465,8 +465,13 @@ public final class SymbolicCase {
 			FreshValueFactory factory,
 			ProgramPoint pp) {
 		SymbolicExpression child = access.getChild();
-		if (child instanceof GlobalVariable)
-			return ((GlobalVariable) child).getName();
+		if (child instanceof GlobalVariable) {
+			// qualified by the class declaring it, when the static type of
+			// the accessed object tells it
+			String name = ((GlobalVariable) child).getName();
+			String qualified = factory.getHeapModel().qualify(access.getContainer().getStaticType(), name);
+			return qualified == null ? name : qualified;
+		}
 		if (child instanceof Variable && factory.getHeapModel().isArrayProperty(((Variable) child).getName())
 				&& isArray(access.getContainer().getStaticType())) {
 			String name = ((Variable) child).getName();
@@ -601,9 +606,27 @@ public final class SymbolicCase {
 			Variable written = HeapModel.written(contents);
 			SymbolicCase res = update(contents, new TernaryExpression(HeapType.FIELD,
 					substitute(contents, factory, pp), ref, v, HeapOperators.ReferenceStore.INSTANCE, loc), factory);
-			return res.update(written, new TernaryExpression(HeapType.WRITTEN_FIELD,
+			res = res.update(written, new TernaryExpression(HeapType.WRITTEN_FIELD,
 					substitute(written, factory, pp), ref, yes, HeapOperators.ReferenceStore.INSTANCE, loc),
 					factory);
+			// the same field of the same object might be accessed in the other
+			// way (by name only, or qualified by its class): if the write
+			// surely denotes it, it is written there too, otherwise it is no
+			// longer written by the model there
+			List<Identifier> aliases = new ArrayList<>();
+			for (Identifier alias : factory.getHeapModel().aliasesOf(field, target.getContainer().getStaticType()))
+				if (alias.getStaticType() == HeapType.FIELD)
+					aliases.add(alias);
+			if (aliases.size() == 1)
+				return res.mirror(aliases.get(0), ref, v, yes, factory, pp, loc);
+			Constant no = new Constant(Untyped.INSTANCE, false, loc);
+			for (Identifier alias : aliases) {
+				Variable aliasWritten = HeapModel.written(alias);
+				res = res.update(aliasWritten, new TernaryExpression(HeapType.WRITTEN_FIELD,
+						substitute(aliasWritten, factory, pp), ref, no, HeapOperators.ReferenceStore.INSTANCE, loc),
+						factory);
+			}
+			return res;
 		}
 		SymbolicExpression key = new BinaryExpression(HeapType.CELL_KEY, ref,
 				substitute(target.getChild(), factory, pp), HeapOperators.CellKey.INSTANCE, loc);
@@ -613,6 +636,25 @@ public final class SymbolicCase {
 		return res.update(HeapModel.WRITTEN_CELLS, new TernaryExpression(HeapType.WRITTEN_CELLS,
 				substitute(HeapModel.WRITTEN_CELLS, factory, pp), key, yes, HeapOperators.ReferenceStore.INSTANCE,
 				loc), factory);
+	}
+
+	/**
+	 * Writes the given value in the given field contents, at the given
+	 * reference, recording that the location has been written.
+	 */
+	private SymbolicCase mirror(
+			Identifier contents,
+			SymbolicExpression ref,
+			SymbolicExpression value,
+			Constant yes,
+			FreshValueFactory factory,
+			ProgramPoint pp,
+			CodeLocation loc) {
+		Variable written = HeapModel.written(contents);
+		SymbolicCase res = update(contents, new TernaryExpression(HeapType.FIELD,
+				substitute(contents, factory, pp), ref, value, HeapOperators.ReferenceStore.INSTANCE, loc), factory);
+		return res.update(written, new TernaryExpression(HeapType.WRITTEN_FIELD,
+				res.substitute(written, factory, pp), ref, yes, HeapOperators.ReferenceStore.INSTANCE, loc), factory);
 	}
 
 	/**
