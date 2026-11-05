@@ -13,7 +13,10 @@ import it.unive.lisa.triage.encoding.ValueSort;
 import it.unive.lisa.triage.model.FreshValue;
 import it.unive.lisa.triage.model.SymbolicCase;
 import it.unive.lisa.triage.smt.SExpression;
+import it.unive.lisa.triage.smt.Sort;
+import it.unive.lisa.triage.smt.FloatingPoints;
 import it.unive.lisa.triage.smt.SmtException;
+import it.unive.lisa.type.Type;
 import it.unive.lisa.type.TypeSystem;
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -177,6 +180,20 @@ public final class Projection {
 		}
 	}
 
+	/**
+	 * Yields a floating point type of the program whose values are encoded
+	 * with the given sort, or {@code null} if there is none.
+	 */
+	private static Type floatType(
+			TypeSystem types,
+			Sort sort) {
+		for (Type t : types.getTypes())
+			if (t.isNumericType() && !t.asNumericType().isIntegral()
+					&& (sort.equals(Sort.FLOAT32) ? t.asNumericType().is32Bits() : t.asNumericType().is64Bits()))
+				return t;
+		return null;
+	}
+
 	private static SymbolicExpression toConstant(
 			SExpression value,
 			TypeSystem types) {
@@ -191,10 +208,17 @@ public final class Projection {
 				return new Constant(types.getStringType(), unquote(atom), loc);
 			return new Constant(types.getIntegerType(), new BigInteger(atom), loc);
 		}
+		Sort fp = FloatingPoints.sortOf(value);
+		if (fp != null) {
+			Type type = floatType(types, fp);
+			return type == null ? null : new Constant(type, FloatingPoints.parse(value, fp), loc);
+		}
 		List<SExpression> children = value.getChildren();
 		if (children.size() != 2 || !children.get(0).isAtom())
 			return null;
 		String head = children.get(0).getAtom();
+		if (head.equals(ValueSort.FLOAT32) || head.equals(ValueSort.FLOAT64))
+			return toConstant(children.get(1), types);
 		if (head.equals("-")) {
 			SymbolicExpression inner = toConstant(children.get(1), types);
 			if (inner instanceof Constant && ((Constant) inner).getValue() instanceof BigInteger)

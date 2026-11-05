@@ -383,7 +383,7 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 			SemanticTool<A, D> tool,
 			StatementMessage warning)
 			throws SemanticException {
-		warningDeadline = deadlineFromNow();
+		warningDeadline = Math.min(deadlineFromNow(), getDeadline());
 		try {
 			return super.verify(tool, warning);
 		} finally {
@@ -427,7 +427,7 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 		queries = 0;
 		// the time budget is shared by all the models built for the violation
 		// (and for the warning, if one is being verified)
-		deadline = warningDeadline != 0 ? warningDeadline : deadlineFromNow();
+		deadline = warningDeadline != 0 ? warningDeadline : Math.min(deadlineFromNow(), getDeadline());
 		VerificationResult res = refine(result, st, violation, List.of());
 		if (res.getOutcome() != VerificationOutcome.POSSIBLE || isProgramStart(result) || maxChains <= 0)
 			return res;

@@ -1,6 +1,7 @@
 package it.unive.lisa.triage.encoding;
 
 import it.unive.lisa.triage.smt.Datatype;
+import it.unive.lisa.triage.smt.FloatingPoints;
 import it.unive.lisa.triage.smt.Datatype.Field;
 import it.unive.lisa.triage.smt.SExpression;
 import it.unive.lisa.triage.smt.SmtException;
@@ -61,6 +62,16 @@ public final class ValueSort {
 	 */
 	public static final String OPAQUE = "Value.Opaque";
 
+	/**
+	 * The name of the constructor of single precision floating point values.
+	 */
+	public static final String FLOAT32 = "Value.F32";
+
+	/**
+	 * The name of the constructor of double precision floating point values.
+	 */
+	public static final String FLOAT64 = "Value.F64";
+
 	private static final String INT_FIELD = "Value.int";
 
 	private static final String BOOL_FIELD = "Value.bool";
@@ -70,6 +81,10 @@ public final class ValueSort {
 	private static final String REF_FIELD = "Value.ref";
 
 	private static final String OPAQUE_FIELD = "Value.opaque";
+
+	private static final String FLOAT32_FIELD = "Value.f32";
+
+	private static final String FLOAT64_FIELD = "Value.f64";
 
 	/**
 	 * The datatype.
@@ -84,6 +99,8 @@ public final class ValueSort {
 		constructors.put(NULL, List.of());
 		constructors.put(REF, List.of(new Field(REF_FIELD, Sort.INT)));
 		constructors.put(OPAQUE, List.of(new Field(OPAQUE_FIELD, Sort.INT)));
+		constructors.put(FLOAT32, List.of(new Field(FLOAT32_FIELD, Sort.FLOAT32)));
+		constructors.put(FLOAT64, List.of(new Field(FLOAT64_FIELD, Sort.FLOAT64)));
 		DATATYPE = new Datatype("Value", constructors);
 	}
 
@@ -124,6 +141,10 @@ public final class ValueSort {
 			return DATATYPE.construct(BOOL, term);
 		if (sort.equals(Sort.STRING))
 			return DATATYPE.construct(STRING, term);
+		if (sort.equals(Sort.FLOAT32))
+			return DATATYPE.construct(FLOAT32, term);
+		if (sort.equals(Sort.FLOAT64))
+			return DATATYPE.construct(FLOAT64, term);
 		return null;
 	}
 
@@ -148,6 +169,10 @@ public final class ValueSort {
 			return DATATYPE.select(BOOL_FIELD, value);
 		if (sort.equals(Sort.STRING))
 			return DATATYPE.select(STRING_FIELD, value);
+		if (sort.equals(Sort.FLOAT32))
+			return DATATYPE.select(FLOAT32_FIELD, value);
+		if (sort.equals(Sort.FLOAT64))
+			return DATATYPE.select(FLOAT64_FIELD, value);
 		return null;
 	}
 
@@ -171,6 +196,10 @@ public final class ValueSort {
 			return DATATYPE.test(BOOL, value);
 		if (sort.equals(Sort.STRING))
 			return DATATYPE.test(STRING, value);
+		if (sort.equals(Sort.FLOAT32))
+			return DATATYPE.test(FLOAT32, value);
+		if (sort.equals(Sort.FLOAT64))
+			return DATATYPE.test(FLOAT64, value);
 		return null;
 	}
 
@@ -254,7 +283,8 @@ public final class ValueSort {
 	 */
 	public static Term isNumeric(
 			Term value) {
-		return Term.or(DATATYPE.test(INT, value), DATATYPE.test(OPAQUE, value));
+		return Term.or(DATATYPE.test(INT, value), DATATYPE.test(OPAQUE, value), DATATYPE.test(FLOAT32, value),
+				DATATYPE.test(FLOAT64, value));
 	}
 
 	/**
@@ -276,11 +306,33 @@ public final class ValueSort {
 		}
 	}
 
+	/**
+	 * Yields a readable representation of a floating point value of the given
+	 * sort, as printed in models: the Java representation of the number.
+	 *
+	 * @param value the value
+	 * @param sort  the sort of the value
+	 *
+	 * @return the representation
+	 */
+	public static String displayFloat(
+			SExpression value,
+			Sort sort) {
+		try {
+			return FloatingPoints.parse(value, sort).toString();
+		} catch (SmtException e) {
+			return value.toString();
+		}
+	}
+
 	private static String display(
 			SExpression value) {
 		if (value.isAtom())
 			return value.getAtom().equals(NULL) ? "null" : value.getAtom();
 		List<SExpression> children = value.getChildren();
+		Sort fp = FloatingPoints.sortOf(value);
+		if (fp != null)
+			return displayFloat(value, fp);
 		if (children.size() == 2 && children.get(0).isAtom()) {
 			String head = children.get(0).getAtom();
 			if (head.equals("-"))
@@ -291,6 +343,10 @@ public final class ValueSort {
 				return "ref#" + display(children.get(1));
 			if (head.equals(OPAQUE))
 				return "opaque#" + display(children.get(1));
+			if (head.equals(FLOAT32))
+				return displayFloat(children.get(1), Sort.FLOAT32);
+			if (head.equals(FLOAT64))
+				return displayFloat(children.get(1), Sort.FLOAT64);
 		}
 		return value.toString();
 	}

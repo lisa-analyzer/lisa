@@ -86,6 +86,7 @@ import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
 import it.unive.lisa.triage.model.SummaryValue;
 import it.unive.lisa.triage.model.InputValue;
 import it.unive.lisa.triage.model.HeapOperators;
+import it.unive.lisa.triage.smt.FloatingPoints;
 import it.unive.lisa.triage.smt.Sort;
 import it.unive.lisa.triage.smt.Term;
 import it.unive.lisa.type.Type;
@@ -307,6 +308,127 @@ public class ExpressionEncoder
 	}
 
 	/**
+	 * Yields an auxiliary constant of the given sort, used to encode the
+	 * expression precisely: the caller must constrain it, through
+	 * {@link SymbolTable#require(Term)}, so that its value is determined by
+	 * the operands of the expression (e.g., the position of the last
+	 * occurrence of a character in a string). Since its value is determined,
+	 * using it does not make the encoding imprecise.
+	 *
+	 * @param sort   the sort of the constant
+	 * @param origin the expression being encoded
+	 *
+	 * @return the constant
+	 */
+	protected Term auxiliary(
+			Sort sort,
+			SymbolicExpression origin) {
+		return symbols.fresh(sort, origin, Term.TRUE);
+	}
+
+	/**
+	 * Yields the floating point sort of an operation over the given operands:
+	 * the widest floating point sort among the ones of the operands, or
+	 * {@code null} if no operand is a floating point number.
+	 *
+	 * @param operands the encodings of the operands
+	 *
+	 * @return the sort, or {@code null}
+	 */
+	protected static Sort floatingSort(
+			Term... operands) {
+		Sort result = null;
+		for (Term t : operands)
+			if (t.getSort().equals(Sort.FLOAT64))
+				return Sort.FLOAT64;
+			else if (t.getSort().equals(Sort.FLOAT32))
+				result = Sort.FLOAT32;
+		return result;
+	}
+
+	/**
+	 * Yields the rounding mode of floating point operations in the encoding
+	 * (round to nearest, ties to even, as in Java).
+	 *
+	 * @return the rounding mode
+	 */
+	protected static Term rne() {
+		return Term.value("RNE", Sort.ROUNDING_MODE);
+	}
+
+	/**
+	 * Converts the given term to a floating point number of the given sort:
+	 * integers and floating point numbers of the other sort are converted with
+	 * rounding to nearest (as by Java's widening conversions), and values are
+	 * read as floating point numbers (precise only if they are numbers of the
+	 * given sort). Terms of other sorts yield unknown numbers.
+	 *
+	 * @param term   the term
+	 * @param fp     the floating point sort
+	 * @param origin the expression being encoded
+	 *
+	 * @return the converted term
+	 */
+	protected Term toFloat(
+			Term term,
+			Sort fp,
+			SymbolicExpression origin) {
+		if (term.getSort().equals(fp))
+			return term;
+		String convert = "(_ to_fp " + fp.getExponentBits() + " " + fp.getSignificandBits() + ")";
+		if (term.getSort().isFloatingPoint())
+			return Term.app(convert, fp, rne(), term);
+		if (term.getSort().equals(Sort.INT))
+			return Term.app(convert, fp, rne(), Term.app("to_real", Sort.REAL, term));
+		if (term.getSort().equals(ValueSort.SORT)) {
+			// values holding integers are converted as integers, and the
+			// ones holding numbers of the given sort are read as they are
+			Term isInt = ValueSort.is(term, Sort.INT);
+			Term isFloat = ValueSort.is(term, fp);
+			symbols.exactOnlyIf(Term.or(isInt, isFloat), origin);
+			return Term.ite(isInt,
+					Term.app(convert, fp, rne(), Term.app("to_real", Sort.REAL, ValueSort.unwrap(term, Sort.INT))),
+					ValueSort.unwrap(term, fp));
+		}
+		return symbols.fresh(fp, origin);
+	}
+
+	/**
+	 * Converts the given floating point number to an integer of the given
+	 * type, as by Java's narrowing conversions: NaN yields zero, numbers are
+	 * rounded toward zero and saturated to the range of the type (of
+	 * {@code int} for types narrower than {@code int}, whose values are then
+	 * wrapped to the type).
+	 *
+	 * @param term the floating point number
+	 * @param type the integral type
+	 *
+	 * @return the integer
+	 */
+	protected Term toIntegral(
+			Term term,
+			Type type) {
+		boolean isLong = type.isNumericType() && type.asNumericType().is64Bits();
+		int bits = isLong ? 64 : 32;
+		BigInteger max = BigInteger.ONE.shiftLeft(bits - 1).subtract(BigInteger.ONE);
+		BigInteger min = BigInteger.ONE.shiftLeft(bits - 1).negate();
+		Term truncated = Term.app("to_int", Sort.INT, Term.app("fp.to_real", Sort.REAL,
+				Term.app("fp.roundToIntegral", term.getSort(), Term.value("RTZ", Sort.ROUNDING_MODE), term)));
+		Term real = Term.app("fp.to_real", Sort.REAL, term);
+		Term result = Term.ite(Term.app("fp.isNaN", Sort.BOOL, term), Term.integer(0),
+				Term.ite(Term.app("fp.isInfinite", Sort.BOOL, term),
+						Term.ite(Term.app("fp.isPositive", Sort.BOOL, term), Term.integer(max), Term.integer(min)),
+						Term.ite(Term.app(">=", Sort.BOOL, real, Term.app("to_real", Sort.REAL, Term.integer(max))),
+								Term.integer(max),
+								Term.ite(Term.app("<=", Sort.BOOL, real,
+										Term.app("to_real", Sort.REAL, Term.integer(min))), Term.integer(min),
+										truncated))));
+		if (type.isNumericType() && (type.asNumericType().is8Bits() || type.asNumericType().is16Bits()))
+			result = wrap(result, type.asNumericType().is8Bits() ? 8 : 16, type.asNumericType().isUnsigned());
+		return result;
+	}
+
+	/**
 	 * Yields the encoding of an expression that is precise only when the given
 	 * guard holds (e.g., an operation encoded only over some of the values of
 	 * its operands): the result is the given term if the guard holds, and an
@@ -466,7 +588,12 @@ public class ExpressionEncoder
 		if (value instanceof Type)
 			// type tokens, used by type operators
 			return ValueSort.typeToken((Type) value);
-		// floats, characters, ...
+		if (value instanceof Double)
+			return FloatingPoints.literal((Double) value);
+		if (value instanceof Float)
+			return FloatingPoints.literal((Float) value);
+		if (value instanceof Character)
+			return Term.integer((Character) value);
 		return havoc(expression);
 	}
 
@@ -548,9 +675,11 @@ public class ExpressionEncoder
 		if (op instanceof LogicalNegation)
 			return Term.not(coerce(arg, Sort.BOOL, expression));
 		if (op instanceof NumericNegation)
-			return arithmetic(expression, List.of(arg), args -> neg(args.get(0)));
+			return arg.getSort().isFloatingPoint() ? Term.app("fp.neg", arg.getSort(), arg)
+					: arithmetic(expression, List.of(arg), args -> neg(args.get(0)));
 		if (op instanceof NumericAbs)
-			return arithmetic(expression, List.of(arg), args -> abs(args.get(0)));
+			return arg.getSort().isFloatingPoint() ? Term.app("fp.abs", arg.getSort(), arg)
+					: arithmetic(expression, List.of(arg), args -> abs(args.get(0)));
 		if (op instanceof BitwiseNegation)
 			// ~x == -x - 1 in two's complement
 			return arithmetic(expression, List.of(arg),
@@ -604,6 +733,34 @@ public class ExpressionEncoder
 			return Term.and(coerce(left, Sort.BOOL, expression), coerce(right, Sort.BOOL, expression));
 		if (op instanceof LogicalOr)
 			return Term.or(coerce(left, Sort.BOOL, expression), coerce(right, Sort.BOOL, expression));
+		Sort fp = floatingSort(left, right);
+		if (fp != null) {
+			// operations over floating point numbers, where the other operand
+			// is converted to a floating point number as by numeric promotion
+			Term l = toFloat(left, fp, expression);
+			Term r = toFloat(right, fp, expression);
+			if (op instanceof ComparisonEq)
+				return Term.app("fp.eq", Sort.BOOL, l, r);
+			if (op instanceof ComparisonNe)
+				return Term.not(Term.app("fp.eq", Sort.BOOL, l, r));
+			if (op instanceof ComparisonLt)
+				return Term.app("fp.lt", Sort.BOOL, l, r);
+			if (op instanceof ComparisonLe)
+				return Term.app("fp.leq", Sort.BOOL, l, r);
+			if (op instanceof ComparisonGt)
+				return Term.app("fp.gt", Sort.BOOL, l, r);
+			if (op instanceof ComparisonGe)
+				return Term.app("fp.geq", Sort.BOOL, l, r);
+			if (op instanceof AdditionOperator)
+				return Term.app("fp.add", fp, rne(), l, r);
+			if (op instanceof SubtractionOperator)
+				return Term.app("fp.sub", fp, rne(), l, r);
+			if (op instanceof MultiplicationOperator)
+				return Term.app("fp.mul", fp, rne(), l, r);
+			if (op instanceof DivisionOperator)
+				return Term.app("fp.div", fp, rne(), l, r);
+		}
+
 		if (op instanceof ComparisonEq)
 			return equality(left, right, expression);
 		if (op instanceof ComparisonNe)
@@ -671,10 +828,16 @@ public class ExpressionEncoder
 			return target != null ? typeCheck(left, target, expression) : havoc(expression);
 		}
 
-		if (op instanceof TypeCast || op instanceof TypeConv)
+		if (op instanceof TypeCast || op instanceof TypeConv) {
+			Sort target = sorts.sortOf(expression.getStaticType());
+			if (target.isFloatingPoint() && (left.getSort().equals(Sort.INT) || left.getSort().isFloatingPoint()))
+				return toFloat(left, target, expression);
+			if (target.equals(Sort.INT) && left.getSort().isFloatingPoint())
+				return toIntegral(left, expression.getStaticType());
 			// the value is preserved if it already has the target sort, and
 			// read as the target sort otherwise
-			return coerce(left, sorts.sortOf(expression.getStaticType()), expression);
+			return coerce(left, target, expression);
+		}
 
 		return havoc(expression);
 	}
@@ -779,7 +942,10 @@ public class ExpressionEncoder
 		Term r = coerce(right, ValueSort.SORT, origin);
 		if (!opaque)
 			return Term.eq(l, r);
-		Term modeled = Term.not(Term.or(ValueSort.isOpaque(l), ValueSort.isOpaque(r)));
+		// floating point numbers are not equal by identity (e.g., NaN)
+		Term modeled = Term.not(Term.or(ValueSort.isOpaque(l), ValueSort.isOpaque(r),
+				ValueSort.is(l, Sort.FLOAT32), ValueSort.is(r, Sort.FLOAT32),
+				ValueSort.is(l, Sort.FLOAT64), ValueSort.is(r, Sort.FLOAT64)));
 		return Term.ite(modeled, Term.eq(l, r),
 				symbols.apply("$==", Sort.BOOL, List.of(l, r), origin, modeled));
 	}
@@ -1116,7 +1282,17 @@ public class ExpressionEncoder
 	 * Wraps the given integer to the range of integers representable with the
 	 * given number of bits.
 	 */
-	private static Term wrap(
+	/**
+	 * Wraps the given integer to the range of the integers of the given bit
+	 * width, as done by overflowing operations.
+	 *
+	 * @param t        the integer
+	 * @param bits     the bit width
+	 * @param unsigned whether or not the integers are unsigned
+	 *
+	 * @return the wrapped integer
+	 */
+	protected static Term wrap(
 			Term t,
 			int bits,
 			boolean unsigned) {

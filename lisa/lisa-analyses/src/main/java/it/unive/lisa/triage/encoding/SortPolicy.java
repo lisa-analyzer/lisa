@@ -12,10 +12,11 @@ import java.util.Set;
 /**
  * A policy deciding the SMT {@link Sort} used to encode program values. Values
  * of integral numeric types are encoded as mathematical integers (overflowing
- * operators wrap their results explicitly), booleans as booleans, and strings
- * as strings. Values of any other type (e.g., floating point numbers,
- * references, characters), and values whose type is unknown or not unique, are
- * encoded through the {@link ValueSort} datatype.
+ * operators wrap their results explicitly), booleans as booleans, strings as
+ * strings, and floating point numbers of 32 or 64 bits as IEEE 754 floating
+ * point numbers. Values of any other type (e.g., references), and values whose
+ * type is unknown or not unique, are encoded through the {@link ValueSort}
+ * datatype.
  *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
@@ -95,6 +96,10 @@ public class SortPolicy {
 			return ((HeapType) type).getSort();
 		if (type.isNumericType() && type.asNumericType().isIntegral())
 			return Sort.INT;
+		if (type.isNumericType() && type.asNumericType().is32Bits())
+			return Sort.FLOAT32;
+		if (type.isNumericType() && type.asNumericType().is64Bits())
+			return Sort.FLOAT64;
 		if (type.isBooleanType())
 			return Sort.BOOL;
 		if (type.isStringType())

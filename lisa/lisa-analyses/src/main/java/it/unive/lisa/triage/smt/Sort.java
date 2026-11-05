@@ -30,6 +30,23 @@ public final class Sort {
 	 */
 	public static final Sort STRING = new Sort("String");
 
+	/**
+	 * The sort of IEEE 754 single precision floating point numbers (8 bits of
+	 * exponent, 24 of significand).
+	 */
+	public static final Sort FLOAT32 = new Sort("Float32");
+
+	/**
+	 * The sort of IEEE 754 double precision floating point numbers (11 bits of
+	 * exponent, 53 of significand).
+	 */
+	public static final Sort FLOAT64 = new Sort("Float64");
+
+	/**
+	 * The sort of the rounding modes of floating point operations.
+	 */
+	public static final Sort ROUNDING_MODE = new Sort("RoundingMode");
+
 	private final String smtlib;
 
 	private final Sort index;
@@ -97,6 +114,38 @@ public final class Sort {
 	 *
 	 * @return whether this is an array sort
 	 */
+	/**
+	 * Yields {@code true} if this is the sort of floating point numbers
+	 * ({@link #FLOAT32} or {@link #FLOAT64}).
+	 *
+	 * @return whether or not this is a floating point sort
+	 */
+	public boolean isFloatingPoint() {
+		return equals(FLOAT32) || equals(FLOAT64);
+	}
+
+	/**
+	 * Yields the number of bits of the exponent of the numbers of this
+	 * floating point sort.
+	 *
+	 * @return the number of bits, or {@code 0} if this is not a floating
+	 *             point sort
+	 */
+	public int getExponentBits() {
+		return equals(FLOAT32) ? 8 : equals(FLOAT64) ? 11 : 0;
+	}
+
+	/**
+	 * Yields the number of bits of the significand (including the hidden
+	 * bit) of the numbers of this floating point sort.
+	 *
+	 * @return the number of bits, or {@code 0} if this is not a floating
+	 *             point sort
+	 */
+	public int getSignificandBits() {
+		return equals(FLOAT32) ? 24 : equals(FLOAT64) ? 53 : 0;
+	}
+
 	public boolean isArray() {
 		return element != null;
 	}

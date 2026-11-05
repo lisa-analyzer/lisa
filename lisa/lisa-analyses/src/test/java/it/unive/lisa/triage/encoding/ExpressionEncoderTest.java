@@ -7,6 +7,8 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.type.BoolType;
 import it.unive.lisa.program.type.Float32Type;
+import it.unive.lisa.symbolic.value.operator.binary.TypeConv;
+import it.unive.lisa.program.type.Float64Type;
 import it.unive.lisa.program.type.Int32Type;
 import it.unive.lisa.program.type.Int8Type;
 import it.unive.lisa.program.type.StringType;
@@ -241,12 +243,38 @@ public class ExpressionEncoderTest {
 	}
 
 	@Test
-	public void floatsAreUnconstrained() throws SemanticException {
+	public void floatArithmetic() throws SemanticException {
 		Constant half = new Constant(Float32Type.INSTANCE, 0.5f, LOC);
+		Constant one = new Constant(Float32Type.INSTANCE, 1.0f, LOC);
 		BinaryExpression sum = bin(Float32Type.INSTANCE, half, half, NumericNonOverflowingAdd.INSTANCE);
-		// float arithmetic is not encoded: the result might be anything
-		assertSatisfiable(eq(sum, half));
-		assertSatisfiable(new UnaryExpression(BoolType.INSTANCE, eq(sum, half), LogicalNegation.INSTANCE, LOC));
+		// floating point arithmetic is IEEE 754 arithmetic
+		assertValid(eq(sum, one));
+		Constant a = new Constant(Float64Type.INSTANCE, 0.1d, LOC);
+		Constant b = new Constant(Float64Type.INSTANCE, 0.2d, LOC);
+		Constant c = new Constant(Float64Type.INSTANCE, 0.3d, LOC);
+		assertValid(not(eq(bin(Float64Type.INSTANCE, a, b, NumericNonOverflowingAdd.INSTANCE), c)));
+		assertValid(eq(bin(Float64Type.INSTANCE, a, b, NumericNonOverflowingAdd.INSTANCE),
+				new Constant(Float64Type.INSTANCE, 0.1d + 0.2d, LOC)));
+		// integers are converted when mixed with floating point numbers
+		assertValid(eq(bin(Float64Type.INSTANCE, integer(1), a, NumericNonOverflowingAdd.INSTANCE),
+				new Constant(Float64Type.INSTANCE, 1.1d, LOC)));
+	}
+
+	@Test
+	public void floatConversions() throws SemanticException {
+		Constant nan = new Constant(Float64Type.INSTANCE, Double.NaN, LOC);
+		Constant big = new Constant(Float64Type.INSTANCE, 1e20, LOC);
+		Constant neg = new Constant(Float64Type.INSTANCE, -2.7, LOC);
+		Constant intType = new Constant(new TypeTokenType(Set.of(Int32Type.INSTANCE)), Int32Type.INSTANCE, LOC);
+		// as Java's (int) casts: NaN is zero, large numbers saturate, and
+		// numbers are truncated toward zero
+		assertValid(eq(bin(Int32Type.INSTANCE, nan, intType, TypeConv.INSTANCE), integer(0)));
+		assertValid(eq(bin(Int32Type.INSTANCE, big, intType, TypeConv.INSTANCE), integer(Integer.MAX_VALUE)));
+		assertValid(eq(bin(Int32Type.INSTANCE, neg, intType, TypeConv.INSTANCE), integer(-2)));
+		Constant doubleType = new Constant(new TypeTokenType(Set.of(Float64Type.INSTANCE)), Float64Type.INSTANCE,
+				LOC);
+		assertValid(eq(bin(Float64Type.INSTANCE, integer(3), doubleType, TypeConv.INSTANCE),
+				new Constant(Float64Type.INSTANCE, 3.0d, LOC)));
 	}
 
 	@Test
