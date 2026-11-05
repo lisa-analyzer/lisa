@@ -123,7 +123,25 @@ import java.util.function.Function;
  * operations, type checks, and heap expressions yield fresh constants.</li>
  * </ul>
  * The sort of identifiers and of unknown values is decided by a
- * {@link SortPolicy}.
+ * {@link SortPolicy}.<br>
+ * <br>
+ * This encoder knows only the operators defined by LiSA. Frontends defining
+ * their own operators can encode them by subclassing this encoder and
+ * overriding the methods encoding each kind of expression (e.g.,
+ * {@link #encodeBinary(BinaryExpression, Term, Term)}), that contain the whole
+ * encoding of the expressions of that kind and yield an unconstrained value
+ * for unknown operators. Overriding methods should encode the operators they
+ * know (possibly replacing the encoding of operators known by this encoder),
+ * and invoke the overridden method for the other ones, relying on the
+ * helpers of
+ * this class (e.g., {@link #coerce(Term, Sort, SymbolicExpression)},
+ * {@link #asString(Term, SymbolicExpression)},
+ * {@link #arithmetic(ValueExpression, List, Function)},
+ * {@link #guarded(Term, Term, List, ValueExpression)}) and on the
+ * {@link SymbolTable} ({@link #getSymbols()}) to record the conditions under
+ * which their encoding is precise. The verifiers building encodings (e.g.,
+ * {@link it.unive.lisa.triage.pdr.PdrVerifier}) can be instructed to use the
+ * subclass through an {@link ExpressionEncoderFactory}.
  *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
@@ -164,6 +182,28 @@ public class ExpressionEncoder
 			SymbolTable symbols) {
 		this.sorts = sorts;
 		this.symbols = symbols;
+	}
+
+	/**
+	 * Yields the policy deciding the sorts of identifiers and of unknown
+	 * values.
+	 *
+	 * @return the policy
+	 */
+	protected SortPolicy getSorts() {
+		return sorts;
+	}
+
+	/**
+	 * Yields the provider of the constants used in the encoding, where
+	 * subclasses can also record the conditions under which their encodings
+	 * are precise ({@link SymbolTable#exactOnlyIf(Term, SymbolicExpression)})
+	 * or can be evaluated ({@link SymbolTable#require(Term)}).
+	 *
+	 * @return the symbol table
+	 */
+	protected SymbolTable getSymbols() {
+		return symbols;
 	}
 
 	/**
@@ -256,10 +296,43 @@ public class ExpressionEncoder
 	 * the results of operations they model, and trusting them would exclude
 	 * real executions. The value is not precise anyway, so this costs no
 	 * precision.
+	 *
+	 * @param expression the expression that cannot be encoded
+	 *
+	 * @return the unconstrained value
 	 */
-	private Term havoc(
+	protected Term havoc(
 			SymbolicExpression expression) {
 		return symbols.fresh(ValueSort.SORT, expression);
+	}
+
+	/**
+	 * Yields the encoding of an expression that is precise only when the given
+	 * guard holds (e.g., an operation encoded only over some of the values of
+	 * its operands): the result is the given term if the guard holds, and an
+	 * unknown, but deterministic, function of the given arguments otherwise
+	 * (never precise, see
+	 * {@link SymbolTable#apply(String, Sort, List, SymbolicExpression, Term)}).
+	 * Encodings that are not valid for all the values of the operands must use
+	 * this (or an equivalent construction) for soundness, rather than yielding
+	 * the partial term directly.
+	 *
+	 * @param guard      the condition under which the term is precise
+	 * @param term       the precise encoding of the expression, when the
+	 *                       guard holds
+	 * @param arguments  the arguments of the unknown function (usually, the
+	 *                       operands of the expression)
+	 * @param expression the expression being encoded
+	 *
+	 * @return the encoded term
+	 */
+	protected Term guarded(
+			Term guard,
+			Term term,
+			List<Term> arguments,
+			ValueExpression expression) {
+		return Term.ite(guard, term,
+				symbols.apply("$" + operatorOf(expression), term.getSort(), arguments, expression, guard));
 	}
 
 	@Override
@@ -306,7 +379,31 @@ public class ExpressionEncoder
 	public Term visit(
 			ValueExpression expression,
 			Term[] subExpressions,
-			Object... params) {
+			Object... params)
+			throws SemanticException {
+		return encodeValue(expression, subExpressions);
+	}
+
+	/**
+	 * Encodes a value expression whose kind is not handled by the other
+	 * methods of this encoder (e.g., an expression with an arbitrary number of
+	 * operands defined by a frontend). This encoder knows no such expression,
+	 * and yields an unconstrained value. Subclasses can override this to
+	 * encode the expressions they know, invoking this method for the other
+	 * ones.
+	 *
+	 * @param expression     the expression
+	 * @param subExpressions the encodings of the sub-expressions, in the order
+	 *                           they are visited by the expression
+	 *
+	 * @return the encoded term
+	 *
+	 * @throws SemanticException if the expression cannot be encoded
+	 */
+	protected Term encodeValue(
+			ValueExpression expression,
+			Term[] subExpressions)
+			throws SemanticException {
 		return havoc(expression);
 	}
 
@@ -336,7 +433,27 @@ public class ExpressionEncoder
 	@Override
 	public Term visit(
 			Constant expression,
-			Object... params) {
+			Object... params)
+			throws SemanticException {
+		return encodeConstant(expression);
+	}
+
+	/**
+	 * Encodes a constant: integral numbers, booleans, strings and types are
+	 * encoded, while other values (e.g., floating point numbers) yield an
+	 * unconstrained value. Subclasses can override this to encode the values
+	 * they know, or to encode some values differently, invoking this method
+	 * for the other ones.
+	 *
+	 * @param expression the constant
+	 *
+	 * @return the encoded term
+	 *
+	 * @throws SemanticException if the expression cannot be encoded
+	 */
+	protected Term encodeConstant(
+			Constant expression)
+			throws SemanticException {
 		Object value = expression.getValue();
 		if (value instanceof Integer || value instanceof Long || value instanceof Short || value instanceof Byte)
 			return Term.integer(((Number) value).longValue());
@@ -402,7 +519,29 @@ public class ExpressionEncoder
 	public Term visit(
 			UnaryExpression expression,
 			Term arg,
-			Object... params) {
+			Object... params)
+			throws SemanticException {
+		return encodeUnary(expression, arg);
+	}
+
+	/**
+	 * Encodes a unary expression, given the encoding of its argument. Unknown
+	 * operators yield an unconstrained value. Subclasses can override this to
+	 * encode the operators they know (e.g., the ones defined by a frontend),
+	 * or to encode some operators differently, invoking this method for the
+	 * other ones.
+	 *
+	 * @param expression the expression
+	 * @param arg        the encoding of the argument
+	 *
+	 * @return the encoded term
+	 *
+	 * @throws SemanticException if the expression cannot be encoded
+	 */
+	protected Term encodeUnary(
+			UnaryExpression expression,
+			Term arg)
+			throws SemanticException {
 		UnaryOperator op = expression.getOperator();
 		if (op instanceof HeapOperators.NewReference)
 			return ValueSort.reference(coerce(arg, Sort.INT, expression));
@@ -426,7 +565,31 @@ public class ExpressionEncoder
 			BinaryExpression expression,
 			Term left,
 			Term right,
-			Object... params) {
+			Object... params)
+			throws SemanticException {
+		return encodeBinary(expression, left, right);
+	}
+
+	/**
+	 * Encodes a binary expression, given the encodings of its operands.
+	 * Unknown operators yield an unconstrained value. Subclasses can override
+	 * this to encode the operators they know (e.g., the ones defined by a
+	 * frontend), or to encode some operators differently, invoking this
+	 * method for the other ones.
+	 *
+	 * @param expression the expression
+	 * @param left       the encoding of the left operand
+	 * @param right      the encoding of the right operand
+	 *
+	 * @return the encoded term
+	 *
+	 * @throws SemanticException if the expression cannot be encoded
+	 */
+	protected Term encodeBinary(
+			BinaryExpression expression,
+			Term left,
+			Term right)
+			throws SemanticException {
 		BinaryOperator op = expression.getOperator();
 
 		if (op instanceof HeapOperators.CellKey)
@@ -477,26 +640,26 @@ public class ExpressionEncoder
 					args -> Term.ite(Term.app("<=", Sort.BOOL, args.get(0), args.get(1)), args.get(0), args.get(1)));
 
 		if (op instanceof StringConcat)
-			return Term.app("str.++", Sort.STRING, str(left, expression), str(right, expression));
+			return Term.app("str.++", Sort.STRING, asString(left, expression), asString(right, expression));
 		if (op instanceof StringContains)
-			return Term.app("str.contains", Sort.BOOL, str(left, expression), str(right, expression));
+			return Term.app("str.contains", Sort.BOOL, asString(left, expression), asString(right, expression));
 		if (op instanceof StringStartsWith)
-			return Term.app("str.prefixof", Sort.BOOL, str(right, expression), str(left, expression));
+			return Term.app("str.prefixof", Sort.BOOL, asString(right, expression), asString(left, expression));
 		if (op instanceof StringEndsWith)
-			return Term.app("str.suffixof", Sort.BOOL, str(right, expression), str(left, expression));
+			return Term.app("str.suffixof", Sort.BOOL, asString(right, expression), asString(left, expression));
 		if (op instanceof StringIsPrefixOf)
-			return Term.app("str.prefixof", Sort.BOOL, str(left, expression), str(right, expression));
+			return Term.app("str.prefixof", Sort.BOOL, asString(left, expression), asString(right, expression));
 		if (op instanceof StringIsSuffixOf)
-			return Term.app("str.suffixof", Sort.BOOL, str(left, expression), str(right, expression));
+			return Term.app("str.suffixof", Sort.BOOL, asString(left, expression), asString(right, expression));
 		if (op instanceof StringIsSubstringOf)
-			return Term.app("str.contains", Sort.BOOL, str(right, expression), str(left, expression));
+			return Term.app("str.contains", Sort.BOOL, asString(right, expression), asString(left, expression));
 		if (op instanceof StringEquals)
-			return Term.eq(str(left, expression), str(right, expression));
+			return Term.eq(asString(left, expression), asString(right, expression));
 		if (op instanceof StringIndexOf)
-			return Term.app("str.indexof", Sort.INT, str(left, expression), str(right, expression),
+			return Term.app("str.indexof", Sort.INT, asString(left, expression), asString(right, expression),
 					Term.integer(0));
 		if (op instanceof StringSubstringToEnd) {
-			Term s = str(left, expression);
+			Term s = asString(left, expression);
 			Term from = coerce(right, Sort.INT, expression);
 			return Term.app("str.substr", Sort.STRING, s, from,
 					Term.app("-", Sort.INT, Term.app("str.len", Sort.INT, s), from));
@@ -504,8 +667,8 @@ public class ExpressionEncoder
 
 		if (op instanceof TypeCheck) {
 			Type target = tokenOf(expression.getRight());
-			if (target != null)
-				return typeCheck(left, target, expression);
+			// checks against types that are not unique cannot be encoded
+			return target != null ? typeCheck(left, target, expression) : havoc(expression);
 		}
 
 		if (op instanceof TypeCast || op instanceof TypeConv)
@@ -522,7 +685,33 @@ public class ExpressionEncoder
 			Term left,
 			Term middle,
 			Term right,
-			Object... params) {
+			Object... params)
+			throws SemanticException {
+		return encodeTernary(expression, left, middle, right);
+	}
+
+	/**
+	 * Encodes a ternary expression, given the encodings of its operands.
+	 * Unknown operators yield an unconstrained value. Subclasses can override
+	 * this to encode the operators they know (e.g., the ones defined by a
+	 * frontend), or to encode some operators differently, invoking this
+	 * method for the other ones.
+	 *
+	 * @param expression the expression
+	 * @param left       the encoding of the left operand
+	 * @param middle     the encoding of the middle operand
+	 * @param right      the encoding of the right operand
+	 *
+	 * @return the encoded term
+	 *
+	 * @throws SemanticException if the expression cannot be encoded
+	 */
+	protected Term encodeTernary(
+			TernaryExpression expression,
+			Term left,
+			Term middle,
+			Term right)
+			throws SemanticException {
 		TernaryOperator op = expression.getOperator();
 		if (op instanceof HeapOperators.ReferenceRead)
 			return read(left, middle, heapKey(right, expression), expression);
@@ -531,26 +720,36 @@ public class ExpressionEncoder
 		if (op instanceof StringSubstring) {
 			Term from = coerce(middle, Sort.INT, expression);
 			Term to = coerce(right, Sort.INT, expression);
-			return Term.app("str.substr", Sort.STRING, str(left, expression), from,
+			return Term.app("str.substr", Sort.STRING, asString(left, expression), from,
 					Term.app("-", Sort.INT, to, from));
 		}
 		if (op instanceof StringReplace)
-			return Term.app("str.replace", Sort.STRING, str(left, expression), str(middle, expression),
-					str(right, expression));
+			return Term.app("str.replace", Sort.STRING, asString(left, expression), asString(middle, expression),
+					asString(right, expression));
 		if (op instanceof StringIndexOfFromIndex)
-			return Term.app("str.indexof", Sort.INT, str(left, expression), str(middle, expression),
+			return Term.app("str.indexof", Sort.INT, asString(left, expression), asString(middle, expression),
 					coerce(right, Sort.INT, expression));
 		if (op instanceof StringStartsWithFromIndex) {
-			Term s = str(left, expression);
+			Term s = asString(left, expression);
 			Term from = coerce(right, Sort.INT, expression);
 			Term suffix = Term.app("str.substr", Sort.STRING, s, from,
 					Term.app("-", Sort.INT, Term.app("str.len", Sort.INT, s), from));
-			return Term.app("str.prefixof", Sort.BOOL, str(middle, expression), suffix);
+			return Term.app("str.prefixof", Sort.BOOL, asString(middle, expression), suffix);
 		}
 		return havoc(expression);
 	}
 
-	private Term str(
+	/**
+	 * Reads the given term as a string, as an operand of a string operation:
+	 * if the term is a value, the operation can be evaluated only if it is a
+	 * string ({@link SymbolTable#require(Term)}).
+	 *
+	 * @param term   the term
+	 * @param origin the expression using the term as a string
+	 *
+	 * @return the string term
+	 */
+	protected Term asString(
 			Term term,
 			SymbolicExpression origin) {
 		// operands of string operators are strings
@@ -779,7 +978,14 @@ public class ExpressionEncoder
 		return expression.getClass().getSimpleName();
 	}
 
-	private void requireNumeric(
+	/**
+	 * Signals that the given term is an operand of a numeric operation: if the
+	 * term is a value, the operation can be evaluated only if it is a number
+	 * ({@link SymbolTable#require(Term)}).
+	 *
+	 * @param term the term
+	 */
+	protected void requireNumeric(
 			Term term) {
 		if (term.getSort().equals(ValueSort.SORT))
 			symbols.require(ValueSort.isNumeric(term));
@@ -798,9 +1004,18 @@ public class ExpressionEncoder
 	 * point number). Any other combination of sorts yields a fresh constant.
 	 * The static type of the expression is not used to decide whether the
 	 * operation is over integers, since frontends might use a common supertype
-	 * of all the possible runtime types of the operands.
+	 * of all the possible runtime types of the operands. Results of the
+	 * operators of LiSA with a fixed bit width (e.g., {@link Numeric32BitAdd})
+	 * are wrapped to their range.
+	 *
+	 * @param expression the expression being encoded
+	 * @param operands   the encodings of the operands
+	 * @param op         the function building the result from the operands,
+	 *                       read as integers
+	 *
+	 * @return the encoded term
 	 */
-	private Term arithmetic(
+	protected Term arithmetic(
 			ValueExpression expression,
 			List<Term> operands,
 			Function<List<Term>, Term> op) {

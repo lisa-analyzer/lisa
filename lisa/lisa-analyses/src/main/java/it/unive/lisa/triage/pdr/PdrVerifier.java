@@ -15,6 +15,7 @@ import it.unive.lisa.outputs.messages.StatementMessage;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.triage.bmc.Unrolling;
+import it.unive.lisa.triage.encoding.ExpressionEncoderFactory;
 import it.unive.lisa.triage.inputs.InputSource;
 import it.unive.lisa.triage.inputs.ReproducingInputs;
 import it.unive.lisa.triage.model.AlarmModel;
@@ -115,6 +116,8 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 	private boolean seeding = true;
 
 	private boolean fixpointCheck = true;
+
+	private ExpressionEncoderFactory encoders = ExpressionEncoderFactory.DEFAULT;
 
 	private Map<String, Integer> statistics = Map.of();
 
@@ -236,6 +239,23 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 	public PdrVerifier<A, D> withGeneralization(
 			PdrEngine.Generalization generalization) {
 		this.generalization = generalization;
+		return this;
+	}
+
+	/**
+	 * Sets the factory of the encoders of expressions (default:
+	 * {@link ExpressionEncoderFactory#DEFAULT}, knowing only the operators of
+	 * LiSA). Frontends can pass encoders knowing their own operators (see
+	 * {@link it.unive.lisa.triage.encoding.ExpressionEncoder}), so that
+	 * counterexamples relying on them can be confirmed.
+	 *
+	 * @param encoders the factory of the encoders
+	 *
+	 * @return this verifier
+	 */
+	public PdrVerifier<A, D> withEncoder(
+			ExpressionEncoderFactory encoders) {
+		this.encoders = encoders;
 		return this;
 	}
 
@@ -547,7 +567,7 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 		}
 
 		try {
-			PdrEngine engine = new PdrEngine(model, s, strict);
+			PdrEngine engine = new PdrEngine(model, s, strict, encoders);
 			engine.setGeneralization(generalization);
 			engine.setSeeding(seeding);
 			engine.setAbstraction(new DomainAbstraction<>(analysis, cache));

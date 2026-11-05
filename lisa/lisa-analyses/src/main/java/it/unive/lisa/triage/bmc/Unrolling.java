@@ -8,6 +8,7 @@ import it.unive.lisa.symbolic.value.TernaryExpression;
 import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.triage.encoding.CellKeySort;
 import it.unive.lisa.triage.encoding.ExpressionEncoder;
+import it.unive.lisa.triage.encoding.ExpressionEncoderFactory;
 import it.unive.lisa.triage.encoding.SymbolTable;
 import it.unive.lisa.triage.encoding.ValueSort;
 import it.unive.lisa.triage.model.AlarmModel;
@@ -109,6 +110,8 @@ public class Unrolling {
 
 	private final boolean strict;
 
+	private final ExpressionEncoderFactory encoders;
+
 	private final Map<String, Set<FreshValue>> inputs;
 
 	private final Map<EdgeTransition, Integer> edgeIds;
@@ -146,7 +149,26 @@ public class Unrolling {
 			AlarmModel model,
 			SmtSolver solver,
 			boolean strict) {
+		this(model, solver, strict, ExpressionEncoderFactory.DEFAULT);
+	}
+
+	/**
+	 * Builds the unrolling, as {@link #Unrolling(AlarmModel, SmtSolver, boolean)},
+	 * encoding expressions with the encoders built by the given factory (e.g.,
+	 * encoders knowing the operators of a frontend).
+	 *
+	 * @param model    the model to encode
+	 * @param solver   the solver where constants are declared
+	 * @param strict   whether or not to encode in strict mode
+	 * @param encoders the factory of the encoders of expressions
+	 */
+	public Unrolling(
+			AlarmModel model,
+			SmtSolver solver,
+			boolean strict,
+			ExpressionEncoderFactory encoders) {
 		this.strict = strict;
+		this.encoders = encoders;
 		this.model = model;
 		this.solver = solver;
 		this.index = new LinkedHashMap<>();
@@ -193,6 +215,14 @@ public class Unrolling {
 	public ModelLocation locationAt(
 			int index) {
 		return locations.get(index);
+	}
+
+	/**
+	 * Yields a new encoder of expressions, using the given symbols.
+	 */
+	private ExpressionEncoder encoder(
+			SymbolTable symbols) {
+		return encoders.create(model.getSorts(), symbols);
 	}
 
 	private Term constant(
@@ -725,7 +755,7 @@ public class Unrolling {
 			locs.add(at(0, init));
 		List<Term> conj = new ArrayList<>();
 		conj.add(Term.or(locs.toArray(Term[]::new)));
-		ExpressionEncoder encoder = new ExpressionEncoder(model.getSorts(), new StepSymbols(0, "#init"));
+		ExpressionEncoder encoder = encoder(new StepSymbols(0, "#init"));
 		for (SymbolicExpression c : model.getInitialConstraints())
 			conj.add(encoder.encodeCondition(c));
 		conj.addAll(existingReferences());
@@ -749,7 +779,7 @@ public class Unrolling {
 			throws SemanticException {
 		List<Term> locs = new ArrayList<>();
 		List<Term> conj = new ArrayList<>();
-		ExpressionEncoder encoder = new ExpressionEncoder(model.getSorts(), new StepSymbols(step, "#inv"));
+		ExpressionEncoder encoder = encoder(new StepSymbols(step, "#inv"));
 		for (ModelLocation loc : locations) {
 			if (model.getSeeds(loc) == null)
 				// unreachable location
@@ -778,7 +808,7 @@ public class Unrolling {
 			int step)
 			throws SemanticException {
 		return seeds(location, step,
-				new ExpressionEncoder(model.getSorts(), new StepSymbols(step, "#inv")));
+				encoder(new StepSymbols(step, "#inv")));
 	}
 
 	private Term seeds(
@@ -835,7 +865,7 @@ public class Unrolling {
 			throws SemanticException {
 		String key = edgeKey(step, edge);
 		StepSymbols symbols = new StepSymbols(step, key.substring(key.indexOf('#')));
-		ExpressionEncoder encoder = new ExpressionEncoder(model.getSorts(), symbols);
+		ExpressionEncoder encoder = encoder(symbols);
 		List<Term> cases = new ArrayList<>();
 		List<Term> precise = new ArrayList<>();
 		List<GuardedReason> guarded = new ArrayList<>();
@@ -987,7 +1017,7 @@ public class Unrolling {
 			throws SemanticException {
 		String key = caseKey(step, edge, index);
 		StepSymbols symbols = new StepSymbols(step, key.substring(key.indexOf('#')));
-		ExpressionEncoder encoder = new ExpressionEncoder(model.getSorts(), symbols);
+		ExpressionEncoder encoder = encoder(symbols);
 		Term c = strictly(required(encodeCase(cases(edge).get(index), step, encoder), symbols, 0), symbols, 0);
 		exactness.put(key, symbols.exact);
 		guards.put(key, symbols.guards);
@@ -1023,7 +1053,7 @@ public class Unrolling {
 			throws SemanticException {
 		StepSymbols symbols = new StepSymbols(step, tag);
 		Term result = strictly(
-				required(new ExpressionEncoder(model.getSorts(), symbols).encodeCondition(condition), symbols, 0),
+				required(encoder(symbols).encodeCondition(condition), symbols, 0),
 				symbols, 0);
 		String key = "cond@" + step + tag;
 		exactness.put(key, symbols.exact);
@@ -1048,7 +1078,7 @@ public class Unrolling {
 			throws SemanticException {
 		String key = badKey(step);
 		StepSymbols symbols = new StepSymbols(step, key.substring(key.indexOf('#')));
-		ExpressionEncoder encoder = new ExpressionEncoder(model.getSorts(), symbols);
+		ExpressionEncoder encoder = encoder(symbols);
 		List<Term> cases = new ArrayList<>();
 		List<Term> precise = new ArrayList<>();
 		List<GuardedReason> guarded = new ArrayList<>();

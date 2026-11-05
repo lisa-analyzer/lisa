@@ -7,6 +7,7 @@ import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.TernaryExpression;
 import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.triage.bmc.Unrolling;
+import it.unive.lisa.triage.encoding.ExpressionEncoderFactory;
 import it.unive.lisa.triage.model.AlarmModel;
 import it.unive.lisa.triage.model.BadCase;
 import it.unive.lisa.triage.model.EdgeTransition;
@@ -246,10 +247,29 @@ public class PdrEngine {
 			AlarmModel model,
 			SmtSolver solver,
 			boolean strict) {
+		this(model, solver, strict, ExpressionEncoderFactory.DEFAULT);
+	}
+
+	/**
+	 * Builds the engine, as
+	 * {@link #PdrEngine(AlarmModel, SmtSolver, boolean)}, encoding expressions
+	 * with the encoders built by the given factory (e.g., encoders knowing the
+	 * operators of a frontend).
+	 *
+	 * @param model    the model to check
+	 * @param solver   the solver to use, that is not closed by the engine
+	 * @param strict   whether or not to encode the model in strict mode
+	 * @param encoders the factory of the encoders of expressions
+	 */
+	public PdrEngine(
+			AlarmModel model,
+			SmtSolver solver,
+			boolean strict,
+			ExpressionEncoderFactory encoders) {
 		this.model = model;
 		this.solver = solver;
 		this.strict = strict;
-		this.unrolling = new Unrolling(model, solver, strict);
+		this.unrolling = new Unrolling(model, solver, strict, encoders);
 		this.types = model.getBadLocation().getNode().getProgram().getTypes();
 		for (ModelLocation loc : model.getLocations())
 			for (EdgeTransition e : model.getTransitions(loc))

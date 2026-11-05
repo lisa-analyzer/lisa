@@ -12,6 +12,7 @@ import it.unive.lisa.checks.verification.Violation;
 import it.unive.lisa.interprocedural.ScopeId;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.triage.encoding.ExpressionEncoderFactory;
 import it.unive.lisa.triage.inputs.ReproducingInputs;
 import it.unive.lisa.triage.model.AlarmModel;
 import it.unive.lisa.triage.model.AlarmModelBuilder;
@@ -104,6 +105,8 @@ public class BoundedModelChecker<A extends AbstractLattice<A>, D extends Abstrac
 
 	private int maxLocations = AlarmModelBuilder.DEFAULT_MAX_LOCATIONS;
 
+	private ExpressionEncoderFactory encoders = ExpressionEncoderFactory.DEFAULT;
+
 	/**
 	 * The trace of the last execution found, if it might rely on summarized
 	 * calls (see {@link Unrolling#dueToCalls(java.util.Collection)}).
@@ -163,6 +166,23 @@ public class BoundedModelChecker<A extends AbstractLattice<A>, D extends Abstrac
 	public BoundedModelChecker<A, D> withMaxLocations(
 			int maxLocations) {
 		this.maxLocations = maxLocations;
+		return this;
+	}
+
+	/**
+	 * Sets the factory of the encoders of expressions (default:
+	 * {@link ExpressionEncoderFactory#DEFAULT}, knowing only the operators of
+	 * LiSA). Frontends can pass encoders knowing their own operators (see
+	 * {@link it.unive.lisa.triage.encoding.ExpressionEncoder}), so that
+	 * executions relying on them can be confirmed.
+	 *
+	 * @param encoders the factory of the encoders
+	 *
+	 * @return this verifier
+	 */
+	public BoundedModelChecker<A, D> withEncoder(
+			ExpressionEncoderFactory encoders) {
+		this.encoders = encoders;
 		return this;
 	}
 
@@ -226,7 +246,7 @@ public class BoundedModelChecker<A extends AbstractLattice<A>, D extends Abstrac
 		}
 
 		try (SmtSolver s = solver) {
-			Unrolling unrolling = new Unrolling(model, s, strict);
+			Unrolling unrolling = new Unrolling(model, s, strict, encoders);
 			s.assertTerm(unrolling.initial());
 			s.assertTerm(unrolling.invariants(0));
 			for (int k = 0; k <= bound; k++) {
@@ -276,8 +296,30 @@ public class BoundedModelChecker<A extends AbstractLattice<A>, D extends Abstrac
 			AlarmModel model,
 			int bound)
 			throws SemanticException {
+		return script(model, bound, ExpressionEncoderFactory.DEFAULT);
+	}
+
+	/**
+	 * Yields the SMT-LIB 2 script containing the queries that bounded model
+	 * checking issues on the given model, up to the given bound, as
+	 * {@link #script(AlarmModel, int)}, encoding expressions with the encoders
+	 * built by the given factory.
+	 *
+	 * @param model    the model
+	 * @param bound    the maximum number of steps
+	 * @param encoders the factory of the encoders of expressions
+	 *
+	 * @return the script
+	 *
+	 * @throws SemanticException if an expression cannot be encoded
+	 */
+	public static String script(
+			AlarmModel model,
+			int bound,
+			ExpressionEncoderFactory encoders)
+			throws SemanticException {
 		SmtLibScript s = new SmtLibScript();
-		Unrolling unrolling = new Unrolling(model, s);
+		Unrolling unrolling = new Unrolling(model, s, false, encoders);
 		s.assertTerm(unrolling.initial());
 		s.assertTerm(unrolling.invariants(0));
 		for (int k = 0; k <= bound; k++) {

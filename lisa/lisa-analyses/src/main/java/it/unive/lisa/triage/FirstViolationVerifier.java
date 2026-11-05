@@ -9,6 +9,7 @@ import it.unive.lisa.checks.verification.VerificationOutcome;
 import it.unive.lisa.checks.verification.VerificationResult;
 import it.unive.lisa.checks.verification.WarningVerifier;
 import it.unive.lisa.outputs.messages.StatementMessage;
+import it.unive.lisa.triage.encoding.ExpressionEncoderFactory;
 import it.unive.lisa.triage.pdr.PdrVerifier;
 import it.unive.lisa.triage.reachability.ReachabilityVerifier;
 import java.util.Collection;
@@ -60,7 +61,21 @@ public class FirstViolationVerifier<A extends AbstractLattice<A>, D extends Abst
 	 * already does.
 	 */
 	public FirstViolationVerifier() {
-		this(new ReachabilityVerifier<>(), new PdrVerifier<A, D>().withFixpointCheck(false));
+		this(ExpressionEncoderFactory.DEFAULT);
+	}
+
+	/**
+	 * Builds the verifier, first using a {@link ReachabilityVerifier} and then
+	 * a {@link PdrVerifier} with default parameters, as
+	 * {@link #FirstViolationVerifier()}, where the latter encodes expressions
+	 * with the encoders built by the given factory (see
+	 * {@link PdrVerifier#withEncoder(ExpressionEncoderFactory)}).
+	 *
+	 * @param encoders the factory of the encoders of expressions
+	 */
+	public FirstViolationVerifier(
+			ExpressionEncoderFactory encoders) {
+		this(new ReachabilityVerifier<>(), new PdrVerifier<A, D>().withFixpointCheck(false).withEncoder(encoders));
 	}
 
 	/**
