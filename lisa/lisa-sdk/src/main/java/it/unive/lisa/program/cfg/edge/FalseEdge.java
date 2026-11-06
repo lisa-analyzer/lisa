@@ -5,6 +5,7 @@ import it.unive.lisa.analysis.AbstractLattice;
 import it.unive.lisa.analysis.Analysis;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.interprocedural.ScopeId;
 import it.unive.lisa.lattices.ExpressionSet;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.symbolic.SymbolicExpression;
@@ -43,7 +44,8 @@ public class FalseEdge
 	@Override
 	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> traverseForward(
 			AnalysisState<A> state,
-			Analysis<A, D> analysis)
+			Analysis<A, D> analysis,
+			ScopeId<?> context)
 			throws SemanticException {
 		ExpressionSet exprs = state.getExecutionExpressions();
 		AnalysisState<A> result = state.bottomExecution();
@@ -53,7 +55,7 @@ public class FalseEdge
 					expr,
 					LogicalNegation.INSTANCE,
 					expr.getCodeLocation());
-			result = result.lub(analysis.assume(state, negated, getSource(), getDestination()));
+			result = result.lub(analysis.assume(state, negated, context, getSource(), getDestination()));
 		}
 		return result;
 	}
@@ -61,9 +63,10 @@ public class FalseEdge
 	@Override
 	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> traverseBackwards(
 			AnalysisState<A> state,
-			Analysis<A, D> analysis)
+			Analysis<A, D> analysis,
+			ScopeId<?> context)
 			throws SemanticException {
-		return traverseForward(state, analysis);
+		return traverseForward(state, analysis, context);
 	}
 
 	@Override

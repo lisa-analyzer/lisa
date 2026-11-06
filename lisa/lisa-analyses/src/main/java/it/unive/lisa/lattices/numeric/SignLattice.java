@@ -8,9 +8,10 @@ import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
 
 /**
- * The lattice structure the values, which can be positive, negative, zero, top
- * or bottom.
- * 
+ * The lattice structure used by {@link it.unive.lisa.analysis.numeric.Sign},
+ * whose elements represent values that are positive, negative, zero, top or
+ * bottom.
+ *
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
 public class SignLattice

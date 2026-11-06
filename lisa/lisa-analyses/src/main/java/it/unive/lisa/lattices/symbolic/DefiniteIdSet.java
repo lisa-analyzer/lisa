@@ -10,8 +10,11 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * An {@link InverseSetLattice} of {@link Identifier}s.
- * 
+ * An {@link InverseSetLattice} of {@link Identifier}s, used by
+ * {@link it.unive.lisa.analysis.numeric.UpperBounds} to track, for each
+ * variable, the set of other variables that are certainly strictly greater than
+ * it.
+ *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public class DefiniteIdSet

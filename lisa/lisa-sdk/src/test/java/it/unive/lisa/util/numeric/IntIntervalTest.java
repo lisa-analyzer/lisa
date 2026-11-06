@@ -1,7 +1,14 @@
 package it.unive.lisa.util.numeric;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.function.BiFunction;
 import org.junit.jupiter.api.Test;
 
@@ -158,6 +165,39 @@ public class IntIntervalTest {
 		test(IntInterval.ZERO, MI_ZERO, IntInterval.ZERO, "/", div);
 		test(IntInterval.ZERO, IntInterval.TOP, IntInterval.ZERO, "/", div);
 		test(IntInterval.ZERO, ZERO_PI, IntInterval.ZERO, "/", div);
+	}
+
+	@Test
+	public void testIteratorEnumeratesAllValuesInclusive() {
+		IntInterval interval = new IntInterval(-1, 2);
+		List<Long> values = new ArrayList<>();
+		Iterator<Long> it = interval.iterator();
+		while (it.hasNext())
+			values.add(it.next());
+		assertEquals(List.of(-1L, 0L, 1L, 2L), values);
+	}
+
+	@Test
+	public void testIteratorOnSingletonYieldsOneValue() {
+		IntInterval interval = new IntInterval(5, 5);
+		Iterator<Long> it = interval.iterator();
+		assertTrue(it.hasNext());
+		assertEquals(5L, it.next());
+		assertFalse(it.hasNext());
+	}
+
+	@Test
+	public void testIteratorThrowsWhenExhausted() {
+		Iterator<Long> it = new IntInterval(0, 0).iterator();
+		it.next();
+		assertFalse(it.hasNext());
+		assertThrows(NoSuchElementException.class, it::next);
+	}
+
+	@Test
+	public void testIteratorOnUnboundedIntervalThrows() {
+		assertThrows(InfiniteIterationException.class, () -> ZERO_PI.iterator());
+		assertThrows(InfiniteIterationException.class, () -> MI_ZERO.iterator());
 	}
 
 }

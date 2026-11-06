@@ -41,7 +41,6 @@ public class UpperBoundsTest {
 		return new Constant(Int32Type.INSTANCE, v, pp.getLocation());
 	}
 
-	/** Creates a state where `small < big`. */
 	private ValueEnvironment<DefiniteIdSet> stateWithBound(
 			Variable small,
 			Variable big) {

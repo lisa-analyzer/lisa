@@ -60,6 +60,7 @@ public class NotEqual
 		return analysis.smallStepSemantics(
 				state,
 				new BinaryExpression(getStaticType(), left, right, ComparisonNe.INSTANCE, getLocation()),
+				interprocedural.getCurrentContext(),
 				this);
 	}
 

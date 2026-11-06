@@ -7,9 +7,6 @@ import java.util.Set;
  * The Null type, that is the type of {#link NullLiteral}. It implements the
  * singleton design pattern, that is the instances of this type are unique. The
  * unique instance of this type can be retrieved by {@link NullType#INSTANCE}.
- * It implements the singleton design pattern, that is the instances of this
- * type are unique. The unique instance of this type can be retrieved by
- * {@link NullType#INSTANCE}.
  * 
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */

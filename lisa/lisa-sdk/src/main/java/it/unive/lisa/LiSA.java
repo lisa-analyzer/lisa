@@ -93,7 +93,7 @@ public class LiSA {
 			Consumer<LiSAReport> infoProvider,
 			Program... programs)
 			throws AnalysisException {
-		LOG.info(conf.toString());
+		LOG.info("Analysis configuration:\n" + conf.toString().replaceAll("(?m)^", "  "));
 
 		DateTime start = new DateTime();
 		LiSARunner runner = new LiSARunner(
@@ -118,7 +118,7 @@ public class LiSA {
 				app,
 				start,
 				new DateTime());
-		LOG.info("LiSA statistics:\n" + stats);
+		LOG.info("Analysis statistics:\n" + stats.toString().replaceAll("(?m)^", "  "));
 
 		LiSAReport report = new LiSAReport(
 				conf,

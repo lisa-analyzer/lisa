@@ -7,6 +7,7 @@ import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
+import it.unive.lisa.interprocedural.ScopeId;
 import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.statement.Expression;
@@ -57,11 +58,12 @@ public class IMPAssert
 			SymbolicExpression expr,
 			StatementStore<A> expressions)
 			throws SemanticException {
+		ScopeId<A> context = interprocedural.getCurrentContext();
 		Analysis<A, D> analysis = interprocedural.getAnalysis();
-		Set<Type> types = analysis.getRuntimeTypesOf(state, expr, this);
+		Set<Type> types = analysis.getRuntimeTypesOf(state, expr, context, this);
 		if (types.stream().noneMatch(Type::isBooleanType))
 			return state.bottomExecution();
-		return analysis.smallStepSemantics(state, new Skip(getLocation()), this);
+		return analysis.smallStepSemantics(state, new Skip(getLocation()), context, this);
 	}
 
 }

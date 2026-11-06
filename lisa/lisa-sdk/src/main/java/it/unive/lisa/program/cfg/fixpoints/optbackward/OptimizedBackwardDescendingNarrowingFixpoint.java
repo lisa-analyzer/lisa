@@ -155,4 +155,37 @@ public class OptimizedBackwardDescendingNarrowingFixpoint<A extends AbstractLatt
 				hotspots);
 	}
 
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + ((config == null) ? 0 : config.hashCode());
+		result = prime * result + ((wideningPoints == null) ? 0 : wideningPoints.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(
+			Object obj) {
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		OptimizedBackwardDescendingNarrowingFixpoint<?,
+				?> other = (OptimizedBackwardDescendingNarrowingFixpoint<?, ?>) obj;
+		if (config == null) {
+			if (other.config != null)
+				return false;
+		} else if (!config.equals(other.config))
+			return false;
+		if (wideningPoints == null) {
+			if (other.wideningPoints != null)
+				return false;
+		} else if (!wideningPoints.equals(other.wideningPoints))
+			return false;
+		return true;
+	}
+
 }

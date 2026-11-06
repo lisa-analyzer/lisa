@@ -294,7 +294,13 @@ public final class CollectionUtilities {
 		public BinaryOperator<StringBuilder> combiner() {
 			return (
 					result,
-					partial) -> result.append(partial);
+					partial) -> {
+				if (partial.length() == 0)
+					return result;
+				if (result.length() == 0)
+					return partial;
+				return result.append(separator).append(partial);
+			};
 		}
 
 		@Override

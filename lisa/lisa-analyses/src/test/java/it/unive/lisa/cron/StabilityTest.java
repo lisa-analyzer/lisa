@@ -121,7 +121,8 @@ public class StabilityTest
 								analysis.getCovarianceClasses(state),
 								StringRepresentation::new,
 								v -> new SetRepresentation(v, StringRepresentation::new));
-						tool.warnOn(exit, "Classes computed: " + StringUtilities.flatten(repr.toString()));
+						tool.warnOn(exit, result.getId(),
+								"Classes computed: " + StringUtilities.flatten(repr.toString()));
 					}
 				} catch (FixpointException e) {
 					throw new AnalysisExecutionException(e);

@@ -7,6 +7,7 @@ import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
+import it.unive.lisa.interprocedural.ScopeId;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.NativeCFG;
@@ -85,15 +86,17 @@ public class Contains
 			SymbolicExpression right,
 			StatementStore<A> expressions)
 			throws SemanticException {
+		ScopeId<A> context = interprocedural.getCurrentContext();
 		Analysis<A, D> analysis = interprocedural.getAnalysis();
-		if (analysis.getRuntimeTypesOf(state, left, this).stream().noneMatch(Type::isStringType))
+		if (analysis.getRuntimeTypesOf(state, left, context, this).stream().noneMatch(Type::isStringType))
 			return state.bottomExecution();
-		if (analysis.getRuntimeTypesOf(state, right, this).stream().noneMatch(Type::isStringType))
+		if (analysis.getRuntimeTypesOf(state, right, context, this).stream().noneMatch(Type::isStringType))
 			return state.bottomExecution();
 
 		return analysis.smallStepSemantics(
 				state,
 				new BinaryExpression(getStaticType(), left, right, StringContains.INSTANCE, getLocation()),
+				context,
 				originating == null ? this : originating);
 	}
 

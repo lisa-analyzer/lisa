@@ -7,6 +7,7 @@ import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
+import it.unive.lisa.interprocedural.ScopeId;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.NativeCFG;
@@ -21,7 +22,7 @@ import it.unive.lisa.type.StringType;
 import it.unive.lisa.type.Type;
 
 /**
- * An expression modeling the string contains operation. The type of both
+ * An expression modeling the string concatenation operation. The type of both
  * operands must be {@link StringType}. The type of this expression is the
  * {@link StringType}. <br>
  * <br>
@@ -32,7 +33,7 @@ import it.unive.lisa.type.Type;
  * present, such statement will be used as {@link ProgramPoint} for semantics
  * computations. This allows subclasses to implement {@link PluggableStatement}
  * easily without redefining the semantics provided by this class.
- * 
+ *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public class Concat
@@ -84,15 +85,17 @@ public class Concat
 			SymbolicExpression right,
 			StatementStore<A> expressions)
 			throws SemanticException {
+		ScopeId<A> context = interprocedural.getCurrentContext();
 		Analysis<A, D> analysis = interprocedural.getAnalysis();
-		if (analysis.getRuntimeTypesOf(state, left, this).stream().noneMatch(Type::isStringType))
+		if (analysis.getRuntimeTypesOf(state, left, context, this).stream().noneMatch(Type::isStringType))
 			return state.bottomExecution();
-		if (analysis.getRuntimeTypesOf(state, right, this).stream().noneMatch(Type::isStringType))
+		if (analysis.getRuntimeTypesOf(state, right, context, this).stream().noneMatch(Type::isStringType))
 			return state.bottomExecution();
 
 		return analysis.smallStepSemantics(
 				state,
 				new BinaryExpression(getStaticType(), left, right, StringConcat.INSTANCE, getLocation()),
+				context,
 				originating == null ? this : originating);
 	}
 

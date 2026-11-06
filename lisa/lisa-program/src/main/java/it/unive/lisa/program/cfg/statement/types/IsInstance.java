@@ -79,6 +79,7 @@ public class IsInstance
 								right,
 								TypeCheck.INSTANCE,
 								getLocation()),
+						interprocedural.getCurrentContext(),
 						this);
 	}
 

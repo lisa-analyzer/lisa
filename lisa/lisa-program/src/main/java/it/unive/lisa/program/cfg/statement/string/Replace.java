@@ -7,6 +7,7 @@ import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
+import it.unive.lisa.interprocedural.ScopeId;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.NativeCFG;
@@ -88,17 +89,19 @@ public class Replace
 			SymbolicExpression right,
 			StatementStore<A> expressions)
 			throws SemanticException {
+		ScopeId<A> context = interprocedural.getCurrentContext();
 		Analysis<A, D> analysis = interprocedural.getAnalysis();
-		if (analysis.getRuntimeTypesOf(state, left, this).stream().noneMatch(Type::isStringType))
+		if (analysis.getRuntimeTypesOf(state, left, context, this).stream().noneMatch(Type::isStringType))
 			return state.bottomExecution();
-		if (analysis.getRuntimeTypesOf(state, middle, this).stream().noneMatch(Type::isStringType))
+		if (analysis.getRuntimeTypesOf(state, middle, context, this).stream().noneMatch(Type::isStringType))
 			return state.bottomExecution();
-		if (analysis.getRuntimeTypesOf(state, right, this).stream().noneMatch(Type::isStringType))
+		if (analysis.getRuntimeTypesOf(state, right, context, this).stream().noneMatch(Type::isStringType))
 			return state.bottomExecution();
 
 		return analysis.smallStepSemantics(
 				state,
 				new TernaryExpression(getStaticType(), left, middle, right, StringReplace.INSTANCE, getLocation()),
+				context,
 				originating == null ? this : originating);
 	}
 

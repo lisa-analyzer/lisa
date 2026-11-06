@@ -11,7 +11,6 @@ import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.PluggableStatement;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.string.Substring;
-import it.unive.lisa.program.type.BoolType;
 import it.unive.lisa.program.type.Int32Type;
 import it.unive.lisa.program.type.StringType;
 
@@ -43,7 +42,7 @@ public class StringSubstring
 						stringUnit,
 						true,
 						"substring",
-						BoolType.INSTANCE,
+						StringType.INSTANCE,
 						new Parameter(location, "this", StringType.INSTANCE),
 						new Parameter(location, "start", Int32Type.INSTANCE),
 						new Parameter(location, "end", Int32Type.INSTANCE)),

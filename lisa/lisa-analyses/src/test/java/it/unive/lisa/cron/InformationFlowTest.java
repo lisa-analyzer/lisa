@@ -117,18 +117,19 @@ public class InformationFlowTest
 													TypeSet>>> post = result
 															.getAnalysisStateAfter(call.getParameters()[i]);
 									SemanticOracle oracle = tool.getAnalysis().domain
-											.makeOracle(post.getExecutionState());
+											.makeOracle(post.getExecutionState(), null);
 
 									for (SymbolicExpression e : tool.getAnalysis()
-											.rewrite(post, post.getExecutionExpressions(), node)) {
+											.rewrite(post, post.getExecutionExpressions(), null, node)) {
 										L stack = domain
 												.eval(post.getExecutionState().valueState, (ValueExpression) e, node,
 														oracle);
 
 										if (stack.isAlwaysTainted())
-											tool.warnOn(call, "Parameter " + i + " is always tainted");
+											tool.warnOn(call, result.getId(), "Parameter " + i + " is always tainted");
 										else if (stack.isPossiblyTainted())
-											tool.warnOn(call, "Parameter " + i + " is possibly tainted");
+											tool.warnOn(call, result.getId(),
+													"Parameter " + i + " is possibly tainted");
 									}
 								}
 						}
@@ -210,13 +211,13 @@ public class InformationFlowTest
 					var postL = result.getAnalysisStateAfter(assign.getLeft());
 					var postR = result.getAnalysisStateAfter(assign.getRight());
 					NonInterference domain = (NonInterference) tool.getAnalysis().domain.valueDomain;
-					SemanticOracle oracleL = tool.getAnalysis().domain.makeOracle(postL.getExecutionState());
-					SemanticOracle oracleR = tool.getAnalysis().domain.makeOracle(postR.getExecutionState());
+					SemanticOracle oracleL = tool.getAnalysis().domain.makeOracle(postL.getExecutionState(), null);
+					SemanticOracle oracleR = tool.getAnalysis().domain.makeOracle(postR.getExecutionState(), null);
 
 					for (SymbolicExpression l : tool.getAnalysis()
-							.rewrite(postL, postL.getExecutionExpressions(), assign))
+							.rewrite(postL, postL.getExecutionExpressions(), null, assign))
 						for (SymbolicExpression r : tool.getAnalysis()
-								.rewrite(postR, postR.getExecutionExpressions(), assign)) {
+								.rewrite(postR, postR.getExecutionExpressions(), null, assign)) {
 							NonInterferenceValue ll = domain
 									.eval(postL.getExecutionState().valueState, (ValueExpression) l, assign.getLeft(),
 											oracleL);
@@ -227,21 +228,25 @@ public class InformationFlowTest
 							if (ll.isLowConfidentiality() && rr.isHighConfidentiality())
 								tool.warnOn(
 										assign,
+										result.getId(),
 										"This assignment assigns a HIGH confidentiality value to a LOW confidentiality variable, thus violating non-interference");
 
 							if (ll.isLowConfidentiality() && state.getExecutionState().isHighConfidentiality())
 								tool.warnOn(
 										assign,
+										result.getId(),
 										"This assignment, located in a HIGH confidentiality block, assigns a LOW confidentiality variable, thus violating non-interference");
 
 							if (ll.isHighIntegrity() && rr.isLowIntegrity())
 								tool.warnOn(
 										assign,
+										result.getId(),
 										"This assignment assigns a LOW integrity value to a HIGH integrity variable, thus violating non-interference");
 
 							if (ll.isHighIntegrity() && state.getExecutionState().isLowIntegrity())
 								tool.warnOn(
 										assign,
+										result.getId(),
 										"This assignment, located in a LOW integrity block, assigns a HIGH integrity variable, thus violating non-interference");
 						}
 				} catch (SemanticException e) {

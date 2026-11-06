@@ -1,5 +1,6 @@
 package it.unive.lisa;
 
+import it.unive.lisa.checks.verification.ReproducingInput;
 import it.unive.lisa.conf.LiSAConfiguration;
 import it.unive.lisa.outputs.messages.CFGDescriptorMessage;
 import it.unive.lisa.outputs.messages.CFGMessage;
@@ -17,6 +18,7 @@ import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.util.file.FileManager;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -191,6 +193,31 @@ public class ReportingTool {
 	}
 
 	/**
+	 * Reports the given warning.
+	 *
+	 * @param warning the warning to report
+	 */
+	protected void addWarning(
+			Message warning) {
+		warnings.add(warning);
+	}
+
+	/**
+	 * Replaces a warning with another one (e.g., the result of its
+	 * verification). This is meant to be used by LiSA when verifying warnings
+	 * after the semantic checks have been executed.
+	 *
+	 * @param original    the warning to replace
+	 * @param replacement the new warning
+	 */
+	public void replaceWarning(
+			Message original,
+			Message replacement) {
+		warnings.remove(original);
+		warnings.add(replacement);
+	}
+
+	/**
 	 * Returns an <b>unmodifiable</b> view of the warnings that have been
 	 * generated up to now using this tool.
 	 * 
@@ -213,6 +240,26 @@ public class ReportingTool {
 	}
 
 	/**
+	 * Reports a new notice that is meant to be a generic notice on the program.
+	 * For notices related to one of the components of the program (e.g., a CFG,
+	 * a statement, ...) rely on the other methods provided by this class.
+	 * 
+	 * @param message           the message of the notice
+	 * @param definite          whether or not the notice is definite, that is,
+	 *                              if the reported behavior happens in at least
+	 *                              one execution of the program
+	 * @param reproducingInputs the inputs reproducing the behavior reported by
+	 *                              the notice (can be {@code null} if no inputs
+	 *                              are known)
+	 */
+	public void notice(
+			String message,
+			boolean definite,
+			List<ReproducingInput> reproducingInputs) {
+		notices.add(new Message(message, definite, reproducingInputs));
+	}
+
+	/**
 	 * Reports a new notice with the given message on the declaration of the
 	 * given unit.
 	 * 
@@ -223,6 +270,27 @@ public class ReportingTool {
 			Unit unit,
 			String message) {
 		notices.add(new UnitMessage(unit, message));
+	}
+
+	/**
+	 * Reports a new notice with the given message on the declaration of the
+	 * given unit.
+	 * 
+	 * @param unit              the unit to notice on
+	 * @param message           the message of the notice
+	 * @param definite          whether or not the notice is definite, that is,
+	 *                              if the reported behavior happens in at least
+	 *                              one execution of the program
+	 * @param reproducingInputs the inputs reproducing the behavior reported by
+	 *                              the notice (can be {@code null} if no inputs
+	 *                              are known)
+	 */
+	public void noticeOn(
+			Unit unit,
+			String message,
+			boolean definite,
+			List<ReproducingInput> reproducingInputs) {
+		notices.add(new UnitMessage(unit, message, definite, reproducingInputs));
 	}
 
 	/**
@@ -242,6 +310,29 @@ public class ReportingTool {
 
 	/**
 	 * Reports a new notice with the given message on the declaration of the
+	 * given global.
+	 * 
+	 * @param unit              the unit containing the global to notice on
+	 * @param global            the global to notice on
+	 * @param message           the message of the notice
+	 * @param definite          whether or not the notice is definite, that is,
+	 *                              if the reported behavior happens in at least
+	 *                              one execution of the program
+	 * @param reproducingInputs the inputs reproducing the behavior reported by
+	 *                              the notice (can be {@code null} if no inputs
+	 *                              are known)
+	 */
+	public void noticeOn(
+			Unit unit,
+			Global global,
+			String message,
+			boolean definite,
+			List<ReproducingInput> reproducingInputs) {
+		notices.add(new GlobalMessage(unit, global, message, definite, reproducingInputs));
+	}
+
+	/**
+	 * Reports a new notice with the given message on the declaration of the
 	 * given cfg.
 	 * 
 	 * @param cfg     the cfg to notice on
@@ -251,6 +342,27 @@ public class ReportingTool {
 			CFG cfg,
 			String message) {
 		notices.add(new CFGMessage(cfg, message));
+	}
+
+	/**
+	 * Reports a new notice with the given message on the declaration of the
+	 * given cfg.
+	 * 
+	 * @param cfg               the cfg to notice on
+	 * @param message           the message of the notice
+	 * @param definite          whether or not the notice is definite, that is,
+	 *                              if the reported behavior happens in at least
+	 *                              one execution of the program
+	 * @param reproducingInputs the inputs reproducing the behavior reported by
+	 *                              the notice (can be {@code null} if no inputs
+	 *                              are known)
+	 */
+	public void noticeOn(
+			CFG cfg,
+			String message,
+			boolean definite,
+			List<ReproducingInput> reproducingInputs) {
+		notices.add(new CFGMessage(cfg, message, definite, reproducingInputs));
 	}
 
 	/**
@@ -264,6 +376,27 @@ public class ReportingTool {
 			CodeMemberDescriptor descriptor,
 			String message) {
 		notices.add(new CFGDescriptorMessage(descriptor, message));
+	}
+
+	/**
+	 * Reports a new notice with the given message on the declaration of the cfg
+	 * represented by the given descriptor.
+	 * 
+	 * @param descriptor        the descriptor cfg to notice on
+	 * @param message           the message of the notice
+	 * @param definite          whether or not the notice is definite, that is,
+	 *                              if the reported behavior happens in at least
+	 *                              one execution of the program
+	 * @param reproducingInputs the inputs reproducing the behavior reported by
+	 *                              the notice (can be {@code null} if no inputs
+	 *                              are known)
+	 */
+	public void noticeOn(
+			CodeMemberDescriptor descriptor,
+			String message,
+			boolean definite,
+			List<ReproducingInput> reproducingInputs) {
+		notices.add(new CFGDescriptorMessage(descriptor, message, definite, reproducingInputs));
 	}
 
 	/**
@@ -284,6 +417,31 @@ public class ReportingTool {
 	}
 
 	/**
+	 * Reports a new notice with the given message on the given statement. If
+	 * {@code statement} is an instance of {@link Expression}, then
+	 * {@link #noticeOn(Expression, String, boolean, List)} is invoked.
+	 * 
+	 * @param statement         the statement to notice on
+	 * @param message           the message of the notice
+	 * @param definite          whether or not the notice is definite, that is,
+	 *                              if the reported behavior happens in at least
+	 *                              one execution of the program
+	 * @param reproducingInputs the inputs reproducing the behavior reported by
+	 *                              the notice (can be {@code null} if no inputs
+	 *                              are known)
+	 */
+	public void noticeOn(
+			Statement statement,
+			String message,
+			boolean definite,
+			List<ReproducingInput> reproducingInputs) {
+		if (statement instanceof Expression)
+			noticeOn((Expression) statement, message, definite, reproducingInputs);
+		else
+			notices.add(new StatementMessage(statement, message, definite, reproducingInputs));
+	}
+
+	/**
 	 * Reports a new notice with the given message on the given expression.
 	 * 
 	 * @param expression the expression to notice on
@@ -293,6 +451,36 @@ public class ReportingTool {
 			Expression expression,
 			String message) {
 		notices.add(new ExpressionMessage(expression, message));
+	}
+
+	/**
+	 * Reports a new notice with the given message on the given expression.
+	 * 
+	 * @param expression        the expression to notice on
+	 * @param message           the message of the notice
+	 * @param definite          whether or not the notice is definite, that is,
+	 *                              if the reported behavior happens in at least
+	 *                              one execution of the program
+	 * @param reproducingInputs the inputs reproducing the behavior reported by
+	 *                              the notice (can be {@code null} if no inputs
+	 *                              are known)
+	 */
+	public void noticeOn(
+			Expression expression,
+			String message,
+			boolean definite,
+			List<ReproducingInput> reproducingInputs) {
+		notices.add(new ExpressionMessage(expression, message, definite, reproducingInputs));
+	}
+
+	/**
+	 * Reports the given notice.
+	 *
+	 * @param notice the notice to report
+	 */
+	protected void addNotice(
+			Message notice) {
+		notices.add(notice);
 	}
 
 	/**

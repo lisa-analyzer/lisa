@@ -149,4 +149,36 @@ public class OptimizedForwardDescendingGLBFixpoint<A extends AbstractLattice<A>,
 				hotspots);
 	}
 
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + ((config == null) ? 0 : config.hashCode());
+		result = prime * result + ((glbs == null) ? 0 : glbs.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(
+			Object obj) {
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		OptimizedForwardDescendingGLBFixpoint<?, ?> other = (OptimizedForwardDescendingGLBFixpoint<?, ?>) obj;
+		if (config == null) {
+			if (other.config != null)
+				return false;
+		} else if (!config.equals(other.config))
+			return false;
+		if (glbs == null) {
+			if (other.glbs != null)
+				return false;
+		} else if (!glbs.equals(other.glbs))
+			return false;
+		return true;
+	}
+
 }

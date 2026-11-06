@@ -4,8 +4,10 @@ import it.unive.lisa.program.SyntheticLocation;
 import it.unive.lisa.type.NullType;
 
 /**
- * A singleton allocation site representing a uninitialized/null location.
- * 
+ * A singleton allocation site representing an uninitialized/null location.
+ * Since it represents no concrete object, it can never be the target of an
+ * assignment ({@link #canBeAssigned()} returns {@code false}).
+ *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public class NullAllocationSite

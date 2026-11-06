@@ -59,6 +59,7 @@ public class Equal
 				.smallStepSemantics(
 						state,
 						new BinaryExpression(getStaticType(), left, right, ComparisonEq.INSTANCE, getLocation()),
+						interprocedural.getCurrentContext(),
 						this);
 	}
 

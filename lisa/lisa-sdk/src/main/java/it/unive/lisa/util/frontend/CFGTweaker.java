@@ -81,15 +81,21 @@ public class CFGTweaker {
 			return;
 
 		// if the other returns do return a value, we cannot add
-		// a ret as we should return a value as well
+		// a ret as we should return a value as well; both flavors are
+		// collected before comparing them, since getNormalExitpoints() does
+		// not guarantee an order that would let a single left-to-right scan
+		// catch a valueless return preceding a valued one
 		boolean returnsValue = false;
+		List<Statement> withoutValue = new LinkedList<>();
 		for (Statement st : cfg.getNormalExitpoints())
 			if (st instanceof Return)
 				returnsValue = true;
-			else if (returnsValue)
-				throw exceptionFactory.apply(
-						"Return statement at " + st.getLocation()
-								+ " should return something, since other returns do it");
+			else
+				withoutValue.add(st);
+		if (returnsValue && !withoutValue.isEmpty())
+			throw exceptionFactory.apply(
+					"Return statement at " + withoutValue.get(0).getLocation()
+							+ " should return something, since other returns do it");
 
 		cfg.addNode(ret);
 		for (Statement st : preExits) {

@@ -33,9 +33,13 @@ import java.util.Vector;
 import org.apache.commons.lang3.tuple.Pair;
 
 /**
- * A class that describes an generic automaton(dfa, nfa, epsilon nfa) using an
- * alphabet of strings, extended with a special symbol for statically unknown
- * ones. Transition symbols are {@link RegularExpression}s.
+ * A generic finite state automaton (DFA, NFA, or epsilon-NFA) whose alphabet is
+ * made of whole strings, extended with {@link TopAtom} to represent statically
+ * unknown substrings, used by
+ * {@link it.unive.lisa.analysis.string.tarsis.Tarsis} to approximate string
+ * values. Transition symbols are {@link RegularExpression}s (typically
+ * {@link Atom}s), and can be labeled with arbitrarily long strings, as opposed
+ * to the single-character transitions of {@link SimpleAutomaton}.
  *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
@@ -311,39 +315,96 @@ public class RegexAutomaton
 		return new RegexAutomaton(exStates, exTransitions).minimize();
 	}
 
+	/**
+	 * {@inheritDoc}<br>
+	 * <br>
+	 * Both automata are first {@link #explode() exploded}, so that the
+	 * transitions not recognizing the top string recognize single characters
+	 * and can be matched one by one. A transition recognizing the top string
+	 * (that is, any string, including the empty one) can match any sequence of
+	 * transitions of the other automaton: it can consume a character and either
+	 * stop or keep consuming, and it can match no character at all. The result
+	 * over-approximates the intersection of the languages.
+	 */
 	@Override
 	public RegexAutomaton intersection(
 			RegexAutomaton other) {
 		if (this == other)
 			return this;
 
-		int code = 0;
-		Map<State, Pair<State, State>> stateMapping = new HashMap<>();
-		SortedSet<State> newStates = new TreeSet<>();
-		SortedSet<Transition<RegularExpression>> newDelta = new TreeSet<Transition<RegularExpression>>();
+		RegexAutomaton left = explode();
+		RegexAutomaton right = other.explode();
+		Map<State, Set<State>> leftClosure = left.topClosure();
+		Map<State, Set<State>> rightClosure = right.topClosure();
 
-		for (State s1 : states)
-			for (State s2 : other.states) {
-				State s = new State(code++, s1.isInitial() && s2.isInitial(), s1.isFinal() && s2.isFinal());
-				stateMapping.put(s, Pair.of(s1, s2));
+		int code = 0;
+		Map<Pair<State, State>, State> mapping = new HashMap<>();
+		SortedSet<State> newStates = new TreeSet<>();
+		for (State s1 : left.states)
+			for (State s2 : right.states) {
+				// the top string matches the empty string: a pair is final if
+				// final states can be reached through top transitions
+				boolean fin = false;
+				for (State c1 : leftClosure.get(s1))
+					for (State c2 : rightClosure.get(s2))
+						fin |= c1.isFinal() && c2.isFinal();
+				State s = new State(code++, s1.isInitial() && s2.isInitial(), fin);
+				mapping.put(Pair.of(s1, s2), s);
 				newStates.add(s);
 			}
 
-		for (Transition<RegularExpression> t1 : getTransitions()) {
-			for (Transition<RegularExpression> t2 : other.getTransitions()) {
-				State from = getStateFromPair(stateMapping, Pair.of(t1.getSource(), t2.getSource()));
-				State to = getStateFromPair(stateMapping, Pair.of(t1.getDestination(), t2.getDestination()));
-
-				if (t1.getSymbol().equals(t2.getSymbol()))
-					newDelta.add(new Transition<RegularExpression>(from, to, t1.getSymbol()));
-				else if (t1.getSymbol() == TopAtom.INSTANCE && t2.getSymbol() != TopAtom.INSTANCE)
-					newDelta.add(new Transition<RegularExpression>(from, to, t2.getSymbol()));
-				else if (t1.getSymbol() != TopAtom.INSTANCE && t2.getSymbol() == TopAtom.INSTANCE)
-					newDelta.add(new Transition<RegularExpression>(from, to, t1.getSymbol()));
+		SortedSet<Transition<RegularExpression>> newDelta = new TreeSet<>();
+		for (State s1 : left.states)
+			for (State s2 : right.states) {
+				State from = mapping.get(Pair.of(s1, s2));
+				for (State c1 : leftClosure.get(s1))
+					for (State c2 : rightClosure.get(s2))
+						for (Transition<RegularExpression> t1 : left.getOutgoingTransitionsFrom(c1))
+							for (Transition<RegularExpression> t2 : right.getOutgoingTransitionsFrom(c2)) {
+								RegularExpression a = t1.getSymbol();
+								RegularExpression b = t2.getSymbol();
+								boolean top1 = a == TopAtom.INSTANCE;
+								boolean top2 = b == TopAtom.INSTANCE;
+								if (!top1 && !top2 && !a.equals(b))
+									continue;
+								RegularExpression symbol = top1 ? b : a;
+								// the symbol is consumed by both transitions
+								newDelta.add(new Transition<>(from,
+										mapping.get(Pair.of(t1.getDestination(), t2.getDestination())), symbol));
+								// a top transition can consume the symbol and
+								// keep consuming
+								if (top1)
+									newDelta.add(new Transition<>(from,
+											mapping.get(Pair.of(c1, t2.getDestination())), symbol));
+								if (top2)
+									newDelta.add(new Transition<>(from,
+											mapping.get(Pair.of(t1.getDestination(), c2)), symbol));
+							}
 			}
-		}
 
-		RegexAutomaton result = from(newStates, newDelta).minimize();
+		return from(newStates, newDelta).minimize();
+	}
+
+	/**
+	 * Yields, for each state, the states reachable from it through transitions
+	 * recognizing the top string (that can match the empty string), including
+	 * the state itself.
+	 */
+	private Map<State, Set<State>> topClosure() {
+		Map<State, Set<State>> result = new HashMap<>();
+		for (State s : states) {
+			Set<State> closure = new HashSet<>();
+			List<State> worklist = new ArrayList<>();
+			worklist.add(s);
+			while (!worklist.isEmpty()) {
+				State current = worklist.remove(worklist.size() - 1);
+				if (closure.add(current))
+					for (Transition<RegularExpression> t : getOutgoingTransitionsFrom(current))
+						if (t.getSymbol() == TopAtom.INSTANCE)
+							worklist.add(t.getDestination());
+			}
+			result.put(s, closure);
+		}
 		return result;
 	}
 

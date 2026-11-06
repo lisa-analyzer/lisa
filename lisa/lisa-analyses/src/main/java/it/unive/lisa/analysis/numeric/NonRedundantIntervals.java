@@ -32,10 +32,21 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 /**
- * An analysis computing finite non redundant powersets of {@link IntInterval}s,
- * approximating integer values as a non redundant set of intervals.
+ * An analysis computing finite non-redundant powersets of {@link IntInterval}s,
+ * approximating integer values as a non-redundant, non-overlapping set of
+ * intervals rather than as a single one. It is built as a disjunctive
+ * refinement of the {@link Interval} domain, through
+ * {@link NonRelationalNonRedundantPowerset}: it can represent unions of
+ * disjoint ranges (e.g., "x is in [0,2] or [10,12]"), tracking, and
+ * periodically simplifying, a set of intervals instead of a single one.
  *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ *
+ * @see <a href=
+ *          "https://www.sciencedirect.com/science/article/pii/S0167642397000348">
+ *          Roberto Giacobazzi, Francesco Ranzato. Optimal domains for
+ *          disjunctive abstract interpretation. Science of Computer
+ *          Programming, 32(1-3):177-210, 1998.</a>
  */
 public class NonRedundantIntervals
 		extends

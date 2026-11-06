@@ -5,11 +5,11 @@ import it.unive.lisa.symbolic.value.operator.binary.ComparisonGe;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonGt;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonLe;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonLt;
-import it.unive.lisa.type.BooleanType;
 
 /**
- * A logical operation on operand(s) of type {@link BooleanType}.
- * 
+ * An {@link Operator} whose effect can be inverted, that is, for which an
+ * opposite operator exists (e.g., a comparison or a logical operator).
+ *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public interface NegatableOperator

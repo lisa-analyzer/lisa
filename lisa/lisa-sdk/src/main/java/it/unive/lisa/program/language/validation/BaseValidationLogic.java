@@ -159,7 +159,7 @@ public class BaseValidationLogic
 		Collection<CFG> entrypoints = program.getEntryPoints();
 		if (!baseline.containsAll(entrypoints)) {
 			Set<CFG> diff = new HashSet<>(entrypoints);
-			diff.retainAll(baseline);
+			diff.removeAll(baseline);
 			throw new ProgramValidationException(format(UNKNOWN_ENTRYPOINTS, diff));
 		}
 

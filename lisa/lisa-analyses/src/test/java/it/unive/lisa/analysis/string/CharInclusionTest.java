@@ -13,20 +13,25 @@ import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.lattices.Satisfiability;
 import it.unive.lisa.program.SyntheticLocation;
 import it.unive.lisa.program.cfg.ProgramPoint;
+import it.unive.lisa.program.type.BoolType;
 import it.unive.lisa.program.type.Int32Type;
 import it.unive.lisa.program.type.StringType;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
+import it.unive.lisa.symbolic.value.PushFromConstraints;
 import it.unive.lisa.symbolic.value.TernaryExpression;
 import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.symbolic.value.Variable;
+import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonEq;
 import it.unive.lisa.symbolic.value.operator.binary.StringCharAt;
 import it.unive.lisa.symbolic.value.operator.binary.StringConcat;
 import it.unive.lisa.symbolic.value.operator.binary.StringContains;
 import it.unive.lisa.symbolic.value.operator.binary.StringEndsWith;
 import it.unive.lisa.symbolic.value.operator.binary.StringEquals;
+import it.unive.lisa.symbolic.value.operator.binary.StringIsPrefixOf;
+import it.unive.lisa.symbolic.value.operator.binary.StringIsSubstringOf;
 import it.unive.lisa.symbolic.value.operator.binary.StringStartsWith;
 import it.unive.lisa.symbolic.value.operator.binary.StringSubstringToEnd;
 import it.unive.lisa.symbolic.value.operator.ternary.StringReplaceAll;
@@ -440,9 +445,9 @@ public class CharInclusionTest {
 	}
 
 	@Test
-	void constraintsOnConcreteStringReturnsStringContainsForEachChar() throws SemanticException {
-		// ci("hi") = CI({h,i},{h,i}) → constraints: "h" StringContains x, "i"
-		// StringContains x
+	void constraintsOnConcreteStringReturnsStringIsSubstringOfForEachChar() throws SemanticException {
+		// ci("hi") = CI({h,i},{h,i}) → constraints in the form constant OP
+		// expression: "h" StringIsSubstringOf x, "i" StringIsSubstringOf x
 		Set<Character> hiChars = chars("hi");
 		ValueEnvironment<CharInclusion.CI> env = domain.makeLattice().putState(VAR_X, ci(hiChars, hiChars));
 		Set<BinaryExpression> cs = domain.constraints(null, env, VAR_X, PP, ORACLE);
@@ -450,7 +455,7 @@ public class CharInclusionTest {
 		// one constraint per certainly-contained char: 'h' and 'i'
 		assertEquals(hiChars.size(), cs.size());
 		for (BinaryExpression c : cs) {
-			assertEquals(StringContains.INSTANCE, c.getOperator());
+			assertEquals(StringIsSubstringOf.INSTANCE, c.getOperator());
 			// left is the char as a string
 			String charStr = ((Constant) c.getLeft()).getValue().toString();
 			assertEquals(1, charStr.length());
@@ -477,5 +482,47 @@ public class CharInclusionTest {
 		Set<BinaryExpression> cs = domain.constraints(null, env, lengthExpr, PP, ORACLE);
 		assertNotNull(cs);
 		assertTrue(cs.size() >= 1);
+	}
+
+	private CharInclusion.CI fromConstraints(
+			BinaryExpression... constraints)
+			throws SemanticException {
+		return domain.evalPushAny(new PushFromConstraints(StringType.INSTANCE, SyntheticLocation.INSTANCE, constraints),
+				PP, ORACLE);
+	}
+
+	private static BinaryExpression constraint(
+			String constant,
+			BinaryOperator operator) {
+		return new BinaryExpression(BoolType.INSTANCE,
+				new Constant(StringType.INSTANCE, constant, SyntheticLocation.INSTANCE), VAR_X, operator,
+				SyntheticLocation.INSTANCE);
+	}
+
+	@Test
+	void constraintsAreInTheExpectedForm() throws SemanticException {
+		// the constant is a substring of x: its characters are certainly
+		// contained in x
+		assertEquals(ci(chars("ab"), null), fromConstraints(constraint("ab", StringIsSubstringOf.INSTANCE)));
+		assertEquals(ci(chars("ab"), null), fromConstraints(constraint("ab", StringIsPrefixOf.INSTANCE)));
+		// x is a substring of the constant: it can only contain its
+		// characters
+		assertEquals(ci(chars(""), chars("abc")), fromConstraints(constraint("abc", StringContains.INSTANCE)));
+		// constraints hold together
+		assertEquals(ci(chars("b"), chars("bc")), fromConstraints(constraint("b", StringIsSubstringOf.INSTANCE),
+				constraint("abc", StringContains.INSTANCE), constraint("bcd", StringStartsWith.INSTANCE)));
+		assertTrue(fromConstraints(constraint("a", StringIsSubstringOf.INSTANCE),
+				constraint("bc", StringContains.INSTANCE)).isBottom());
+		// no constraints, no information
+		assertTrue(fromConstraints().isTop());
+	}
+
+	@Test
+	void constraintsRoundTrip() throws SemanticException {
+		ValueEnvironment<CharInclusion.CI> env = domain.makeLattice().putState(VAR_X, ci(chars("ab"), chars("abc")));
+		Set<BinaryExpression> constraints = domain.constraints(null, env, VAR_X, PP, ORACLE);
+		assertTrue(constraints.stream().allMatch(c -> c.getOperator() == StringIsSubstringOf.INSTANCE
+				&& c.getLeft() instanceof Constant && c.getRight().equals(VAR_X)), constraints.toString());
+		assertEquals(ci(chars("ab"), null), fromConstraints(constraints.toArray(BinaryExpression[]::new)));
 	}
 }

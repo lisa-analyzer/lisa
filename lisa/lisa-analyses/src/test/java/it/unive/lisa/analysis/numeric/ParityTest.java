@@ -8,6 +8,7 @@ import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.events.EventQueue;
+import it.unive.lisa.interprocedural.ScopeId;
 import it.unive.lisa.lattices.ExpressionSet;
 import it.unive.lisa.lattices.Satisfiability;
 import it.unive.lisa.lattices.numeric.ParityLattice;
@@ -153,6 +154,11 @@ public class ParityTest {
 
 		@Override
 		public EventQueue getEventQueue() {
+			return null;
+		}
+
+		@Override
+		public ScopeId<?> getContext() {
 			return null;
 		}
 

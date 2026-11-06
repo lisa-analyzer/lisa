@@ -36,9 +36,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 /**
- * A {@link NonRelationalTypeDomain} holding a set of {@link Type}s,
- * representing the inferred runtime types of an {@link Expression}.
- * 
+ * A {@link NonRelationalTypeDomain} holding a set of {@link Type}s
+ * ({@link TypeSet}), representing the inferred runtime types of an
+ * {@link Expression}. It computes the actual set of concrete runtime types that
+ * an expression can have, propagating and intersecting type information through
+ * casts, type checks, heap accesses and memory pointers.
+ *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public class InferredTypes
@@ -267,8 +270,10 @@ public class InferredTypes
 		TypeSet starting = environment.getState(id);
 		if (eval.isBottom() || starting.isBottom())
 			return environment.bottom();
+		// the top type set has no elements: it stands for all types
+		Set<Type> current = starting.isTop() ? types.getTypes() : starting.elements;
 		// we keep only the ones that can be casted
-		Set<Type> update = difference(starting.elements, okTypes);
+		Set<Type> update = difference(current, okTypes);
 		if (update.isEmpty())
 			return environment.bottom();
 		else
@@ -320,17 +325,19 @@ public class InferredTypes
 		if (eval.isBottom() || starting.isBottom())
 			return environment.bottom();
 		Set<Type> update = null;
+		// the top type set has no elements: it stands for all types
+		Set<Type> current = starting.isTop() ? types.getTypes() : starting.elements;
 
 		if (operator == ComparisonEq.INSTANCE)
 			// we keep only the types allowed by the type tokens
 			// that were already there
-			update = intersection(starting.elements, exactTypes);
+			update = intersection(current, exactTypes);
 		else if (operator == ComparisonNe.INSTANCE)
 			// we keep only the types that are not allowed by the type tokens
-			update = difference(starting.elements, exactTypes);
+			update = difference(current, exactTypes);
 		else if (operator == TypeCheck.INSTANCE)
 			// we keep only the ones that can be casted
-			update = types.cast(starting.elements, tokens);
+			update = types.cast(current, tokens);
 
 		if (update == null)
 			return environment;

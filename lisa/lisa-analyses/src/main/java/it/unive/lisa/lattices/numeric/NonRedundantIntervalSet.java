@@ -13,8 +13,9 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 /**
- * A {@link NonRedundantSetLattice} that contains a set of {@link IntInterval}s.
- * 
+ * A {@link NonRedundantSetLattice} that contains a set of {@link IntInterval}s,
+ * used by {@link it.unive.lisa.analysis.numeric.NonRedundantIntervals}.
+ *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public class NonRedundantIntervalSet

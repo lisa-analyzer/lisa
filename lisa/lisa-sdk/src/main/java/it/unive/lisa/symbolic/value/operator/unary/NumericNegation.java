@@ -15,8 +15,10 @@ import java.util.stream.Collectors;
  * (i.e., multiplication by {@code -1}) of that value.<br>
  * <br>
  * Argument expression type: {@link NumericType}<br>
- * Computed expression type: {@link NumericType} (same of the argument, but
- * signed)
+ * Computed expression type: {@link NumericType} (same of the argument; note
+ * that type inference does not track the sign change that negation implies, so
+ * the result may report an unsigned type even though the negated value is
+ * conceptually signed)
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */

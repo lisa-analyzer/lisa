@@ -181,7 +181,13 @@ public final class BitExternalSet<T>
 		if (pos >> 6 >= localbits.length)
 			return false;
 
-		localbits[pos >> 6] &= ~(1L << (pos % 64));
+		long mask = 1L << (pos % 64);
+		if ((localbits[pos >> 6] & mask) == 0L)
+			// the element is registered in the cache, but it is not part of
+			// this particular set: nothing to remove
+			return false;
+
+		localbits[pos >> 6] &= ~mask;
 		removeTrailingZeros();
 		return true;
 	}
