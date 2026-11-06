@@ -76,6 +76,23 @@ public class Unrolling {
 	private final Map<String, List<Term>> guards = new LinkedHashMap<>();
 
 	/**
+	 * The length of the SMT-LIB text of the terms beyond which they are
+	 * defined as constants when shared (see {@link SymbolTable#share(Term)}).
+	 */
+	private static final int SHARE_THRESHOLD = 2000;
+
+	/**
+	 * The constants defined as shared terms, by their text.
+	 */
+	private final Map<String, Term> shared = new LinkedHashMap<>();
+
+	/**
+	 * The relations of the transitions encoded by
+	 * {@link #transition(int, EdgeTransition)}, by key.
+	 */
+	private final Map<String, Term> relations = new LinkedHashMap<>();
+
+	/**
 	 * The reasons why the encoding with each key is not exact, regardless of
 	 * the model (see {@link #getImprecisions(String, SmtSolver)})
 	 */
@@ -310,6 +327,24 @@ public class Unrolling {
 	 * Yields the symbol of the uninterpreted function with the given name and
 	 * signature, declaring it in the solver the first time.
 	 */
+	/**
+	 * Yields the given term, or a constant defined as the given term if its
+	 * text is large, so that encodings using it more than once do not repeat
+	 * it (see {@link SymbolTable#share(Term)}).
+	 */
+	private Term share(
+			Term term) {
+		String text = term.toSmtLib();
+		if (text.length() <= SHARE_THRESHOLD)
+			return term;
+		Term known = shared.get(text);
+		if (known == null) {
+			known = solver.define("share!" + shared.size(), term);
+			shared.put(text, known);
+		}
+		return known;
+	}
+
 	private String function(
 			String name,
 			List<Sort> arguments,
@@ -478,6 +513,12 @@ public class Unrolling {
 				sorts.add(arg.getSort());
 			return Term.app(Unrolling.this.function(function, sorts, result), result,
 					arguments.toArray(Term[]::new));
+		}
+
+		@Override
+		public Term share(
+				Term term) {
+			return Unrolling.this.share(term);
 		}
 
 		@Override
@@ -772,9 +813,13 @@ public class Unrolling {
 		if (!model.getVocabulary().contains(HeapModel.ALLOC))
 			return List.of();
 		Term counter = var(HeapModel.ALLOC, 0);
+		// only the references that might be read matter
+		Set<Identifier> live = new LinkedHashSet<>();
+		for (ModelLocation init : model.getInitialLocations())
+			live.addAll(model.getLive(init));
 		List<Term> result = new ArrayList<>();
 		for (Identifier id : model.getVocabulary()) {
-			if (HeapModel.isHeapState(id))
+			if (HeapModel.isHeapState(id) || !live.contains(id))
 				continue;
 			Term value = var(id, 0);
 			if (value.getSort().equals(ValueSort.SORT))
@@ -1001,7 +1046,7 @@ public class Unrolling {
 		for (SymbolicCase c : edge.getStore().getCases()) {
 			int from = symbols.guards.size();
 			int req = symbols.requirements.size();
-			Term ct = required(encodeCase(c, step, encoder), symbols, req);
+			Term ct = required(encodeCase(c, step, encoder, edge.getDestination()), symbols, req);
 			cases.add(strictly(ct, symbols, from));
 			precise.add(preciseCase(ct, symbols, from));
 			guarded.addAll(guardedReasons(ct, symbols, from));
@@ -1010,20 +1055,47 @@ public class Unrolling {
 		guards.put(key, List.of(Term.or(precise.toArray(Term[]::new))));
 		record(key, symbols, guarded);
 		inputs.put(key, symbols.used);
-		return Term.and(
+		Term relation = Term.and(
 				at(step, edge.getSource()),
 				Term.eq(pc(step + 1), Term.integer(indexOf(edge.getDestination()))),
 				Term.or(cases.toArray(Term[]::new)));
+		relations.put(key, relation);
+		return relation;
+	}
+
+	/**
+	 * Yields {@code true} if the transition encoded with the given key (by
+	 * {@link #transition(int, EdgeTransition)}) holds in the current model of
+	 * the given solver, that must have just answered
+	 * {@link it.unive.lisa.triage.smt.SmtResult#SAT}: this tells which of the
+	 * transitions between the same locations has been taken.
+	 *
+	 * @param key    the key, as returned by
+	 *                   {@link #edgeKey(int, EdgeTransition)}
+	 * @param solver the solver
+	 *
+	 * @return whether or not the transition holds
+	 */
+	public boolean holds(
+			String key,
+			SmtSolver solver) {
+		Term relation = relations.get(key);
+		return relation != null && "true".equals(solver.getValues(List.of(relation)).get(relation));
 	}
 
 	private Term encodeCase(
 			SymbolicCase c,
 			int step,
-			ExpressionEncoder encoder)
+			ExpressionEncoder encoder,
+			ModelLocation destination)
 			throws SemanticException {
 		List<Term> conj = new ArrayList<>();
 		for (SymbolicExpression cond : c.getPathCondition())
 			conj.add(encoder.encodeCondition(cond));
+		// identifiers that are not live at the destination are left
+		// unconstrained, unless they are updated (the values assigned to them
+		// might use inputs, that are still produced)
+		Set<Identifier> live = model.getLive(destination);
 		for (Identifier id : model.getVocabulary()) {
 			SymbolicExpression value = c.getUpdates().get(id);
 			Term post = var(id, step + 1);
@@ -1035,7 +1107,7 @@ public class Unrolling {
 				// reading the unconstrained contents is not precise (as done
 				// for the initial states)
 				conj.add(Term.eq(post, nothingWritten(id)));
-			else if (!c.isUnconstrained(id)) {
+			else if (!c.isUnconstrained(id) && live.contains(id)) {
 				// the identifier might have been renamed by scoping
 				Identifier pre = c.preIdentifier(id);
 				conj.add(Term.eq(post, pre.equals(id) ? var(id, step) : encoder.encodeAs(pre, post.getSort())));
@@ -1147,7 +1219,8 @@ public class Unrolling {
 		String key = caseKey(step, edge, index);
 		StepSymbols symbols = new StepSymbols(step, key.substring(key.indexOf('#')));
 		ExpressionEncoder encoder = encoder(symbols);
-		Term c = strictly(required(encodeCase(cases(edge).get(index), step, encoder), symbols, 0), symbols, 0);
+		Term c = strictly(required(encodeCase(cases(edge).get(index), step, encoder, edge.getDestination()), symbols,
+				0), symbols, 0);
 		exactness.put(key, symbols.exact);
 		guards.put(key, symbols.guards);
 		record(key, symbols, guardedReasons(Term.TRUE, symbols, 0));

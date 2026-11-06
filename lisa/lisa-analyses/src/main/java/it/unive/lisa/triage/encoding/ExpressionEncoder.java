@@ -471,8 +471,7 @@ public class ExpressionEncoder
 
 	private static int bitsOf(
 			SymbolicExpression operand) {
-		if (operand != null && operand.getStaticType().isNumericType()
-				&& operand.getStaticType().asNumericType().isIntegral()
+		if (operand != null && SortPolicy.isIntegral(operand.getStaticType())
 				&& operand.getStaticType().asNumericType().getNBits() <= 32)
 			return 32;
 		return 64;
@@ -778,7 +777,7 @@ public class ExpressionEncoder
 			Term arg,
 			Object... params)
 			throws SemanticException {
-		return encodeUnary(expression, arg);
+		return encodeUnary(expression, symbols.share(arg));
 	}
 
 	/**
@@ -826,7 +825,7 @@ public class ExpressionEncoder
 			Term right,
 			Object... params)
 			throws SemanticException {
-		return encodeBinary(expression, left, right);
+		return encodeBinary(expression, symbols.share(left), symbols.share(right));
 	}
 
 	/**
@@ -1009,7 +1008,7 @@ public class ExpressionEncoder
 			Term right,
 			Object... params)
 			throws SemanticException {
-		return encodeTernary(expression, left, middle, right);
+		return encodeTernary(expression, symbols.share(left), symbols.share(middle), symbols.share(right));
 	}
 
 	/**
@@ -1425,12 +1424,13 @@ public class ExpressionEncoder
 	}
 
 	/**
-	 * Yields the number of bits of the given type, if it is an integral type
-	 * whose size is known, or 0 otherwise.
+	 * Yields the number of bits of the given type, if its values are integers
+	 * (see {@link SortPolicy#isIntegral(Type)}) and its size is known, or 0
+	 * otherwise.
 	 */
 	private static int integralBits(
 			Type type) {
-		if (!type.isNumericType() || !type.asNumericType().isIntegral())
+		if (!SortPolicy.isIntegral(type))
 			return 0;
 		int bits = type.asNumericType().getNBits();
 		return bits == 8 || bits == 16 || bits == 32 || bits == 64 ? bits : 0;

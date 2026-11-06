@@ -90,6 +90,35 @@ public final class SymbolicStore {
 	}
 
 	/**
+	 * Yields the sequential composition of this store with the given one: each
+	 * case of this store composed with each case of the given one (see
+	 * {@link SymbolicCase#then(SymbolicCase, FreshValueFactory, long)}).
+	 * Yields {@code null} if the composition has more cases than the bound of
+	 * this store, or if some composition of cases is too large.
+	 *
+	 * @param next  the store following this one
+	 * @param bound the maximum size of the conditions and values of the
+	 *                  composed cases
+	 *
+	 * @return the composition, or {@code null}
+	 */
+	public SymbolicStore then(
+			SymbolicStore next,
+			long bound) {
+		if (cases.size() * next.cases.size() > maxCases)
+			return null;
+		Set<SymbolicCase> result = new LinkedHashSet<>();
+		for (SymbolicCase first : cases)
+			for (SymbolicCase second : next.cases) {
+				SymbolicCase c = first.then(second, factory, bound);
+				if (c == null)
+					return null;
+				result.add(c);
+			}
+		return new SymbolicStore(Collections.unmodifiableSet(result), factory, maxCases);
+	}
+
+	/**
 	 * Yields the store where all values are lost.
 	 *
 	 * @return the store

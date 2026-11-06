@@ -24,7 +24,9 @@ import it.unive.lisa.program.type.Int32Type;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonEq;
+import it.unive.lisa.symbolic.value.operator.binary.ComparisonGt;
 import it.unive.lisa.triage.bmc.Unrolling;
 import it.unive.lisa.triage.model.AlarmModel;
 import it.unive.lisa.triage.model.AlarmModelBuilder;
@@ -35,6 +37,7 @@ import it.unive.lisa.triage.smt.SmtLibProcessSolver;
 import it.unive.lisa.triage.smt.SmtResult;
 import it.unive.lisa.triage.smt.SmtSolver;
 import it.unive.lisa.triage.smt.Term;
+import it.unive.lisa.type.Untyped;
 import java.nio.file.Files;
 import java.util.List;
 import org.junit.jupiter.api.BeforeAll;
@@ -95,7 +98,13 @@ public class TwoStateQueryTest {
 		Statement ret = cfg.getNodes().stream().filter(n -> n.toString().contains("return")).findFirst().get();
 		SemanticTool t = tool;
 		AnalyzedCFG result = (AnalyzedCFG) t.getResultOf(cfg).iterator().next();
-		return AlarmModelBuilder.build(t, result, ret, Violation.reach(), SymbolicStore.DEFAULT_MAX_CASES);
+		// the property reads x at the end, so that it is live after the guard
+		Variable x = new Variable(Untyped.INSTANCE, "x", SyntheticLocation.INSTANCE);
+		BinaryExpression positive = new BinaryExpression(BoolType.INSTANCE, x,
+				new Constant(Int32Type.INSTANCE, 0, SyntheticLocation.INSTANCE), ComparisonGt.INSTANCE,
+				SyntheticLocation.INSTANCE);
+		return AlarmModelBuilder.build(t, result, ret, Violation.condition(ret, positive),
+				SymbolicStore.DEFAULT_MAX_CASES);
 	}
 
 	private static Identifier find(

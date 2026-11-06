@@ -4,6 +4,7 @@ import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.triage.model.HeapType;
 import it.unive.lisa.triage.smt.Sort;
+import it.unive.lisa.type.CharacterType;
 import it.unive.lisa.type.Type;
 import java.util.Collection;
 import java.util.Map;
@@ -104,7 +105,7 @@ public class SortPolicy {
 			Type type) {
 		if (type instanceof HeapType)
 			return ((HeapType) type).getSort();
-		if (type.isNumericType() && type.asNumericType().isIntegral())
+		if (isIntegral(type))
 			return Sort.INT;
 		if (floats && type.isNumericType() && type.asNumericType().is32Bits())
 			return Sort.FLOAT32;
@@ -218,7 +219,21 @@ public class SortPolicy {
 	 */
 	public static boolean isFloat(
 			Type type) {
-		return type.isNumericType() && !type.asNumericType().isIntegral();
+		return type.isNumericType() && !isIntegral(type);
+	}
+
+	/**
+	 * Yields {@code true} if the values of the given type are integers: the
+	 * ones of integral numeric types, and characters (whose types might be
+	 * numeric types that are not integral ones).
+	 *
+	 * @param type the type
+	 *
+	 * @return whether or not the values of the type are integers
+	 */
+	public static boolean isIntegral(
+			Type type) {
+		return type.isNumericType() && (type.asNumericType().isIntegral() || type instanceof CharacterType);
 	}
 
 	/**
@@ -242,6 +257,6 @@ public class SortPolicy {
 
 	private static boolean mayBeOpaque(
 			Type type) {
-		return type.isUntyped() || (type.isNumericType() && !type.asNumericType().isIntegral());
+		return type.isUntyped() || isFloat(type);
 	}
 }

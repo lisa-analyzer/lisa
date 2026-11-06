@@ -908,6 +908,118 @@ public final class SymbolicCase {
 	}
 
 	/**
+	 * Yields the sequential composition of this case with the given one, that
+	 * is, a case describing a transition of this case followed by a transition
+	 * of the given one: its path condition holds if this case's holds and the
+	 * one of the given case holds after it, and identifiers have the values
+	 * the given case gives them, evaluated after this case. Yields
+	 * {@code null} if some condition or value of the composition is larger
+	 * than the given bound (see {@link #isTooLarge(SymbolicExpression, long)}),
+	 * since tracking it would be expensive (it would be summarized,
+	 * losing precision, when assigned).
+	 *
+	 * @param next    the case following this one
+	 * @param factory the factory of fresh values (for the identifiers that are
+	 *                    unconstrained after this case, but read by the next
+	 *                    one)
+	 * @param bound   the maximum size of the conditions and values of the
+	 *                    composition
+	 *
+	 * @return the composition, or {@code null}
+	 */
+	public SymbolicCase then(
+			SymbolicCase next,
+			FreshValueFactory factory,
+			long bound) {
+		// the conditions and values of the next case are over the values
+		// before it, that is, after this case (identifiers unconstrained
+		// after this case are read as the same unknown value everywhere)
+		Map<Identifier, SymbolicExpression> reads = new LinkedHashMap<>();
+		List<SymbolicExpression> pc = new ArrayList<>(pathCondition);
+		for (SymbolicExpression cond : next.pathCondition) {
+			SymbolicExpression c = substituteOnce(cond, factory, reads);
+			if (isTooLarge(c, bound))
+				return null;
+			pc.add(c);
+		}
+		Map<Identifier, SymbolicExpression> values = new LinkedHashMap<>();
+		for (Map.Entry<Identifier, SymbolicExpression> u : next.updates.entrySet()) {
+			SymbolicExpression v = substituteOnce(u.getValue(), factory, reads);
+			if (isTooLarge(v, bound))
+				return null;
+			values.put(u.getKey(), v);
+		}
+
+		// the identifiers that the next case does not update are renamed by
+		// its scopings, and might be unconstrained after it
+		SymbolicCase result = this;
+		for (Scoping scoping : next.scopings)
+			result = result.scope(scoping.token, scoping.push);
+		if (next.havocAll)
+			result = result.withHavocAll();
+		else {
+			if (!next.forgotten.isEmpty())
+				result = result.forget(next.forgotten);
+			for (Predicate<Identifier> test : next.forgottenIf)
+				result = result.forgetIf(test);
+			if (next.heapHavoc)
+				result = result.withHeapHavoc(next.preservedHeap);
+		}
+
+		Map<Identifier, SymbolicExpression> upd = new LinkedHashMap<>(result.updates);
+		upd.putAll(values);
+		Set<Identifier> forg = result.forgotten;
+		if (!Collections.disjoint(forg, values.keySet())) {
+			forg = new LinkedHashSet<>(forg);
+			forg.removeAll(values.keySet());
+			forg = Collections.unmodifiableSet(forg);
+		}
+		return new SymbolicCase(Collections.unmodifiableList(pc), Collections.unmodifiableMap(upd), forg,
+				result.forgottenIf, result.heapHavoc, result.preservedHeap, result.havocAll, result.scopings);
+	}
+
+	/**
+	 * Rewrites the given expression of a case following this one (thus, over
+	 * identifiers and fresh values) into an expression over the values before
+	 * this case, as {@link #substitute(SymbolicExpression, FreshValueFactory,
+	 * ProgramPoint)} does, rewriting each identifier once (so that the unknown
+	 * values replacing unconstrained identifiers are shared).
+	 */
+	private SymbolicExpression substituteOnce(
+			SymbolicExpression expression,
+			FreshValueFactory factory,
+			Map<Identifier, SymbolicExpression> reads) {
+		if (expression instanceof FreshValue)
+			return expression;
+		if (expression instanceof Identifier) {
+			Identifier id = (Identifier) expression;
+			SymbolicExpression known = reads.get(id);
+			if (known == null) {
+				known = substitute(id, factory, null);
+				reads.put(id, known);
+			}
+			return known;
+		}
+		if (expression instanceof UnaryExpression) {
+			UnaryExpression u = (UnaryExpression) expression;
+			return new UnaryExpression(u.getStaticType(), substituteOnce(u.getExpression(), factory, reads),
+					u.getOperator(), u.getCodeLocation());
+		}
+		if (expression instanceof BinaryExpression) {
+			BinaryExpression b = (BinaryExpression) expression;
+			return fold(new BinaryExpression(b.getStaticType(), substituteOnce(b.getLeft(), factory, reads),
+					substituteOnce(b.getRight(), factory, reads), b.getOperator(), b.getCodeLocation()));
+		}
+		if (expression instanceof TernaryExpression) {
+			TernaryExpression t = (TernaryExpression) expression;
+			return new TernaryExpression(t.getStaticType(), substituteOnce(t.getLeft(), factory, reads),
+					substituteOnce(t.getMiddle(), factory, reads), substituteOnce(t.getRight(), factory, reads),
+					t.getOperator(), t.getCodeLocation());
+		}
+		return substitute(expression, factory, null);
+	}
+
+	/**
 	 * Merges two cases into a single one that over-approximates both. The
 	 * resulting path condition contains only the conjuncts common to both
 	 * cases, plus an unknown condition (a fresh {@link SummaryValue}) if some

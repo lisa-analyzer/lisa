@@ -65,6 +65,8 @@ public class TransitionExtractor<A extends AbstractLattice<A>, D extends Abstrac
 
 	private final ReplayDomain<A, D> domain;
 
+	private final FreshValueFactory factory;
+
 	private final ReplayInterprocedural<A, D> replay;
 
 	private final TransitionExtractor<A, D> parent;
@@ -179,6 +181,7 @@ public class TransitionExtractor<A extends AbstractLattice<A>, D extends Abstrac
 		// we use an analysis without events, as the replay is not part of
 		// the fixpoint computation
 		this.analysis = new Analysis(tool.getConfiguration().analysis, tool.getConfiguration().shouldSmashError);
+		this.factory = factory;
 		this.domain = new ReplayDomain<>(analysis.domain, factory, maxCases);
 		this.replay = new ReplayInterprocedural<>(tool, frame, domain, expanded, budget, cache);
 		this.resumeNode = resumeNode;
@@ -257,6 +260,21 @@ public class TransitionExtractor<A extends AbstractLattice<A>, D extends Abstrac
 	 *                               node
 	 */
 	public NodeTransitions extract(
+			ModelLocation location,
+			boolean expansion)
+			throws SemanticException {
+		// an unknown value produced by the node is the same value wherever it
+		// is used (e.g., both in the condition and in the result of a
+		// short-circuiting operator)
+		factory.startRun();
+		try {
+			return extractRun(location, expansion);
+		} finally {
+			factory.endRun();
+		}
+	}
+
+	private NodeTransitions extractRun(
 			ModelLocation location,
 			boolean expansion)
 			throws SemanticException {

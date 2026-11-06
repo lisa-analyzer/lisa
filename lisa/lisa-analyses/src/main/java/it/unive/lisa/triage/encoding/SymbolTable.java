@@ -156,6 +156,22 @@ public interface SymbolTable {
 	}
 
 	/**
+	 * Yields a term equivalent to the given one, possibly a shorter one (e.g.,
+	 * a constant defined as the given term): encodings that use an operand more
+	 * than once (e.g., in the branches of a conditional term) use this to avoid
+	 * their size growing exponentially with the nesting of the expressions. By
+	 * default, this is the given term itself.
+	 *
+	 * @param term the term
+	 *
+	 * @return the equivalent term
+	 */
+	default Term share(
+			Term term) {
+		return term;
+	}
+
+	/**
 	 * Yields the application of an unspecified, deterministic function to the
 	 * given arguments, standing for the value of the given expression, that is
 	 * never encoded precisely (e.g., the result of an operator the encoder does

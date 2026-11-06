@@ -6,7 +6,10 @@ import it.unive.lisa.symbolic.value.PushAny;
 import it.unive.lisa.triage.inputs.InputSource;
 import it.unive.lisa.triage.inputs.InputSourceResolver;
 import it.unive.lisa.type.Type;
+import java.util.ArrayDeque;
 import java.util.Collections;
+import java.util.Deque;
+import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -26,6 +29,13 @@ public class FreshValueFactory {
 	private final Map<String, FreshValue> values;
 
 	private long next;
+
+	/**
+	 * The fresh values produced during the current runs (see
+	 * {@link #startRun()}), by the unknown value they replace, from the
+	 * innermost run (runs might be nested).
+	 */
+	private final Deque<Map<PushAny, FreshValue>> runs = new ArrayDeque<>();
 
 	/**
 	 * Builds the factory.
@@ -81,6 +91,39 @@ public class FreshValueFactory {
 	 * @return the fresh value
 	 */
 	public synchronized FreshValue fresh(
+			PushAny value,
+			ProgramPoint pp) {
+		Map<PushAny, FreshValue> run = runs.peek();
+		if (run == null)
+			return create(value, pp);
+		FreshValue known = run.get(value);
+		if (known == null) {
+			known = create(value, pp);
+			run.put(value, known);
+		}
+		return known;
+	}
+
+	/**
+	 * Starts a run, that is, the replay of a node: until {@link #endRun()},
+	 * the same unknown value (the same instance of {@link PushAny}, produced by
+	 * a single evaluation) is always replaced by the same fresh value
+	 * ({@link #fresh(PushAny, ProgramPoint)}), even if the replay uses it more
+	 * than once (e.g., in the condition and in the result of a short-circuiting
+	 * operator).
+	 */
+	public synchronized void startRun() {
+		runs.push(new IdentityHashMap<>());
+	}
+
+	/**
+	 * Ends the current run (see {@link #startRun()}).
+	 */
+	public synchronized void endRun() {
+		runs.pop();
+	}
+
+	private FreshValue create(
 			PushAny value,
 			ProgramPoint pp) {
 		if (value instanceof SummaryMarker)

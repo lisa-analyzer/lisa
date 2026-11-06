@@ -9,6 +9,7 @@ import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.TernaryExpression;
 import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.symbolic.value.operator.binary.LogicalAnd;
+import it.unive.lisa.triage.encoding.SortPolicy;
 import it.unive.lisa.triage.encoding.ValueSort;
 import it.unive.lisa.triage.model.FreshValue;
 import it.unive.lisa.triage.model.SymbolicCase;
@@ -188,7 +189,7 @@ public final class Projection {
 			TypeSystem types,
 			Sort sort) {
 		for (Type t : types.getTypes())
-			if (t.isNumericType() && !t.asNumericType().isIntegral()
+			if (SortPolicy.isFloat(t)
 					&& (sort.equals(Sort.FLOAT32) ? t.asNumericType().is32Bits() : t.asNumericType().is64Bits()))
 				return t;
 		return null;

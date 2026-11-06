@@ -265,6 +265,64 @@ public class AlarmModelBuilderTest {
 	}
 
 	@Test
+	public void largeBlocks() throws SemanticException {
+		CFG main = cfg("main");
+		Statement ret = node(main, "return");
+		AlarmModel model = build(main, ret, Violation.reach());
+		AlarmModel blocks = model.withLargeBlocks();
+		// only the initial and the bad locations are left, connected by one
+		// transition for each branch
+		ModelLocation init = at(model, node(main, "y = +(x, 1)"));
+		assertEquals(Set.of(init, at(model, ret)), blocks.getLocations());
+		assertEquals(model.getInitialLocations(), blocks.getInitialLocations());
+		assertEquals(model.getBadLocation(), blocks.getBadLocation());
+		List<EdgeTransition> edges = blocks.getTransitions(init);
+		assertEquals(2, edges.size(), edges.toString());
+		for (EdgeTransition e : edges) {
+			assertEquals(at(model, ret), e.getDestination());
+			assertEquals(3, e.getComponents().size());
+			assertEquals(at(model, node(main, ">(y, 10)")), e.getIntermediateLocations().get(0));
+			assertEquals(1, e.getStore().getCases().size());
+			SymbolicCase c = e.getStore().getCases().iterator().next();
+			// the condition of the branch is expressed over the parameter
+			assertTrue(c.getPathCondition().stream().anyMatch(cond -> cond.toString().contains("x")),
+					c.toString());
+			assertFalse(c.getPathCondition().stream().anyMatch(cond -> cond.toString().contains("y")),
+					c.toString());
+		}
+		// the transitions of the removed locations are still known
+		assertNotNull(blocks.getNodeTransitions(at(model, node(main, ">(y, 10)"))));
+		// the seeds of the removed locations are not
+		assertNull(blocks.getSeeds(at(model, node(main, ">(y, 10)"))));
+	}
+
+	@Test
+	public void liveness() throws SemanticException {
+		CFG main = cfg("main");
+		Statement ret = node(main, "return");
+		AlarmModel model = build(main, ret, Violation.reach());
+		Identifier x = find(model, "x");
+		Identifier y = find(model, "y");
+		// the guard reads y, computed from x
+		assertTrue(model.getLive(at(model, node(main, "y = +(x, 1)"))).contains(x));
+		assertTrue(model.getLive(at(model, node(main, ">(y, 10)"))).contains(y));
+		assertFalse(model.getLive(at(model, node(main, ">(y, 10)"))).contains(x));
+		// reaching the return reads nothing
+		assertTrue(model.getLive(at(model, ret)).isEmpty());
+		assertTrue(model.getLive(at(model, node(main, "y = 0"))).isEmpty());
+
+		// a condition on y at the return makes it live in the branches
+		Variable v = new Variable(Untyped.INSTANCE, "y", SyntheticLocation.INSTANCE);
+		BinaryExpression big = new BinaryExpression(BoolType.INSTANCE, v,
+				new Constant(Int32Type.INSTANCE, 10, SyntheticLocation.INSTANCE), ComparisonGt.INSTANCE,
+				SyntheticLocation.INSTANCE);
+		model = build(main, ret, Violation.condition(ret, big));
+		assertEquals(Set.of(y), model.getLive(at(model, ret)));
+		assertTrue(model.getLive(at(model, node(main, "y = *(y, 2)"))).contains(y));
+		assertFalse(model.getLive(at(model, node(main, "y = 0"))).contains(y));
+	}
+
+	@Test
 	public void conditionsDecidedByTheAnalysisAreSeeds() throws SemanticException {
 		CFG main = cfg("main");
 		AlarmModel model = build(main, node(main, "return"), Violation.reach());

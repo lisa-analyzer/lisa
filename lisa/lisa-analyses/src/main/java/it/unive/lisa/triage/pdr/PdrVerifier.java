@@ -21,6 +21,7 @@ import it.unive.lisa.triage.inputs.InputSource;
 import it.unive.lisa.triage.inputs.ReproducingInputs;
 import it.unive.lisa.triage.model.AlarmModel;
 import it.unive.lisa.triage.model.AlarmModelBuilder;
+import it.unive.lisa.triage.model.EdgeTransition;
 import it.unive.lisa.triage.model.Frame;
 import it.unive.lisa.triage.model.InputValue;
 import it.unive.lisa.triage.model.ModelLocation;
@@ -32,6 +33,7 @@ import it.unive.lisa.triage.smt.SmtLibProcessSolver;
 import it.unive.lisa.triage.smt.SmtSolver;
 import it.unive.lisa.triage.smt.SmtSolverUnavailableException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -176,6 +178,8 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 
 	private int maxChains = DEFAULT_MAX_CHAINS;
 
+	private boolean largeBlocks = true;
+
 	/**
 	 * The default maximum number of chains of calls tried when a violation in a
 	 * callee is neither confirmed nor refuted.
@@ -294,6 +298,21 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 	public PdrVerifier<A, D> withMaxChains(
 			int maxChains) {
 		this.maxChains = maxChains;
+		return this;
+	}
+
+	/**
+	 * Sets whether or not sequences of transitions of the models are composed
+	 * into single ones before searching them (see
+	 * {@link AlarmModel#withLargeBlocks()}; default: {@code true}).
+	 *
+	 * @param largeBlocks whether or not to compose transitions
+	 *
+	 * @return this verifier
+	 */
+	public PdrVerifier<A, D> withLargeBlocks(
+			boolean largeBlocks) {
+		this.largeBlocks = largeBlocks;
 		return this;
 	}
 
@@ -536,7 +555,10 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 			inexact = false;
 			callTrace = null;
 			statistics = Map.of();
-			VerificationResult res = search(model, false);
+			// the calls to expand are found on the original model, through
+			// the intermediate locations of the traces
+			AlarmModel searched = largeBlocks ? model.withLargeBlocks() : model;
+			VerificationResult res = search(searched, false);
 			List<ModelLocation> trace = callTrace;
 			queries += statistics.getOrDefault("queries", 0);
 			Map<String, Integer> last = statistics;
@@ -546,7 +568,7 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 				// precisely: since the strict encoding under-approximates the
 				// executions, only its counterexamples are meaningful
 				statistics = Map.of();
-				strict = search(model, true);
+				strict = search(searched, true);
 				queries += statistics.getOrDefault("queries", 0);
 			}
 			if (!last.isEmpty() || queries > 0) {
@@ -708,12 +730,22 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 			// correspond to a step
 			if (trace.isEmpty() || !trace.get(trace.size() - 1).equals(o.getLocation()))
 				trace.add(o.getLocation());
-			// inputs are produced in the context of the frame of the
-			// transition producing them
-			ScopeId<?> context = (o.getEdge() == null ? o.getLocation() : o.getEdge().getSource()).getFrame()
-					.getResult().getId();
-			for (Map.Entry<InputValue, String> input : o.getInputs().entrySet())
-				inputs.add(input.getKey().getSource(), input.getValue(), context);
+			EdgeTransition edge = o.getEdge();
+			if (edge == null) {
+				ScopeId<?> context = o.getLocation().getFrame().getResult().getId();
+				for (Map.Entry<InputValue, String> input : o.getInputs().entrySet())
+					inputs.add(input.getKey().getSource(), input.getValue(), context);
+				continue;
+			}
+			// the locations a composed transition passes through
+			trace.addAll(edge.getIntermediateLocations());
+			// inputs are produced in the order of the transitions producing
+			// them, in the context of their frames
+			List<Map.Entry<InputValue, String>> produced = new ArrayList<>(o.getInputs().entrySet());
+			produced.sort(Comparator.comparingInt(input -> edge.positionOf(input.getKey())));
+			for (Map.Entry<InputValue, String> input : produced)
+				inputs.add(input.getKey().getSource(), input.getValue(),
+						edge.componentOf(input.getKey()).getSource().getFrame().getResult().getId());
 		}
 
 		String path = COUNTEREXAMPLE_PREFIX + (trace.size() - 1) + " steps through " + trace;

@@ -9,7 +9,6 @@ import it.unive.lisa.checks.verification.IndividualWarningVerifier;
 import it.unive.lisa.checks.verification.VerificationOutcome;
 import it.unive.lisa.checks.verification.VerificationResult;
 import it.unive.lisa.checks.verification.Violation;
-import it.unive.lisa.interprocedural.ScopeId;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.triage.encoding.ExpressionEncoderFactory;
@@ -30,6 +29,7 @@ import it.unive.lisa.triage.smt.SmtSolver;
 import it.unive.lisa.triage.smt.SmtSolverUnavailableException;
 import it.unive.lisa.triage.smt.Term;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -103,6 +103,8 @@ public class BoundedModelChecker<A extends AbstractLattice<A>, D extends Abstrac
 
 	private int maxRounds = DEFAULT_MAX_ROUNDS;
 
+	private boolean largeBlocks = true;
+
 	private int maxLocations = AlarmModelBuilder.DEFAULT_MAX_LOCATIONS;
 
 	private ExpressionEncoderFactory encoders = ExpressionEncoderFactory.DEFAULT;
@@ -137,6 +139,23 @@ public class BoundedModelChecker<A extends AbstractLattice<A>, D extends Abstrac
 		this.bound = bound;
 		this.solvers = solvers;
 		this.maxCases = maxCases;
+	}
+
+	/**
+	 * Sets whether or not sequences of transitions of the models are composed
+	 * into single ones before searching them (see
+	 * {@link AlarmModel#withLargeBlocks()}; default: {@code true}). With
+	 * composed transitions, the bound limits the number of composed
+	 * transitions.
+	 *
+	 * @param largeBlocks whether or not to compose transitions
+	 *
+	 * @return this verifier
+	 */
+	public BoundedModelChecker<A, D> withLargeBlocks(
+			boolean largeBlocks) {
+		this.largeBlocks = largeBlocks;
+		return this;
 	}
 
 	/**
@@ -213,12 +232,15 @@ public class BoundedModelChecker<A extends AbstractLattice<A>, D extends Abstrac
 
 			inexact = false;
 			callTrace = null;
-			VerificationResult res = search(model, false);
+			// the calls to expand are found on the original model, through
+			// the intermediate locations of the traces
+			AlarmModel searched = largeBlocks ? model.withLargeBlocks() : model;
+			VerificationResult res = search(searched, false);
 			List<ModelLocation> trace = callTrace;
 			if (inexact) {
 				// look for a counterexample where all values are computed
 				// precisely
-				VerificationResult strict = search(model, true);
+				VerificationResult strict = search(searched, true);
 				if (strict.getOutcome() == VerificationOutcome.CONFIRMED)
 					return strict;
 			}
@@ -360,21 +382,38 @@ public class BoundedModelChecker<A extends AbstractLattice<A>, D extends Abstrac
 			for (Map.Entry<Term, String> v : solver.getValues(new ArrayList<>(params.keySet())).entrySet())
 				inputs.add(model.getParameters().get(params.get(v.getKey())), v.getValue());
 
-		for (int t = 0; t < length; t++)
+		// the trace, including the locations composed transitions pass
+		// through
+		List<ModelLocation> full = new ArrayList<>();
+		for (int t = 0; t < length; t++) {
+			full.add(trace.get(t));
+			// the transition taken between the two locations (several might
+			// connect them, e.g., composed transitions through different
+			// branches)
+			EdgeTransition taken = null;
 			for (EdgeTransition edge : model.getTransitions(trace.get(t)))
 				if (edge.getDestination().equals(trace.get(t + 1))) {
-					String key = unrolling.edgeKey(t, edge);
-					imprecisions.addAll(unrolling.getImprecisions(key, solver));
-					// inputs are produced in the context of the frame of the
-					// transition producing them
-					collectInputs(unrolling, key, solver, inputs, edge.getSource().getFrame().getResult().getId());
+					if (unrolling.holds(unrolling.edgeKey(t, edge), solver)) {
+						taken = edge;
+						break;
+					}
+					if (taken == null)
+						taken = edge;
 				}
+			if (taken == null)
+				continue;
+			String key = unrolling.edgeKey(t, taken);
+			imprecisions.addAll(unrolling.getImprecisions(key, solver));
+			collectInputs(unrolling, key, solver, inputs, taken);
+			full.addAll(taken.getIntermediateLocations());
+		}
+		full.add(trace.get(length));
+		trace = full;
 		String badKey = unrolling.badKey(length);
 		imprecisions.addAll(unrolling.getImprecisions(badKey, solver));
-		collectInputs(unrolling, badKey, solver, inputs,
-				trace.get(length).getFrame().getResult().getId());
+		collectInputs(unrolling, badKey, solver, inputs, null, trace.get(trace.size() - 1));
 
-		String path = "violation reached in " + length + " steps through " + trace;
+		String path = "violation reached in " + (trace.size() - 1) + " steps through " + trace;
 		if (!imprecisions.isEmpty()) {
 			if (!inexact && Unrolling.dueToCalls(imprecisions))
 				callTrace = trace;
@@ -393,15 +432,37 @@ public class BoundedModelChecker<A extends AbstractLattice<A>, D extends Abstrac
 			String key,
 			SmtSolver solver,
 			ReproducingInputs inputs,
-			ScopeId<?> context) {
-		List<InputValue> values = Unrolling.inputsOf(unrolling.getFreshValues(key));
+			EdgeTransition edge) {
+		collectInputs(unrolling, key, solver, inputs, edge, edge.getSource());
+	}
+
+	/**
+	 * Collects the inputs of the encoding with the given key, produced by the
+	 * given transition (if any) or at the given location: inputs are produced
+	 * in the order of the transitions producing them (for composed
+	 * transitions), in the context of the frame of the transition producing
+	 * them.
+	 */
+	private static void collectInputs(
+			Unrolling unrolling,
+			String key,
+			SmtSolver solver,
+			ReproducingInputs inputs,
+			EdgeTransition edge,
+			ModelLocation location) {
+		List<InputValue> values = new ArrayList<>(Unrolling.inputsOf(unrolling.getFreshValues(key)));
 		if (values.isEmpty())
 			return;
+		if (edge != null)
+			values.sort(Comparator.comparingInt(edge::positionOf));
 		List<Term> terms = new ArrayList<>();
 		for (InputValue v : values)
 			terms.add(unrolling.freshConstant(v, key));
 		Map<Term, String> model = solver.getValues(terms);
-		for (int i = 0; i < values.size(); i++)
-			inputs.add(values.get(i).getSource(), model.get(terms.get(i)), context);
+		for (int i = 0; i < values.size(); i++) {
+			ModelLocation producer = edge == null ? location : edge.componentOf(values.get(i)).getSource();
+			inputs.add(values.get(i).getSource(), model.get(terms.get(i)),
+					producer.getFrame().getResult().getId());
+		}
 	}
 }

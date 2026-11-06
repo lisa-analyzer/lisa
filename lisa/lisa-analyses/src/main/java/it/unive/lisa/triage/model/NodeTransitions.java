@@ -233,6 +233,19 @@ public class NodeTransitions {
 	}
 
 	/**
+	 * Yields a copy of these transitions, whose outgoing transitions are the
+	 * given ones.
+	 *
+	 * @param transitions the outgoing transitions
+	 *
+	 * @return the copy
+	 */
+	public NodeTransitions withTransitions(
+			List<EdgeTransition> transitions) {
+		return new NodeTransitions(location, new ArrayList<>(transitions), exit, errors, partial, calls, escaping);
+	}
+
+	/**
 	 * Yields the calls to cfgs reached while replaying the node from this
 	 * location, in evaluation order.
 	 *
