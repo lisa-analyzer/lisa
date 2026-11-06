@@ -115,8 +115,7 @@ public class Global
 	 *                        {@link Untyped#INSTANCE}
 	 * @param annotations the annotations of this global variable
 	 * @param isFinal     whether or not this global is final, that is, its
-	 *                        value cannot change after it has been
-	 *                        initialized
+	 *                        value cannot change after it has been initialized
 	 */
 	public Global(
 			CodeLocation location,

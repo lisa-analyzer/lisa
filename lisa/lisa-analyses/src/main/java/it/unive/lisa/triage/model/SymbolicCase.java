@@ -33,9 +33,9 @@ import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedHashSet;
 import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -61,8 +61,8 @@ import java.util.function.Predicate;
  * unconstrained after the transition.</li>
  * </ul>
  * The heap is represented as in {@link HeapModel}: reads and writes of fields
- * and array cells become reads and writes of the identifiers of the heap
- * model, and allocations yield fresh references. Instances of this class are
+ * and array cells become reads and writes of the identifiers of the heap model,
+ * and allocations yield fresh references. Instances of this class are
  * immutable.
  *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
@@ -100,8 +100,8 @@ public final class SymbolicCase {
 	private final boolean havocAll;
 
 	/**
-	 * The scopes pushed and popped by the transition, in order: the
-	 * identifiers that are not updated are renamed accordingly (see
+	 * The scopes pushed and popped by the transition, in order: the identifiers
+	 * that are not updated are renamed accordingly (see
 	 * {@link #preIdentifier(Identifier)}).
 	 */
 	private final List<Scoping> scopings;
@@ -160,8 +160,8 @@ public final class SymbolicCase {
 
 		/**
 		 * Yields the name before this scoping of the given identifier, or
-		 * {@code null} if the identifier did not exist before (e.g., a
-		 * variable of the scope that has been pushed).
+		 * {@code null} if the identifier did not exist before (e.g., a variable
+		 * of the scope that has been pushed).
 		 */
 		private Identifier inverse(
 				Identifier id) {
@@ -456,8 +456,9 @@ public final class SymbolicCase {
 	}
 
 	/**
-	 * The result of {@link #fieldOf(AccessChild, FreshValueFactory, ProgramPoint)}
-	 * when it cannot tell whether the access reads a field or a cell.
+	 * The result of
+	 * {@link #fieldOf(AccessChild, FreshValueFactory, ProgramPoint)} when it
+	 * cannot tell whether the access reads a field or a cell.
 	 */
 	private static final String UNDECIDED = "?";
 
@@ -513,10 +514,10 @@ public final class SymbolicCase {
 	}
 
 	/**
-	 * The maximum size of the values of the updates of a case (as the number
-	 * of nodes of their trees): larger values are not tracked, since their
-	 * size might grow exponentially (e.g., with repeated writes of the same
-	 * heap contents within one transition).
+	 * The maximum size of the values of the updates of a case (as the number of
+	 * nodes of their trees): larger values are not tracked, since their size
+	 * might grow exponentially (e.g., with repeated writes of the same heap
+	 * contents within one transition).
 	 */
 	public static final long MAX_VALUE_SIZE = 1000;
 
@@ -668,9 +669,9 @@ public final class SymbolicCase {
 	}
 
 	/**
-	 * Yields the case obtained by performing the given allocation at the end
-	 * of this case: the allocation site holds a new reference, different from
-	 * all existing ones, and the counter of allocations is incremented.
+	 * Yields the case obtained by performing the given allocation at the end of
+	 * this case: the allocation site holds a new reference, different from all
+	 * existing ones, and the counter of allocations is incremented.
 	 *
 	 * @param allocation the allocation
 	 * @param factory    the factory of fresh values
@@ -798,8 +799,8 @@ public final class SymbolicCase {
 
 	/**
 	 * Yields this case, where the heap is unconstrained after the transition
-	 * (e.g., because of a write that the heap model does not represent),
-	 * except for the given heap contents.
+	 * (e.g., because of a write that the heap model does not represent), except
+	 * for the given heap contents.
 	 *
 	 * @param preserved the heap contents that are preserved
 	 *
@@ -819,10 +820,10 @@ public final class SymbolicCase {
 
 	/**
 	 * Yields this case, where the heap is unconstrained after the transition,
-	 * except for the given heap contents, as after a call whose callees are
-	 * not modeled. The callees might allocate objects: the counter of
-	 * allocations is increased by an unknown amount, so that the references
-	 * allocated afterwards are still new.
+	 * except for the given heap contents, as after a call whose callees are not
+	 * modeled. The callees might allocate objects: the counter of allocations
+	 * is increased by an unknown amount, so that the references allocated
+	 * afterwards are still new.
 	 *
 	 * @param preserved the heap contents that are preserved
 	 * @param factory   the factory of fresh values
@@ -852,9 +853,9 @@ public final class SymbolicCase {
 	}
 
 	/**
-	 * Yields this case, followed by the push (if {@code push} holds) or the
-	 * pop of the scope identified by the given token: identifiers are renamed
-	 * as the analysis renames them ({@link Identifier#pushScope} and
+	 * Yields this case, followed by the push (if {@code push} holds) or the pop
+	 * of the scope identified by the given token: identifiers are renamed as
+	 * the analysis renames them ({@link Identifier#pushScope} and
 	 * {@link Identifier#popScope}), and the ones that are not visible after the
 	 * scoping are forgotten. The identifiers of the heap model are never
 	 * renamed.
@@ -910,8 +911,8 @@ public final class SymbolicCase {
 	 * Merges two cases into a single one that over-approximates both. The
 	 * resulting path condition contains only the conjuncts common to both
 	 * cases, plus an unknown condition (a fresh {@link SummaryValue}) if some
-	 * conjuncts are not common, and identifiers whose values differ between
-	 * the cases become unconstrained (they are assigned a fresh
+	 * conjuncts are not common, and identifiers whose values differ between the
+	 * cases become unconstrained (they are assigned a fresh
 	 * {@link SummaryValue}).
 	 *
 	 * @param first    the first case
@@ -957,7 +958,8 @@ public final class SymbolicCase {
 				if (!sameScopings || !v1.equals(first.preIdentifier(id)))
 					upd.put(id, v1);
 			} else
-				upd.put(id, factory.summary(id.getStaticType(), SummaryValue.Kind.MERGE, "merged value of " + id, location));
+				upd.put(id, factory.summary(id.getStaticType(), SummaryValue.Kind.MERGE, "merged value of " + id,
+						location));
 		}
 
 		List<Predicate<Identifier>> tests = new ArrayList<>(first.forgottenIf);

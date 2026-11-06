@@ -81,13 +81,6 @@ test {
 			outputs.remove(desc.id)
 		}
 	}
-
-	jacoco {
-		// we don't care about coverage of excpetion classes
-		// most of the times they only define constructors
-		// that invoke super constructors...
-		excludes = ['**/*Exception*']
-	}
 }
 
 tasks.register('cron', Test) {
@@ -142,6 +135,8 @@ tasks.register('update-cron', Test) {
 	testClassesDirs = sourceSets.test.output.classesDirs
 	classpath = sourceSets.test.runtimeClasspath
 	systemProperty "lisa.cron.update", "true"
+	// runs the full triage benchmark (see TriageBenchmarkTest)
+	systemProperty "lisa.triage.full", System.getProperty("lisa.triage.full", "false")
 
 	filter {
 		failOnNoMatchingTests false
@@ -161,13 +156,3 @@ tasks.register('completeBuild') {
 	dependsOn build, cron, checkCodeStyle
 }
 
-jacocoTestReport {
-	// we do not depend also on cron for now
-	dependsOn test // tests are required to run before generating the report
-	afterEvaluate {
-		// this will effectively hide exception classes from the report
-		classDirectories.setFrom(files(classDirectories.files.collect {
-			fileTree(dir: it, exclude: '**/*Exception*')
-		}))
-	}
-}

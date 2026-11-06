@@ -5,6 +5,7 @@ import it.unive.lisa.checks.verification.VerificationResult;
 import it.unive.lisa.checks.verification.Violation;
 import it.unive.lisa.interprocedural.ScopeId;
 import it.unive.lisa.program.cfg.statement.Expression;
+import it.unive.lisa.program.cfg.statement.Statement;
 import java.util.List;
 
 /**
@@ -79,8 +80,8 @@ public class ExpressionMessage
 	 *
 	 * @param expression the expression where this message is reported on
 	 * @param message    the message of this message
-	 * @param context    the context where this message was reported on (can
-	 *                       be {@code null})
+	 * @param context    the context where this message was reported on (can be
+	 *                       {@code null})
 	 * @param violation  the violation reported by this message
 	 */
 	public ExpressionMessage(
@@ -99,8 +100,10 @@ public class ExpressionMessage
 			boolean refuted,
 			List<ReproducingInput> reproducingInputs,
 			Violation violation,
-			String explanation) {
-		super(expression, message, context, definite, refuted, reproducingInputs, violation, explanation);
+			String explanation,
+			Statement thrower) {
+		super(expression, message, context, definite, refuted, reproducingInputs, violation, explanation,
+				thrower);
 	}
 
 	@Override
@@ -110,15 +113,15 @@ public class ExpressionMessage
 		switch (result.getOutcome()) {
 		case CONFIRMED:
 			return new ExpressionMessage(getExpression(), getMessage(), getContext(), true, false,
-					result.getReproducingInputs(), getViolation(), explanation);
+					result.getReproducingInputs(), getViolation(), explanation, result.getThrower());
 		case REFUTED:
 			return new ExpressionMessage(getExpression(), getMessage(), getContext(), false, true, null,
-					getViolation(), explanation);
+					getViolation(), explanation, null);
 		case POSSIBLE:
 		default:
 			return explanation == null ? this
 					: new ExpressionMessage(getExpression(), getMessage(), getContext(), isDefinite(), isRefuted(),
-							getReproducingInputs(), getViolation(), explanation);
+							getReproducingInputs(), getViolation(), explanation, getThrower());
 		}
 	}
 

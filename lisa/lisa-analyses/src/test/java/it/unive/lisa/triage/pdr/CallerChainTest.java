@@ -32,10 +32,10 @@ import org.junit.jupiter.api.Test;
 /**
  * End-to-end tests for {@link PdrVerifier} on warnings inside callees, whose
  * results are not the ones of the beginning of the program: counterexamples
- * starting from the states of the callees are confirmed through models
- * starting from the callers, while refutations of those models are not used.
- * The program is analyzed by a context-sensitive analysis with intervals,
- * starting from {@code main} only. Tests are skipped if z3 is not available.
+ * starting from the states of the callees are confirmed through models starting
+ * from the callers, while refutations of those models are not used. The program
+ * is analyzed by a context-sensitive analysis with intervals, starting from
+ * {@code main} only. Tests are skipped if z3 is not available.
  */
 public class CallerChainTest {
 

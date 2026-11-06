@@ -17,9 +17,9 @@ import java.util.Map;
  * violation they report (see
  * {@link SemanticTool#warnOn(it.unive.lisa.program.cfg.statement.Statement, it.unive.lisa.interprocedural.ScopeId, Violation, String)}):
  * once all checks have been executed, LiSA passes all the warnings carrying a
- * violation to the verifier selected through the configuration of the
- * analysis, and turns confirmed warnings into definite ones (with their
- * reproducing inputs) and refuted warnings into refuted ones.
+ * violation to the verifier selected through the configuration of the analysis,
+ * and turns confirmed warnings into definite ones (with their reproducing
+ * inputs) and refuted warnings into refuted ones.
  *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  *
@@ -30,10 +30,10 @@ import java.util.Map;
 public interface WarningVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<A>> {
 
 	/**
-	 * Verifies the violations reported by the given warnings, given the
-	 * results of the analysis contained in the given tool. Verifiers are free
-	 * to verify only some of the warnings (e.g., to bound the verification
-	 * time): warnings that are not verified are left possible.
+	 * Verifies the violations reported by the given warnings, given the results
+	 * of the analysis contained in the given tool. Verifiers are free to verify
+	 * only some of the warnings (e.g., to bound the verification time):
+	 * warnings that are not verified are left possible.
 	 *
 	 * @param tool     the tool containing the results of the analysis
 	 * @param warnings the warnings to verify, each carrying the violation it

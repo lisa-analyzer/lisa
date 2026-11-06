@@ -29,9 +29,9 @@ import java.util.Map;
  * </ol>
  * Refutations found along the way are kept, so that a warning refuted by the
  * cheap verifier is not verified again by the expensive one. Warnings that are
- * not verified because the verification stopped stay possible, and their
- * result explains it ({@link #NOT_VERIFIED}). Warnings that stay possible after
- * being verified keep the explanation of the last verifier that verified them.
+ * not verified because the verification stopped stay possible, and their result
+ * explains it ({@link #NOT_VERIFIED}). Warnings that stay possible after being
+ * verified keep the explanation of the last verifier that verified them.
  *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  *
@@ -106,9 +106,9 @@ public class FirstViolationVerifier<A extends AbstractLattice<A>, D extends Abst
 	/**
 	 * Verifies, with the given verifier, the warnings that have been neither
 	 * refuted nor confirmed yet, recording the results in the given map. If a
-	 * warning is confirmed, the verification stops, and the warnings that
-	 * have not been verified in this phase are recorded as
-	 * {@link #NOT_VERIFIED}, unless they have been refuted before.
+	 * warning is confirmed, the verification stops, and the warnings that have
+	 * not been verified in this phase are recorded as {@link #NOT_VERIFIED},
+	 * unless they have been refuted before.
 	 *
 	 * @return {@code true} if a warning has been confirmed
 	 */

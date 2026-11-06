@@ -218,11 +218,6 @@ public class TriageBenchmarkTest {
 				DefaultConfiguration.defaultTypeDomain());
 		rows.addAll(run("strings-prefix", "strings.imp", prefix));
 
-		DefaultConfiguration tarsis = new DefaultConfiguration();
-		tarsis.analysis = DefaultConfiguration.simpleDomain(DefaultConfiguration.defaultHeapDomain(), new Tarsis(),
-				DefaultConfiguration.defaultTypeDomain());
-		rows.addAll(run("strings-tarsis", "strings.imp", tarsis));
-
 		DefaultConfiguration suffix = new DefaultConfiguration();
 		suffix.analysis = DefaultConfiguration.simpleDomain(DefaultConfiguration.defaultHeapDomain(), new Suffix(),
 				DefaultConfiguration.defaultTypeDomain());
@@ -230,6 +225,11 @@ public class TriageBenchmarkTest {
 
 		if (full) {
 			// the most expensive suite, only run in the full benchmark
+			DefaultConfiguration tarsis = new DefaultConfiguration();
+			tarsis.analysis = DefaultConfiguration.simpleDomain(DefaultConfiguration.defaultHeapDomain(), new Tarsis(),
+					DefaultConfiguration.defaultTypeDomain());
+			rows.addAll(run("strings-tarsis", "strings.imp", tarsis));
+
 			DefaultConfiguration chars = new DefaultConfiguration();
 			chars.analysis = DefaultConfiguration.simpleDomain(DefaultConfiguration.defaultHeapDomain(),
 					new CharInclusion(), DefaultConfiguration.defaultTypeDomain());

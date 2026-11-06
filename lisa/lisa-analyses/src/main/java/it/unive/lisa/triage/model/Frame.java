@@ -6,9 +6,9 @@ import java.util.Objects;
 
 /**
  * A frame of an {@link AlarmModel}: the code of a cfg, analyzed in a given
- * context, reached through a chain of calls from the cfg where the model
- * starts (its root frame). Each frame has its own copy of the locations of its
- * cfg, whose states are the ones computed by the analysis for its context.
+ * context, reached through a chain of calls from the cfg where the model starts
+ * (its root frame). Each frame has its own copy of the locations of its cfg,
+ * whose states are the ones computed by the analysis for its context.
  *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */

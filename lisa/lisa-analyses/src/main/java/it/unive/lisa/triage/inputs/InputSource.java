@@ -44,12 +44,12 @@ public class InputSource {
 		CALL_RESULT,
 
 		/**
-		 * The value returned by a call that does not model a user input:
-		 * native code approximating a computation, code of the program whose
-		 * result has not been computed precisely (e.g., because calls are
-		 * analyzed modularly), or calls that cannot be resolved (whose result
-		 * is decided by the open call policy). This is not a genuine input:
-		 * the value is determined by the code of the callee.
+		 * The value returned by a call that does not model a user input: native
+		 * code approximating a computation, code of the program whose result
+		 * has not been computed precisely (e.g., because calls are analyzed
+		 * modularly), or calls that cannot be resolved (whose result is decided
+		 * by the open call policy). This is not a genuine input: the value is
+		 * determined by the code of the callee.
 		 */
 		IMPRECISE_CALL_RESULT,
 

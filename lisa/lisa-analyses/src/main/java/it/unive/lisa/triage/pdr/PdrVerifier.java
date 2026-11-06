@@ -13,6 +13,7 @@ import it.unive.lisa.checks.verification.Violation;
 import it.unive.lisa.interprocedural.ScopeId;
 import it.unive.lisa.outputs.messages.StatementMessage;
 import it.unive.lisa.program.cfg.statement.Statement;
+import it.unive.lisa.program.cfg.statement.call.CFGCall;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.triage.bmc.Unrolling;
 import it.unive.lisa.triage.encoding.ExpressionEncoderFactory;
@@ -33,13 +34,12 @@ import it.unive.lisa.triage.smt.SmtSolverUnavailableException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.apache.commons.lang3.tuple.Triple;
-import it.unive.lisa.program.cfg.statement.call.CFGCall;
-import java.util.LinkedList;
 import java.util.function.Supplier;
+import org.apache.commons.lang3.tuple.Triple;
 
 /**
  * An {@link IndividualWarningVerifier} based on property-directed reachability
@@ -129,7 +129,8 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 
 	/**
 	 * The trace of the last counterexample found, if it might rely on
-	 * summarized calls (see {@link Unrolling#dueToCalls(java.util.Collection)}).
+	 * summarized calls (see
+	 * {@link Unrolling#dueToCalls(java.util.Collection)}).
 	 */
 	private List<ModelLocation> callTrace;
 
@@ -151,14 +152,14 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 	private long warningDeadline;
 
 	/**
-	 * The verifier checking violations against the results of the analysis,
-	 * and finding the chains of calls reaching a result.
+	 * The verifier checking violations against the results of the analysis, and
+	 * finding the chains of calls reaching a result.
 	 */
 	private ReachabilityVerifier<A, D> reachability;
 
 	/**
-	 * The information computed from the results of the analysis, shared by
-	 * all the models built over them.
+	 * The information computed from the results of the analysis, shared by all
+	 * the models built over them.
 	 */
 	private ResultCache<A> cache;
 
@@ -176,8 +177,8 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 	private int maxChains = DEFAULT_MAX_CHAINS;
 
 	/**
-	 * The default maximum number of chains of calls tried when a violation in
-	 * a callee is neither confirmed nor refuted.
+	 * The default maximum number of chains of calls tried when a violation in a
+	 * callee is neither confirmed nor refuted.
 	 */
 	public static final int DEFAULT_MAX_CHAINS = 3;
 
@@ -276,10 +277,9 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 	/**
 	 * Sets the maximum number of chains of calls from the beginning of the
 	 * program tried when a violation in a callee (i.e., in a result that is not
-	 * the one of the beginning of the program) is neither confirmed nor
-	 * refuted (default: {@link #DEFAULT_MAX_CHAINS}; {@code 0}
-	 * never tries them). Models starting from the callers can only confirm
-	 * violations.
+	 * the one of the beginning of the program) is neither confirmed nor refuted
+	 * (default: {@link #DEFAULT_MAX_CHAINS}; {@code 0} never tries them).
+	 * Models starting from the callers can only confirm violations.
 	 *
 	 * @param maxChains the maximum number of chains
 	 *
@@ -326,10 +326,10 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 	 * Yields the statistics of the engine on the last candidate violation that
 	 * reached it: the number of queries ({@code queries}), the number of frames
 	 * ({@code level}), and the number of generalizations proposed by the domain
-	 * ({@code proposals}) and used ({@code accepted}). Queries are counted
-	 * over all the models built for the violation, while the other statistics
-	 * refer to the last one. Violations decided before running the engine
-	 * yield an empty map.
+	 * ({@code proposals}) and used ({@code accepted}). Queries are counted over
+	 * all the models built for the violation, while the other statistics refer
+	 * to the last one. Violations decided before running the engine yield an
+	 * empty map.
 	 *
 	 * @return the statistics
 	 */
@@ -705,7 +705,14 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 		if (!model.isConfirmable())
 			return new VerificationResult(VerificationOutcome.POSSIBLE,
 					path + ", from states that are not the initial ones of the program");
+		// the statement raising the error of an error violation, if the
+		// counterexample ends with a transition to a raised error
+		Statement thrower = null;
+		for (Obligation o : cex)
+			if (o.getEdge() != null && o.getEdge().getThrower() != null
+					&& o.getEdge().getDestination().equals(model.getBadLocation()))
+				thrower = o.getEdge().getThrower();
 		return new VerificationResult(VerificationOutcome.CONFIRMED,
-				path + " (not yet certified by execution)", inputs.get());
+				path + " (not yet certified by execution)", inputs.get()).withThrower(thrower);
 	}
 }

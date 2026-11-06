@@ -51,8 +51,8 @@ public enum HeapType
 	CELL_KEY(CellKeySort.SORT),
 
 	/**
-	 * The counter of allocations, that is, the identifier of the next
-	 * reference to be allocated.
+	 * The counter of allocations, that is, the identifier of the next reference
+	 * to be allocated.
 	 */
 	COUNTER(Sort.INT),
 

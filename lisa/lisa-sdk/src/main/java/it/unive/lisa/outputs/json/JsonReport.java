@@ -285,10 +285,11 @@ public class JsonReport {
 	 * representation of the target they have been reported on (if any, and if
 	 * it is not a cfg), the context they have been reported on and its hash (if
 	 * any), the kind of the target, the text of the message, whether the
-	 * message is definite, refuted, or possible, the inputs reproducing the reported
-	 * behavior (if any), and the explanation of the outcome of its verification
-	 * (if any). The explanation is informative only: it is not part of the
-	 * identity of the message, and it is ignored when comparing messages.
+	 * message is definite, refuted, or possible, the inputs reproducing the
+	 * reported behavior (if any), and the explanation of the outcome of its
+	 * verification (if any). The explanation is informative only: it is not
+	 * part of the identity of the message, and it is ignored when comparing
+	 * messages.
 	 * 
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 */

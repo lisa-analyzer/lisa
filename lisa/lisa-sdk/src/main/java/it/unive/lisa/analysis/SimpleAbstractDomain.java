@@ -1002,6 +1002,7 @@ public class SimpleAbstractDomain<H extends HeapLattice<H>, V extends ValueLatti
 		}
 
 	}
+
 	@Override
 	public <T> Collection<T> getAllDomainInstances(
 			Class<T> domain) {

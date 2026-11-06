@@ -60,6 +60,7 @@ import it.unive.lisa.outputs.json.JsonReport;
 import it.unive.lisa.outputs.json.JsonReport.JsonMessage;
 import it.unive.lisa.outputs.json.JsonReport.JsonReproducingInput;
 import it.unive.lisa.outputs.messages.Message;
+import it.unive.lisa.outputs.messages.StatementMessage;
 import it.unive.lisa.outputs.serializableGraph.SerializableEdge;
 import it.unive.lisa.outputs.serializableGraph.SerializableGraph;
 import it.unive.lisa.outputs.serializableGraph.SerializableNode;
@@ -698,11 +699,15 @@ public class EqualityContractVerificationTest {
 		verify(JsonMessage.class, verifier -> verifier.withIgnoredFields("explanation"), Warning.NONFINAL_FIELDS);
 		verify(JsonReproducingInput.class, Warning.NONFINAL_FIELDS);
 		// neither the violation reported by a message nor the explanation of
-		// its verification are part of its identity
+		// its verification (and the statement raising a confirmed error) are
+		// part of its identity
 		verify(Message.class, verifier -> verifier.withIgnoredFields("violation", "explanation"));
 		Reflections scanner = mkReflections();
 		for (Class<? extends Message> message : scanner.getSubTypesOf(Message.class))
-			verify(message, verifier -> verifier.withIgnoredFields("violation", "explanation"));
+			if (StatementMessage.class.isAssignableFrom(message))
+				verify(message, verifier -> verifier.withIgnoredFields("violation", "explanation", "thrower"));
+			else
+				verify(message, verifier -> verifier.withIgnoredFields("violation", "explanation"));
 	}
 
 	@Test
@@ -710,7 +715,9 @@ public class EqualityContractVerificationTest {
 	public void testVerification() throws ClassNotFoundException {
 		verify(ConditionViolation.class);
 		verify(ErrorViolation.class);
-		verify(VerificationResult.class);
+		// the statement raising a confirmed error is not part of the identity
+		// of a result
+		verify(VerificationResult.class, verifier -> verifier.withIgnoredFields("thrower"));
 		verify(ReproducingInput.class);
 		// array sorts refer to their index and element sorts
 		verify(Sort.class, verifier -> verifier.withPrefabValues(Sort.class, Sort.INT, Sort.BOOL));

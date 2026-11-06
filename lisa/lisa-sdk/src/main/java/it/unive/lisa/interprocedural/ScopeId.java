@@ -49,11 +49,11 @@ public interface ScopeId<A extends AbstractLattice<A>> {
 	/**
 	 * Yields a hash of this id, that can be used to identify it in places where
 	 * its full representation would be too long (e.g., names of symbolic
-	 * expressions or file names). The hash must be consistent with
-	 * {@link #equals(Object)}, that is, equal ids must have equal hashes, and
-	 * it must be stable across different executions of the analysis.
-	 * Implementations should compute the hash once at construction (e.g.,
-	 * through {@link #computeHash(String)}) and return the stored value.
+	 * expressions or file names). The hash must be consistent with equals, that
+	 * is, equal ids must have equal hashes, and it must be stable across
+	 * different executions of the analysis. Implementations should compute the
+	 * hash once at construction (e.g., through {@link #computeHash(String)})
+	 * and return the stored value.
 	 * 
 	 * @return the hash of this id
 	 */

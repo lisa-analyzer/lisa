@@ -32,8 +32,8 @@ import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.PluggableStatement;
 import it.unive.lisa.program.cfg.statement.Statement;
-import it.unive.lisa.program.cfg.statement.UserInput;
 import it.unive.lisa.program.cfg.statement.UnaryExpression;
+import it.unive.lisa.program.cfg.statement.UserInput;
 import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.program.type.BoolType;
 import it.unive.lisa.program.type.Int32Type;
@@ -76,7 +76,8 @@ public class InputSourceResolverTest {
 	private static final Map<String, Call> calls = new HashMap<>();
 
 	/**
-	 * The construct implementing the native {@code nondet} method, a user input.
+	 * The construct implementing the native {@code nondet} method, a user
+	 * input.
 	 */
 	public static class Nondet
 			extends

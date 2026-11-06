@@ -75,8 +75,8 @@ public class NativeCFG
 	}
 
 	/**
-	 * Yields the class of the construct that this native cfg is rewritten
-	 * into (see {@link #rewrite(Statement, Expression...)}).
+	 * Yields the class of the construct that this native cfg is rewritten into
+	 * (see {@link #rewrite(Statement, Expression...)}).
 	 * 
 	 * @return the class of the construct
 	 */

@@ -84,7 +84,8 @@ public class FreshValueFactory {
 			PushAny value,
 			ProgramPoint pp) {
 		if (value instanceof SummaryMarker)
-			return summary(value.getStaticType(), ((SummaryMarker) value).getKind(), ((SummaryMarker) value).getReason(),
+			return summary(value.getStaticType(), ((SummaryMarker) value).getKind(),
+					((SummaryMarker) value).getReason(),
 					value.getCodeLocation());
 		InputSource source = resolver.resolve(value, pp);
 		if (source.getKind() == InputSource.Kind.IMPRECISE_CALL_RESULT)

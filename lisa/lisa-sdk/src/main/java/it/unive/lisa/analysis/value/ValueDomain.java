@@ -141,10 +141,10 @@ public interface ValueDomain<L extends ValueLattice<L>>
 	 * Builds a set of constraints that model the fact that {@code expr} is in
 	 * the range {@code [low, high]}. Following the form of constraints (see
 	 * {@link #constraints(ValueDomain, ValueLattice, ValueExpression, ProgramPoint, SemanticOracle)}),
-	 * the lower bound is generated as {@code low <= expr} and the upper bound as
-	 * {@code high >= expr}. If {@code low} is {@code null}, then only the upper
-	 * bound is generated. If {@code high} is {@code null}, then only the lower
-	 * bound is generated. If both are {@code null}, then an empty set of
+	 * the lower bound is generated as {@code low <= expr} and the upper bound
+	 * as {@code high >= expr}. If {@code low} is {@code null}, then only the
+	 * upper bound is generated. If {@code high} is {@code null}, then only the
+	 * lower bound is generated. If both are {@code null}, then an empty set of
 	 * constraints is returned.
 	 *
 	 * @param constantType the type of the constants
@@ -169,7 +169,8 @@ public interface ValueDomain<L extends ValueLattice<L>>
 			return Collections.emptySet();
 
 		BinaryExpression lb = null, ub = null;
-		// constraints have the form 'constant OP expr': low <= expr and high >= expr
+		// constraints have the form 'constant OP expr': low <= expr and high >=
+		// expr
 		if (low != null)
 			lb = makeConstraint(constantType, low, ComparisonLe.INSTANCE, expr, pp).iterator().next();
 		if (high != null)

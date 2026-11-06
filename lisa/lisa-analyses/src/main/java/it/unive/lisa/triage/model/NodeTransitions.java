@@ -25,12 +25,11 @@ import java.util.Map;
  * evaluated in the middle of the node.</li>
  * </ul>
  * When callees are expanded, the outgoing transitions also include the ones
- * entering the frames of the callees, and the ones returning from an exit
- * point of a callee to the location where the caller resumes (these do not
- * correspond to edges of a cfg). The calls to cfgs reached while replaying the
- * node are also recorded (see {@link #getCalls()}).
- * Executions that halt are not represented, since they do not reach any other
- * program point.
+ * entering the frames of the callees, and the ones returning from an exit point
+ * of a callee to the location where the caller resumes (these do not correspond
+ * to edges of a cfg). The calls to cfgs reached while replaying the node are
+ * also recorded (see {@link #getCalls()}). Executions that halt are not
+ * represented, since they do not reach any other program point.
  *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
@@ -63,23 +62,41 @@ public class NodeTransitions {
 
 		private final SymbolicStore store;
 
+		private final Statement origin;
+
 		/**
 		 * Builds the error.
 		 *
-		 * @param node  the node of the root frame raising the error (through
-		 *                  its calls)
-		 * @param error the error, whose thrower is the node or one of its
-		 *                  sub-expressions
-		 * @param store the transition from the location where the error is
-		 *                  raised to the error, in the scope of the root frame
+		 * @param node   the node of the root frame raising the error (through
+		 *                   its calls)
+		 * @param error  the error, whose thrower is the node or one of its
+		 *                   sub-expressions
+		 * @param store  the transition from the location where the error is
+		 *                   raised to the error, in the scope of the root frame
+		 * @param origin the statement raising the error in the frame where it
+		 *                   is raised (the thrower of the error if it is raised
+		 *                   in the root frame)
 		 */
 		public EscapingError(
 				Statement node,
 				Error error,
-				SymbolicStore store) {
+				SymbolicStore store,
+				Statement origin) {
 			this.node = node;
 			this.error = error;
 			this.store = store;
+			this.origin = origin;
+		}
+
+		/**
+		 * Yields the statement raising the error in the frame where it is
+		 * raised: when the error leaves a callee, the thrower of the error is
+		 * the call, while this is the statement of the callee raising it.
+		 *
+		 * @return the statement
+		 */
+		public Statement getOrigin() {
+			return origin;
 		}
 
 		/**
@@ -161,8 +178,8 @@ public class NodeTransitions {
 	 * @param location the location of the node
 	 * @param outgoing the transitions through the outgoing edges, and the ones
 	 *                     entering and returning from callees, and the ones
-	 *                     moving errors raised in a callee to the handlers
-	 *                     of its callers
+	 *                     moving errors raised in a callee to the handlers of
+	 *                     its callers
 	 * @param exit     the transition to the end of the cfg, or {@code null}
 	 * @param errors   the transitions to the errors raised by the node
 	 * @param partial  the transitions to the end of each sub-expression

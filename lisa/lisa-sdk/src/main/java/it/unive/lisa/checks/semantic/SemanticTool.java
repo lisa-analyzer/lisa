@@ -227,11 +227,11 @@ public class SemanticTool<A extends AbstractLattice<A>, D extends AbstractDomain
 
 	/**
 	 * Reports a new possible warning with the given message on the given
-	 * statement, reporting the given violation. After the semantic checks,
-	 * LiSA verifies the violations of all warnings through the
-	 * {@link WarningVerifier} selected in
-	 * the configuration ({@link LiSAConfiguration#warningVerifier}), if any,
-	 * possibly confirming or refuting the warning.
+	 * statement, reporting the given violation. After the semantic checks, LiSA
+	 * verifies the violations of all warnings through the
+	 * {@link WarningVerifier} selected in the configuration
+	 * ({@link LiSAConfiguration#warningVerifier}), if any, possibly confirming
+	 * or refuting the warning.
 	 * 
 	 * @param statement the statement to warn on
 	 * @param violation the violation reported by the warning
@@ -249,11 +249,11 @@ public class SemanticTool<A extends AbstractLattice<A>, D extends AbstractDomain
 	 * statement, in the given context (e.g., the one of the result that caused
 	 * the warning), reporting the given violation. After the semantic checks,
 	 * LiSA verifies the violations of all warnings through the
-	 * {@link WarningVerifier} selected in
-	 * the configuration ({@link LiSAConfiguration#warningVerifier}), if any,
-	 * possibly confirming or refuting the warning: the violation is verified
-	 * only in the given context, or in all the contexts where the statement
-	 * has been analyzed if the context is {@code null}.
+	 * {@link WarningVerifier} selected in the configuration
+	 * ({@link LiSAConfiguration#warningVerifier}), if any, possibly confirming
+	 * or refuting the warning: the violation is verified only in the given
+	 * context, or in all the contexts where the statement has been analyzed if
+	 * the context is {@code null}.
 	 * 
 	 * @param statement the statement to warn on
 	 * @param context   the context where the warning is reported (can be

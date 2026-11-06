@@ -62,8 +62,8 @@ import java.util.function.Supplier;
  * have written (see {@link Unrolling#dueToCalls(java.util.Collection)}), the
  * expandable calls reached along it are expanded (see
  * {@link AlarmModelBuilder}), and the search is repeated on the new model. This
- * happens for at most a given number of rounds, and until the model reaches
- * its maximum number of locations.
+ * happens for at most a given number of rounds, and until the model reaches its
+ * maximum number of locations.
  *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  *
@@ -92,8 +92,8 @@ public class BoundedModelChecker<A extends AbstractLattice<A>, D extends Abstrac
 	private final int maxCases;
 
 	/**
-	 * The information computed from the results of the analysis, shared by
-	 * all the models built over them.
+	 * The information computed from the results of the analysis, shared by all
+	 * the models built over them.
 	 */
 	private ResultCache<A> cache;
 

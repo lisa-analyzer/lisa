@@ -50,8 +50,8 @@ public class ReproducingInputs {
 
 	/**
 	 * Adds an input taking the given value, produced in the given context
-	 * (e.g., the one of a callee whose code produces the input), after the
-	 * ones added so far.
+	 * (e.g., the one of a callee whose code produces the input), after the ones
+	 * added so far.
 	 *
 	 * @param source  the source of the input
 	 * @param value   the value, in SMT-LIB syntax

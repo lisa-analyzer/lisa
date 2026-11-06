@@ -1,7 +1,5 @@
 package it.unive.lisa;
 
-import it.unive.lisa.triage.model.ReplayAnalysis;
-import java.util.function.Predicate;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import it.unive.lisa.analysis.AbstractDomain;
@@ -108,6 +106,7 @@ import it.unive.lisa.symbolic.value.operator.unary.LogicalNegation;
 import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
 import it.unive.lisa.triage.inputs.InputSourceResolver;
 import it.unive.lisa.triage.model.FreshValueFactory;
+import it.unive.lisa.triage.model.ReplayAnalysis;
 import it.unive.lisa.triage.model.ReplayDomain;
 import it.unive.lisa.triage.model.SymbolicStore;
 import it.unive.lisa.type.Type;
@@ -121,6 +120,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Predicate;
 import org.apache.commons.collections4.SetUtils;
 import org.apache.commons.lang3.tuple.Pair;
 

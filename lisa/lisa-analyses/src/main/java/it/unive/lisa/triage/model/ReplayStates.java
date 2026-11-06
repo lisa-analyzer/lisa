@@ -86,9 +86,10 @@ public final class ReplayStates {
 	 *
 	 * @return the lifted state
 	 */
-	public static <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<ReplayState<A>> liftExecution(
-			AnalysisState<A> state,
-			ReplayDomain<A, D> domain) {
+	public static <A extends AbstractLattice<A>,
+			D extends AbstractDomain<A>> AnalysisState<ReplayState<A>> liftExecution(
+					AnalysisState<A> state,
+					ReplayDomain<A, D> domain) {
 		ProgramState<ReplayState<A>> execution = lift(state.getExecution(), domain);
 		return new AnalysisState<>(execution).bottom().withExecution(execution);
 	}

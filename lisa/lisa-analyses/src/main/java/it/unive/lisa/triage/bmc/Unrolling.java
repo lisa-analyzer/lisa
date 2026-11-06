@@ -28,8 +28,8 @@ import it.unive.lisa.triage.smt.Sort;
 import it.unive.lisa.triage.smt.Term;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedHashMap;
 import java.util.IdentityHashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -82,8 +82,8 @@ public class Unrolling {
 	private final Map<String, Set<String>> reasons = new LinkedHashMap<>();
 
 	/**
-	 * The reasons why the encoding with each key is not exact in models where
-	 * a condition holds and a guard does not (see
+	 * The reasons why the encoding with each key is not exact in models where a
+	 * condition holds and a guard does not (see
 	 * {@link #getImprecisions(String, SmtSolver)})
 	 */
 	private final Map<String, List<GuardedReason>> guardedReasons = new LinkedHashMap<>();
@@ -155,9 +155,10 @@ public class Unrolling {
 	}
 
 	/**
-	 * Builds the unrolling, as {@link #Unrolling(AlarmModel, SmtSolver, boolean)},
-	 * encoding expressions with the encoders built by the given factory (e.g.,
-	 * encoders knowing the operators of a frontend).
+	 * Builds the unrolling, as
+	 * {@link #Unrolling(AlarmModel, SmtSolver, boolean)}, encoding expressions
+	 * with the encoders built by the given factory (e.g., encoders knowing the
+	 * operators of a frontend).
 	 *
 	 * @param model    the model to encode
 	 * @param solver   the solver where constants are declared
@@ -193,9 +194,9 @@ public class Unrolling {
 	/**
 	 * Yields {@code true} if the encoding of the given model might involve
 	 * floating point numbers: they are encoded by the sorts of the model, and
-	 * some identifier of the vocabulary or fresh value might hold them, or
-	 * some expression that is encoded has a floating point type or is a
-	 * floating point constant.
+	 * some identifier of the vocabulary or fresh value might hold them, or some
+	 * expression that is encoded has a floating point type or is a floating
+	 * point constant.
 	 *
 	 * @param model the model
 	 *
@@ -584,14 +585,14 @@ public class Unrolling {
 	public static final String UNSUPPORTED_OPERATIONS = "unsupported operations";
 
 	/**
-	 * The kind of imprecision of operations applied to values of kinds they
-	 * are not modeled for (e.g., arithmetic over floating point numbers).
+	 * The kind of imprecision of operations applied to values of kinds they are
+	 * not modeled for (e.g., arithmetic over floating point numbers).
 	 */
 	public static final String OTHER_KINDS = "operations on values of other kinds";
 
 	/**
-	 * The kind of imprecision of comparisons and equalities between values
-	 * that might not be integers (e.g., floating point numbers).
+	 * The kind of imprecision of comparisons and equalities between values that
+	 * might not be integers (e.g., floating point numbers).
 	 */
 	public static final String NON_INTEGER_COMPARISONS = "comparisons of non-integers";
 
@@ -604,11 +605,11 @@ public class Unrolling {
 	 * Yields the reasons why the encoding with the given key is not exact in
 	 * the current model of the given solver, that must have just answered
 	 * {@link it.unive.lisa.triage.smt.SmtResult#SAT}. Each reason has the form
-	 * {@code kind: detail}, where the kind is the one of a
-	 * {@link SummaryValue} ({@link SummaryValue.Kind#getDescription()}) or one
-	 * of the constants of this class, and the detail tells which value or
-	 * operation is not encoded precisely. The result is empty if and only if
-	 * the encoding is exact in the model ({@link #isExact(String, SmtSolver)}).
+	 * {@code kind: detail}, where the kind is the one of a {@link SummaryValue}
+	 * ({@link SummaryValue.Kind#getDescription()}) or one of the constants of
+	 * this class, and the detail tells which value or operation is not encoded
+	 * precisely. The result is empty if and only if the encoding is exact in
+	 * the model ({@link #isExact(String, SmtSolver)}).
 	 *
 	 * @param key    the key
 	 * @param solver the solver
@@ -723,8 +724,8 @@ public class Unrolling {
 	}
 
 	/**
-	 * Yields a short description of the given expression, naming its
-	 * operator, if any.
+	 * Yields a short description of the given expression, naming its operator,
+	 * if any.
 	 */
 	private static String describe(
 			SymbolicExpression origin) {
@@ -740,18 +741,17 @@ public class Unrolling {
 	}
 
 	/**
-	 * Yields the constraints stating that the references held by identifiers
-	 * in the initial states have been allocated before the ones that the model
+	 * Yields the constraints stating that the references held by identifiers in
+	 * the initial states have been allocated before the ones that the model
 	 * allocates, that is, their identifiers are smaller than the initial value
 	 * of the counter of allocations (see {@link HeapModel}). These constraints
-	 * hold in every concrete state, for a large enough counter, and they
-	 * ensure that new references never alias the ones of identifiers. The
-	 * references stored in fields of objects and in cells of arrays in the
-	 * initial states are not constrained, as this would need quantifiers, that
-	 * solvers often cannot decide: this is sound, as the contents of the heap
-	 * in the initial states are not written by the model, so that executions
-	 * reading them are never considered precise (see
-	 * {@link SymbolTable#exactOnlyIfWritten}).
+	 * hold in every concrete state, for a large enough counter, and they ensure
+	 * that new references never alias the ones of identifiers. The references
+	 * stored in fields of objects and in cells of arrays in the initial states
+	 * are not constrained, as this would need quantifiers, that solvers often
+	 * cannot decide: this is sound, as the contents of the heap in the initial
+	 * states are not written by the model, so that executions reading them are
+	 * never considered precise (see {@link SymbolTable#exactOnlyIfWritten}).
 	 */
 	private List<Term> existingReferences() {
 		if (!model.getVocabulary().contains(HeapModel.ALLOC))
@@ -786,8 +786,8 @@ public class Unrolling {
 	}
 
 	/**
-	 * Yields the map recording that no location has been written, for the
-	 * given identifier of the heap model recording written locations.
+	 * Yields the map recording that no location has been written, for the given
+	 * identifier of the heap model recording written locations.
 	 */
 	private static Term nothingWritten(
 			Identifier id) {
@@ -910,14 +910,14 @@ public class Unrolling {
 	}
 
 	/**
-	 * Yields {@code true} if the given constraint computed by the analysis
-	 * (an invariant, or an initial constraint) involves floating point
-	 * numbers. Such constraints are not encoded: analyses often reason about
-	 * floating point numbers as real numbers (e.g., ignoring NaN, or rounding),
-	 * and their constraints are not sound with respect to the IEEE 754
-	 * semantics of the encoding (e.g., the constraint {@code x == NaN}, stating
-	 * that {@code x} is NaN, never holds in IEEE 754). Not encoding them is
-	 * sound, since they only restrict the states.
+	 * Yields {@code true} if the given constraint computed by the analysis (an
+	 * invariant, or an initial constraint) involves floating point numbers.
+	 * Such constraints are not encoded: analyses often reason about floating
+	 * point numbers as real numbers (e.g., ignoring NaN, or rounding), and
+	 * their constraints are not sound with respect to the IEEE 754 semantics of
+	 * the encoding (e.g., the constraint {@code x == NaN}, stating that
+	 * {@code x} is NaN, never holds in IEEE 754). Not encoding them is sound,
+	 * since they only restrict the states.
 	 */
 	private boolean floating(
 			SymbolicExpression constraint) {

@@ -80,8 +80,8 @@ public class CustomOperatorEncodingTest {
 	private static final SourceCodeLocation LOC = new SourceCodeLocation("test", 0, 0);
 
 	/**
-	 * An operator that LiSA does not know, yielding the maximum of two
-	 * numbers (as, e.g., {@code Math.max} in Java).
+	 * An operator that LiSA does not know, yielding the maximum of two numbers
+	 * (as, e.g., {@code Math.max} in Java).
 	 */
 	public static class TestMax
 			implements

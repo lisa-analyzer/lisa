@@ -8,9 +8,9 @@ import it.unive.lisa.analysis.AnalyzedCFG;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.checks.semantic.SemanticTool;
 import it.unive.lisa.interprocedural.ScopeId;
-import it.unive.lisa.outputs.messages.StatementMessage;
 import it.unive.lisa.lattices.GenericMapLattice;
 import it.unive.lisa.lattices.GenericSetLattice;
+import it.unive.lisa.outputs.messages.StatementMessage;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.type.Type;
 import java.util.ArrayList;
@@ -27,22 +27,22 @@ import org.apache.logging.log4j.Logger;
 /**
  * A {@link WarningVerifier} that verifies each warning independently of the
  * others, by verifying the violation it reports in the results of the analysis
- * of the statement it is reported on. Implementations only have to define how
- * a single violation is verified in a single result
+ * of the statement it is reported on. Implementations only have to define how a
+ * single violation is verified in a single result
  * ({@link #verify(AnalyzedCFG, Statement, Violation)}).<br>
  * <br>
- * An {@link ErrorViolation} reported on a statement happens if a matching
- * error continuation is in the post-state of the statement, either because
- * the statement raises it or because it is propagated, uncaught, from the
- * statement raising it (e.g., an exception reaching the end of a method).
- * Since errors leaving a called method are attributed to the call, each error
- * continuation records a statement of the same cfg, its thrower: this class
- * verifies error violations by verifying, for each matching error
- * continuation, that it is raised by its thrower. Implementations thus only
- * have to verify error violations raised by the given statement.<br>
+ * An {@link ErrorViolation} reported on a statement happens if a matching error
+ * continuation is in the post-state of the statement, either because the
+ * statement raises it or because it is propagated, uncaught, from the statement
+ * raising it (e.g., an exception reaching the end of a method). Since errors
+ * leaving a called method are attributed to the call, each error continuation
+ * records a statement of the same cfg, its thrower: this class verifies error
+ * violations by verifying, for each matching error continuation, that it is
+ * raised by its thrower. Implementations thus only have to verify error
+ * violations raised by the given statement.<br>
  * <br>
- * Failures while verifying a warning do not abort the verification: the
- * warning is deemed possible.
+ * Failures while verifying a warning do not abort the verification: the warning
+ * is deemed possible.
  *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  *
@@ -158,12 +158,12 @@ public abstract class IndividualWarningVerifier<A extends AbstractLattice<A>, D 
 	}
 
 	/**
-	 * Verifies, directly at the given statement, an error violation whose
-	 * error continuations might have been propagated from other statements.
-	 * This is queried before verifying the continuations where they are
-	 * raised, and it lets implementations exploit information that is only
-	 * available where the warning is reported (e.g., that all executions
-	 * reaching the end of a cfg do so with matching errors). If the result is
+	 * Verifies, directly at the given statement, an error violation whose error
+	 * continuations might have been propagated from other statements. This is
+	 * queried before verifying the continuations where they are raised, and it
+	 * lets implementations exploit information that is only available where the
+	 * warning is reported (e.g., that all executions reaching the end of a cfg
+	 * do so with matching errors). If the result is
 	 * {@link VerificationOutcome#POSSIBLE}, the continuations are verified
 	 * where they are raised. The default implementation yields
 	 * {@link VerificationResult#POSSIBLE}.
@@ -185,11 +185,11 @@ public abstract class IndividualWarningVerifier<A extends AbstractLattice<A>, D 
 	}
 
 	/**
-	 * Verifies the given violation at the given statement, in the given
-	 * result. Error violations are verified at the statements throwing the
-	 * matching error continuations in the post-state of the statement (see
-	 * the documentation of this class), excluding the ones that are caught by
-	 * the error edges leaving the statement.
+	 * Verifies the given violation at the given statement, in the given result.
+	 * Error violations are verified at the statements throwing the matching
+	 * error continuations in the post-state of the statement (see the
+	 * documentation of this class), excluding the ones that are caught by the
+	 * error edges leaving the statement.
 	 */
 	private VerificationResult verifyIn(
 			Analysis<A, D> analysis,
@@ -230,7 +230,8 @@ public abstract class IndividualWarningVerifier<A extends AbstractLattice<A>, D 
 		// no matching error reaches the statement
 		VerificationResult outcome = VerificationResult.REFUTED;
 		for (Statement thrower : throwers) {
-			outcome = outcome.lub(verify(result, thrower, violation));
+			// a confirmation tells which statement raises the error
+			outcome = outcome.lub(verify(result, thrower, violation).withThrower(thrower));
 			if (outcome.getOutcome() == VerificationOutcome.CONFIRMED)
 				break;
 		}

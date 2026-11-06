@@ -157,6 +157,9 @@ public final class Datatype {
 	 * @param term        the term
 	 *
 	 * @return the boolean term
+	 * 
+	 * @throws IllegalArgumentException if the given constructor is not a
+	 *                                      constructor of this datatype
 	 */
 	public Term test(
 			String constructor,

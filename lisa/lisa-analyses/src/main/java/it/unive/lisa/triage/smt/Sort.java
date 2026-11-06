@@ -73,6 +73,8 @@ public final class Sort {
 	 * @param width the number of bits
 	 *
 	 * @return the sort
+	 * 
+	 * @throws IllegalArgumentException if {@code width} is not positive
 	 */
 	public static Sort bitVector(
 			int width) {
@@ -110,11 +112,6 @@ public final class Sort {
 	}
 
 	/**
-	 * Yields whether this is an array sort (see {@link #array(Sort, Sort)}).
-	 *
-	 * @return whether this is an array sort
-	 */
-	/**
 	 * Yields {@code true} if this is the sort of floating point numbers
 	 * ({@link #FLOAT32} or {@link #FLOAT64}).
 	 *
@@ -125,27 +122,32 @@ public final class Sort {
 	}
 
 	/**
-	 * Yields the number of bits of the exponent of the numbers of this
-	 * floating point sort.
+	 * Yields the number of bits of the exponent of the numbers of this floating
+	 * point sort.
 	 *
-	 * @return the number of bits, or {@code 0} if this is not a floating
-	 *             point sort
+	 * @return the number of bits, or {@code 0} if this is not a floating point
+	 *             sort
 	 */
 	public int getExponentBits() {
 		return equals(FLOAT32) ? 8 : equals(FLOAT64) ? 11 : 0;
 	}
 
 	/**
-	 * Yields the number of bits of the significand (including the hidden
-	 * bit) of the numbers of this floating point sort.
+	 * Yields the number of bits of the significand (including the hidden bit)
+	 * of the numbers of this floating point sort.
 	 *
-	 * @return the number of bits, or {@code 0} if this is not a floating
-	 *             point sort
+	 * @return the number of bits, or {@code 0} if this is not a floating point
+	 *             sort
 	 */
 	public int getSignificandBits() {
 		return equals(FLOAT32) ? 24 : equals(FLOAT64) ? 53 : 0;
 	}
 
+	/**
+	 * Yields whether this is an array sort (see {@link #array(Sort, Sort)}).
+	 *
+	 * @return whether this is an array sort
+	 */
 	public boolean isArray() {
 		return element != null;
 	}
@@ -163,8 +165,8 @@ public final class Sort {
 	/**
 	 * Yields the sort of the elements of this array sort.
 	 *
-	 * @return the sort of the elements, or {@code null} if this is not an
-	 *             array sort
+	 * @return the sort of the elements, or {@code null} if this is not an array
+	 *             sort
 	 */
 	public Sort getElement() {
 		return element;

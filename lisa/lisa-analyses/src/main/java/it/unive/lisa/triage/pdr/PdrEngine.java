@@ -63,8 +63,8 @@ import java.util.Set;
  * {@link Unrolling}, the post-state is step {@code 1}. A single query covers
  * all the cases of all the transitions entering a location (the model tells
  * which one is taken), and the terms used by many queries (the invariants of
- * the analysis, the lemmas, the transitions and the initial condition) are
- * sent to the solver once, as definitions.
+ * the analysis, the lemmas, the transitions and the initial condition) are sent
+ * to the solver once, as definitions.
  *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
@@ -148,8 +148,8 @@ public class PdrEngine {
 	public static final long MAX_LITERAL_SIZE = 10_000;
 
 	/**
-	 * The imprecision of predecessors where conditions too large to be
-	 * tracked have been dropped.
+	 * The imprecision of predecessors where conditions too large to be tracked
+	 * have been dropped.
 	 */
 	public static final String OVERSIZED = "unprojected values: conditions too large to track";
 
@@ -194,8 +194,8 @@ public class PdrEngine {
 	private List<Obligation> counterexample;
 
 	/**
-	 * The terms sent to the solver once, as definitions, since they are used
-	 * by many queries: the seeds of each location, the initial condition, the
+	 * The terms sent to the solver once, as definitions, since they are used by
+	 * many queries: the seeds of each location, the initial condition, the
 	 * lemmas and the transitions, at the steps they are used at.
 	 */
 	private final Map<Object, Term> definitions = new LinkedHashMap<>();
@@ -251,10 +251,9 @@ public class PdrEngine {
 	}
 
 	/**
-	 * Builds the engine, as
-	 * {@link #PdrEngine(AlarmModel, SmtSolver, boolean)}, encoding expressions
-	 * with the encoders built by the given factory (e.g., encoders knowing the
-	 * operators of a frontend).
+	 * Builds the engine, as {@link #PdrEngine(AlarmModel, SmtSolver, boolean)},
+	 * encoding expressions with the encoders built by the given factory (e.g.,
+	 * encoders knowing the operators of a frontend).
 	 *
 	 * @param model    the model to check
 	 * @param solver   the solver to use, that is not closed by the engine
@@ -640,8 +639,8 @@ public class PdrEngine {
 	 * read by the given expressions have been written (see
 	 * {@link HeapOperators.WrittenAt}), that are added to the obligations: a
 	 * read is precise only if its location has been written, and this is a
-	 * property of the whole execution reaching the read, not only of the
-	 * step performing it. Adding the conditions to the obligations makes the
+	 * property of the whole execution reaching the read, not only of the step
+	 * performing it. Adding the conditions to the obligations makes the
 	 * predecessors computed for them satisfy them too, until the writes are
 	 * reached. Strict queries require the reads to be precise, so the
 	 * conditions hold in the models of the queries yielding the obligations.

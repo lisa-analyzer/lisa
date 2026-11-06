@@ -25,8 +25,8 @@ import it.unive.lisa.type.Type;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.LinkedHashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -94,8 +94,7 @@ public class TransitionExtractor<A extends AbstractLattice<A>, D extends Abstrac
 	 *
 	 * @param tool       the tool containing the results of the analysis
 	 * @param frame      the frame whose nodes are replayed
-	 * @param factory    the factory of the fresh values used in the
-	 *                       transitions
+	 * @param factory    the factory of the fresh values used in the transitions
 	 * @param maxCases   the maximum number of cases of each transition
 	 * @param expanded   the frames of the callees to expand
 	 * @param budget     tells whether or not new callees can be entered (see
@@ -121,17 +120,16 @@ public class TransitionExtractor<A extends AbstractLattice<A>, D extends Abstrac
 	 *
 	 * @param tool       the tool containing the results of the analysis
 	 * @param frame      the frame whose nodes are replayed
-	 * @param factory    the factory of the fresh values used in the
-	 *                       transitions
+	 * @param factory    the factory of the fresh values used in the transitions
 	 * @param maxCases   the maximum number of cases of each transition
 	 * @param expanded   the frames of the callees to expand
 	 * @param budget     tells whether more calls can be expanded
-	 * @param resumeNode the node of the caller containing the call that
-	 *                       reaches the frame, where the caller resumes after
-	 *                       the call returns ({@code null} for the root frame)
-	 * @param parent     the extractor of the frame of the caller, that
-	 *                       handles the errors leaving the frame
-	 *                       ({@code null} for the root frame)
+	 * @param resumeNode the node of the caller containing the call that reaches
+	 *                       the frame, where the caller resumes after the call
+	 *                       returns ({@code null} for the root frame)
+	 * @param parent     the extractor of the frame of the caller, that handles
+	 *                       the errors leaving the frame ({@code null} for the
+	 *                       root frame)
 	 */
 	public TransitionExtractor(
 			SemanticTool<A, D> tool,
@@ -150,19 +148,18 @@ public class TransitionExtractor<A extends AbstractLattice<A>, D extends Abstrac
 	 *
 	 * @param tool       the tool containing the results of the analysis
 	 * @param frame      the frame whose nodes are replayed
-	 * @param factory    the factory of the fresh values used in the
-	 *                       transitions
+	 * @param factory    the factory of the fresh values used in the transitions
 	 * @param maxCases   the maximum number of cases of each transition
 	 * @param expanded   the frames of the callees to expand
 	 * @param budget     tells whether more calls can be expanded
-	 * @param resumeNode the node of the caller containing the call that
-	 *                       reaches the frame, where the caller resumes after
-	 *                       the call returns ({@code null} for the root frame)
-	 * @param parent     the extractor of the frame of the caller, that
-	 *                       handles the errors leaving the frame
-	 *                       ({@code null} for the root frame)
-	 * @param cache      the cache of the information computed from the
-	 *                       results of the analysis
+	 * @param resumeNode the node of the caller containing the call that reaches
+	 *                       the frame, where the caller resumes after the call
+	 *                       returns ({@code null} for the root frame)
+	 * @param parent     the extractor of the frame of the caller, that handles
+	 *                       the errors leaving the frame ({@code null} for the
+	 *                       root frame)
+	 * @param cache      the cache of the information computed from the results
+	 *                       of the analysis
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public TransitionExtractor(
@@ -248,8 +245,8 @@ public class TransitionExtractor<A extends AbstractLattice<A>, D extends Abstrac
 
 	/**
 	 * Extracts the symbolic transitions starting at the given location of the
-	 * frame of this extractor: the location before a node, or the one where
-	 * the node resumes after an expanded call returned.
+	 * frame of this extractor: the location before a node, or the one where the
+	 * node resumes after an expanded call returned.
 	 *
 	 * @param location  the location
 	 * @param expansion whether or not the calls of the node can be expanded
@@ -277,6 +274,8 @@ public class TransitionExtractor<A extends AbstractLattice<A>, D extends Abstrac
 		Map<Frame, SymbolicStore> entered = replay.getEntered();
 		if (replay.hasStopped())
 			post = stopped(post);
+		else if (entered.isEmpty() && post.getExecution().isBottom())
+			post = lost(node, pre, post);
 
 		Map<Statement, SymbolicStore> partial = new LinkedHashMap<>();
 		for (Statement sub : expressions.getKeys()) {
@@ -355,7 +354,7 @@ public class TransitionExtractor<A extends AbstractLattice<A>, D extends Abstrac
 		if (parent != null)
 			for (Map.Entry<Error, ProgramState<ReplayState<A>>> e : raised(node, post).entrySet())
 				if (!caught(node, e.getKey()))
-					leave(location, e.getKey(), e.getValue(), outgoing, escaping);
+					leave(location, e.getKey(), e.getValue(), outgoing, escaping, e.getKey().getThrower());
 
 		return new NodeTransitions(location, outgoing, exit, raisedErrors(node, post), partial, replay.getCalls(),
 				escaping);
@@ -363,37 +362,38 @@ public class TransitionExtractor<A extends AbstractLattice<A>, D extends Abstrac
 
 	/**
 	 * Moves an error raised in the frame of this extractor, and not caught
-	 * there, to the caller: the scope of the callee is popped, and the error
-	 * is raised by the call, as the analysis does when an error leaves a
-	 * callee.
+	 * there, to the caller: the scope of the callee is popped, and the error is
+	 * raised by the call, as the analysis does when an error leaves a callee.
 	 */
 	private void leave(
 			ModelLocation source,
 			Error error,
 			ProgramState<ReplayState<A>> state,
 			List<EdgeTransition> outgoing,
-			List<NodeTransitions.EscapingError> escaping)
+			List<NodeTransitions.EscapingError> escaping,
+			Statement origin)
 			throws SemanticException {
 		CFGCall call = frame.getCall();
 		ProgramState<ReplayState<A>> popped = state.popScope(new ScopeToken(call), call);
 		Call thrower = call;
 		while (thrower.getSource() != null)
 			thrower = thrower.getSource();
-		parent.raise(source, new Error(error.getType(), thrower), popped, outgoing, escaping);
+		parent.raise(source, new Error(error.getType(), thrower), popped, outgoing, escaping, origin);
 	}
 
 	/**
-	 * Handles an error raised by a node of the frame of this extractor
-	 * through one of its calls: the error goes to the handlers of the node
-	 * that catch it, or leaves the frame if none catches it (to the caller, or
-	 * out of the model if this is the root frame).
+	 * Handles an error raised by a node of the frame of this extractor through
+	 * one of its calls: the error goes to the handlers of the node that catch
+	 * it, or leaves the frame if none catches it (to the caller, or out of the
+	 * model if this is the root frame).
 	 */
 	private void raise(
 			ModelLocation source,
 			Error error,
 			ProgramState<ReplayState<A>> state,
 			List<EdgeTransition> outgoing,
-			List<NodeTransitions.EscapingError> escaping)
+			List<NodeTransitions.EscapingError> escaping,
+			Statement origin)
 			throws SemanticException {
 		Statement node = rootOf(error.getThrower());
 		AnalysisState<ReplayState<A>> raised = new AnalysisState<>(state).bottom().addError(error, state);
@@ -402,15 +402,15 @@ public class TransitionExtractor<A extends AbstractLattice<A>, D extends Abstrac
 		if (caught(node, error))
 			return;
 		if (parent == null)
-			escaping.add(new NodeTransitions.EscapingError(node, error, state.getState().getStore()));
+			escaping.add(new NodeTransitions.EscapingError(node, error, state.getState().getStore(), origin));
 		else
-			leave(source, error, state, outgoing, escaping);
+			leave(source, error, state, outgoing, escaping, origin);
 	}
 
 	/**
-	 * Yields the error-handling edges that might catch the errors raised by
-	 * the given node: its own ones, and the ones of the nodes that follow it
-	 * (see {@link #downstreamHandlers(Statement)}).
+	 * Yields the error-handling edges that might catch the errors raised by the
+	 * given node: its own ones, and the ones of the nodes that follow it (see
+	 * {@link #downstreamHandlers(Statement)}).
 	 */
 	private List<Edge> handlersOf(
 			Statement node) {
@@ -473,6 +473,28 @@ public class TransitionExtractor<A extends AbstractLattice<A>, D extends Abstrac
 					traversed.getExecutionState().getStore()));
 	}
 
+	/**
+	 * Yields the post-state of a node whose replay yielded no execution. If the
+	 * analysis computed executions after the node, the replay lost them (e.g.,
+	 * the semantics of a native construct behaves differently when replayed):
+	 * since excluding them would be unsound, the node continues from the
+	 * post-state of the analysis, losing all values.
+	 */
+	private AnalysisState<ReplayState<A>> lost(
+			Statement node,
+			AnalysisState<ReplayState<A>> pre,
+			AnalysisState<ReplayState<A>> post) {
+		AnalysisState<A> after = result.getAnalysisStateAfter(node);
+		if (after.getExecution().isBottom() || after.getExecutionState().isBottom()
+				|| pre.getExecution().isBottom())
+			return post;
+		ProgramState<A> execution = after.getExecution();
+		ReplayState<A> state = domain.lift(execution.getState())
+				.withStore(pre.getExecutionState().getStore().havocAll());
+		return post.withExecution(new ProgramState<>(state, execution.getComputedExpressions(),
+				execution.getFixpointInformation()));
+	}
+
 	private static <A extends AbstractLattice<A>> AnalysisState<ReplayState<A>> stopped(
 			AnalysisState<ReplayState<A>> state) {
 		if (!state.getExecution().isBottom() && state.getExecutionState().isBottom())
@@ -487,10 +509,10 @@ public class TransitionExtractor<A extends AbstractLattice<A>, D extends Abstrac
 	}
 
 	/**
-	 * Yields the error-handling edges of the nodes that can be reached from
-	 * the given one through edges that are not error-handling ones (excluding
-	 * the ones of the node itself), keeping one edge for each handler and
-	 * protected block.
+	 * Yields the error-handling edges of the nodes that can be reached from the
+	 * given one through edges that are not error-handling ones (excluding the
+	 * ones of the node itself), keeping one edge for each handler and protected
+	 * block.
 	 */
 	private Collection<Edge> downstreamHandlers(
 			Statement node) {

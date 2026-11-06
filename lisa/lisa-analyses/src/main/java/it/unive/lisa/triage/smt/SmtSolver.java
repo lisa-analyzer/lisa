@@ -8,11 +8,11 @@ import java.util.Map;
  * An incremental SMT solver. Implementations might rely on external tools that
  * are not available in every environment: in that case, their creation fails
  * with an {@link SmtSolverUnavailableException}. All methods throw an
- * {@link SmtException} if the solver cannot complete the request: requests
- * that answer nothing (declarations, definitions, assertions and scopes) might
- * be sent to the solver later, together with the next request answering
- * something (e.g., {@link #check()}), and their failures reported by it. Solvers
- * hold external resources, and must be closed once they are no longer needed.
+ * {@link SmtException} if the solver cannot complete the request: requests that
+ * answer nothing (declarations, definitions, assertions and scopes) might be
+ * sent to the solver later, together with the next request answering something
+ * (e.g., {@link #check()}), and their failures reported by it. Solvers hold
+ * external resources, and must be closed once they are no longer needed.
  *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
@@ -71,8 +71,8 @@ public interface SmtSolver
 	/**
 	 * Defines a constant equal to the given term, that can be used in place of
 	 * the term in later requests (e.g., to send a term that is used by many
-	 * queries only once). Definitions, as declarations, are global, and
-	 * survive {@link #pop()}.
+	 * queries only once). Definitions, as declarations, are global, and survive
+	 * {@link #pop()}.
 	 *
 	 * @param name the name of the constant, that must not be already declared
 	 *                 or defined
@@ -86,8 +86,8 @@ public interface SmtSolver
 
 	/**
 	 * Discards all declarations, definitions, assertions and scopes, so that
-	 * the solver can be reused for unrelated queries as if it was new.
-	 * Solvers that cannot be reset are left unchanged.
+	 * the solver can be reused for unrelated queries as if it was new. Solvers
+	 * that cannot be reset are left unchanged.
 	 *
 	 * @return {@code true} if the solver has been reset, {@code false} if it
 	 *             cannot be reset

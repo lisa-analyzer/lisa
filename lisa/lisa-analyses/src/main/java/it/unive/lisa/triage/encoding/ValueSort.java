@@ -1,8 +1,8 @@
 package it.unive.lisa.triage.encoding;
 
 import it.unive.lisa.triage.smt.Datatype;
-import it.unive.lisa.triage.smt.FloatingPoints;
 import it.unive.lisa.triage.smt.Datatype.Field;
+import it.unive.lisa.triage.smt.FloatingPoints;
 import it.unive.lisa.triage.smt.SExpression;
 import it.unive.lisa.triage.smt.SmtException;
 import it.unive.lisa.triage.smt.Sort;
@@ -92,12 +92,12 @@ public final class ValueSort {
 	public static final Datatype DATATYPE;
 
 	/**
-	 * The {@link Datatype} of values without the constructors of floating
-	 * point numbers: the sort and the other constructors are the same as the
-	 * ones of {@link #DATATYPE}, so that the terms not involving floating
-	 * point numbers are the same with both. Declaring this datatype when
-	 * floating point numbers are not used avoids involving the theory of
-	 * floating point numbers in the queries, that can make them much slower.
+	 * The {@link Datatype} of values without the constructors of floating point
+	 * numbers: the sort and the other constructors are the same as the ones of
+	 * {@link #DATATYPE}, so that the terms not involving floating point numbers
+	 * are the same with both. Declaring this datatype when floating point
+	 * numbers are not used avoids involving the theory of floating point
+	 * numbers in the queries, that can make them much slower.
 	 */
 	public static final Datatype DATATYPE_WITHOUT_FLOATS;
 
@@ -270,9 +270,9 @@ public final class ValueSort {
 	}
 
 	/**
-	 * Yields the boolean term that holds if the given value is opaque, that
-	 * is, a value whose meaning is not modeled (e.g., a floating point number,
-	 * or a type token).
+	 * Yields the boolean term that holds if the given value is opaque, that is,
+	 * a value whose meaning is not modeled (e.g., a floating point number, or a
+	 * type token).
 	 *
 	 * @param value the value
 	 *

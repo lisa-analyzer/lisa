@@ -1,5 +1,6 @@
 package it.unive.lisa.checks.verification;
 
+import it.unive.lisa.program.cfg.statement.Statement;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -37,6 +38,8 @@ public class VerificationResult {
 
 	private final List<ReproducingInput> reproducingInputs;
 
+	private final Statement thrower;
+
 	/**
 	 * Builds the result, with no reproducing inputs.
 	 *
@@ -73,6 +76,44 @@ public class VerificationResult {
 		this.reproducingInputs = reproducingInputs == null || reproducingInputs.isEmpty()
 				? Collections.emptyList()
 				: Collections.unmodifiableList(List.copyOf(reproducingInputs));
+		this.thrower = null;
+	}
+
+	private VerificationResult(
+			VerificationResult result,
+			Statement thrower) {
+		this.outcome = result.outcome;
+		this.explanation = result.explanation;
+		this.reproducingInputs = result.reproducingInputs;
+		this.thrower = thrower;
+	}
+
+	/**
+	 * Yields a copy of this result recording the statement raising the error of
+	 * a confirmed error violation (see {@link #getThrower()}). This result is
+	 * returned if it is not confirmed, or if it already records one.
+	 *
+	 * @param thrower the statement raising the error
+	 *
+	 * @return the result
+	 */
+	public VerificationResult withThrower(
+			Statement thrower) {
+		if (outcome != VerificationOutcome.CONFIRMED || this.thrower != null || thrower == null)
+			return this;
+		return new VerificationResult(this, thrower);
+	}
+
+	/**
+	 * Yields the statement raising the error that confirms an error violation,
+	 * if known: errors reported on a statement might be raised by several
+	 * statements, and a confirmation tells which one raises it in the
+	 * reproduced execution. This is not part of the equality of results.
+	 *
+	 * @return the statement, or {@code null} if unknown
+	 */
+	public Statement getThrower() {
+		return thrower;
 	}
 
 	/**
@@ -163,11 +204,12 @@ public class VerificationResult {
 			expl = explanation + "\n" + other.explanation;
 		List<ReproducingInput> inputs = reproducingInputs.isEmpty() ? other.reproducingInputs : reproducingInputs;
 
-		if (Objects.equals(expl, explanation) && inputs == reproducingInputs)
+		Statement thr = thrower == null ? other.thrower : thrower;
+		if (Objects.equals(expl, explanation) && inputs == reproducingInputs && thr == thrower)
 			return this;
-		if (Objects.equals(expl, other.explanation) && inputs == other.reproducingInputs)
+		if (Objects.equals(expl, other.explanation) && inputs == other.reproducingInputs && thr == other.thrower)
 			return other;
-		return new VerificationResult(lub, expl, inputs);
+		return new VerificationResult(lub, expl, inputs).withThrower(thr);
 	}
 
 	@Override

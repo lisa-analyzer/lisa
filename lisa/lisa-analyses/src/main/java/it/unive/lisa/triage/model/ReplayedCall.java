@@ -12,9 +12,8 @@ import java.util.List;
  * a statement (e.g., the call to a constructor performed by an object
  * creation). A call is <i>expandable</i> if the code of its callees can be part
  * of the model, in frames entered from the frame of the node (see
- * {@link ReplayInterprocedural} for the conditions), and <i>expanded</i> if
- * the replay entered (or resumed after) its callees instead of summarizing
- * them.
+ * {@link ReplayInterprocedural} for the conditions), and <i>expanded</i> if the
+ * replay entered (or resumed after) its callees instead of summarizing them.
  *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */

@@ -16,6 +16,18 @@ import it.unive.lisa.symbolic.value.Identifier;
 import java.util.Collection;
 import org.apache.commons.lang3.tuple.Pair;
 
+/**
+ * An abstract domain that replays the execution of a program, tracking the
+ * symbolic store and the underlying abstract domain. The replay domain is
+ * parameterized by the type of the underlying abstract domain and the type of
+ * the abstract lattice it produces.
+ * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ *
+ * @param <A> the type of {@link AbstractLattice} embedded in this state
+ * @param <D> the type of {@link AbstractDomain} that produces instances of
+ *                {@code A}
+ */
 public class ReplayDomain<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
 		implements
 		AbstractDomain<ReplayState<A>> {

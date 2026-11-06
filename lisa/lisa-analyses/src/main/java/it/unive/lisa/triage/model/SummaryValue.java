@@ -55,10 +55,10 @@ public class SummaryValue
 		UNSUPPORTED("unsupported expressions"),
 
 		/**
-		 * The condition under which one of several unconditional successors
-		 * of a node is chosen, when the cfg over-approximates the control
-		 * flow of the program (e.g., a block shared by several paths that
-		 * continue differently after it).
+		 * The condition under which one of several unconditional successors of
+		 * a node is chosen, when the cfg over-approximates the control flow of
+		 * the program (e.g., a block shared by several paths that continue
+		 * differently after it).
 		 */
 		CONTROL("nondeterministic control flow");
 

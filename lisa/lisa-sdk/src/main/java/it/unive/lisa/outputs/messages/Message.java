@@ -253,8 +253,8 @@ public class Message
 
 	/**
 	 * Yields the explanation of the outcome of the verification of the
-	 * violation reported by this message, if any (e.g., why the violation
-	 * could be neither confirmed nor refuted).
+	 * violation reported by this message, if any (e.g., why the violation could
+	 * be neither confirmed nor refuted).
 	 *
 	 * @return the explanation, or {@code null}
 	 */

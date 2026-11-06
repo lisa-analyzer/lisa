@@ -107,7 +107,6 @@ subprojects {
     apply plugin: 'checkstyle' // javadoc checking - coding conventions
     apply plugin: 'maven-publish' // publication on maven central
     apply plugin: 'signing' // artifact signing
-    apply plugin: 'jacoco' // coverage reports
     
     apply from: "${project.rootDir}/code-style.gradle"
     apply from: "${project.rootDir}/java.gradle"

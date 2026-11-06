@@ -12,6 +12,16 @@ import it.unive.lisa.symbolic.value.Identifier;
 import java.util.Collection;
 import org.apache.commons.lang3.tuple.Pair;
 
+/**
+ * An abstract domain that tracks the history of fixpoint iterations as a
+ * {@link HistoryState}.
+ * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ * 
+ * @param <A> the type of {@link AbstractLattice} embedded in this state
+ * @param <D> the type of {@link AbstractDomain} that produces instances of
+ *                {@code A}
+ */
 public class HistoryDomain<
 		D extends AbstractDomain<A>,
 		A extends AbstractLattice<A>>

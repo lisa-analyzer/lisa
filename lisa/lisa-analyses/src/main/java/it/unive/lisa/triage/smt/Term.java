@@ -285,9 +285,9 @@ public final class Term {
 	}
 
 	/**
-	 * Builds the application of an associative connective, dropping its
-	 * neutral arguments and yielding its absorbing element if one of the
-	 * arguments is that element.
+	 * Builds the application of an associative connective, dropping its neutral
+	 * arguments and yielding its absorbing element if one of the arguments is
+	 * that element.
 	 */
 	private static Term connective(
 			String name,

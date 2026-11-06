@@ -24,8 +24,8 @@ public final class HeapOperators {
 
 	/**
 	 * The map obtained by writing, in a map (the left operand), a value (the
-	 * right operand) at a key (the middle operand, a reference for the
-	 * contents of fields, or the key of a cell for the cells of arrays).
+	 * right operand) at a key (the middle operand, a reference for the contents
+	 * of fields, or the key of a cell for the cells of arrays).
 	 *
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 */
@@ -60,8 +60,8 @@ public final class HeapOperators {
 	 * The value of a map (the left operand) at a key (the right operand, a
 	 * reference for the contents of fields, or the key of a cell for the cells
 	 * of arrays), as read by the program: the middle operand tells which
-	 * locations have been written, and the read is precise only if the
-	 * location has been written.
+	 * locations have been written, and the read is precise only if the location
+	 * has been written.
 	 *
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 */
@@ -126,10 +126,10 @@ public final class HeapOperators {
 	}
 
 	/**
-	 * Whether a location has been written: the left operand is a map of
-	 * written locations (see {@link ReferenceRead}), and the right one is the
-	 * key of the location (a reference for the contents of fields, or the key
-	 * of a cell for the cells of arrays).
+	 * Whether a location has been written: the left operand is a map of written
+	 * locations (see {@link ReferenceRead}), and the right one is the key of
+	 * the location (a reference for the contents of fields, or the key of a
+	 * cell for the cells of arrays).
 	 *
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 */

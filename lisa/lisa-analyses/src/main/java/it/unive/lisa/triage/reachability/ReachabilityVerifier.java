@@ -140,10 +140,10 @@ public class ReachabilityVerifier<A extends AbstractLattice<A>, D extends Abstra
 	 * {@link ReachabilityStatus#REACHABLE}, and all the exit points of the cfg
 	 * are only reached with matching errors (that is, their normal and halting
 	 * states are bottom, and they contain no other error, ignoring the errors
-	 * caught by the error edges leaving them), then every
-	 * terminating execution of the cfg ends with a matching error, and the
-	 * violation is confirmed. This holds even if no single statement always
-	 * raises the error (e.g., if two branches raise it).
+	 * caught by the error edges leaving them), then every terminating execution
+	 * of the cfg ends with a matching error, and the violation is confirmed.
+	 * This holds even if no single statement always raises the error (e.g., if
+	 * two branches raise it).
 	 */
 	@Override
 	protected VerificationResult verifyPropagated(

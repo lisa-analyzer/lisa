@@ -20,8 +20,8 @@ import java.util.function.UnaryOperator;
  * The {@link Analysis} used to replay statements over a {@link ReplayDomain}.
  * Before the target of an assignment that is a heap location (e.g., a field of
  * an object) is rewritten into the locations of the abstraction of the heap of
- * the analysis, the write is recorded in the stores of the replayed state, as
- * a write of the heap model (see {@link HeapModel}). The wrapped domain still
+ * the analysis, the write is recorded in the stores of the replayed state, as a
+ * write of the heap model (see {@link HeapModel}). The wrapped domain still
  * performs the assignment as during the analysis, so that it can answer the
  * queries of the replay. Assignments of locations of the abstraction of the
  * heap of the analysis that do not come from such a write make the heap

@@ -17,9 +17,8 @@ import java.util.Set;
  * and the transition leading there (or no transition, if the obligation
  * restricts the cube of its parent to initial states), together with the values
  * of the inputs taken by that transition and the exactness of its encoding (as
- * the reasons why it is not exact, if any), so
- * that a chain of obligations reaching the initial states yields a
- * counterexample.
+ * the reasons why it is not exact, if any), so that a chain of obligations
+ * reaching the initial states yields a counterexample.
  *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
@@ -48,23 +47,24 @@ public final class Obligation
 	/**
 	 * Builds the obligation.
 	 *
-	 * @param location the location
-	 * @param cube     the cube
-	 * @param level    the level
-	 * @param parent   the obligation this is a predecessor of, or {@code null}
-	 *                     for the bad location
-	 * @param edge     the transition from {@code location} to the location of
-	 *                     the parent (for the bad location, {@code null})
-	 * @param inputs   the values of the inputs taken by the transition (for the
-	 *                     bad location, by the bad case)
+	 * @param location     the location
+	 * @param cube         the cube
+	 * @param level        the level
+	 * @param parent       the obligation this is a predecessor of, or
+	 *                         {@code null} for the bad location
+	 * @param edge         the transition from {@code location} to the location
+	 *                         of the parent (for the bad location,
+	 *                         {@code null})
+	 * @param inputs       the values of the inputs taken by the transition (for
+	 *                         the bad location, by the bad case)
 	 * @param imprecisions the reasons why the transition (or the bad case) is
 	 *                         not encoded exactly (empty if it is), as
 	 *                         {@link it.unive.lisa.triage.bmc.Unrolling#getImprecisions(String, it.unive.lisa.triage.smt.SmtSolver)}
 	 *                         yields them
-	 * @param point    the values of the identifiers in the model that produced
-	 *                     this obligation (a state of the cube)
-	 * @param order    the creation order of the obligation, used to break ties
-	 *                     in the queue
+	 * @param point        the values of the identifiers in the model that
+	 *                         produced this obligation (a state of the cube)
+	 * @param order        the creation order of the obligation, used to break
+	 *                         ties in the queue
 	 */
 	public Obligation(
 			ModelLocation location,

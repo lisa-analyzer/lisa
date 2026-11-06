@@ -351,7 +351,8 @@ public class CallExpansionTest {
 		// the violation is real, but it cannot be confirmed
 		VerificationResult result = verify(new PdrVerifier<>(PdrVerifier.DEFAULT_MAX_LEVEL, 500,
 				PdrVerifier.DEFAULT_MAX_MILLIS, SmtLibProcessSolver::z3, SymbolicStore.DEFAULT_MAX_CASES)
-				.withFixpointCheck(false), "recursive");
+						.withFixpointCheck(false),
+				"recursive");
 		assertEquals(VerificationOutcome.POSSIBLE, result.getOutcome(), result.toString());
 	}
 

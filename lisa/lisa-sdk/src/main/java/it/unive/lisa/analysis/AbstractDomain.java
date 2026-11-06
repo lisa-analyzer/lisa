@@ -40,8 +40,8 @@ public interface AbstractDomain<
 	 * contained inside this domain, also recursively querying inner domains
 	 * (enabling retrieval through combinations of domains, or through domains
 	 * wrapping other domains). This is the counterpart, for domains, of
-	 * {@link Lattice#getAllLatticeInstances(Class)}, and lets code that needs
-	 * a specific domain (e.g., the value domain of a
+	 * {@link Lattice#getAllLatticeInstances(Class)}, and lets code that needs a
+	 * specific domain (e.g., the value domain of a
 	 * {@link SimpleAbstractDomain}) retrieve it without depending on how the
 	 * domain of the analysis is built.<br>
 	 * <br>

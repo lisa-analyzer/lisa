@@ -157,20 +157,9 @@ public class SortPolicy {
 	}
 
 	/**
-	 * Yields whether the values of the given expression might be opaque values
-	 * whose meaning is not modeled, and whose equalities and comparisons thus
-	 * do not follow from their identity (that is, floating point numbers, or
-	 * values of unknown type). Identifiers are judged through their runtime
-	 * types (if known), while other expressions through their static type.
-	 *
-	 * @param expression the expression
-	 *
-	 * @return whether the values might be opaque
-	 */
-	/**
-	 * Yields a policy deciding the same sorts as this one, except that
-	 * floating point numbers are not encoded as such, but as opaque values of
-	 * the {@link ValueSort} datatype (whose meaning is not modeled), and the
+	 * Yields a policy deciding the same sorts as this one, except that floating
+	 * point numbers are not encoded as such, but as opaque values of the
+	 * {@link ValueSort} datatype (whose meaning is not modeled), and the
 	 * constructors of floating point values of {@link ValueSort} are not used.
 	 *
 	 * @return the policy
@@ -232,6 +221,15 @@ public class SortPolicy {
 		return type.isNumericType() && !type.asNumericType().isIntegral();
 	}
 
+	/**
+	 * Yields {@code true} if the given expression might be encoded as an opaque
+	 * value of the {@link ValueSort} datatype, that is, if its type is unknown,
+	 * or if it is a floating point type.
+	 *
+	 * @param expression the expression
+	 *
+	 * @return whether or not the expression might be encoded as an opaque value
+	 */
 	public boolean mayBeOpaque(
 			SymbolicExpression expression) {
 		if (expression instanceof Identifier) {

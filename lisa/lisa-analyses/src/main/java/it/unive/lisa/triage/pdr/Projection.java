@@ -12,10 +12,10 @@ import it.unive.lisa.symbolic.value.operator.binary.LogicalAnd;
 import it.unive.lisa.triage.encoding.ValueSort;
 import it.unive.lisa.triage.model.FreshValue;
 import it.unive.lisa.triage.model.SymbolicCase;
-import it.unive.lisa.triage.smt.SExpression;
-import it.unive.lisa.triage.smt.Sort;
 import it.unive.lisa.triage.smt.FloatingPoints;
+import it.unive.lisa.triage.smt.SExpression;
 import it.unive.lisa.triage.smt.SmtException;
+import it.unive.lisa.triage.smt.Sort;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.TypeSystem;
 import java.math.BigInteger;
@@ -181,8 +181,8 @@ public final class Projection {
 	}
 
 	/**
-	 * Yields a floating point type of the program whose values are encoded
-	 * with the given sort, or {@code null} if there is none.
+	 * Yields a floating point type of the program whose values are encoded with
+	 * the given sort, or {@code null} if there is none.
 	 */
 	private static Type floatType(
 			TypeSystem types,

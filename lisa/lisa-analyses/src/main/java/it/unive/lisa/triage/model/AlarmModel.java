@@ -18,12 +18,12 @@ import java.util.Set;
  * A model of the executions of a cfg (in a given context) that might lead to
  * the violation of a property, built by {@link AlarmModelBuilder}. The model is
  * a control-flow automaton whose locations (see {@link ModelLocation}) are the
- * beginnings of the nodes of the cfg that can reach the node where the property is checked (the <i>bad
- * location</i>), and whose edges carry the symbolic transitions extracted from
- * the results of the analysis. If some calls are expanded, the locations also
- * include the ones of the frames of their callees, and the ones where the
- * callers resume after the callees return (see {@link AlarmModelBuilder}). The
- * model contains:
+ * beginnings of the nodes of the cfg that can reach the node where the property
+ * is checked (the <i>bad location</i>), and whose edges carry the symbolic
+ * transitions extracted from the results of the analysis. If some calls are
+ * expanded, the locations also include the ones of the frames of their callees,
+ * and the ones where the callers resume after the callees return (see
+ * {@link AlarmModelBuilder}). The model contains:
  * <ul>
  * <li>the locations ({@link #getLocations()}) and their transitions
  * ({@link #getTransitions(ModelLocation)}, restricted to edges between
@@ -199,8 +199,8 @@ public class AlarmModel {
 
 	/**
 	 * Yields the frames of the callees of the expandable calls reached at the
-	 * given locations of this model, that are not already among the given
-	 * ones (see {@link NodeTransitions#getCalls()}).
+	 * given locations of this model, that are not already among the given ones
+	 * (see {@link NodeTransitions#getCalls()}).
 	 *
 	 * @param trace    the locations
 	 * @param expanded the frames already expanded

@@ -83,22 +83,22 @@ import it.unive.lisa.symbolic.value.operator.unary.NumericAbs;
 import it.unive.lisa.symbolic.value.operator.unary.NumericNegation;
 import it.unive.lisa.symbolic.value.operator.unary.StringLength;
 import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
-import it.unive.lisa.triage.model.SummaryValue;
 import it.unive.lisa.triage.model.FreshValue;
-import it.unive.lisa.triage.model.InputValue;
 import it.unive.lisa.triage.model.HeapOperators;
+import it.unive.lisa.triage.model.InputValue;
+import it.unive.lisa.triage.model.SummaryValue;
 import it.unive.lisa.triage.smt.FloatingPoints;
 import it.unive.lisa.triage.smt.Sort;
 import it.unive.lisa.triage.smt.Term;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.TypeTokenType;
 import java.math.BigInteger;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 
 /**
@@ -131,11 +131,10 @@ import java.util.function.Function;
  * their own operators can encode them by subclassing this encoder and
  * overriding the methods encoding each kind of expression (e.g.,
  * {@link #encodeBinary(BinaryExpression, Term, Term)}), that contain the whole
- * encoding of the expressions of that kind and yield an unconstrained value
- * for unknown operators. Overriding methods should encode the operators they
- * know (possibly replacing the encoding of operators known by this encoder),
- * and invoke the overridden method for the other ones, relying on the
- * helpers of
+ * encoding of the expressions of that kind and yield an unconstrained value for
+ * unknown operators. Overriding methods should encode the operators they know
+ * (possibly replacing the encoding of operators known by this encoder), and
+ * invoke the overridden method for the other ones, relying on the helpers of
  * this class (e.g., {@link #coerce(Term, Sort, SymbolicExpression)},
  * {@link #asString(Term, SymbolicExpression)},
  * {@link #arithmetic(ValueExpression, List, Function)},
@@ -198,9 +197,9 @@ public class ExpressionEncoder
 
 	/**
 	 * Yields the provider of the constants used in the encoding, where
-	 * subclasses can also record the conditions under which their encodings
-	 * are precise ({@link SymbolTable#exactOnlyIf(Term, SymbolicExpression)})
-	 * or can be evaluated ({@link SymbolTable#require(Term)}).
+	 * subclasses can also record the conditions under which their encodings are
+	 * precise ({@link SymbolTable#exactOnlyIf(Term, SymbolicExpression)}) or
+	 * can be evaluated ({@link SymbolTable#require(Term)}).
 	 *
 	 * @return the symbol table
 	 */
@@ -328,10 +327,10 @@ public class ExpressionEncoder
 	/**
 	 * Yields an auxiliary constant of the given sort, used to encode the
 	 * expression precisely: the caller must constrain it, through
-	 * {@link SymbolTable#require(Term)}, so that its value is determined by
-	 * the operands of the expression (e.g., the position of the last
-	 * occurrence of a character in a string). Since its value is determined,
-	 * using it does not make the encoding imprecise.
+	 * {@link SymbolTable#require(Term)}, so that its value is determined by the
+	 * operands of the expression (e.g., the position of the last occurrence of
+	 * a character in a string). Since its value is determined, using it does
+	 * not make the encoding imprecise.
 	 *
 	 * @param sort   the sort of the constant
 	 * @param origin the expression being encoded
@@ -402,8 +401,8 @@ public class ExpressionEncoder
 	 *
 	 * @param term    the term to convert
 	 * @param fp      the floating point sort
-	 * @param operand the expression whose encoding is the term, or
-	 *                    {@code null} if unknown
+	 * @param operand the expression whose encoding is the term, or {@code null}
+	 *                    if unknown
 	 * @param origin  the expression being encoded
 	 *
 	 * @return the floating point number
@@ -446,11 +445,11 @@ public class ExpressionEncoder
 
 	/**
 	 * Converts the given integer to a floating point number of the given sort,
-	 * rounding to the nearest one. The conversion goes through a bit-vector
-	 * of the given width (smaller ones are much cheaper for solvers), since
+	 * rounding to the nearest one. The conversion goes through a bit-vector of
+	 * the given width (smaller ones are much cheaper for solvers), since
 	 * solvers often fail to decide conversions from real numbers: integers
-	 * outside of the range of signed integers of that width yield an
-	 * imprecise value.
+	 * outside of the range of signed integers of that width yield an imprecise
+	 * value.
 	 *
 	 * @param term   the integer
 	 * @param fp     the floating point sort
@@ -474,11 +473,11 @@ public class ExpressionEncoder
 	}
 
 	/**
-	 * Converts the given floating point number to an integer of the given
-	 * type, as by Java's narrowing conversions: NaN yields zero, numbers are
-	 * rounded toward zero and saturated to the range of the type (of
-	 * {@code int} for types narrower than {@code int}, whose values are then
-	 * wrapped to the type).
+	 * Converts the given floating point number to an integer of the given type,
+	 * as by Java's narrowing conversions: NaN yields zero, numbers are rounded
+	 * toward zero and saturated to the range of the type (of {@code int} for
+	 * types narrower than {@code int}, whose values are then wrapped to the
+	 * type).
 	 *
 	 * @param term the floating point number
 	 * @param type the integral type
@@ -526,8 +525,8 @@ public class ExpressionEncoder
 	 * the partial term directly.
 	 *
 	 * @param guard      the condition under which the term is precise
-	 * @param term       the precise encoding of the expression, when the
-	 *                       guard holds
+	 * @param term       the precise encoding of the expression, when the guard
+	 *                       holds
 	 * @param arguments  the arguments of the unknown function (usually, the
 	 *                       operands of the expression)
 	 * @param expression the expression being encoded
@@ -593,12 +592,11 @@ public class ExpressionEncoder
 	}
 
 	/**
-	 * Encodes a value expression whose kind is not handled by the other
-	 * methods of this encoder (e.g., an expression with an arbitrary number of
-	 * operands defined by a frontend). This encoder knows no such expression,
-	 * and yields an unconstrained value. Subclasses can override this to
-	 * encode the expressions they know, invoking this method for the other
-	 * ones.
+	 * Encodes a value expression whose kind is not handled by the other methods
+	 * of this encoder (e.g., an expression with an arbitrary number of operands
+	 * defined by a frontend). This encoder knows no such expression, and yields
+	 * an unconstrained value. Subclasses can override this to encode the
+	 * expressions they know, invoking this method for the other ones.
 	 *
 	 * @param expression     the expression
 	 * @param subExpressions the encodings of the sub-expressions, in the order
@@ -650,8 +648,8 @@ public class ExpressionEncoder
 	 * Encodes a constant: integral numbers, booleans, strings and types are
 	 * encoded, while other values (e.g., floating point numbers) yield an
 	 * unconstrained value. Subclasses can override this to encode the values
-	 * they know, or to encode some values differently, invoking this method
-	 * for the other ones.
+	 * they know, or to encode some values differently, invoking this method for
+	 * the other ones.
 	 *
 	 * @param expression the constant
 	 *
@@ -751,9 +749,9 @@ public class ExpressionEncoder
 	/**
 	 * Encodes a unary expression, given the encoding of its argument. Unknown
 	 * operators yield an unconstrained value. Subclasses can override this to
-	 * encode the operators they know (e.g., the ones defined by a frontend),
-	 * or to encode some operators differently, invoking this method for the
-	 * other ones.
+	 * encode the operators they know (e.g., the ones defined by a frontend), or
+	 * to encode some operators differently, invoking this method for the other
+	 * ones.
 	 *
 	 * @param expression the expression
 	 * @param arg        the encoding of the argument
@@ -797,11 +795,11 @@ public class ExpressionEncoder
 	}
 
 	/**
-	 * Encodes a binary expression, given the encodings of its operands.
-	 * Unknown operators yield an unconstrained value. Subclasses can override
-	 * this to encode the operators they know (e.g., the ones defined by a
-	 * frontend), or to encode some operators differently, invoking this
-	 * method for the other ones.
+	 * Encodes a binary expression, given the encodings of its operands. Unknown
+	 * operators yield an unconstrained value. Subclasses can override this to
+	 * encode the operators they know (e.g., the ones defined by a frontend), or
+	 * to encode some operators differently, invoking this method for the other
+	 * ones.
 	 *
 	 * @param expression the expression
 	 * @param left       the encoding of the left operand
@@ -970,8 +968,8 @@ public class ExpressionEncoder
 	 * Encodes a ternary expression, given the encodings of its operands.
 	 * Unknown operators yield an unconstrained value. Subclasses can override
 	 * this to encode the operators they know (e.g., the ones defined by a
-	 * frontend), or to encode some operators differently, invoking this
-	 * method for the other ones.
+	 * frontend), or to encode some operators differently, invoking this method
+	 * for the other ones.
 	 *
 	 * @param expression the expression
 	 * @param left       the encoding of the left operand
@@ -1016,8 +1014,8 @@ public class ExpressionEncoder
 	}
 
 	/**
-	 * Reads the given term as a string, as an operand of a string operation:
-	 * if the term is a value, the operation can be evaluated only if it is a
+	 * Reads the given term as a string, as an operand of a string operation: if
+	 * the term is a value, the operation can be evaluated only if it is a
 	 * string ({@link SymbolTable#require(Term)}).
 	 *
 	 * @param term   the term
@@ -1038,10 +1036,10 @@ public class ExpressionEncoder
 	 * Encodes the equality of two terms. Values are equal if they are the same
 	 * value, unless one of them is opaque and might be a floating point number
 	 * ({@link SortPolicy#mayBeOpaque(SymbolicExpression)}): the meaning of
-	 * opaque values is not modeled, and equality between them does not
-	 * coincide with their identity (e.g., a floating point NaN is not equal to
-	 * itself, and {@code 1 == 1.0} holds). Such equalities are thus an
-	 * unknown, but deterministic, function of the operands (never precise).
+	 * opaque values is not modeled, and equality between them does not coincide
+	 * with their identity (e.g., a floating point NaN is not equal to itself,
+	 * and {@code 1 == 1.0} holds). Such equalities are thus an unknown, but
+	 * deterministic, function of the operands (never precise).
 	 */
 	private Term equality(
 			Term left,
@@ -1126,9 +1124,8 @@ public class ExpressionEncoder
 	}
 
 	/**
-	 * Encodes the key of a heap map for the given reference: the identifier
-	 * of the reference (precise only if the value is a reference, e.g., not
-	 * null).
+	 * Encodes the key of a heap map for the given reference: the identifier of
+	 * the reference (precise only if the value is a reference, e.g., not null).
 	 */
 	private Term referenceKey(
 			Term reference,
@@ -1141,8 +1138,8 @@ public class ExpressionEncoder
 	}
 
 	/**
-	 * Encodes the value of the given map at the given key (unconstrained if
-	 * the map is not an array).
+	 * Encodes the value of the given map at the given key (unconstrained if the
+	 * map is not an array).
 	 */
 	private Term select(
 			Term map,
@@ -1190,19 +1187,10 @@ public class ExpressionEncoder
 	}
 
 	/**
-	 * Encodes whether the given term has a type that can be assigned to the
-	 * given one. A value can have the type only if it has been built with the
-	 * constructor of the sort of the type, and it surely has it if the type
-	 * covers the sort ({@link SortPolicy#covers(Type, Sort)}): otherwise, the
-	 * result is unconstrained among the values with the right constructor.
-	 * Terms that are not values have the type if it covers their sort, and do
-	 * not have it if their sort is different.
-	 */
-	/**
 	 * Yields the type denoted by the given type token: a constant whose value
-	 * is the type, or whose static type is a {@link TypeTokenType} for a
-	 * single type (whatever its value). Yields {@code null} if the expression
-	 * does not denote a unique type.
+	 * is the type, or whose static type is a {@link TypeTokenType} for a single
+	 * type (whatever its value). Yields {@code null} if the expression does not
+	 * denote a unique type.
 	 */
 	private static Type tokenOf(
 			SymbolicExpression token) {
@@ -1393,10 +1381,6 @@ public class ExpressionEncoder
 				r);
 	}
 
-	/**
-	 * Wraps the given integer to the range of integers representable with the
-	 * given number of bits.
-	 */
 	/**
 	 * Wraps the given integer to the range of the integers of the given bit
 	 * width, as done by overflowing operations.

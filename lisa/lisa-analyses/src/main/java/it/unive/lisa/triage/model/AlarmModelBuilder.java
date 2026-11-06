@@ -16,6 +16,7 @@ import it.unive.lisa.lattices.Satisfiability;
 import it.unive.lisa.program.cfg.Parameter;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Statement;
+import it.unive.lisa.program.cfg.statement.call.CFGCall;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Identifier;
@@ -30,8 +31,6 @@ import it.unive.lisa.triage.inputs.InputSource;
 import it.unive.lisa.triage.inputs.InputSourceResolver;
 import it.unive.lisa.triage.reachability.Reachability;
 import it.unive.lisa.type.Type;
-import org.apache.commons.lang3.tuple.Triple;
-import it.unive.lisa.program.cfg.statement.call.CFGCall;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -42,6 +41,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BooleanSupplier;
+import org.apache.commons.lang3.tuple.Triple;
 
 /**
  * Builds the {@link AlarmModel} of a candidate violation, given the results of
@@ -53,14 +53,13 @@ import java.util.function.BooleanSupplier;
  * Calls to cfgs can be <i>expanded</i>, given the frames of their callees (see
  * {@link Frame#enter(it.unive.lisa.program.cfg.statement.call.CFGCall, AnalyzedCFG)}
  * and {@link ReplayInterprocedural}): the model then also contains the
- * locations of the frames of the expanded callees (the nodes of their cfgs
- * that can reach an exit point, recursively expanding their own calls), and
- * the locations where the callers resume after the callees return, connected
- * by the transitions entering and returning from the callees. Since the number
- * of locations can grow quickly, expansion stops when the model has more
- * locations than a given budget (the remaining calls are summarized). The
- * model is finally restricted to the locations that can reach the bad
- * location.
+ * locations of the frames of the expanded callees (the nodes of their cfgs that
+ * can reach an exit point, recursively expanding their own calls), and the
+ * locations where the callers resume after the callees return, connected by the
+ * transitions entering and returning from the callees. Since the number of
+ * locations can grow quickly, expansion stops when the model has more locations
+ * than a given budget (the remaining calls are summarized). The model is
+ * finally restricted to the locations that can reach the bad location.
  *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
@@ -102,9 +101,9 @@ public final class AlarmModelBuilder {
 	}
 
 	/**
-	 * Builds the model of the given violation, expanding the calls whose
-	 * callee frames are all in the given set, with
-	 * {@link #DEFAULT_MAX_LOCATIONS} as budget of locations.
+	 * Builds the model of the given violation, expanding the calls whose callee
+	 * frames are all in the given set, with {@link #DEFAULT_MAX_LOCATIONS} as
+	 * budget of locations.
 	 *
 	 * @param <A>       the type of the abstract states of the analysis
 	 * @param <D>       the type of the domain of the analysis
@@ -132,9 +131,9 @@ public final class AlarmModelBuilder {
 	}
 
 	/**
-	 * Builds the model of the given violation, expanding the calls whose
-	 * callee frames are all in the given set, as long as the model has at
-	 * most {@code maxLocations} locations.
+	 * Builds the model of the given violation, expanding the calls whose callee
+	 * frames are all in the given set, as long as the model has at most
+	 * {@code maxLocations} locations.
 	 *
 	 * @param <A>          the type of the abstract states of the analysis
 	 * @param <D>          the type of the domain of the analysis
@@ -169,9 +168,9 @@ public final class AlarmModelBuilder {
 	 * result containing the statement, reached through the given chain of
 	 * calls: the root frame of the model is the one of the first caller, and
 	 * the calls of the chain are expanded, so that the bad location is in the
-	 * frame of the result. Since the model only considers the executions
-	 * going through the chain, it can confirm the violation, but not refute
-	 * it. With an empty chain, the model starts from the result itself.
+	 * frame of the result. Since the model only considers the executions going
+	 * through the chain, it can confirm the violation, but not refute it. With
+	 * an empty chain, the model starts from the result itself.
 	 *
 	 * @param <A>          the type of the abstract states of the analysis
 	 * @param <D>          the type of the domain of the analysis
@@ -185,8 +184,8 @@ public final class AlarmModelBuilder {
 	 *                         which calls are no longer expanded
 	 * @param chain        the chain of calls, from the first caller: for each
 	 *                         call, the result of the caller, its node
-	 *                         containing the call, and the call (the callee
-	 *                         of the last call is the result)
+	 *                         containing the call, and the call (the callee of
+	 *                         the last call is the result)
 	 *
 	 * @return the model
 	 *
@@ -254,9 +253,9 @@ public final class AlarmModelBuilder {
 	 * Builds the model of the given violation as
 	 * {@link #build(SemanticTool, AnalyzedCFG, Statement, Violation, int, Set, int, List, long)}
 	 * does, using the given cache of the information computed from the results
-	 * of the analysis, that can be shared by all the models built over the
-	 * same results. If the given time passes before all the transitions of the
-	 * model have been extracted, no model is built.
+	 * of the analysis, that can be shared by all the models built over the same
+	 * results. If the given time passes before all the transitions of the model
+	 * have been extracted, no model is built.
 	 *
 	 * @param <A>          the type of the abstract states of the analysis
 	 * @param <D>          the type of the domain of the analysis
@@ -314,8 +313,8 @@ public final class AlarmModelBuilder {
 		private final Map<ModelLocation, NodeTransitions> transitions = new LinkedHashMap<>();
 
 		/**
-		 * Discards the transitions of the locations reaching calls to the
-		 * given frames, that are going to be expanded.
+		 * Discards the transitions of the locations reaching calls to the given
+		 * frames, that are going to be expanded.
 		 *
 		 * @param frames the frames
 		 */
@@ -334,8 +333,8 @@ public final class AlarmModelBuilder {
 	/**
 	 * Builds the model of the given violation as
 	 * {@link #build(SemanticTool, AnalyzedCFG, Statement, Violation, int, Set, int, List, long, ResultCache)}
-	 * does, reusing the transitions extracted by a previous model built for
-	 * the same violation and chain of calls, but expanding fewer calls.
+	 * does, reusing the transitions extracted by a previous model built for the
+	 * same violation and chain of calls, but expanding fewer calls.
 	 *
 	 * @param <A>          the type of the abstract states of the analysis
 	 * @param <D>          the type of the domain of the analysis
@@ -354,9 +353,9 @@ public final class AlarmModelBuilder {
 	 *                         calls are no longer expanded, and the
 	 *                         construction of the model is abandoned
 	 * @param cache        the cache
-	 * @param reuse        the transitions of the previous models, updated
-	 *                         with the ones of this model ({@code null}
-	 *                         means that nothing is reused)
+	 * @param reuse        the transitions of the previous models, updated with
+	 *                         the ones of this model ({@code null} means that
+	 *                         nothing is reused)
 	 *
 	 * @return the model, or {@code null} if the deadline passed before the
 	 *             model could be built
@@ -472,10 +471,10 @@ public final class AlarmModelBuilder {
 				if (loc.getFrame().isRoot() && loc.getNode().equals(bad))
 					for (Map.Entry<Error, SymbolicStore> e : tr.getErrors().entrySet())
 						if (err.matches(e.getKey().getType()))
-							more.add(new EdgeTransition(loc, raised, null, e.getValue()));
+							more.add(new EdgeTransition(loc, raised, null, e.getValue(), e.getKey().getThrower()));
 				for (NodeTransitions.EscapingError e : tr.getEscaping())
 					if (e.getNode().equals(bad) && err.matches(e.getError().getType()))
-						more.add(new EdgeTransition(loc, raised, null, e.getStore()));
+						more.add(new EdgeTransition(loc, raised, null, e.getStore(), e.getOrigin()));
 				transitions.put(loc, tr.withOutgoing(more));
 			}
 			locations.add(raised);
@@ -687,8 +686,8 @@ public final class AlarmModelBuilder {
 	/**
 	 * Yields the scopes of the identifiers of the callers that are visible in
 	 * the given frame, from the innermost one: for each prefix of the chain of
-	 * calls leading to the frame (from the last call), the tokens of the
-	 * scopes pushed by the calls.
+	 * calls leading to the frame (from the last call), the tokens of the scopes
+	 * pushed by the calls.
 	 */
 	private static Set<List<ScopeToken>> scopesOf(
 			Frame frame) {
@@ -747,8 +746,8 @@ public final class AlarmModelBuilder {
 	}
 
 	/**
-	 * The locations that can reach the given one through the transitions of
-	 * the given locations, including the location itself.
+	 * The locations that can reach the given one through the transitions of the
+	 * given locations, including the location itself.
 	 */
 	private static Set<ModelLocation> backwardReachable(
 			ModelLocation target,
@@ -896,9 +895,9 @@ public final class AlarmModelBuilder {
 	}
 
 	/**
-	 * Collects the identifiers read by the given transitions: the ones in
-	 * their path conditions and in the values of their updates (not the
-	 * updated identifiers).
+	 * Collects the identifiers read by the given transitions: the ones in their
+	 * path conditions and in the values of their updates (not the updated
+	 * identifiers).
 	 */
 	private static void collectRead(
 			NodeTransitions tr,

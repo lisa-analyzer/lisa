@@ -25,6 +25,7 @@ import it.unive.lisa.lattices.GenericMapLattice;
 import it.unive.lisa.lattices.GenericSetLattice;
 import it.unive.lisa.program.Application;
 import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.fixpoints.CompoundState;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Statement;
@@ -49,14 +50,13 @@ import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.symbolic.value.TernaryExpression;
 import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.type.Type;
-import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
 import it.unive.lisa.util.datastructures.graph.GraphVisitor;
-import it.unive.lisa.program.cfg.edge.Edge;
+import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.LinkedHashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -93,33 +93,34 @@ import org.apache.commons.lang3.tuple.Pair;
  * (scoping the state and assigning the parameters), and its store is recorded
  * as the transition entering the frame of the callee (see
  * {@link #getEntered()}), while the run stops at the call (errors raised by the
- * callees are propagated from their frames, see {@link TransitionExtractor}). When the run starts from the location where the node resumes after
- * an expanded call returned, all the expanded calls up to that one (included)
- * have already returned: their result is their meta variable, assigned by the
+ * callees are propagated from their frames, see {@link TransitionExtractor}).
+ * When the run starts from the location where the node resumes after an
+ * expanded call returned, all the expanded calls up to that one (included) have
+ * already returned: their result is their meta variable, assigned by the
  * transition returning from the callee, with no effects on the store and no
  * errors raised. When the run reaches the call it resumes after, the store is
  * reset to the identity, since the effects of the part of the node evaluated
- * before the call are already part of the transition entering the callees.
- * The operands evaluated before the call that are still to be used are then
- * evaluated at the location where the node resumes: this requires them to
- * yield the same values there.<br>
+ * before the call are already part of the transition entering the callees. The
+ * operands evaluated before the call that are still to be used are then
+ * evaluated at the location where the node resumes: this requires them to yield
+ * the same values there.<br>
  * <br>
  * A call is <b>expandable</b> if:
  * <ul>
- * <li>some of its targets have a result in the context of the call (computed
- * as the analysis does), so that their code can be part of the model;</li>
- * <li>it is not recursive, that is, none of its targets appears in the chain
- * of frames leading to the replayed one;</li>
+ * <li>some of its targets have a result in the context of the call (computed as
+ * the analysis does), so that their code can be part of the model;</li>
+ * <li>it is not recursive, that is, none of its targets appears in the chain of
+ * frames leading to the replayed one;</li>
  * <li>it is not part of the node where the property is checked (since the
  * property must be checked on a single location);</li>
- * <li>the run lost no value and the store contains no unknown value (except
- * for the amounts of objects allocated by summarized calls) in its path
- * conditions and in the values of variables before the call, since an unknown
- * value evaluated again when the node resumes would be a different one; the
- * effects of the part of the node evaluated before the call (e.g.,
- * assignments, allocations, writes of the heap, summarized calls whose results
- * are not used afterwards) are allowed, as they are only part of the
- * transition entering the callees;</li>
+ * <li>the run lost no value and the store contains no unknown value (except for
+ * the amounts of objects allocated by summarized calls) in its path conditions
+ * and in the values of variables before the call, since an unknown value
+ * evaluated again when the node resumes would be a different one; the effects
+ * of the part of the node evaluated before the call (e.g., assignments,
+ * allocations, writes of the heap, summarized calls whose results are not used
+ * afterwards) are allowed, as they are only part of the transition entering the
+ * callees;</li>
  * <li>(<i>operand rule</i>) the operands evaluated in the node before the call
  * that are not actual parameters of the call do not read the heap nor global
  * variables (i.e., their values contain no {@link AccessChild},
@@ -208,8 +209,8 @@ public class ReplayInterprocedural<A extends AbstractLattice<A>, D extends Abstr
 	 * @param frame    the frame whose statements are replayed
 	 * @param domain   the domain used for the replay
 	 * @param expanded the frames of the callees to expand
-	 * @param budget   tells whether or not new callees can be entered (e.g.,
-	 *                     if the model has room for their locations); it is
+	 * @param budget   tells whether or not new callees can be entered (e.g., if
+	 *                     the model has room for their locations); it is
 	 *                     queried only when an expanded call is entered
 	 */
 	public ReplayInterprocedural(
@@ -228,11 +229,11 @@ public class ReplayInterprocedural<A extends AbstractLattice<A>, D extends Abstr
 	 * @param frame    the frame whose statements are replayed
 	 * @param domain   the domain used for the replay
 	 * @param expanded the frames of the callees to expand
-	 * @param budget   tells whether or not new callees can be entered (e.g.,
-	 *                     if the model has room for their locations); it is
+	 * @param budget   tells whether or not new callees can be entered (e.g., if
+	 *                     the model has room for their locations); it is
 	 *                     queried only when an expanded call is entered
-	 * @param cache    the cache of the information computed from the results
-	 *                     of the analysis
+	 * @param cache    the cache of the information computed from the results of
+	 *                     the analysis
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public ReplayInterprocedural(
@@ -526,16 +527,15 @@ public class ReplayInterprocedural<A extends AbstractLattice<A>, D extends Abstr
 	}
 
 	/**
-	 * Yields the result of an expanded call whose callees already returned:
-	 * its meta variable, assigned by the transition returning from the
-	 * callees. The abstract state becomes the one computed by the analysis
-	 * after the call, that accounts for the effects of the callees. If the
-	 * call is the one the run resumes after, the effects of the part of the
-	 * node evaluated before it are already part of the transition entering
-	 * the callees: the store is reset to the identity, so that the rest of the
-	 * run is relative to the location where the node resumes, and the errors
-	 * raised before the call (already raised when entering the callees) are
-	 * discarded.
+	 * Yields the result of an expanded call whose callees already returned: its
+	 * meta variable, assigned by the transition returning from the callees. The
+	 * abstract state becomes the one computed by the analysis after the call,
+	 * that accounts for the effects of the callees. If the call is the one the
+	 * run resumes after, the effects of the part of the node evaluated before
+	 * it are already part of the transition entering the callees: the store is
+	 * reset to the identity, so that the rest of the run is relative to the
+	 * location where the node resumes, and the errors raised before the call
+	 * (already raised when entering the callees) are discarded.
 	 */
 	private AnalysisState<ReplayState<A>> returned(
 			CFGCall call,
@@ -707,8 +707,8 @@ public class ReplayInterprocedural<A extends AbstractLattice<A>, D extends Abstr
 	}
 
 	/**
-	 * Yields the results of the targets of the given call in the context of
-	 * the call, that is, the context of this frame extended with the call (as
+	 * Yields the results of the targets of the given call in the context of the
+	 * call, that is, the context of this frame extended with the call (as
 	 * computed by the analysis). If the context cannot be computed, the unique
 	 * result of a target is used, if any.
 	 */
@@ -750,8 +750,7 @@ public class ReplayInterprocedural<A extends AbstractLattice<A>, D extends Abstr
 				if (match == null)
 					match = candidates.size() == 1 ? candidates.iterator().next()
 							: cache.merged(candidates, pushed, () -> merge(target, candidates, context));
-				else if (candidates.size() > 1)
-					{
+				else if (candidates.size() > 1) {
 					ScopeId<A> id = match.getId();
 					match = cache.merged(candidates, id, () -> merge(target, candidates, id));
 				}
@@ -764,14 +763,14 @@ public class ReplayInterprocedural<A extends AbstractLattice<A>, D extends Abstr
 	}
 
 	/**
-	 * Yields the result of the given target of the given call in the frames
-	 * to expand, if any. The frames to expand might come from a chain of
-	 * calls computed from the results of the analysis (see
+	 * Yields the result of the given target of the given call in the frames to
+	 * expand, if any. The frames to expand might come from a chain of calls
+	 * computed from the results of the analysis (see
 	 * {@link AlarmModelBuilder}), whose contexts might depend on states at the
 	 * calls that the replay does not compute exactly as the analysis did: the
-	 * result of the frame is used, so that the frames of the chain are
-	 * entered. The result describes some of the executions of the callee from
-	 * the call, as found by the analysis.
+	 * result of the frame is used, so that the frames of the chain are entered.
+	 * The result describes some of the executions of the callee from the call,
+	 * as found by the analysis.
 	 */
 	@SuppressWarnings("unchecked")
 	private AnalyzedCFG<A> expandedResult(

@@ -193,8 +193,8 @@ public class TransitionExtractorTest {
 
 	/**
 	 * Encodes that the given variable of the pre-state is an integer: untyped
-	 * IMP values might also be, e.g., floating point numbers, whose
-	 * comparisons are not modeled.
+	 * IMP values might also be, e.g., floating point numbers, whose comparisons
+	 * are not modeled.
 	 */
 	private Term isInteger(
 			String name)

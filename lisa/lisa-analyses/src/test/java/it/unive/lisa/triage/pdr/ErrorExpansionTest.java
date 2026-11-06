@@ -33,10 +33,10 @@ import org.junit.jupiter.api.Test;
 
 /**
  * End-to-end tests for the errors raised inside expanded callees in
- * {@link PdrVerifier}, on the results of a context-sensitive analysis of an
- * IMP program with intervals: errors leaving a callee reach the handlers of
- * its callers, or the bad location of error violations, under the conditions
- * that make the callee raise them. Tests are skipped if z3 is not available.
+ * {@link PdrVerifier}, on the results of a context-sensitive analysis of an IMP
+ * program with intervals: errors leaving a callee reach the handlers of its
+ * callers, or the bad location of error violations, under the conditions that
+ * make the callee raise them. Tests are skipped if z3 is not available.
  */
 public class ErrorExpansionTest {
 

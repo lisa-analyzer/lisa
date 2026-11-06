@@ -189,7 +189,8 @@ public final class SymbolicStore {
 
 	/**
 	 * Makes the heap unconstrained in every case, except for the given heap
-	 * contents (see {@link SymbolicCase#withHeapHavoc(Set, FreshValueFactory, CodeLocation)}).
+	 * contents (see
+	 * {@link SymbolicCase#withHeapHavoc(Set, FreshValueFactory, CodeLocation)}).
 	 *
 	 * @param preserved the heap contents that are preserved
 	 * @param location  the location of the transition
@@ -244,7 +245,8 @@ public final class SymbolicStore {
 
 	/**
 	 * Pushes (if {@code push} holds) or pops the scope identified by the given
-	 * token in every case (see {@link SymbolicCase#scope(ScopeToken, boolean)}).
+	 * token in every case (see
+	 * {@link SymbolicCase#scope(ScopeToken, boolean)}).
 	 *
 	 * @param token the token of the scope
 	 * @param push  whether the scope is pushed or popped

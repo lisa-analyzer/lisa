@@ -23,9 +23,8 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * The representation of the heap in alarm models. The heap is part of the
- * state of the model, through synthetic identifiers that the analysis never
- * sees:
+ * The representation of the heap in alarm models. The heap is part of the state
+ * of the model, through synthetic identifiers that the analysis never sees:
  * <ul>
  * <li>for each field name {@code f}, the identifier {@code $field:f} (of type
  * {@link HeapType#FIELD}) maps the identifier of each reference to the value of
@@ -53,13 +52,13 @@ import java.util.Set;
  * ({@code $field:f}) otherwise (e.g., in dynamically typed languages): since
  * different objects have different references, fields with the same name of
  * different classes never interfere in the latter case. Since the same field
- * might be accessed in both ways, writing a field in one way makes the
- * contents of the field with the same name in the other way unknown (see
- * {@link #aliasesOf(String)}). A field identified by its class is immutable if
- * it is final, while a field identified by its name only is immutable if all
- * the fields with that name in the program are final: their contents can only
- * be written by the code of the classes declaring them (e.g., their
- * constructors), and they are preserved by calls to other code.
+ * might be accessed in both ways, writing a field in one way makes the contents
+ * of the field with the same name in the other way unknown (see
+ * {@link #aliasesOf(String, Type)}). A field identified by its class is
+ * immutable if it is final, while a field identified by its name only is
+ * immutable if all the fields with that name in the program are final: their
+ * contents can only be written by the code of the classes declaring them (e.g.,
+ * their constructors), and they are preserved by calls to other code.
  *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
@@ -173,8 +172,8 @@ public class HeapModel {
 	 * arrays.
 	 *
 	 * @param program         the program
-	 * @param arrayProperties the names of the variables that, when accessed
-	 *                            on an array, denote a property of the array
+	 * @param arrayProperties the names of the variables that, when accessed on
+	 *                            an array, denote a property of the array
 	 *                            (e.g., its length) rather than an index
 	 */
 	public HeapModel(
@@ -283,8 +282,8 @@ public class HeapModel {
 	}
 
 	/**
-	 * Yields whether the given expression mentions the synthetic identifiers
-	 * or operators of the heap model, and thus cannot be evaluated by the
+	 * Yields whether the given expression mentions the synthetic identifiers or
+	 * operators of the heap model, and thus cannot be evaluated by the
 	 * analysis.
 	 *
 	 * @param expression the expression
@@ -338,8 +337,8 @@ public class HeapModel {
 	 * the given static type, qualified by the class declaring it (as
 	 * {@code C::f}): the first class declaring an instance field with that name
 	 * among the class of the static type and its ancestors, as fields are
-	 * resolved statically. Yields {@code null} if the static type does not
-	 * tell the class (e.g., it is unknown), or if no such class exists.
+	 * resolved statically. Yields {@code null} if the static type does not tell
+	 * the class (e.g., it is unknown), or if no such class exists.
 	 *
 	 * @param type the static type of the accessed object (or of a reference or
 	 *                 pointer to it)
@@ -397,10 +396,10 @@ public class HeapModel {
 	 * the same fields as the given one, accessed in the other way (see
 	 * {@link #qualify(Type, String)}), and the ones recording which locations
 	 * have been written: for a qualified name {@code C::f}, the field named
-	 * {@code f}, and for a name {@code f}, the fields named {@code f}
-	 * qualified by their classes, if these might be the class of the accessed
-	 * object (i.e., they are related to the class of its static type, or the
-	 * static type is unknown).
+	 * {@code f}, and for a name {@code f}, the fields named {@code f} qualified
+	 * by their classes, if these might be the class of the accessed object
+	 * (i.e., they are related to the class of its static type, or the static
+	 * type is unknown).
 	 *
 	 * @param name the name of the field, possibly qualified
 	 * @param type the static type of the accessed object (or of a reference or
@@ -439,9 +438,9 @@ public class HeapModel {
 	}
 
 	/**
-	 * Yields the identifiers of the immutable field contents that a call to
-	 * the given code members cannot write: final fields can only be written by
-	 * the code of the classes declaring them, which includes the code of their
+	 * Yields the identifiers of the immutable field contents that a call to the
+	 * given code members cannot write: final fields can only be written by the
+	 * code of the classes declaring them, which includes the code of their
 	 * subclasses (e.g., constructors invoking the ones of their superclasses).
 	 *
 	 * @param targets the code members that might be called
@@ -475,8 +474,8 @@ public class HeapModel {
 
 	/**
 	 * Yields the identifiers of the contents of all the immutable fields: the
-	 * values of final fields of existing objects cannot be changed by any
-	 * code, as they are only written when objects are initialized.
+	 * values of final fields of existing objects cannot be changed by any code,
+	 * as they are only written when objects are initialized.
 	 *
 	 * @return the identifiers of the immutable field contents
 	 */
