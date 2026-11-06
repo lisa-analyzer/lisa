@@ -14,9 +14,15 @@ import it.unive.lisa.checks.semantic.SemanticCheck;
 import it.unive.lisa.checks.semantic.SemanticTool;
 import it.unive.lisa.checks.verification.Violation;
 import it.unive.lisa.imp.IMPFrontend;
+import it.unive.lisa.interprocedural.context.ContextBasedAnalysis;
+import it.unive.lisa.interprocedural.callgraph.RTACallGraph;
 import it.unive.lisa.outputs.messages.Message;
 import it.unive.lisa.program.Program;
 import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.statement.Assignment;
+import it.unive.lisa.program.cfg.statement.call.Call;
+import it.unive.lisa.program.cfg.statement.BinaryExpression;
+import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.triage.smt.SmtLibProcessSolver;
 import java.nio.file.Files;
@@ -65,6 +71,29 @@ public class FirstViolationVerifierTest {
 
 	}
 
+	private static class WarnOnAssignedCalls<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
+			implements
+			SemanticCheck<A, D> {
+
+		@Override
+		public boolean visit(
+				SemanticTool<A, D> tool,
+				CFG graph,
+				Statement node) {
+			// the warning is on a call, a sub-expression of the node: the
+			// assigned one, or the right operand of the assigned expression
+			if (node instanceof Assignment) {
+				Expression right = ((Assignment) node).getRight();
+				if (right instanceof BinaryExpression)
+					right = ((BinaryExpression) right).getRight();
+				if (right instanceof Call)
+					tool.warnOn(right, Violation.error(), graph.getDescriptor().getName());
+			}
+			return true;
+		}
+
+	}
+
 	private static Map<String, Message> analyze(
 			String program)
 			throws Exception {
@@ -75,6 +104,14 @@ public class FirstViolationVerifierTest {
 			String program,
 			SemanticCheck<?, ?> check)
 			throws Exception {
+		return analyze(program, check, false);
+	}
+
+	private static Map<String, Message> analyze(
+			String program,
+			SemanticCheck<?, ?> check,
+			boolean contextSensitive)
+			throws Exception {
 		Program p = IMPFrontend.processText(program);
 		for (CFG cfg : p.getAllCFGs())
 			if (!p.getEntryPoints().contains(cfg))
@@ -83,6 +120,10 @@ public class FirstViolationVerifierTest {
 		conf.analysis = DefaultConfiguration.defaultAbstractDomain();
 		conf.workdir = Files.createTempDirectory("first-violation").toString();
 		conf.semanticChecks.add(check);
+		if (contextSensitive) {
+			conf.callGraph = new RTACallGraph();
+			conf.interproceduralAnalysis = new ContextBasedAnalysis<>();
+		}
 		conf.warningVerifier = new FirstViolationVerifier<>();
 		LiSAReport report = new LiSA(conf).run(p);
 		Map<String, Message> warnings = new HashMap<>();
@@ -158,6 +199,29 @@ public class FirstViolationVerifierTest {
 		assertTrue(some.getReproducingInputs().stream()
 				.anyMatch(i -> i.getSource().startsWith("parameter x of") && Integer.parseInt(i.getValue()) > 0),
 				some.getReproducingInputs().toString());
+	}
+
+	@Test
+	public void errorsOfSubExpressionsAreConfirmed() throws Exception {
+		// the post-state of the call does not contain the error it raises,
+		// that is part of the post-state of the assignment
+		Map<String, Message> warnings = analyze("class A { ~A() {} }\n"
+				+ "class test { h(a) { throw new A(); } main() { def x = this.h(0); return x; } }",
+				new WarnOnAssignedCalls<>(), true);
+		assertTrue(warnings.get("main").isDefinite(), warnings.toString());
+		// errors raised by the actual parameters of the call are raised when
+		// evaluating it
+		warnings = analyze("class A { ~A() {} }\n"
+				+ "class test { h(a) { throw new A(); } g(a) { return a; } "
+				+ "main() { def x = this.g(this.h(0)); return x; } }",
+				new WarnOnAssignedCalls<>(), true);
+		assertTrue(warnings.get("main").isDefinite(), warnings.toString());
+		// while errors raised by other parts of the node are not
+		warnings = analyze("class A { ~A() {} }\n"
+				+ "class test { h(a) { throw new A(); } g(a) { return a; } "
+				+ "main() { def x = this.h(0) + this.g(1); return x; } }",
+				new WarnOnAssignedCalls<>(), true);
+		assertTrue(warnings.get("main").isRefuted(), warnings.toString());
 	}
 
 	@Test

@@ -643,6 +643,20 @@ public final class AlarmModelBuilder {
 							.addAll(extractor.getAnalysis().getRuntimeTypesOf(pre, id,
 									loc.getFrame().getResult().getId(), loc.getNode()));
 		}
+		// the identifiers of the callers visible in callees hold the values of
+		// the identifiers of the callers (whose types might be unknown where
+		// they are out of scope)
+		for (Identifier id : vocabulary)
+			if (id instanceof OutOfScopeIdentifier) {
+				Identifier current = id;
+				for (ScopeToken token : scopesOf(id))
+					current = current instanceof OutOfScopeIdentifier
+							? ((OutOfScopeIdentifier) current).popScope(token, null)
+							: current;
+				Set<Type> original = current == null ? null : types.get(current);
+				if (original != null)
+					types.computeIfAbsent(id, i -> new LinkedHashSet<>()).addAll(original);
+			}
 		for (FreshValue fresh : factory.getValues().values())
 			if (!fresh.getStaticType().isUntyped())
 				types.put(fresh, Set.of(fresh.getStaticType()));

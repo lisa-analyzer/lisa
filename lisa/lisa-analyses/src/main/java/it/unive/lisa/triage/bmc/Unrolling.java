@@ -480,6 +480,21 @@ public class Unrolling {
 					arguments.toArray(Term[]::new));
 		}
 
+		@Override
+		public Term unknown(
+				String function,
+				Sort result,
+				List<Term> arguments,
+				SymbolicExpression origin) {
+			exact = false;
+			reasons.add(UNSUPPORTED_OPERATIONS + ": " + describe(origin));
+			List<Sort> sorts = new ArrayList<>();
+			for (Term arg : arguments)
+				sorts.add(arg.getSort());
+			return Term.app(Unrolling.this.function(function, sorts, result), result,
+					arguments.toArray(Term[]::new));
+		}
+
 		private final List<Term> requirements = new ArrayList<>();
 
 		@Override

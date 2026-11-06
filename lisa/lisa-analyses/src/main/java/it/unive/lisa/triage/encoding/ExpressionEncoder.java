@@ -69,6 +69,12 @@ import it.unive.lisa.symbolic.value.operator.binary.StringIsSubstringOf;
 import it.unive.lisa.symbolic.value.operator.binary.StringIsSuffixOf;
 import it.unive.lisa.symbolic.value.operator.binary.StringStartsWith;
 import it.unive.lisa.symbolic.value.operator.binary.StringSubstringToEnd;
+import it.unive.lisa.symbolic.value.operator.binary.BitwiseAnd;
+import it.unive.lisa.symbolic.value.operator.binary.BitwiseOr;
+import it.unive.lisa.symbolic.value.operator.binary.BitwiseShiftLeft;
+import it.unive.lisa.symbolic.value.operator.binary.BitwiseShiftRight;
+import it.unive.lisa.symbolic.value.operator.binary.BitwiseUnsignedShiftRight;
+import it.unive.lisa.symbolic.value.operator.binary.BitwiseXor;
 import it.unive.lisa.symbolic.value.operator.binary.TypeCast;
 import it.unive.lisa.symbolic.value.operator.binary.TypeCheck;
 import it.unive.lisa.symbolic.value.operator.binary.TypeConv;
@@ -305,6 +311,35 @@ public class ExpressionEncoder
 	protected Term havoc(
 			SymbolicExpression expression) {
 		return symbols.fresh(ValueSort.SORT, expression);
+	}
+
+	/**
+	 * Yields the value of an expression whose operator is not encoded: as for
+	 * {@link #havoc(SymbolicExpression)}, the value is not precise, but it is
+	 * the application of an unknown function of the operands, specific to the
+	 * operator (see
+	 * {@link SymbolTable#unknown(String, Sort, List, SymbolicExpression)}), so
+	 * that the same operation over the same operands yields the same value.
+	 * This assumes that operators are deterministic, and that equal operators
+	 * (as by {@link Object#equals(Object)}) denote the same operation.
+	 *
+	 * @param expression the expression
+	 * @param operands   the encodings of its operands
+	 *
+	 * @return the value
+	 */
+	protected Term unsupported(
+			ValueExpression expression,
+			Term... operands) {
+		Object op = expression instanceof UnaryExpression ? ((UnaryExpression) expression).getOperator()
+				: expression instanceof BinaryExpression ? ((BinaryExpression) expression).getOperator()
+						: expression instanceof TernaryExpression ? ((TernaryExpression) expression).getOperator()
+								: null;
+		if (op == null)
+			return havoc(expression);
+		// operators that are not equal must denote different functions
+		String function = "$" + op.getClass().getSimpleName() + ":" + op + "#" + Integer.toHexString(op.hashCode());
+		return symbols.unknown(function, ValueSort.SORT, List.of(operands), expression);
 	}
 
 	/**
@@ -781,7 +816,7 @@ public class ExpressionEncoder
 					args -> Term.app("-", Sort.INT, neg(args.get(0)), Term.integer(1)));
 		if (op instanceof StringLength)
 			return Term.app("str.len", Sort.INT, coerce(arg, Sort.STRING, expression));
-		return havoc(expression);
+		return unsupported(expression, arg);
 	}
 
 	@Override
@@ -917,6 +952,11 @@ public class ExpressionEncoder
 					Term.app("-", Sort.INT, Term.app("str.len", Sort.INT, s), from));
 		}
 
+		if (op instanceof BitwiseAnd || op instanceof BitwiseOr || op instanceof BitwiseXor
+				|| op instanceof BitwiseShiftLeft || op instanceof BitwiseShiftRight
+				|| op instanceof BitwiseUnsignedShiftRight)
+			return bitwise(expression, left, right);
+
 		if (op instanceof TypeCheck) {
 			Type target = tokenOf(expression.getRight());
 			// checks against types that are not unique cannot be encoded
@@ -947,10 +987,18 @@ public class ExpressionEncoder
 			}
 			// the value is preserved if it already has the target sort, and
 			// read as the target sort otherwise
-			return coerce(left, target, expression);
+			Term converted = coerce(left, target, expression);
+			if (op instanceof TypeConv && target.equals(Sort.INT) && converted.getSort().equals(Sort.INT)) {
+				// narrowing conversions between integral types keep the
+				// lowest bits of the value (widening ones do not change it)
+				int bits = integralBits(expression.getStaticType());
+				if (bits > 0)
+					converted = wrap(converted, bits, expression.getStaticType().asNumericType().isUnsigned());
+			}
+			return converted;
 		}
 
-		return havoc(expression);
+		return unsupported(expression, left, right);
 	}
 
 	@Override
@@ -1010,7 +1058,7 @@ public class ExpressionEncoder
 					Term.app("-", Sort.INT, Term.app("str.len", Sort.INT, s), from));
 			return Term.app("str.prefixof", Sort.BOOL, asString(middle, expression), suffix);
 		}
-		return havoc(expression);
+		return unsupported(expression, left, middle, right);
 	}
 
 	/**
@@ -1324,6 +1372,68 @@ public class ExpressionEncoder
 			wrapped.add(ValueSort.wrap(t));
 		return Term.ite(guard, ValueSort.wrap(result),
 				symbols.apply("$" + operatorOf(expression), ValueSort.SORT, wrapped, expression, guard));
+	}
+
+	/**
+	 * Encodes a bitwise operation over integers, through bit-vectors as wide as
+	 * the (promoted) type of the operation: 32 bits, or 64 if it involves a
+	 * 64-bits integer. Bitwise operations over booleans are logical ones. As
+	 * in Java, shift distances are taken modulo the width.
+	 */
+	private Term bitwise(
+			BinaryExpression expression,
+			Term left,
+			Term right) {
+		BinaryOperator op = expression.getOperator();
+		boolean shift = op instanceof BitwiseShiftLeft || op instanceof BitwiseShiftRight
+				|| op instanceof BitwiseUnsignedShiftRight;
+		if (!shift && left.getSort().equals(Sort.BOOL) && right.getSort().equals(Sort.BOOL)) {
+			if (op instanceof BitwiseAnd)
+				return Term.and(left, right);
+			if (op instanceof BitwiseOr)
+				return Term.or(left, right);
+			return Term.not(Term.eq(left, right));
+		}
+
+		// the width of the promoted type of the operands (only the left one
+		// for shifts), or of the result if they are not known
+		int bits = Math.max(integralBits(expression.getLeft().getStaticType()),
+				shift ? 0 : integralBits(expression.getRight().getStaticType()));
+		if (bits == 0)
+			bits = integralBits(expression.getStaticType());
+		if (bits == 0)
+			return unsupported(expression, left, right);
+		int width = Math.max(bits, 32);
+		Sort bv = Sort.bitVector(width);
+		String toBits = "(_ int2bv " + width + ")";
+		return arithmetic(expression, List.of(left, right), args -> {
+			Term l = Term.app(toBits, bv, args.get(0));
+			Term r = shift
+					? Term.app(toBits, bv, Term.app("mod", Sort.INT, args.get(1), Term.integer(width)))
+					: Term.app(toBits, bv, args.get(1));
+			String function = op instanceof BitwiseAnd ? "bvand"
+					: op instanceof BitwiseOr ? "bvor"
+							: op instanceof BitwiseXor ? "bvxor"
+									: op instanceof BitwiseShiftLeft ? "bvshl"
+											: op instanceof BitwiseShiftRight ? "bvashr" : "bvlshr";
+			Term unsigned = Term.app("bv2int", Sort.INT, Term.app(function, bv, l, r));
+			// the bits are read in two's complement
+			BigInteger half = BigInteger.ONE.shiftLeft(width - 1);
+			return Term.ite(Term.app(">=", Sort.BOOL, unsigned, Term.integer(half)),
+					Term.app("-", Sort.INT, unsigned, Term.integer(BigInteger.ONE.shiftLeft(width))), unsigned);
+		});
+	}
+
+	/**
+	 * Yields the number of bits of the given type, if it is an integral type
+	 * whose size is known, or 0 otherwise.
+	 */
+	private static int integralBits(
+			Type type) {
+		if (!type.isNumericType() || !type.asNumericType().isIntegral())
+			return 0;
+		int bits = type.asNumericType().getNBits();
+		return bits == 8 || bits == 16 || bits == 32 || bits == 64 ? bits : 0;
 	}
 
 	private static Term neg(

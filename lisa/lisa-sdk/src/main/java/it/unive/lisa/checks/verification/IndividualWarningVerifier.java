@@ -11,6 +11,7 @@ import it.unive.lisa.interprocedural.ScopeId;
 import it.unive.lisa.lattices.GenericMapLattice;
 import it.unive.lisa.lattices.GenericSetLattice;
 import it.unive.lisa.outputs.messages.StatementMessage;
+import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.type.Type;
 import java.util.ArrayList;
@@ -189,7 +190,10 @@ public abstract class IndividualWarningVerifier<A extends AbstractLattice<A>, D 
 	 * Error violations are verified at the statements throwing the matching
 	 * error continuations in the post-state of the statement (see the
 	 * documentation of this class), excluding the ones that are caught by the
-	 * error edges leaving the statement.
+	 * error edges leaving the statement. For sub-expressions, whose post-states
+	 * might not contain the errors they raise, the post-state of the node
+	 * containing them is used, restricted to the errors thrown by the
+	 * sub-expression or by its own sub-expressions.
 	 */
 	private VerificationResult verifyIn(
 			Analysis<A, D> analysis,
@@ -205,8 +209,15 @@ public abstract class IndividualWarningVerifier<A extends AbstractLattice<A>, D 
 		if (direct.getOutcome() != VerificationOutcome.POSSIBLE)
 			return direct;
 
-		// errors caught when leaving the statement do not propagate further
-		AnalysisState<A> post = analysis.removeCaughtErrors(result.getAnalysisStateAfter(st), st);
+		// the post-states of sub-expressions might not contain the errors they
+		// raise: the post-state of the node containing the statement is used,
+		// considering only the errors raised by (sub-expressions of) the
+		// statement
+		Statement node = st instanceof Expression ? ((Expression) st).getRootStatement() : st;
+		if (node == null || !st.getCFG().containsNode(node))
+			node = st;
+		// errors caught when leaving the node do not propagate further
+		AnalysisState<A> post = analysis.removeCaughtErrors(result.getAnalysisStateAfter(node), node);
 		GenericMapLattice<AnalysisState.Error, ?> errors = post.getErrors();
 		GenericMapLattice<Type, GenericSetLattice<Statement>> smashed = post.getSmashedErrors();
 		if (errors.isTop() || smashed.isTop())
@@ -216,7 +227,8 @@ public abstract class IndividualWarningVerifier<A extends AbstractLattice<A>, D 
 		Set<Statement> throwers = new LinkedHashSet<>();
 		if (!errors.isBottom())
 			for (AnalysisState.Error err : errors.getKeys())
-				if (error.matches(err.getType()) && !post.getErrors().getState(err).getState().isBottom())
+				if (error.matches(err.getType()) && !post.getErrors().getState(err).getState().isBottom()
+						&& (node == st || isWithin(err.getThrower(), st)))
 					throwers.add(err.getThrower());
 		if (!smashed.isBottom())
 			for (Map.Entry<Type, GenericSetLattice<Statement>> entry : smashed)
@@ -224,7 +236,8 @@ public abstract class IndividualWarningVerifier<A extends AbstractLattice<A>, D 
 					if (entry.getValue().isTop())
 						return VerificationResult.POSSIBLE;
 					for (Statement thrower : entry.getValue())
-						throwers.add(thrower);
+						if (node == st || isWithin(thrower, st))
+							throwers.add(thrower);
 				}
 
 		// no matching error reaches the statement
@@ -236,6 +249,21 @@ public abstract class IndividualWarningVerifier<A extends AbstractLattice<A>, D 
 				break;
 		}
 		return outcome;
+	}
+
+	/**
+	 * Yields {@code true} if the given statement is the given expression, or
+	 * one of its sub-expressions.
+	 */
+	private static boolean isWithin(
+			Statement st,
+			Statement expression) {
+		for (Statement current = st; current != null; current = current instanceof Expression
+				? ((Expression) current).getParentStatement()
+				: null)
+			if (current == expression)
+				return true;
+		return false;
 	}
 
 	/**

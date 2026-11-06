@@ -86,8 +86,11 @@ import org.apache.commons.lang3.tuple.Pair;
  * Each replay of a node is a <i>run</i> (see
  * {@link #startRun(Statement, CFGCall, boolean)}), during which every call to
  * cfgs is recorded, in evaluation order, as a {@link ReplayedCall}. A call is
- * <b>expanded</b> if it is expandable, and the frames of all its callees are
- * among the ones to expand given at construction. Starting from the location
+ * <b>expanded</b> if it is expandable, and either the frames of all its callees
+ * are among the ones to expand given at construction, or it is (part of) an
+ * actual parameter of a call whose callees are (since the unknown result of a
+ * summarized call evaluated before an expanded one would prevent expanding the
+ * latter). Starting from the location
  * before the node, the first expanded call that is reached <i>enters</i> its
  * callees: the entry state of each callee is prepared as the analysis does
  * (scoping the state and assigning the parameters), and its store is recorded
@@ -387,8 +390,11 @@ public class ReplayInterprocedural<A extends AbstractLattice<A>, D extends Abstr
 		for (AnalyzedCFG<A> callee : results)
 			frames.add(frame.enter(call, callee));
 		String obstacle = obstacle(call, results, entryState, parameters, expressions);
-		// the callees of a call are expanded together
-		boolean expand = obstacle == null && !frames.isEmpty() && frames.stream().anyMatch(expanded::contains);
+		// the callees of a call are expanded together, and so are the ones of
+		// the calls evaluated as actual parameters of an expanded call (their
+		// unknown results would prevent expanding it)
+		boolean expand = obstacle == null && !frames.isEmpty()
+				&& (frames.stream().anyMatch(expanded::contains) || isWithinExpanded(call));
 
 		if (resumed != null) {
 			// the run resumes after an expanded call: the ones reached before
@@ -625,6 +631,22 @@ public class ReplayInterprocedural<A extends AbstractLattice<A>, D extends Abstr
 						return "unknown values produced before the call";
 		}
 		return null;
+	}
+
+	/**
+	 * Yields {@code true} if the given call is (part of) an actual parameter of
+	 * a call of the replayed frame whose callees are expanded.
+	 */
+	private boolean isWithinExpanded(
+			CFGCall call) {
+		for (Frame f : expanded)
+			if (frame.equals(f.getParent()) && f.getCall() != call)
+				// resolved calls are not part of the cfg: the statements of
+				// the cfg are the calls they have been resolved from
+				for (Call c = call; c != null; c = c.getSource())
+					if (isWithin(c, f.getCall()))
+						return true;
+		return false;
 	}
 
 	/**

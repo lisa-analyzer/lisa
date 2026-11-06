@@ -8,9 +8,12 @@ import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.type.BoolType;
 import it.unive.lisa.program.type.Float32Type;
 import it.unive.lisa.program.type.Float64Type;
+import it.unive.lisa.program.type.Int16Type;
 import it.unive.lisa.program.type.Int32Type;
+import it.unive.lisa.program.type.Int64Type;
 import it.unive.lisa.program.type.Int8Type;
 import it.unive.lisa.program.type.StringType;
+import it.unive.lisa.program.type.UInt16Type;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.NullConstant;
 import it.unive.lisa.symbolic.value.BinaryExpression;
@@ -21,9 +24,16 @@ import it.unive.lisa.symbolic.value.TernaryExpression;
 import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
+import it.unive.lisa.symbolic.value.operator.binary.BitwiseAnd;
+import it.unive.lisa.symbolic.value.operator.binary.BitwiseOr;
+import it.unive.lisa.symbolic.value.operator.binary.BitwiseShiftLeft;
+import it.unive.lisa.symbolic.value.operator.binary.BitwiseShiftRight;
+import it.unive.lisa.symbolic.value.operator.binary.BitwiseUnsignedShiftRight;
+import it.unive.lisa.symbolic.value.operator.binary.BitwiseXor;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonEq;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonGe;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonGt;
+import it.unive.lisa.symbolic.value.operator.binary.ComparisonLe;
 import it.unive.lisa.symbolic.value.operator.binary.LogicalAnd;
 import it.unive.lisa.symbolic.value.operator.binary.LogicalOr;
 import it.unive.lisa.symbolic.value.operator.binary.Numeric8BitAdd;
@@ -51,6 +61,7 @@ import it.unive.lisa.triage.smt.Term;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.TypeTokenType;
 import it.unive.lisa.type.Untyped;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -97,11 +108,27 @@ public class ExpressionEncoderTest {
 			return constants.computeIfAbsent(id, i -> solver.declare(i.getName(), sort));
 		}
 
+		private final Map<String, String> functions = new HashMap<>();
+
 		@Override
 		public Term fresh(
 				Sort sort,
 				SymbolicExpression origin) {
 			return solver.declare("fresh" + (fresh++), sort);
+		}
+
+		@Override
+		public Term unknown(
+				String function,
+				Sort result,
+				List<Term> arguments,
+				SymbolicExpression origin) {
+			List<Sort> sorts = new ArrayList<>();
+			for (Term arg : arguments)
+				sorts.add(arg.getSort());
+			String name = functions.computeIfAbsent(function + sorts + result,
+					k -> solver.declareFunction("f" + functions.size(), sorts, result));
+			return Term.app(name, result, arguments.toArray(Term[]::new));
 		}
 
 	}
@@ -319,6 +346,73 @@ public class ExpressionEncoderTest {
 		// unsupported operations are unconstrained
 		assertSatisfiable(eq(new UnaryExpression(StringType.INSTANCE, string("a"), StringToUpperCase.INSTANCE, LOC),
 				string("whatever")));
+	}
+
+	@Test
+	public void unsupportedOperationsAreFunctions() throws SemanticException {
+		UnaryExpression upper = new UnaryExpression(StringType.INSTANCE, S, StringToUpperCase.INSTANCE, LOC);
+		Variable t = new Variable(StringType.INSTANCE, "t", LOC);
+		Map<Identifier, Set<Type>> types = new HashMap<>();
+		types.put(S, Set.of(StringType.INSTANCE));
+		types.put(t, Set.of(StringType.INSTANCE));
+		encoder = new ExpressionEncoder(new SortPolicy(types), new Symbols());
+		UnaryExpression other = new UnaryExpression(StringType.INSTANCE, t, StringToUpperCase.INSTANCE, LOC);
+		// the same operation over the same operands yields the same value
+		assertValid(implies(eq(S, t), eq(upper, other)));
+		// but its value is unknown
+		assertSatisfiable(eq(upper, string("whatever")));
+		assertSatisfiable(and(eq(S, t), eq(upper, string("a"))));
+	}
+
+	@Test
+	public void bitwiseOperations() throws SemanticException {
+		Type i = Int32Type.INSTANCE;
+		assertValid(eq(bin(i, integer(12), integer(10), BitwiseAnd.INSTANCE), integer(8)));
+		assertValid(eq(bin(i, integer(12), integer(10), BitwiseOr.INSTANCE), integer(14)));
+		assertValid(eq(bin(i, integer(12), integer(10), BitwiseXor.INSTANCE), integer(6)));
+		assertValid(eq(bin(i, integer(-1), integer(255), BitwiseAnd.INSTANCE), integer(255)));
+		// shifts in two's complement, with distances modulo the width
+		assertValid(eq(bin(i, integer(1), integer(31), BitwiseShiftLeft.INSTANCE), integer(Integer.MIN_VALUE)));
+		assertValid(eq(bin(i, integer(1), integer(33), BitwiseShiftLeft.INSTANCE), integer(2)));
+		assertValid(eq(bin(i, integer(-8), integer(1), BitwiseShiftRight.INSTANCE), integer(-4)));
+		assertValid(eq(bin(i, integer(-1), integer(28), BitwiseUnsignedShiftRight.INSTANCE), integer(15)));
+		assertValid(eq(bin(i, integer(-1), integer(-1), BitwiseUnsignedShiftRight.INSTANCE), integer(1)));
+		// 64-bits operations
+		Constant one = new Constant(Int64Type.INSTANCE, 1L, LOC);
+		assertValid(eq(bin(Int64Type.INSTANCE, one, integer(40), BitwiseShiftLeft.INSTANCE),
+				new Constant(Int64Type.INSTANCE, 1L << 40, LOC)));
+		// properties over unknown operands
+		assertValid(eq(bin(i, X, X, BitwiseXor.INSTANCE), integer(0)));
+		assertValid(bin(BoolType.INSTANCE, bin(i, X, integer(255), BitwiseAnd.INSTANCE), integer(255),
+				ComparisonLe.INSTANCE));
+		assertSatisfiable(eq(bin(i, X, Y, BitwiseOr.INSTANCE), integer(-1)));
+		// over booleans, they are logical operations
+		Variable b = new Variable(BoolType.INSTANCE, "b", LOC);
+		Map<Identifier, Set<Type>> types = new HashMap<>();
+		types.put(b, Set.of(BoolType.INSTANCE));
+		encoder = new ExpressionEncoder(new SortPolicy(types), new Symbols());
+		assertValid(eq(bin(BoolType.INSTANCE, b, new Constant(BoolType.INSTANCE, false, LOC), BitwiseAnd.INSTANCE),
+				new Constant(BoolType.INSTANCE, false, LOC)));
+		assertValid(not(bin(BoolType.INSTANCE, b, b, BitwiseXor.INSTANCE)));
+	}
+
+	@Test
+	public void narrowingConversions() throws SemanticException {
+		Constant byteType = new Constant(new TypeTokenType(Set.of(Int8Type.INSTANCE)), Int8Type.INSTANCE, LOC);
+		Constant shortType = new Constant(new TypeTokenType(Set.of(Int16Type.INSTANCE)), Int16Type.INSTANCE, LOC);
+		Constant charType = new Constant(new TypeTokenType(Set.of(UInt16Type.INSTANCE)), UInt16Type.INSTANCE, LOC);
+		Constant intType = new Constant(new TypeTokenType(Set.of(Int32Type.INSTANCE)), Int32Type.INSTANCE, LOC);
+		assertValid(eq(bin(Int8Type.INSTANCE, integer(200), byteType, TypeConv.INSTANCE), integer(-56)));
+		assertValid(eq(bin(Int8Type.INSTANCE, integer(-5), byteType, TypeConv.INSTANCE), integer(-5)));
+		assertValid(eq(bin(Int16Type.INSTANCE, integer(40000), shortType, TypeConv.INSTANCE), integer(-25536)));
+		assertValid(eq(bin(UInt16Type.INSTANCE, integer(-1), charType, TypeConv.INSTANCE), integer(65535)));
+		assertValid(eq(bin(Int32Type.INSTANCE, new Constant(Int64Type.INSTANCE, 1L << 32, LOC), intType,
+				TypeConv.INSTANCE), integer(0)));
+		// a value out of the range of the target type changes
+		assertSatisfiable(not(eq(bin(Int8Type.INSTANCE, X, byteType, TypeConv.INSTANCE), X)));
+		// widening conversions keep the value
+		assertValid(eq(bin(Int32Type.INSTANCE, bin(Int8Type.INSTANCE, X, byteType, TypeConv.INSTANCE), intType,
+				TypeConv.INSTANCE), bin(Int8Type.INSTANCE, X, byteType, TypeConv.INSTANCE)));
 	}
 
 	@Test

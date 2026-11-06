@@ -189,6 +189,12 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 	private static final int MAX_CHAIN_LENGTH = 20;
 
 	/**
+	 * The beginning of the explanations of the results built from
+	 * counterexamples.
+	 */
+	private static final String COUNTEREXAMPLE_PREFIX = "violation reached in ";
+
+	/**
 	 * The maximum number of partial chains explored when looking for chains of
 	 * calls.
 	 */
@@ -437,14 +443,22 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 		// unknown): models starting from the callers can confirm the violation
 		// (but not refute it, since they only consider the executions through
 		// specific chains of calls)
+		// the explanation of the first model starting from the callers that
+		// reaches the violation, if any, as it tells why the violation stays
+		// possible on executions from the beginning of the program
+		VerificationResult fromCallers = null;
 		for (List<Triple<AnalyzedCFG<A>, Statement, CFGCall>> chain : chainsTo(result)) {
 			if (System.currentTimeMillis() >= deadline)
 				break;
 			VerificationResult confirmed = refine(result, st, violation, chain);
 			if (confirmed.getOutcome() == VerificationOutcome.CONFIRMED)
 				return confirmed;
+			if (fromCallers == null && confirmed.getOutcome() == VerificationOutcome.POSSIBLE
+					&& confirmed.getExplanation() != null
+					&& confirmed.getExplanation().startsWith(COUNTEREXAMPLE_PREFIX))
+				fromCallers = confirmed;
 		}
-		return res;
+		return fromCallers != null ? fromCallers : res;
 	}
 
 	/**
@@ -577,16 +591,23 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 		boolean wasInexact = inexact;
 		List<ModelLocation> trace = callTrace;
 		Map<String, Integer> stats = statistics;
+		// a conclusive second search is not affected by the imprecisions of
+		// the first one
+		inexact = false;
+		callTrace = null;
 		VerificationResult precise = searchOnce(model, strict);
 		int total = stats.getOrDefault("queries", 0) + statistics.getOrDefault("queries", 0);
 		if (precise.getOutcome() == VerificationOutcome.POSSIBLE) {
-			// the first search is kept, as it is not affected by the solver
-			// failing on floating point queries
-			inexact = wasInexact;
-			callTrace = trace;
-			statistics = stats;
-		} else
-			res = precise;
+			// the result of the second search explains why the violation stays
+			// possible (the imprecisions of the first one might be due to the
+			// floating point numbers it does not encode), while the calls to
+			// expand are also taken from the first one, as it is not affected
+			// by the solver failing on floating point queries
+			inexact |= wasInexact;
+			if (callTrace == null)
+				callTrace = trace;
+		}
+		res = precise;
 		Map<String, Integer> merged = new LinkedHashMap<>(statistics);
 		merged.put("queries", total);
 		statistics = merged;
@@ -695,7 +716,7 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 				inputs.add(input.getKey().getSource(), input.getValue(), context);
 		}
 
-		String path = "violation reached in " + (trace.size() - 1) + " steps through " + trace;
+		String path = COUNTEREXAMPLE_PREFIX + (trace.size() - 1) + " steps through " + trace;
 		if (!imprecisions.isEmpty()) {
 			if (!inexact && Unrolling.dueToCalls(imprecisions))
 				callTrace = trace;

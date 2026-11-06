@@ -45,12 +45,22 @@ public class CallerChainTest {
 			+ "      def r = this.helper(x);\n"
 			+ "      def y = x + 1;\n"
 			+ "      def s = this.pair(x, y);\n"
+			+ "      def u = this.nested(this.inc(x));\n"
 			+ "    }\n"
 			+ "    return 0;\n"
 			+ "  }\n"
 			+ "  helper(a) {\n"
 			+ "    def w = 0;\n"
 			+ "    if (a == 42)\n"
+			+ "      w = 1;\n"
+			+ "    return w;\n"
+			+ "  }\n"
+			+ "  inc(a) {\n"
+			+ "    return a + 1;\n"
+			+ "  }\n"
+			+ "  nested(a) {\n"
+			+ "    def w = 0;\n"
+			+ "    if (a == 10)\n"
 			+ "      w = 1;\n"
 			+ "    return w;\n"
 			+ "  }\n"
@@ -121,6 +131,22 @@ public class CallerChainTest {
 		// the value returned by the call is produced in the context of main
 		for (ReproducingInput input : result.getReproducingInputs())
 			assertEquals("<empty>", input.getContext(), result.toString());
+	}
+
+	@Test
+	public void callsInActualParametersOfChainsAreExpanded() throws SemanticException {
+		// the call to nested can be expanded only if the one to inc, evaluated
+		// before it as its actual parameter, is expanded too
+		VerificationResult result = verify(new PdrVerifier<>().withFixpointCheck(false), "nested");
+		assertEquals(VerificationOutcome.CONFIRMED, result.getOutcome(), result.toString());
+		boolean found = false;
+		for (ReproducingInput input : result.getReproducingInputs())
+			if (input.getSource().startsWith("parameter x of")) {
+				assertEquals("9", input.getValue(), result.toString());
+				found = true;
+			}
+		assertTrue(found, result.toString());
+		assertTrue(result.getExplanation().contains("[main > inc]"), result.toString());
 	}
 
 	@Test

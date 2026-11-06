@@ -154,4 +154,30 @@ public interface SymbolTable {
 			Term guard) {
 		return fresh(result, origin, guard);
 	}
+
+	/**
+	 * Yields the application of an unspecified, deterministic function to the
+	 * given arguments, standing for the value of the given expression, that is
+	 * never encoded precisely (e.g., the result of an operator the encoder does
+	 * not know). As for
+	 * {@link #apply(String, Sort, List, SymbolicExpression, Term)}, the same
+	 * function applied to the same arguments yields the same value, but, as
+	 * for {@link #fresh(Sort, SymbolicExpression)}, the value is never
+	 * precise. By default, this is the same as
+	 * {@link #fresh(Sort, SymbolicExpression)}.
+	 *
+	 * @param function  the name of the function
+	 * @param result    the sort of the result
+	 * @param arguments the arguments
+	 * @param origin    the expression whose value is not encoded precisely
+	 *
+	 * @return the application
+	 */
+	default Term unknown(
+			String function,
+			Sort result,
+			List<Term> arguments,
+			SymbolicExpression origin) {
+		return fresh(result, origin);
+	}
 }
