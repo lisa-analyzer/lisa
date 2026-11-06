@@ -458,6 +458,30 @@ public class ContextBasedAnalysis<A extends AbstractLattice<A>,
 	}
 
 	/**
+	 * Returns whether the given call is a recursion.
+	 *
+	 * @param call        the call
+	 * @param entryState  the entry state of the call
+	 * @param parameters  the expressions representing the actual parameters of
+	 *                        the call
+	 * @param expressions the cache where analysis states of intermediate
+	 *                        expressions are stored
+	 *
+	 * @return {@code true} if the call is a recursion
+	 *
+	 * @throws SemanticException if an exception happens during the computation
+	 */
+	protected boolean isRecursion(
+			CFGCall call,
+			AnalysisState<A> entryState,
+			ExpressionSet[] parameters,
+			StatementStore<A> expressions)
+			throws SemanticException {
+		return call.getTargetedCFGs().stream().anyMatch(call.getCFG()::equals)
+				|| callgraph.getCalleesTransitively(call.getTargets()).contains(call.getCFG());
+	}
+
+	/**
 	 * Whether or not this analysis should store the results of fixpoint
 	 * executions for them to be returned as part of
 	 * {@link #getFixpointResults()}.
@@ -487,9 +511,7 @@ public class ContextBasedAnalysis<A extends AbstractLattice<A>,
 			throws SemanticException {
 		callgraph.registerCall(call);
 
-		if (shouldCheckForRecursions()
-				&& (call.getTargetedCFGs().stream().anyMatch(call.getCFG()::equals)
-						|| callgraph.getCalleesTransitively(call.getTargets()).contains(call.getCFG()))) {
+		if (shouldCheckForRecursions() && isRecursion(call, entryState, parameters, expressions)) {
 			// this calls introduces a loop in the call graph -> recursion
 			// we need a special fixpoint to compute its result
 			// we compute that at the end of each fixpoint iteration
