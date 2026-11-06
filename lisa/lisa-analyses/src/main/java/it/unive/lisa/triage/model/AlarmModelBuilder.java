@@ -867,9 +867,13 @@ public final class AlarmModelBuilder {
 		if (e instanceof BinaryExpression && ((BinaryExpression) e).getOperator() == LogicalAnd.INSTANCE) {
 			conjuncts(((BinaryExpression) e).getLeft(), result);
 			conjuncts(((BinaryExpression) e).getRight(), result);
-		} else if (!hasFreshValues(e) && !HeapModel.mentionsHeapModel(e))
-			// the analysis cannot evaluate the heap model
-			result.add(e);
+		} else {
+			// the analysis evaluates global variables, but not the rest of the
+			// heap model
+			SymbolicExpression cond = HeapModel.withoutDefinitions(e);
+			if (!hasFreshValues(cond) && !HeapModel.mentionsHeapModel(cond))
+				result.add(cond);
+		}
 	}
 
 	private static boolean hasFreshValues(

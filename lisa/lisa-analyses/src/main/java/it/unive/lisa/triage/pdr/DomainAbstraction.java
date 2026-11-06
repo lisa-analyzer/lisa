@@ -73,7 +73,10 @@ public class DomainAbstraction<A extends AbstractLattice<A>, D extends AbstractD
 		AnalyzedCFG<A> result = (AnalyzedCFG<A>) location.getFrame().getResult();
 		Statement node = location.getNode();
 		AnalysisState<A> state = cache.preStateOf(result, node, analysis);
-		for (SymbolicExpression lit : cube.getLiterals()) {
+		for (SymbolicExpression literal : cube.getLiterals()) {
+			// the analysis evaluates global variables, but not the rest of the
+			// heap model
+			SymbolicExpression lit = HeapModel.withoutDefinitions(literal);
 			if (HeapModel.mentionsHeapModel(lit))
 				// the analysis cannot evaluate the heap model: not assuming the
 				// literal only weakens the proposal

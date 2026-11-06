@@ -852,6 +852,11 @@ public class ExpressionEncoder
 
 		if (op instanceof HeapOperators.CellKey)
 			return CellKeySort.key(referenceKey(left, expression), coerce(right, Sort.INT, expression));
+		if (op instanceof HeapOperators.DefinedRead) {
+			// the value is known only if the variable has been written
+			symbols.exactOnlyIfWritten(coerce(right, Sort.BOOL, expression), expression.getLeft());
+			return left;
+		}
 		if (op instanceof HeapOperators.WrittenAt)
 			// locations of maps that do not track writes are never written
 			return left.getSort().isArray() && left.getSort().getElement().equals(Sort.BOOL)

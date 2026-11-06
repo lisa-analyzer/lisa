@@ -13,6 +13,7 @@ import it.unive.lisa.program.type.Int32Type;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
+import it.unive.lisa.symbolic.value.GlobalVariable;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.OutOfScopeIdentifier;
 import it.unive.lisa.symbolic.value.Variable;
@@ -175,6 +176,39 @@ public class SymbolicCaseCompositionTest {
 		assertFalse(composed.isUnconstrained(field));
 		assertTrue(composed.isUnconstrained(other));
 		assertFalse(composed.isUnconstrained(X));
+	}
+
+	@Test
+	public void globalVariablesTrackTheirDefinition() {
+		GlobalVariable g = new GlobalVariable(Int32Type.INSTANCE, "C::g", LOC);
+		Identifier defined = HeapModel.defined(g);
+		// reads of values not written by the case are guarded by whether
+		// the variable has been written
+		SymbolicExpression read = HeapModel.definedRead(g, defined);
+		assertEquals(read, SymbolicCase.IDENTITY.substitute(g, factory, null));
+		// rewriting a guarded read does not guard it again
+		assertEquals(read, SymbolicCase.IDENTITY.substitute(read, factory, null));
+		assertEquals(read, compose(SymbolicCase.IDENTITY.assign(X, integer(1), factory, null),
+				SymbolicCase.IDENTITY.assign(Y, g, factory, null)).getUpdates().get(Y));
+
+		// writes define the variable
+		SymbolicCase written = SymbolicCase.IDENTITY.assign(g, integer(1), factory, null);
+		assertEquals(integer(1), written.substitute(g, factory, null));
+		assertEquals(true, ((Constant) written.getUpdates().get(defined)).getValue());
+		assertEquals(integer(1),
+				compose(written, SymbolicCase.IDENTITY.assign(Y, g, factory, null)).getUpdates().get(Y));
+
+		// code that is not modeled might write global variables, unless they
+		// are preserved
+		SymbolicCase havoc = written.withHeapHavoc(Set.of());
+		assertTrue(havoc.isUnconstrained(g));
+		assertTrue(havoc.isUnconstrained(defined));
+		SymbolicExpression unknown = havoc.substitute(g, factory, null);
+		assertTrue(unknown instanceof SummaryValue);
+		assertEquals(SummaryValue.Kind.HEAP, ((SummaryValue) unknown).getKind());
+		SymbolicCase preserved = written.withHeapHavoc(Set.of(g, defined));
+		assertFalse(preserved.isUnconstrained(g));
+		assertEquals(integer(1), preserved.substitute(g, factory, null));
 	}
 
 	@Test

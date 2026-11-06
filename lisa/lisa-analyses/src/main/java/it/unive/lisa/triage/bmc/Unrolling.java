@@ -829,8 +829,9 @@ public class Unrolling {
 	}
 
 	/**
-	 * Yields the constraints stating that no location of the heap has been
-	 * written by the model in the initial states (see {@link HeapModel}).
+	 * Yields the constraints stating that no location of the heap, and no
+	 * global variable, has been written by the model in the initial states
+	 * (see {@link HeapModel}).
 	 */
 	private List<Term> nothingWritten() {
 		List<Term> result = new ArrayList<>();
@@ -842,7 +843,8 @@ public class Unrolling {
 
 	private static boolean isWrittenMap(
 			Identifier id) {
-		return id.getStaticType() == HeapType.WRITTEN_FIELD || id.getStaticType() == HeapType.WRITTEN_CELLS;
+		return id.getStaticType() == HeapType.WRITTEN_FIELD || id.getStaticType() == HeapType.WRITTEN_CELLS
+				|| id.getStaticType() == HeapType.DEFINED;
 	}
 
 	/**
@@ -851,6 +853,8 @@ public class Unrolling {
 	 */
 	private static Term nothingWritten(
 			Identifier id) {
+		if (id.getStaticType() == HeapType.DEFINED)
+			return Term.FALSE;
 		Sort sort = ((HeapType) id.getStaticType()).getSort();
 		return Term.app("(as const " + sort.toSmtLib() + ")", sort, Term.FALSE);
 	}

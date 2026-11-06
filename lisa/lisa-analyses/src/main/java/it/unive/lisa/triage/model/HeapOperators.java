@@ -160,6 +160,40 @@ public final class HeapOperators {
 	}
 
 	/**
+	 * The value of a global variable (the left operand), as read by the
+	 * program: the right operand tells whether the variable has been written,
+	 * and the read is precise only if it has (see
+	 * {@link HeapModel#defined(it.unive.lisa.symbolic.value.Identifier)}).
+	 *
+	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+	 */
+	public static final class DefinedRead
+			implements
+			BinaryOperator {
+
+		/**
+		 * The singleton instance of this class.
+		 */
+		public static final DefinedRead INSTANCE = new DefinedRead();
+
+		private DefinedRead() {
+		}
+
+		@Override
+		public Set<Type> typeInference(
+				TypeSystem types,
+				Set<Type> left,
+				Set<Type> right) {
+			return left;
+		}
+
+		@Override
+		public String toString() {
+			return "defined";
+		}
+	}
+
+	/**
 	 * The reference whose identifier is the operand (an integer).
 	 *
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>

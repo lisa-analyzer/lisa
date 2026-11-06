@@ -9,11 +9,13 @@ import it.unive.lisa.program.cfg.CodeMember;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.MemoryAllocation;
 import it.unive.lisa.symbolic.value.BinaryExpression;
+import it.unive.lisa.symbolic.value.GlobalVariable;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.TernaryExpression;
 import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.Type;
+import it.unive.lisa.type.Untyped;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -44,7 +46,13 @@ import java.util.Set;
  * yields a reference that is different from all the existing ones;</li>
  * <li>for each allocation site, an identifier (of type
  * {@link HeapType#REFERENCE}) holds the reference most recently allocated by
- * the site.</li>
+ * the site;</li>
+ * <li>for each global variable (e.g., a static field), an identifier (of type
+ * {@link HeapType#DEFINED}) records whether its value has been written by the
+ * model: global variables are initialized by code that might not be part of
+ * the model (e.g., static initializers), so that reading one that has not been
+ * written yields a value that is not computed precisely (see
+ * {@link #defined(Identifier)}).</li>
  * </ul>
  * Fields are identified by the class declaring them and their name
  * ({@code $field:C::f}, see {@link #qualify(Type, String)}) when the static
@@ -58,7 +66,9 @@ import java.util.Set;
  * immutable if it is final, while a field identified by its name only is
  * immutable if all the fields with that name in the program are final: their
  * contents can only be written by the code of the classes declaring them (e.g.,
- * their constructors), and they are preserved by calls to other code.
+ * their constructors), and they are preserved by calls to other code. The same
+ * holds for final global variables, that can only be written by the code of the
+ * units declaring them.
  *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
@@ -90,6 +100,12 @@ public class HeapModel {
 	 * been written.
 	 */
 	public static final String WRITTEN_PREFIX = "$written:";
+
+	/**
+	 * The prefix of the names of the identifiers recording whether global
+	 * variables have been written.
+	 */
+	public static final String DEFINED_PREFIX = "$defined:";
 
 	/**
 	 * The identifier of the counter of allocations.
@@ -137,6 +153,17 @@ public class HeapModel {
 	private final Map<String, CompilationUnit> declarers;
 
 	/**
+	 * For each name of a final global variable (see
+	 * {@link #globalName(Unit, Global)}), the unit declaring it.
+	 */
+	private final Map<String, Unit> finalGlobals;
+
+	/**
+	 * The names of all global variables (see {@link #globalName(Unit, Global)}).
+	 */
+	private final Set<String> globals;
+
+	/**
 	 * The separator between the name of a class and the name of a field in
 	 * qualified field names.
 	 */
@@ -149,6 +176,8 @@ public class HeapModel {
 		this.immutable = Collections.emptyMap();
 		this.qualified = Collections.emptyMap();
 		this.finals = Collections.emptyMap();
+		this.finalGlobals = Collections.emptyMap();
+		this.globals = Collections.emptySet();
 		this.declarers = Collections.emptyMap();
 		this.arrayProperties = DEFAULT_ARRAY_PROPERTIES;
 	}
@@ -185,6 +214,15 @@ public class HeapModel {
 		this.qualified = new LinkedHashMap<>();
 		this.finals = new LinkedHashMap<>();
 		this.declarers = new LinkedHashMap<>();
+		this.finalGlobals = new LinkedHashMap<>();
+		this.globals = new LinkedHashSet<>();
+		for (Unit unit : program.getUnits())
+			for (Global g : unit.getGlobals()) {
+				String name = globalName(unit, g);
+				globals.add(name);
+				if (g.isFinal())
+					finalGlobals.put(name, unit);
+			}
 		for (Unit unit : program.getUnits())
 			if (unit instanceof CompilationUnit)
 				for (Global g : ((CompilationUnit) unit).getInstanceGlobals(false)) {
@@ -248,6 +286,102 @@ public class HeapModel {
 	}
 
 	/**
+	 * Yields the name of the variable holding the value of the given global of
+	 * the given unit, as accessed by the program (e.g., {@code C::f}).
+	 *
+	 * @param unit   the unit
+	 * @param global the global
+	 *
+	 * @return the name
+	 */
+	public static String globalName(
+			Unit unit,
+			Global global) {
+		return unit.getName() + QUALIFIER + global.getName();
+	}
+
+	/**
+	 * Yields whether the model records whether the given identifier has been
+	 * written (see {@link #defined(Identifier)}): this happens for global
+	 * variables.
+	 *
+	 * @param id the identifier
+	 *
+	 * @return whether the definition of the identifier is tracked
+	 */
+	public static boolean tracksDefinition(
+			Identifier id) {
+		return id instanceof GlobalVariable;
+	}
+
+	/**
+	 * Yields the identifier recording whether the given global variable has
+	 * been written by the model.
+	 *
+	 * @param variable the global variable
+	 *
+	 * @return the identifier
+	 */
+	public static Variable defined(
+			Identifier variable) {
+		return new Variable(HeapType.DEFINED, DEFINED_PREFIX + variable.getName(), SyntheticLocation.INSTANCE);
+	}
+
+	/**
+	 * Yields the value of the given global variable, as read by the program:
+	 * the read is precise only if the variable has been written by the model
+	 * (see {@link HeapOperators.DefinedRead}).
+	 *
+	 * @param value   the value of the variable
+	 * @param defined whether the variable has been written
+	 *
+	 * @return the read
+	 */
+	public static BinaryExpression definedRead(
+			SymbolicExpression value,
+			SymbolicExpression defined) {
+		return new BinaryExpression(value.getStaticType(), value, defined, HeapOperators.DefinedRead.INSTANCE,
+				value.getCodeLocation());
+	}
+
+	/**
+	 * Yields the given expression where reads of global variables (see
+	 * {@link #definedRead(SymbolicExpression, SymbolicExpression)}) are
+	 * replaced by the variables, that the analysis can evaluate.
+	 *
+	 * @param expression the expression
+	 *
+	 * @return the resulting expression
+	 */
+	public static SymbolicExpression withoutDefinitions(
+			SymbolicExpression expression) {
+		if (expression instanceof UnaryExpression) {
+			UnaryExpression u = (UnaryExpression) expression;
+			SymbolicExpression e = withoutDefinitions(u.getExpression());
+			return e == u.getExpression() ? u
+					: new UnaryExpression(u.getStaticType(), e, u.getOperator(), u.getCodeLocation());
+		}
+		if (expression instanceof BinaryExpression) {
+			BinaryExpression b = (BinaryExpression) expression;
+			if (b.getOperator() instanceof HeapOperators.DefinedRead)
+				return withoutDefinitions(b.getLeft());
+			SymbolicExpression l = withoutDefinitions(b.getLeft());
+			SymbolicExpression r = withoutDefinitions(b.getRight());
+			return l == b.getLeft() && r == b.getRight() ? b
+					: new BinaryExpression(b.getStaticType(), l, r, b.getOperator(), b.getCodeLocation());
+		}
+		if (expression instanceof TernaryExpression) {
+			TernaryExpression t = (TernaryExpression) expression;
+			SymbolicExpression l = withoutDefinitions(t.getLeft());
+			SymbolicExpression m = withoutDefinitions(t.getMiddle());
+			SymbolicExpression r = withoutDefinitions(t.getRight());
+			return l == t.getLeft() && m == t.getMiddle() && r == t.getRight() ? t
+					: new TernaryExpression(t.getStaticType(), l, m, r, t.getOperator(), t.getCodeLocation());
+		}
+		return expression;
+	}
+
+	/**
 	 * Yields the identifier of the reference most recently allocated by the
 	 * given allocation.
 	 *
@@ -278,7 +412,8 @@ public class HeapModel {
 						|| expression.getStaticType() == HeapType.CELLS
 						|| expression.getStaticType() == HeapType.WRITTEN_FIELD
 						|| expression.getStaticType() == HeapType.WRITTEN_CELLS
-						|| expression.getStaticType() == HeapType.COUNTER);
+						|| expression.getStaticType() == HeapType.COUNTER
+					|| expression.getStaticType() == HeapType.DEFINED);
 	}
 
 	/**
@@ -302,6 +437,7 @@ public class HeapModel {
 			BinaryExpression b = (BinaryExpression) expression;
 			return b.getOperator() instanceof HeapOperators.CellKey
 					|| b.getOperator() instanceof HeapOperators.WrittenAt
+					|| b.getOperator() instanceof HeapOperators.DefinedRead
 					|| mentionsHeapModel(b.getLeft())
 					|| mentionsHeapModel(b.getRight());
 		}
@@ -469,6 +605,12 @@ public class HeapModel {
 				preserved.add(contents);
 				preserved.add(written(contents));
 			}
+		for (Map.Entry<String, Unit> e : finalGlobals.entrySet())
+			if (!writers.contains(e.getValue())) {
+				GlobalVariable variable = global(e.getKey());
+				preserved.add(variable);
+				preserved.add(defined(variable));
+			}
 		return preserved;
 	}
 
@@ -489,6 +631,28 @@ public class HeapModel {
 			preserved.add(written(contents));
 		}
 		return preserved;
+	}
+
+	/**
+	 * Yields the identifiers of all global variables, and of the identifiers
+	 * recording whether they have been written: writes of the heap never
+	 * affect them.
+	 *
+	 * @return the identifiers
+	 */
+	public Set<Identifier> globalVariables() {
+		Set<Identifier> result = new LinkedHashSet<>();
+		for (String name : globals) {
+			GlobalVariable variable = global(name);
+			result.add(variable);
+			result.add(defined(variable));
+		}
+		return result;
+	}
+
+	private static GlobalVariable global(
+			String name) {
+		return new GlobalVariable(Untyped.INSTANCE, name, SyntheticLocation.INSTANCE);
 	}
 
 	private static Set<CompilationUnit> ancestors(

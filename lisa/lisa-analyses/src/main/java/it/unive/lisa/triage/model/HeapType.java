@@ -46,6 +46,11 @@ public enum HeapType
 	WRITTEN_CELLS(Sort.array(CellKeySort.SORT, Sort.BOOL)),
 
 	/**
+	 * Whether a global variable has been written.
+	 */
+	DEFINED(Sort.BOOL),
+
+	/**
 	 * The key of a cell of an array.
 	 */
 	CELL_KEY(CellKeySort.SORT),

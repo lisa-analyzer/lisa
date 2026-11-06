@@ -245,7 +245,7 @@ public final class SymbolicCase {
 			return false;
 		if (havocAll || forgotten.contains(id))
 			return true;
-		if (heapHavoc && (isHeap(id) || (HeapModel.isHeapState(id) && !preservedHeap.contains(id))))
+		if (heapHavoc && (isHeap(id) || (isHavockedWithHeap(id) && !preservedHeap.contains(id))))
 			return true;
 		for (Predicate<Identifier> test : forgottenIf)
 			if (test.test(id))
@@ -317,6 +317,16 @@ public final class SymbolicCase {
 	}
 
 	/**
+	 * Yields whether the given identifier is unconstrained when the heap is
+	 * (unless preserved): the identifiers of the heap model, and global
+	 * variables (that code not modeled might write as well).
+	 */
+	private static boolean isHavockedWithHeap(
+			Identifier id) {
+		return HeapModel.isHeapState(id) || HeapModel.tracksDefinition(id);
+	}
+
+	/**
 	 * Rewrites the given expression, evaluated at the end of this case, into an
 	 * expression over the values before the transition and fresh values.
 	 * Identifiers are replaced by their current values, unknown values
@@ -344,12 +354,11 @@ public final class SymbolicCase {
 				return value;
 			if (isHeap(id))
 				return summary(expression, SummaryValue.Kind.HEAP, "value read from the heap", factory);
-			if (HeapModel.isHeapState(id) && isUnconstrained(id))
-				return summary(expression, SummaryValue.Kind.HEAP, "contents of " + id + " after unmodeled writes",
-						factory);
-			if (isUnconstrained(id))
-				return summary(expression, SummaryValue.Kind.UNCONSTRAINED, "unconstrained value of " + id, factory);
-			return preIdentifier(id);
+			SymbolicExpression before = valueBefore(id, factory);
+			if (HeapModel.tracksDefinition(id) && !(before instanceof FreshValue))
+				// the value before the transition might not be known
+				return HeapModel.definedRead(before, substitute(HeapModel.defined(id), factory, pp));
+			return before;
 		}
 		if (expression instanceof PushInv)
 			return summary(expression, SummaryValue.Kind.INVALID, "invalid value", factory);
@@ -367,6 +376,17 @@ public final class SymbolicCase {
 		}
 		if (expression instanceof BinaryExpression) {
 			BinaryExpression b = (BinaryExpression) expression;
+			if (b.getOperator() instanceof HeapOperators.DefinedRead && b.getLeft() instanceof Identifier) {
+				// a read already guarded by whether the variable is defined
+				Identifier id = (Identifier) b.getLeft();
+				SymbolicExpression value = updates.get(id);
+				if (value == null)
+					value = valueBefore(id, factory);
+				// values written by the model, or unknown, are not guarded
+				return value instanceof Identifier && !(value instanceof FreshValue)
+						? HeapModel.definedRead(value, substitute(b.getRight(), factory, pp))
+						: value;
+			}
 			return fold(new BinaryExpression(
 					b.getStaticType(),
 					substitute(b.getLeft(), factory, pp),
@@ -420,6 +440,21 @@ public final class SymbolicCase {
 		if (expression instanceof HeapExpression)
 			return summary(expression, SummaryValue.Kind.HEAP, "heap expression " + expression, factory);
 		return summary(expression, SummaryValue.Kind.UNSUPPORTED, "unsupported expression " + expression, factory);
+	}
+
+	/**
+	 * Yields the value before the transition of the given identifier, that is
+	 * not updated by this case: an unknown value if it is unconstrained, the
+	 * identifier holding it otherwise.
+	 */
+	private SymbolicExpression valueBefore(
+			Identifier id,
+			FreshValueFactory factory) {
+		if (isHavockedWithHeap(id) && isUnconstrained(id))
+			return summary(id, SummaryValue.Kind.HEAP, "contents of " + id + " after unmodeled writes", factory);
+		if (isUnconstrained(id))
+			return summary(id, SummaryValue.Kind.UNCONSTRAINED, "unconstrained value of " + id, factory);
+		return preIdentifier(id);
 	}
 
 	/**
@@ -606,8 +641,12 @@ public final class SymbolicCase {
 			FreshValueFactory factory,
 			ProgramPoint pp) {
 		String field = fieldOf(target, factory, pp);
-		if (field == UNDECIDED)
-			return withHeapHavoc(factory.getHeapModel().immutableContents());
+		if (field == UNDECIDED) {
+			// global variables are not part of the heap
+			Set<Identifier> preserved = new LinkedHashSet<>(factory.getHeapModel().immutableContents());
+			preserved.addAll(factory.getHeapModel().globalVariables());
+			return withHeapHavoc(preserved);
+		}
 		SymbolicExpression v = substitute(value, factory, pp);
 		SymbolicExpression ref = substitute(target.getContainer(), factory, pp);
 		CodeLocation loc = target.getCodeLocation();
@@ -722,6 +761,8 @@ public final class SymbolicCase {
 			forg.remove(id);
 			forg = Collections.unmodifiableSet(forg);
 		}
+		if (HeapModel.tracksDefinition(id))
+			upd.put(HeapModel.defined(id), new Constant(Untyped.INSTANCE, true, value.getCodeLocation()));
 		return new SymbolicCase(pathCondition, Collections.unmodifiableMap(upd), forg, forgottenIf, heapHavoc,
 				preservedHeap, havocAll, scopings);
 	}
@@ -813,7 +854,7 @@ public final class SymbolicCase {
 			kept.retainAll(preservedHeap);
 		Map<Identifier, SymbolicExpression> upd = new LinkedHashMap<>(updates);
 		// heap contents that are not preserved are no longer updated
-		upd.keySet().removeIf(id -> HeapModel.isHeapState(id) && !kept.contains(id));
+		upd.keySet().removeIf(id -> isHavockedWithHeap(id) && !kept.contains(id));
 		return new SymbolicCase(pathCondition, Collections.unmodifiableMap(upd), forgotten, forgottenIf, true,
 				Collections.unmodifiableSet(kept), havocAll, scopings);
 	}
@@ -845,7 +886,7 @@ public final class SymbolicCase {
 				ComparisonGe.INSTANCE, location));
 		Map<Identifier, SymbolicExpression> upd = new LinkedHashMap<>(updates);
 		// heap contents that are not preserved are no longer updated
-		upd.keySet().removeIf(id -> HeapModel.isHeapState(id) && !kept.contains(id));
+		upd.keySet().removeIf(id -> isHavockedWithHeap(id) && !kept.contains(id));
 		upd.put(HeapModel.ALLOC, new BinaryExpression(HeapType.COUNTER, counter, allocated,
 				NumericNonOverflowingAdd.INSTANCE, location));
 		return new SymbolicCase(Collections.unmodifiableList(pc), Collections.unmodifiableMap(upd), forgotten,
@@ -1007,6 +1048,17 @@ public final class SymbolicCase {
 		}
 		if (expression instanceof BinaryExpression) {
 			BinaryExpression b = (BinaryExpression) expression;
+			if (b.getOperator() instanceof HeapOperators.DefinedRead && b.getLeft() instanceof Identifier) {
+				// a read already guarded by whether the variable is defined
+				Identifier id = (Identifier) b.getLeft();
+				SymbolicExpression value = updates.get(id);
+				if (value == null)
+					value = valueBefore(id, factory);
+				// values written by the model, or unknown, are not guarded
+				return value instanceof Identifier && !(value instanceof FreshValue)
+						? HeapModel.definedRead(value, substituteOnce(b.getRight(), factory, reads))
+						: value;
+			}
 			return fold(new BinaryExpression(b.getStaticType(), substituteOnce(b.getLeft(), factory, reads),
 					substituteOnce(b.getRight(), factory, reads), b.getOperator(), b.getCodeLocation()));
 		}
