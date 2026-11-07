@@ -94,7 +94,7 @@ public class NodeList<G extends CodeGraph<G, N, E>, N extends CodeNode<G, N, E>,
 			E sequentialSingleton,
 			boolean computeOffsets) {
 		this.sequentialSingleton = sequentialSingleton;
-		nodes = new LinkedList<>();
+		nodes = new ArrayList<>();
 		cutoff = new HashSet<>();
 		extraEdges = new HashMap<>();
 	}
@@ -107,7 +107,7 @@ public class NodeList<G extends CodeGraph<G, N, E>, N extends CodeNode<G, N, E>,
 	public NodeList(
 			NodeList<G, N, E> other) {
 		sequentialSingleton = other.sequentialSingleton;
-		nodes = new LinkedList<>(other.nodes);
+		nodes = new ArrayList<>(other.nodes);
 		cutoff = new HashSet<>(other.cutoff);
 		extraEdges = new HashMap<>();
 		for (Entry<N, NodeEdges<G, N, E>> entry : other.extraEdges.entrySet())
