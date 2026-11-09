@@ -10,13 +10,19 @@ import it.unive.lisa.LiSA;
 import it.unive.lisa.LiSAReport;
 import it.unive.lisa.analysis.AbstractDomain;
 import it.unive.lisa.analysis.AbstractLattice;
+import it.unive.lisa.analysis.AnalyzedCFG;
 import it.unive.lisa.checks.semantic.SemanticCheck;
 import it.unive.lisa.checks.semantic.SemanticTool;
+import it.unive.lisa.checks.verification.IndividualWarningVerifier;
+import it.unive.lisa.checks.verification.VerificationOutcome;
+import it.unive.lisa.checks.verification.VerificationResult;
 import it.unive.lisa.checks.verification.Violation;
+import it.unive.lisa.checks.verification.WarningVerifier;
 import it.unive.lisa.imp.IMPFrontend;
 import it.unive.lisa.interprocedural.context.ContextBasedAnalysis;
 import it.unive.lisa.interprocedural.callgraph.RTACallGraph;
 import it.unive.lisa.outputs.messages.Message;
+import it.unive.lisa.outputs.messages.StatementMessage;
 import it.unive.lisa.program.Program;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.statement.Assignment;
@@ -26,7 +32,9 @@ import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.triage.smt.SmtLibProcessSolver;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 
@@ -112,6 +120,15 @@ public class FirstViolationVerifierTest {
 			SemanticCheck<?, ?> check,
 			boolean contextSensitive)
 			throws Exception {
+		return analyze(program, check, contextSensitive, new FirstViolationVerifier<>());
+	}
+
+	private static Map<String, Message> analyze(
+			String program,
+			SemanticCheck<?, ?> check,
+			boolean contextSensitive,
+			WarningVerifier<?, ?> verifier)
+			throws Exception {
 		Program p = IMPFrontend.processText(program);
 		for (CFG cfg : p.getAllCFGs())
 			if (!p.getEntryPoints().contains(cfg))
@@ -124,7 +141,7 @@ public class FirstViolationVerifierTest {
 			conf.callGraph = new RTACallGraph();
 			conf.interproceduralAnalysis = new ContextBasedAnalysis<>();
 		}
-		conf.warningVerifier = new FirstViolationVerifier<>();
+		conf.warningVerifier = verifier;
 		LiSAReport report = new LiSA(conf).run(p);
 		Map<String, Message> warnings = new HashMap<>();
 		for (Message warning : report.getWarnings())
@@ -136,6 +153,85 @@ public class FirstViolationVerifierTest {
 			Message warning) {
 		assertFalse(warning.isDefinite(), warning.toString());
 		assertFalse(warning.isRefuted(), warning.toString());
+	}
+
+	/**
+	 * A verifier leaving every warning possible, after the given time,
+	 * recording the bounds on the time of each warning it is given.
+	 */
+	private static class Slow<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
+			extends
+			IndividualWarningVerifier<A, D>
+			implements
+			TimeLimited {
+
+		private final long millis;
+
+		private final List<Long> limits = new ArrayList<>();
+
+		private long limit;
+
+		private Slow(
+				long millis) {
+			this.millis = millis;
+		}
+
+		@Override
+		public void init(
+				SemanticTool<A, D> tool) {
+		}
+
+		@Override
+		public VerificationResult verify(
+				SemanticTool<A, D> tool,
+				StatementMessage warning) {
+			limits.add(limit);
+			try {
+				Thread.sleep(millis);
+			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
+			}
+			return new VerificationResult(VerificationOutcome.POSSIBLE, "slow");
+		}
+
+		@Override
+		public VerificationResult verify(
+				AnalyzedCFG<A> result,
+				Statement st,
+				Violation violation) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public void setTimeLimit(
+				long millis) {
+			limit = millis;
+		}
+	}
+
+	@Test
+	public void theTimeBudgetIsSharedAmongWarnings() throws Exception {
+		Slow<?, ?> cheap = new Slow<>(0);
+		Slow<?, ?> expensive = new Slow<>(600);
+		@SuppressWarnings({ "rawtypes", "unchecked" })
+		FirstViolationVerifier<?, ?> verifier = new FirstViolationVerifier(cheap, expensive).withTimeBudget(1000);
+		Map<String, Message> warnings = analyze("class test {\n"
+				+ "  a() { def w = 0; w = 1; return w; }\n"
+				+ "  b() { def w = 0; w = 1; return w; }\n"
+				+ "  c() { def w = 0; w = 1; return w; }\n"
+				+ "}", new WarnOnAssignments<>(), false, verifier);
+		assertEquals(3, warnings.size(), warnings.toString());
+		// the first warning gets the whole budget, as the minimum share is
+		// larger than the budget; the second one the time left
+		assertEquals(2, expensive.limits.size(), expensive.limits.toString());
+		assertTrue(expensive.limits.get(0) > 900 && expensive.limits.get(0) <= 1000, expensive.limits.toString());
+		assertTrue(expensive.limits.get(1) > 0 && expensive.limits.get(1) < 500, expensive.limits.toString());
+		// the budget ran out before the third warning
+		assertEquals(1, warnings.values().stream()
+				.filter(w -> FirstViolationVerifier.NOT_VERIFIED_IN_TIME.equals(w.getExplanation())).count(),
+				warnings.toString());
+		// the bound is removed after the verification
+		assertEquals(0, expensive.limit);
 	}
 
 	@Test

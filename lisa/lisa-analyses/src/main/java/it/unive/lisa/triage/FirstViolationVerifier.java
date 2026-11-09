@@ -7,14 +7,21 @@ import it.unive.lisa.checks.semantic.SemanticTool;
 import it.unive.lisa.checks.verification.IndividualWarningVerifier;
 import it.unive.lisa.checks.verification.VerificationOutcome;
 import it.unive.lisa.checks.verification.VerificationResult;
+import it.unive.lisa.checks.verification.Violation;
 import it.unive.lisa.checks.verification.WarningVerifier;
 import it.unive.lisa.outputs.messages.StatementMessage;
+import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.triage.encoding.ExpressionEncoderFactory;
 import it.unive.lisa.triage.pdr.PdrVerifier;
 import it.unive.lisa.triage.reachability.ReachabilityVerifier;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * A {@link WarningVerifier} that aims at confirming one warning as quickly as
@@ -49,9 +56,35 @@ public class FirstViolationVerifier<A extends AbstractLattice<A>, D extends Abst
 	 */
 	public static final String NOT_VERIFIED = "not verified: the verification stopped at the first confirmed warning";
 
+	/**
+	 * The explanation of the warnings that are not verified, since the time
+	 * budget of the verification ran out before them (see
+	 * {@link #withTimeBudget(long)}).
+	 */
+	public static final String NOT_VERIFIED_IN_TIME = "not verified: the time budget of the verification ran out";
+
+	/**
+	 * The minimum time given to the verification of each warning when the time
+	 * budget is shared among warnings (see {@link #withTimeBudget(long)}), in
+	 * milliseconds.
+	 */
+	public static final long MIN_SHARE_MILLIS = 10_000;
+
 	private final IndividualWarningVerifier<A, D> cheap;
 
 	private final IndividualWarningVerifier<A, D> expensive;
+
+	/**
+	 * The time budget of each verification of a set of warnings, in
+	 * milliseconds, or {@code 0} if there is none.
+	 */
+	private long budget;
+
+	/**
+	 * The time by which every verification must end (see
+	 * {@link #withDeadline(long)}), or {@code 0} if there is none.
+	 */
+	private long end;
 
 	/**
 	 * Builds the verifier, first using a {@link ReachabilityVerifier} and then
@@ -91,16 +124,84 @@ public class FirstViolationVerifier<A extends AbstractLattice<A>, D extends Abst
 		this.expensive = expensive;
 	}
 
+	/**
+	 * Sets the time budget of each verification of a set of warnings (default:
+	 * none). The time left is shared among the warnings still to verify: each
+	 * gets an equal share (at least {@link #MIN_SHARE_MILLIS}), when the
+	 * verifier of the phase can be bounded ({@link TimeLimited}), within its own
+	 * budget. When the budget runs out, the warnings not verified yet stay
+	 * possible ({@link #NOT_VERIFIED_IN_TIME}). A program might fail many
+	 * checks at the same statement (e.g., in different contexts): the first
+	 * warning of each statement is verified before the other ones, so that the
+	 * budget is spent on different statements first.
+	 *
+	 * @param millis the time budget, in milliseconds, or {@code 0} for none
+	 *
+	 * @return this verifier
+	 */
+	public FirstViolationVerifier<A, D> withTimeBudget(
+			long millis) {
+		this.budget = millis;
+		return this;
+	}
+
+	/**
+	 * Sets the time by which every verification of a set of warnings must end
+	 * (default: none), as {@link System#currentTimeMillis()} gives it: the time
+	 * left until then is shared among the warnings, as the time budget of
+	 * {@link #withTimeBudget(long)} is (if both are set, the verification ends
+	 * when the first of them is reached). This bounds the verification when the
+	 * whole run of the tool must end by a given time.
+	 *
+	 * @param time the time, or {@code 0} for none
+	 *
+	 * @return this verifier
+	 */
+	public FirstViolationVerifier<A, D> withDeadline(
+			long time) {
+		this.end = time;
+		return this;
+	}
+
 	@Override
 	public Map<StatementMessage, VerificationResult> verify(
 			SemanticTool<A, D> tool,
 			Collection<StatementMessage> warnings)
 			throws SemanticException {
+		long deadline = budget > 0 ? System.currentTimeMillis() + budget : Long.MAX_VALUE;
+		if (end > 0)
+			deadline = Math.min(deadline, end);
+		List<StatementMessage> ordered = byStatement(warnings);
 		Map<StatementMessage, VerificationResult> results = new LinkedHashMap<>();
-		if (phase(cheap, tool, warnings, results))
+		try {
+			if (phase(cheap, tool, ordered, results, deadline))
+				return results;
+			phase(expensive, tool, ordered, results, deadline);
 			return results;
-		phase(expensive, tool, warnings, results);
-		return results;
+		} finally {
+			for (IndividualWarningVerifier<A, D> verifier : List.of(cheap, expensive))
+				if (verifier instanceof TimeLimited)
+					((TimeLimited) verifier).setTimeLimit(0);
+		}
+	}
+
+	/**
+	 * Yields the given warnings, where the first warning of each statement
+	 * (and violation) comes before the other warnings of the same statement
+	 * (e.g., in other contexts), keeping their order otherwise.
+	 */
+	private static List<StatementMessage> byStatement(
+			Collection<StatementMessage> warnings) {
+		List<StatementMessage> first = new ArrayList<>();
+		List<StatementMessage> others = new ArrayList<>();
+		Set<Pair<Statement, Violation>> seen = new HashSet<>();
+		for (StatementMessage warning : warnings)
+			if (seen.add(Pair.of(warning.getStatement(), warning.getViolation())))
+				first.add(warning);
+			else
+				others.add(warning);
+		first.addAll(others);
+		return first;
 	}
 
 	/**
@@ -116,11 +217,19 @@ public class FirstViolationVerifier<A extends AbstractLattice<A>, D extends Abst
 			D extends AbstractDomain<A>> boolean phase(
 					IndividualWarningVerifier<A, D> verifier,
 					SemanticTool<A, D> tool,
-					Collection<StatementMessage> warnings,
-					Map<StatementMessage, VerificationResult> results)
+					List<StatementMessage> warnings,
+					Map<StatementMessage, VerificationResult> results,
+					long deadline)
 					throws SemanticException {
 		verifier.init(tool);
 		boolean confirmed = false;
+		// the warnings this phase verifies (those not refuted before)
+		int left = 0;
+		for (StatementMessage warning : warnings) {
+			VerificationResult previous = results.get(warning);
+			if (previous == null || previous.getOutcome() == VerificationOutcome.POSSIBLE)
+				left++;
+		}
 		for (StatementMessage warning : warnings) {
 			VerificationResult previous = results.get(warning);
 			if (previous != null && previous.getOutcome() != VerificationOutcome.POSSIBLE)
@@ -130,6 +239,17 @@ public class FirstViolationVerifier<A extends AbstractLattice<A>, D extends Abst
 				results.put(warning, new VerificationResult(VerificationOutcome.POSSIBLE, NOT_VERIFIED));
 				continue;
 			}
+			long now = System.currentTimeMillis();
+			if (now >= deadline) {
+				results.put(warning, new VerificationResult(VerificationOutcome.POSSIBLE, NOT_VERIFIED_IN_TIME));
+				continue;
+			}
+			if (deadline != Long.MAX_VALUE && verifier instanceof TimeLimited)
+				// an equal share of the time left, but never beyond the
+				// budget
+				((TimeLimited) verifier)
+						.setTimeLimit(Math.min(deadline - now, Math.max(MIN_SHARE_MILLIS, (deadline - now) / left)));
+			left--;
 			VerificationResult result = verifier.verify(tool, warning);
 			results.put(warning, result);
 			if (result.getOutcome() == VerificationOutcome.CONFIRMED)

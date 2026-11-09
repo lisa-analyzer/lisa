@@ -15,6 +15,7 @@ import it.unive.lisa.outputs.messages.StatementMessage;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.call.CFGCall;
 import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.triage.TimeLimited;
 import it.unive.lisa.triage.bmc.Unrolling;
 import it.unive.lisa.triage.encoding.ExpressionEncoderFactory;
 import it.unive.lisa.triage.inputs.InputSource;
@@ -78,7 +79,9 @@ import org.apache.commons.lang3.tuple.Triple;
  */
 public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
 		extends
-		IndividualWarningVerifier<A, D> {
+		IndividualWarningVerifier<A, D>
+		implements
+		TimeLimited {
 
 	/**
 	 * The default maximum level of frames.
@@ -145,6 +148,12 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 	 * The time by which the verification of the current violation must end.
 	 */
 	private long deadline;
+
+	/**
+	 * The bound on the time of each warning set from outside (see
+	 * {@link #setTimeLimit(long)}), or {@code 0}.
+	 */
+	private long timeLimit;
 
 	/**
 	 * The time by which the verification of the current warning must end, if
@@ -418,7 +427,16 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 	}
 
 	private long deadlineFromNow() {
-		return maxMillis > 0 ? System.currentTimeMillis() + maxMillis : Long.MAX_VALUE;
+		long millis = maxMillis > 0 ? maxMillis : Long.MAX_VALUE;
+		if (timeLimit > 0)
+			millis = Math.min(millis, timeLimit);
+		return millis == Long.MAX_VALUE ? Long.MAX_VALUE : System.currentTimeMillis() + millis;
+	}
+
+	@Override
+	public void setTimeLimit(
+			long millis) {
+		timeLimit = millis;
 	}
 
 	@Override
