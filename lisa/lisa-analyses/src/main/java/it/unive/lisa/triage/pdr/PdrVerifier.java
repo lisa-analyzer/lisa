@@ -471,8 +471,16 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 		// the time budget is shared by all the models built for the violation
 		// (and for the warning, if one is being verified)
 		deadline = warningDeadline != 0 ? warningDeadline : deadlineFromNow();
+		// when the model cannot start from the beginning of the program, half
+		// of the time is left to the models starting from the callers, that
+		// are the ones whose counterexamples can be confirmed
+		boolean callers = !isProgramStart(result) && maxChains > 0;
+		long full = deadline;
+		if (callers && full != Long.MAX_VALUE)
+			deadline = System.currentTimeMillis() + (full - System.currentTimeMillis()) / 2;
 		VerificationResult res = refine(result, st, violation, List.of());
-		if (res.getOutcome() != VerificationOutcome.POSSIBLE || isProgramStart(result) || maxChains <= 0)
+		deadline = full;
+		if (res.getOutcome() != VerificationOutcome.POSSIBLE || !callers)
 			return res;
 
 		// the model starts from the states of the result, that are not the
