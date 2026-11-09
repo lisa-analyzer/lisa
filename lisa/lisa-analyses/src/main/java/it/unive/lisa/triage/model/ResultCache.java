@@ -7,13 +7,20 @@ import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.AnalyzedCFG;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.interprocedural.ScopeId;
+import it.unive.lisa.interprocedural.callgraph.CallGraph;
+import it.unive.lisa.program.cfg.CodeMember;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.triage.reachability.Reachability;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.IdentityHashMap;
+import java.util.LinkedList;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.function.Supplier;
+
 
 /**
  * A cache of the information computed from the results of an analysis while
@@ -34,6 +41,84 @@ public class ResultCache<A extends AbstractLattice<A>> {
 	private final Map<AnalyzedCFG<A>, Map<Statement, AnalysisState<A>>> preStates = new IdentityHashMap<>();
 
 	private final Map<Collection<AnalyzedCFG<A>>, Map<ScopeId<A>, AnalyzedCFG<A>>> merged = new IdentityHashMap<>();
+
+	/**
+	 * The global variables written by the code of each member, as the frontend
+	 * knows them.
+	 */
+	private GlobalWrites globalWrites = GlobalWrites.UNKNOWN;
+
+	/**
+	 * For each member, the global variables written by its code and by the
+	 * code of the members it calls, transitively ({@code null} if unknown).
+	 */
+	private final Map<CodeMember, Optional<Set<String>>> transitiveWrites = new HashMap<>();
+
+	/**
+	 * Sets the global variables written by the code of each member of the
+	 * program, as the frontend knows them (by default, none is known).
+	 *
+	 * @param globalWrites the global writes
+	 */
+	public void setGlobalWrites(
+			GlobalWrites globalWrites) {
+		this.globalWrites = globalWrites;
+		transitiveWrites.clear();
+	}
+
+	/**
+	 * Yields the names of the global variables that the given members might
+	 * write, also through the members they call, transitively, as the given
+	 * call graph tells them, or {@code null} if they are not known (see
+	 * {@link GlobalWrites}).
+	 *
+	 * @param members   the members
+	 * @param callgraph the call graph
+	 *
+	 * @return the names, or {@code null}
+	 */
+	public Set<String> globalsWrittenBy(
+			Collection<? extends CodeMember> members,
+			CallGraph callgraph) {
+		Set<String> result = new HashSet<>();
+		for (CodeMember member : members) {
+			Optional<Set<String>> written = transitiveWrites.get(member);
+			if (written == null) {
+				written = Optional.ofNullable(transitively(member, callgraph));
+				transitiveWrites.put(member, written);
+			}
+			if (written.isEmpty())
+				return null;
+			result.addAll(written.get());
+		}
+		return result;
+	}
+
+	private Set<String> transitively(
+			CodeMember member,
+			CallGraph callgraph) {
+		Set<String> result = new HashSet<>();
+		Set<CodeMember> seen = new HashSet<>();
+		LinkedList<CodeMember> ws = new LinkedList<>();
+		ws.add(member);
+		while (!ws.isEmpty()) {
+			CodeMember current = ws.removeFirst();
+			if (!seen.add(current))
+				continue;
+			Set<String> written = globalWrites.writtenBy(current);
+			if (written == null)
+				return null;
+			result.addAll(written);
+			if (callgraph == null)
+				return null;
+			for (CodeMember callee : callgraph.getCallees(current))
+				// initializers do nothing once the variables they initialize
+				// have been written (see GlobalWrites)
+				if (!globalWrites.isInitializer(callee))
+					ws.add(callee);
+		}
+		return result;
+	}
 
 	/**
 	 * Yields the state before the given node of the given result, as computed

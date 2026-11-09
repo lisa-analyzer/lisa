@@ -651,6 +651,27 @@ public class HeapModel {
 		return result;
 	}
 
+	/**
+	 * Yields the identifiers of the global variables whose names are not among
+	 * the given ones, and of the identifiers recording whether they have been
+	 * written.
+	 *
+	 * @param names the names of the global variables
+	 *
+	 * @return the identifiers
+	 */
+	public Set<Identifier> globalsNotIn(
+			Set<String> names) {
+		Set<Identifier> result = new LinkedHashSet<>();
+		for (String name : globals)
+			if (!names.contains(name)) {
+				GlobalVariable variable = global(name);
+				result.add(variable);
+				result.add(defined(variable));
+			}
+		return result;
+	}
+
 	private static GlobalVariable global(
 			String name) {
 		return new GlobalVariable(Untyped.INSTANCE, name, SyntheticLocation.INSTANCE);

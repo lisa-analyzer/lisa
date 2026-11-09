@@ -435,8 +435,12 @@ public class ReplayInterprocedural<A extends AbstractLattice<A>, D extends Abstr
 					call);
 		// the callees might have written the heap, except for the immutable
 		// fields they cannot write
-		Set<Identifier> preserved = entryState.getExecutionState().getStore().getFactory().getHeapModel()
-				.preservedBy(call.getTargets());
+		HeapModel heap = entryState.getExecutionState().getStore().getFactory().getHeapModel();
+		Set<Identifier> preserved = new LinkedHashSet<>(heap.preservedBy(call.getTargets()));
+		// and the global variables they cannot write
+		Set<String> written = cache.globalsWrittenBy(call.getTargets(), tool.getCallGraph());
+		if (written != null)
+			preserved.addAll(heap.globalsNotIn(written));
 		callres = callres.withExecution(mapState(callres.getExecution(),
 				s -> s.withStore(s.getStore().heapHavoc(preserved, call.getLocation()))));
 		return withCalleeFailures(call, entryState, callres);

@@ -24,6 +24,7 @@ import it.unive.lisa.triage.model.AlarmModel;
 import it.unive.lisa.triage.model.AlarmModelBuilder;
 import it.unive.lisa.triage.model.EdgeTransition;
 import it.unive.lisa.triage.model.Frame;
+import it.unive.lisa.triage.model.GlobalWrites;
 import it.unive.lisa.triage.model.InputValue;
 import it.unive.lisa.triage.model.ModelLocation;
 import it.unive.lisa.triage.model.ResultCache;
@@ -123,6 +124,8 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 	private boolean fixpointCheck = true;
 
 	private ExpressionEncoderFactory encoders = ExpressionEncoderFactory.DEFAULT;
+
+	private GlobalWrites globalWrites = GlobalWrites.UNKNOWN;
 
 	private Map<String, Integer> statistics = Map.of();
 
@@ -263,6 +266,23 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 	}
 
 	/**
+	 * Sets the global variables written by the code of each member of the
+	 * program, as the frontend knows them (default:
+	 * {@link GlobalWrites#UNKNOWN}): the calls that the models summarize then
+	 * leave unchanged the global variables that their callees cannot write,
+	 * instead of making all of them unknown.
+	 *
+	 * @param globalWrites the global writes
+	 *
+	 * @return this verifier
+	 */
+	public PdrVerifier<A, D> withGlobalWrites(
+			GlobalWrites globalWrites) {
+		this.globalWrites = globalWrites;
+		return this;
+	}
+
+	/**
 	 * Sets the factory of the encoders of expressions (default:
 	 * {@link ExpressionEncoderFactory#DEFAULT}, knowing only the operators of
 	 * LiSA). Frontends can pass encoders knowing their own operators (see
@@ -394,6 +414,7 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 		this.reachability = new ReachabilityVerifier<>();
 		this.reachability.init(tool);
 		this.cache = new ResultCache<>();
+		this.cache.setGlobalWrites(globalWrites);
 		this.analysis = newAnalysis(tool);
 	}
 
