@@ -673,7 +673,7 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 			case UNKNOWN:
 			default:
 				return new VerificationResult(VerificationOutcome.POSSIBLE,
-						"the solver could not decide a query: " + s.getReasonUnknown());
+						"the solver could not decide a query: " + engine.getReasonUnknown());
 			}
 		} catch (SmtException e) {
 			// the solver might be unusable

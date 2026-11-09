@@ -16,6 +16,7 @@ import it.unive.lisa.triage.model.HeapOperators;
 import it.unive.lisa.triage.model.InputValue;
 import it.unive.lisa.triage.model.ModelLocation;
 import it.unive.lisa.triage.model.SymbolicCase;
+import it.unive.lisa.triage.smt.SmtException;
 import it.unive.lisa.triage.smt.SmtResult;
 import it.unive.lisa.triage.smt.SmtSolver;
 import it.unive.lisa.triage.smt.Term;
@@ -350,6 +351,39 @@ public class PdrEngine {
 	 */
 	public Unrolling getUnrolling() {
 		return unrolling;
+	}
+
+	/**
+	 * Why the solver could not decide the query that stopped the search, if
+	 * any.
+	 */
+	private String reasonUnknown;
+
+	/**
+	 * Yields why the solver could not decide the query that stopped the search
+	 * (with {@link Status#UNKNOWN}).
+	 *
+	 * @return the reason, or {@code null} if the search did not stop because of
+	 *             an undecided query
+	 */
+	public String getReasonUnknown() {
+		return reasonUnknown;
+	}
+
+	/**
+	 * Stops the search after a query the solver could not decide, recording
+	 * why: the reason is asked before the scope of the query is closed, as
+	 * solvers forget it afterwards.
+	 */
+	private void unknown()
+			throws Stop {
+		try {
+			reasonUnknown = solver.getReasonUnknown();
+		} catch (SmtException e) {
+			reasonUnknown = "unknown reason (" + e.getMessage() + ")";
+		}
+		solver.pop();
+		throw new Stop(Status.UNKNOWN);
 	}
 
 	/**
@@ -823,10 +857,8 @@ public class PdrEngine {
 		for (Term t : terms)
 			solver.assertTerm(t);
 		SmtResult res = solver.check();
-		if (res == SmtResult.UNKNOWN) {
-			solver.pop();
-			throw new Stop(Status.UNKNOWN);
-		}
+		if (res == SmtResult.UNKNOWN)
+			unknown();
 		return res;
 	}
 
@@ -865,10 +897,8 @@ public class PdrEngine {
 		for (Map.Entry<String, Term> t : terms.entrySet())
 			solver.assertNamed(t.getKey(), t.getValue());
 		SmtResult res = solver.check();
-		if (res == SmtResult.UNKNOWN) {
-			solver.pop();
-			throw new Stop(Status.UNKNOWN);
-		}
+		if (res == SmtResult.UNKNOWN)
+			unknown();
 		if (res == SmtResult.UNSAT)
 			for (String name : solver.getUnsatCore()) {
 				SymbolicExpression lit = names.get(name);

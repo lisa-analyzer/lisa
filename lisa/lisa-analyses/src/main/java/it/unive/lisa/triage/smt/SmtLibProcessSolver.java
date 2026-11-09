@@ -76,6 +76,40 @@ public class SmtLibProcessSolver
 	private boolean closed;
 
 	/**
+	 * The number of scopes currently open.
+	 */
+	private int depth;
+
+	/**
+	 * The equalities defining the constants of
+	 * {@link #defineConstant(String, Term)}, each with the depth of the scope
+	 * where it is asserted: when that scope is closed, the equality is
+	 * asserted again in the enclosing one, so that it holds in all later
+	 * queries.
+	 */
+	private final List<Definition> definitions = new ArrayList<>();
+
+	private static final class Definition {
+
+		private final Term equality;
+
+		private int depth;
+
+		private Definition(
+				Term equality,
+				int depth) {
+			this.equality = equality;
+			this.depth = depth;
+		}
+	}
+
+	/**
+	 * Why the last satisfiability check is unknown, when the solver has been
+	 * killed because it did not answer in time ({@code null} otherwise).
+	 */
+	private String killed;
+
+	/**
 	 * The commands that have been sent, but whose answers have not been read
 	 * yet: commands answering {@code success} are pipelined, and their answers
 	 * are read before the next request answering something else.
@@ -285,6 +319,8 @@ public class SmtLibProcessSolver
 	 */
 	@Override
 	public boolean reset() {
+		depth = 0;
+		definitions.clear();
 		command("(reset)");
 		// options are reset as well
 		command("(set-option :print-success true)");
@@ -300,6 +336,17 @@ public class SmtLibProcessSolver
 		Term constant = Term.constant(name, body.getSort());
 		command("(define-fun " + constant.toSmtLib() + " () " + body.getSort().toSmtLib() + " " + body.toSmtLib()
 				+ ")");
+		return constant;
+	}
+
+	@Override
+	public Term defineConstant(
+			String name,
+			Term body) {
+		Term constant = declare(name, body.getSort());
+		Term equality = Term.eq(constant, body);
+		assertTerm(equality);
+		definitions.add(new Definition(equality, depth));
 		return constant;
 	}
 
@@ -377,11 +424,24 @@ public class SmtLibProcessSolver
 	@Override
 	public void push() {
 		command("(push 1)");
+		depth++;
 	}
 
 	@Override
 	public void pop() {
+		if (closed && killed != null)
+			// the solver has been killed while checking: its scopes are gone
+			// with it
+			return;
 		command("(pop 1)");
+		depth--;
+		// the constants defined in the closed scope are still declared, and
+		// still equal to their terms
+		for (Definition def : definitions)
+			if (def.depth > depth) {
+				assertTerm(def.equality);
+				def.depth = depth;
+			}
 	}
 
 	@Override
@@ -390,6 +450,7 @@ public class SmtLibProcessSolver
 		try {
 			response = query("(check-sat)");
 		} catch (SolverTimeoutException e) {
+			killed = "timeout: " + e.getMessage();
 			return SmtResult.UNKNOWN;
 		}
 		if (response.isAtom())
@@ -453,11 +514,14 @@ public class SmtLibProcessSolver
 
 	@Override
 	public String getReasonUnknown() {
+		if (closed && killed != null)
+			return killed;
 		SExpression response = query("(get-info :reason-unknown)");
 		if (response.isAtom() || response.getChildren().size() != 2)
 			throw new SmtException("Unexpected response to get-info: " + response);
 		return unquote(response.getChildren().get(1).toString());
 	}
+
 
 	private static String unquote(
 			String text) {
