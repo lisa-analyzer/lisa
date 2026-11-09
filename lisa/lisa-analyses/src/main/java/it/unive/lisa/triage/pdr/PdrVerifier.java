@@ -28,13 +28,16 @@ import it.unive.lisa.triage.model.GlobalWrites;
 import it.unive.lisa.triage.model.InputValue;
 import it.unive.lisa.triage.model.ModelLocation;
 import it.unive.lisa.triage.model.ResultCache;
+import it.unive.lisa.triage.model.SummaryValue;
 import it.unive.lisa.triage.model.SymbolicStore;
 import it.unive.lisa.triage.reachability.ReachabilityVerifier;
 import it.unive.lisa.triage.smt.SmtException;
 import it.unive.lisa.triage.smt.SmtLibProcessSolver;
 import it.unive.lisa.triage.smt.SmtSolver;
 import it.unive.lisa.triage.smt.SmtSolverUnavailableException;
+import org.apache.commons.lang3.tuple.Triple;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -43,7 +46,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
-import org.apache.commons.lang3.tuple.Triple;
+
 
 /**
  * An {@link IndividualWarningVerifier} based on property-directed reachability
@@ -130,6 +133,18 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 	private Map<String, Integer> statistics = Map.of();
 
 	private boolean inexact;
+
+	/**
+	 * Whether the last counterexample found relies on values merged because
+	 * transitions had too many cases (see {@link SymbolicStore}).
+	 */
+	private boolean merged;
+
+	/**
+	 * How many times the maximum number of cases of each transition can be
+	 * doubled, when counterexamples rely on merged values.
+	 */
+	private static final int MAX_CASE_DOUBLINGS = 2;
 
 	private int maxRounds = DEFAULT_MAX_ROUNDS;
 
@@ -587,8 +602,11 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 		AlarmModelBuilder.Reuse reuse = new AlarmModelBuilder.Reuse();
 		// the result of the previous round
 		VerificationResult previous = null;
+		// the maximum number of cases of each transition, doubled when
+		// counterexamples rely on merged values
+		int cases = maxCases;
 		for (int round = 1;; round++) {
-			AlarmModel model = AlarmModelBuilder.build(tool, result, st, violation, maxCases, expanded,
+			AlarmModel model = AlarmModelBuilder.build(tool, result, st, violation, cases, expanded,
 					maxLocations, chain, deadline, cache, reuse);
 			if (model == null)
 				return previous != null ? previous
@@ -604,6 +622,7 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 				return new VerificationResult(VerificationOutcome.REFUTED, "the violation cannot happen");
 
 			inexact = false;
+			merged = false;
 			callTrace = null;
 			statistics = Map.of();
 			// the calls to expand are found on the original model, through
@@ -630,14 +649,22 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 			if (strict != null && strict.getOutcome() == VerificationOutcome.CONFIRMED)
 				return strict;
 
-			if (res.getOutcome() != VerificationOutcome.POSSIBLE || trace == null || round >= maxRounds
+			if (res.getOutcome() != VerificationOutcome.POSSIBLE || round >= maxRounds
 					|| model.isTruncated() || System.currentTimeMillis() >= deadline)
 				return res;
-			Set<Frame> more = model.getExpandableFrames(trace, expanded);
-			if (more.isEmpty())
+			// the next round expands the calls the counterexample relies on,
+			// and keeps more cases if it relies on merged values
+			Set<Frame> more = trace == null ? Collections.emptySet() : model.getExpandableFrames(trace, expanded);
+			boolean grow = merged && cases < maxCases << MAX_CASE_DOUBLINGS;
+			if (more.isEmpty() && !grow)
 				return res;
 			expanded.addAll(more);
-			reuse.expand(more);
+			if (grow) {
+				cases *= 2;
+				// the transitions change with the number of cases
+				reuse = new AlarmModelBuilder.Reuse();
+			} else
+				reuse.expand(more);
 			previous = res;
 		}
 	}
@@ -803,6 +830,8 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 		if (!imprecisions.isEmpty()) {
 			if (!inexact && Unrolling.dueToCalls(imprecisions))
 				callTrace = trace;
+			if (imprecisions.stream().anyMatch(r -> r.startsWith(SummaryValue.Kind.MERGE.getDescription())))
+				merged = true;
 			inexact = true;
 			return new VerificationResult(VerificationOutcome.POSSIBLE, path + ", " + Unrolling.explain(imprecisions));
 		}

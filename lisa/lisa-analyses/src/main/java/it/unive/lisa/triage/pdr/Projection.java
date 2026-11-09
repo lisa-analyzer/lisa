@@ -12,6 +12,8 @@ import it.unive.lisa.symbolic.value.operator.binary.LogicalAnd;
 import it.unive.lisa.triage.encoding.SortPolicy;
 import it.unive.lisa.triage.encoding.ValueSort;
 import it.unive.lisa.triage.model.FreshValue;
+import it.unive.lisa.triage.model.HeapOperators;
+import it.unive.lisa.triage.model.HeapType;
 import it.unive.lisa.triage.model.SymbolicCase;
 import it.unive.lisa.triage.smt.FloatingPoints;
 import it.unive.lisa.triage.smt.SExpression;
@@ -161,8 +163,9 @@ public final class Projection {
 
 	/**
 	 * Converts a value printed by a solver in a model into a constant
-	 * expression. Integers, booleans, strings, and the null value (also wrapped
-	 * in {@link ValueSort values}) are supported.
+	 * expression. Integers, booleans, strings, floating point numbers, the null
+	 * value and references (also wrapped in {@link ValueSort values}) are
+	 * supported.
 	 *
 	 * @param smtlib the value, in SMT-LIB syntax
 	 * @param types  the type system providing the types of constants
@@ -229,6 +232,17 @@ public final class Projection {
 		}
 		if (head.equals(ValueSort.INT) || head.equals(ValueSort.BOOL) || head.equals(ValueSort.STRING))
 			return toConstant(children.get(1), types);
+		if (head.equals(ValueSort.REF)) {
+			// the reference with the given identifier (see HeapModel)
+			SymbolicExpression id = toConstant(children.get(1), types);
+			return id instanceof Constant && ((Constant) id).getValue() instanceof BigInteger
+					&& ((BigInteger) ((Constant) id).getValue()).bitLength() < 32
+							? new UnaryExpression(HeapType.REFERENCE,
+							new Constant(HeapType.COUNTER, ((BigInteger) ((Constant) id).getValue()).intValueExact(),
+									loc),
+							HeapOperators.NewReference.INSTANCE, loc)
+					: null;
+		}
 		return null;
 	}
 

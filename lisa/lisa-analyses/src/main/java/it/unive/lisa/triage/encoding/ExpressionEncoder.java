@@ -868,7 +868,11 @@ public class ExpressionEncoder
 		if (op instanceof LogicalOr)
 			return Term.or(coerce(left, Sort.BOOL, expression), coerce(right, Sort.BOOL, expression));
 		Sort fp = floatingSort(left, right);
-		if (fp != null) {
+		boolean floatOperation = op instanceof ComparisonEq || op instanceof ComparisonNe
+				|| op instanceof ComparisonLt || op instanceof ComparisonLe || op instanceof ComparisonGt
+				|| op instanceof ComparisonGe || op instanceof AdditionOperator || op instanceof SubtractionOperator
+				|| op instanceof MultiplicationOperator || op instanceof DivisionOperator;
+		if (fp != null && floatOperation) {
 			// operations over floating point numbers, where the other operand
 			// is converted to a floating point number as by numeric promotion
 			Term l = toFloat(left, fp, expression.getLeft(), expression);

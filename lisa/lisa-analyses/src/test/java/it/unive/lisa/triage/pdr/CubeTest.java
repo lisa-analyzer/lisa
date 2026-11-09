@@ -11,9 +11,11 @@ import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.NullConstant;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
+import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonEq;
 import it.unive.lisa.symbolic.value.operator.binary.LogicalAnd;
+import it.unive.lisa.triage.model.HeapOperators;
 import it.unive.lisa.type.Untyped;
 import java.math.BigInteger;
 import java.util.List;
@@ -52,6 +54,11 @@ public class CubeTest {
 		assertEquals(true, ((Constant) Projection.toConstant("(Value.Bool true)", types)).getValue());
 		assertEquals("a\"bè", ((Constant) Projection.toConstant("\"a\"\"b\\u{e8}\"", types)).getValue());
 		assertTrue(Projection.toConstant("Value.Null", types) instanceof NullConstant);
-		assertNull(Projection.toConstant("(Value.Ref 3)", types));
+		SymbolicExpression ref = Projection.toConstant("(Value.Ref 3)", types);
+		assertTrue(ref instanceof UnaryExpression
+				&& ((UnaryExpression) ref).getOperator() == HeapOperators.NewReference.INSTANCE);
+		assertEquals(3, ((Constant) ((UnaryExpression) ref).getExpression()).getValue());
+		// identifiers that are not counters are not projected
+		assertNull(Projection.toConstant("(Value.Ref 4294967296)", types));
 	}
 }
