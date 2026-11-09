@@ -92,9 +92,9 @@ public final class SymbolicStore {
 	/**
 	 * Yields the sequential composition of this store with the given one: each
 	 * case of this store composed with each case of the given one (see
-	 * {@link SymbolicCase#then(SymbolicCase, FreshValueFactory, long)}).
-	 * Yields {@code null} if the composition has more cases than the bound of
-	 * this store, or if some composition of cases is too large.
+	 * {@link SymbolicCase#then(SymbolicCase, FreshValueFactory, long)}). Yields
+	 * {@code null} if the composition has more cases than the bound of this
+	 * store, or if some composition of cases is too large.
 	 *
 	 * @param next  the store following this one
 	 * @param bound the maximum size of the conditions and values of the

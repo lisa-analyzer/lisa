@@ -14,8 +14,7 @@ public interface TimeLimited {
 	 * verification of a warning takes at most the given time, or the time of
 	 * the own budget of the verifier, if smaller.
 	 *
-	 * @param millis the time, in milliseconds, or {@code 0} to remove the
-	 *                   bound
+	 * @param millis the time, in milliseconds, or {@code 0} to remove the bound
 	 */
 	void setTimeLimit(
 			long millis);

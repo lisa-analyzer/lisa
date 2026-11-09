@@ -76,8 +76,8 @@ public class Unrolling {
 	private final Map<String, List<Term>> guards = new LinkedHashMap<>();
 
 	/**
-	 * The length of the SMT-LIB text of the terms beyond which they are
-	 * defined as constants when shared (see {@link SymbolTable#share(Term)}).
+	 * The length of the SMT-LIB text of the terms beyond which they are defined
+	 * as constants when shared (see {@link SymbolTable#share(Term)}).
 	 */
 	private static final int SHARE_THRESHOLD = 2000;
 
@@ -324,13 +324,9 @@ public class Unrolling {
 	}
 
 	/**
-	 * Yields the symbol of the uninterpreted function with the given name and
-	 * signature, declaring it in the solver the first time.
-	 */
-	/**
 	 * Yields the given term, or a constant defined as the given term if its
-	 * text is large, so that encodings using it more than once do not repeat
-	 * it (see {@link SymbolTable#share(Term)}).
+	 * text is large, so that encodings using it more than once do not repeat it
+	 * (see {@link SymbolTable#share(Term)}).
 	 */
 	private Term share(
 			Term term) {
@@ -830,8 +826,8 @@ public class Unrolling {
 
 	/**
 	 * Yields the constraints stating that no location of the heap, and no
-	 * global variable, has been written by the model in the initial states
-	 * (see {@link HeapModel}).
+	 * global variable, has been written by the model in the initial states (see
+	 * {@link HeapModel}).
 	 */
 	private List<Term> nothingWritten() {
 		List<Term> result = new ArrayList<>();

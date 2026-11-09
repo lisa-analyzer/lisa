@@ -49,8 +49,8 @@ import java.util.Set;
  * the site;</li>
  * <li>for each global variable (e.g., a static field), an identifier (of type
  * {@link HeapType#DEFINED}) records whether its value has been written by the
- * model: global variables are initialized by code that might not be part of
- * the model (e.g., static initializers), so that reading one that has not been
+ * model: global variables are initialized by code that might not be part of the
+ * model (e.g., static initializers), so that reading one that has not been
  * written yields a value that is not computed precisely (see
  * {@link #defined(Identifier)}).</li>
  * </ul>
@@ -159,7 +159,8 @@ public class HeapModel {
 	private final Map<String, Unit> finalGlobals;
 
 	/**
-	 * The names of all global variables (see {@link #globalName(Unit, Global)}).
+	 * The names of all global variables (see
+	 * {@link #globalName(Unit, Global)}).
 	 */
 	private final Set<String> globals;
 
@@ -413,7 +414,7 @@ public class HeapModel {
 						|| expression.getStaticType() == HeapType.WRITTEN_FIELD
 						|| expression.getStaticType() == HeapType.WRITTEN_CELLS
 						|| expression.getStaticType() == HeapType.COUNTER
-					|| expression.getStaticType() == HeapType.DEFINED);
+						|| expression.getStaticType() == HeapType.DEFINED);
 	}
 
 	/**
@@ -635,8 +636,8 @@ public class HeapModel {
 
 	/**
 	 * Yields the identifiers of all global variables, and of the identifiers
-	 * recording whether they have been written: writes of the heap never
-	 * affect them.
+	 * recording whether they have been written: writes of the heap never affect
+	 * them.
 	 *
 	 * @return the identifiers
 	 */

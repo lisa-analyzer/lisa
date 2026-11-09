@@ -105,9 +105,9 @@ public class FreshValueFactory {
 	}
 
 	/**
-	 * Starts a run, that is, the replay of a node: until {@link #endRun()},
-	 * the same unknown value (the same instance of {@link PushAny}, produced by
-	 * a single evaluation) is always replaced by the same fresh value
+	 * Starts a run, that is, the replay of a node: until {@link #endRun()}, the
+	 * same unknown value (the same instance of {@link PushAny}, produced by a
+	 * single evaluation) is always replaced by the same fresh value
 	 * ({@link #fresh(PushAny, ProgramPoint)}), even if the replay uses it more
 	 * than once (e.g., in the condition and in the result of a short-circuiting
 	 * operator).

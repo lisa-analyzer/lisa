@@ -90,23 +90,22 @@ import org.apache.commons.lang3.tuple.Pair;
  * are among the ones to expand given at construction, or it is (part of) an
  * actual parameter of a call whose callees are (since the unknown result of a
  * summarized call evaluated before an expanded one would prevent expanding the
- * latter). Starting from the location
- * before the node, the first expanded call that is reached <i>enters</i> its
- * callees: the entry state of each callee is prepared as the analysis does
- * (scoping the state and assigning the parameters), and its store is recorded
- * as the transition entering the frame of the callee (see
- * {@link #getEntered()}), while the run stops at the call (errors raised by the
- * callees are propagated from their frames, see {@link TransitionExtractor}).
- * When the run starts from the location where the node resumes after an
- * expanded call returned, all the expanded calls up to that one (included) have
- * already returned: their result is their meta variable, assigned by the
- * transition returning from the callee, with no effects on the store and no
- * errors raised. When the run reaches the call it resumes after, the store is
- * reset to the identity, since the effects of the part of the node evaluated
- * before the call are already part of the transition entering the callees. The
- * operands evaluated before the call that are still to be used are then
- * evaluated at the location where the node resumes: this requires them to yield
- * the same values there.<br>
+ * latter). Starting from the location before the node, the first expanded call
+ * that is reached <i>enters</i> its callees: the entry state of each callee is
+ * prepared as the analysis does (scoping the state and assigning the
+ * parameters), and its store is recorded as the transition entering the frame
+ * of the callee (see {@link #getEntered()}), while the run stops at the call
+ * (errors raised by the callees are propagated from their frames, see
+ * {@link TransitionExtractor}). When the run starts from the location where the
+ * node resumes after an expanded call returned, all the expanded calls up to
+ * that one (included) have already returned: their result is their meta
+ * variable, assigned by the transition returning from the callee, with no
+ * effects on the store and no errors raised. When the run reaches the call it
+ * resumes after, the store is reset to the identity, since the effects of the
+ * part of the node evaluated before the call are already part of the transition
+ * entering the callees. The operands evaluated before the call that are still
+ * to be used are then evaluated at the location where the node resumes: this
+ * requires them to yield the same values there.<br>
  * <br>
  * A call is <b>expandable</b> if:
  * <ul>
@@ -120,8 +119,8 @@ import org.apache.commons.lang3.tuple.Pair;
  * node evaluated before the call (e.g., assignments, also of unknown values,
  * conditions, allocations, writes of the heap, summarized calls) are allowed,
  * as they are only part of the transition entering the callees, and the
- * variables they assign are read from the state after the callees when the
- * node resumes;</li>
+ * variables they assign are read from the state after the callees when the node
+ * resumes;</li>
  * <li>(<i>operand rule</i>) the operands evaluated in the node before the call
  * that are not actual parameters of the call do not read the heap nor global
  * variables (i.e., their values contain no {@link AccessChild},

@@ -25,6 +25,12 @@ import it.unive.lisa.symbolic.value.operator.MultiplicationOperator;
 import it.unive.lisa.symbolic.value.operator.RemainderOperator;
 import it.unive.lisa.symbolic.value.operator.SubtractionOperator;
 import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
+import it.unive.lisa.symbolic.value.operator.binary.BitwiseAnd;
+import it.unive.lisa.symbolic.value.operator.binary.BitwiseOr;
+import it.unive.lisa.symbolic.value.operator.binary.BitwiseShiftLeft;
+import it.unive.lisa.symbolic.value.operator.binary.BitwiseShiftRight;
+import it.unive.lisa.symbolic.value.operator.binary.BitwiseUnsignedShiftRight;
+import it.unive.lisa.symbolic.value.operator.binary.BitwiseXor;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonEq;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonGe;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonGt;
@@ -69,12 +75,6 @@ import it.unive.lisa.symbolic.value.operator.binary.StringIsSubstringOf;
 import it.unive.lisa.symbolic.value.operator.binary.StringIsSuffixOf;
 import it.unive.lisa.symbolic.value.operator.binary.StringStartsWith;
 import it.unive.lisa.symbolic.value.operator.binary.StringSubstringToEnd;
-import it.unive.lisa.symbolic.value.operator.binary.BitwiseAnd;
-import it.unive.lisa.symbolic.value.operator.binary.BitwiseOr;
-import it.unive.lisa.symbolic.value.operator.binary.BitwiseShiftLeft;
-import it.unive.lisa.symbolic.value.operator.binary.BitwiseShiftRight;
-import it.unive.lisa.symbolic.value.operator.binary.BitwiseUnsignedShiftRight;
-import it.unive.lisa.symbolic.value.operator.binary.BitwiseXor;
 import it.unive.lisa.symbolic.value.operator.binary.TypeCast;
 import it.unive.lisa.symbolic.value.operator.binary.TypeCheck;
 import it.unive.lisa.symbolic.value.operator.binary.TypeConv;
@@ -1381,8 +1381,8 @@ public class ExpressionEncoder
 	/**
 	 * Encodes a bitwise operation over integers, through bit-vectors as wide as
 	 * the (promoted) type of the operation: 32 bits, or 64 if it involves a
-	 * 64-bits integer. Bitwise operations over booleans are logical ones. As
-	 * in Java, shift distances are taken modulo the width.
+	 * 64-bits integer. Bitwise operations over booleans are logical ones. As in
+	 * Java, shift distances are taken modulo the width.
 	 */
 	private Term bitwise(
 			BinaryExpression expression,

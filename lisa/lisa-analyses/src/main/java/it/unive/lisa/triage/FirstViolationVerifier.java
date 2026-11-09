@@ -132,12 +132,12 @@ public class FirstViolationVerifier<A extends AbstractLattice<A>, D extends Abst
 	 * verifier) except {@link #MIN_SHARE_MILLIS} for each of the warnings after
 	 * it, and the time it does not use goes to the next ones. Since the
 	 * verification stops at the first confirmed warning, this lets the first
-	 * warnings be verified as they would be without a budget, as long as
-	 * there is time for the other ones. When the budget runs out, the warnings not verified yet stay
-	 * possible ({@link #NOT_VERIFIED_IN_TIME}). A program might fail many
-	 * checks at the same statement (e.g., in different contexts): the first
-	 * warning of each statement is verified before the other ones, so that the
-	 * budget is spent on different statements first.
+	 * warnings be verified as they would be without a budget, as long as there
+	 * is time for the other ones. When the budget runs out, the warnings not
+	 * verified yet stay possible ({@link #NOT_VERIFIED_IN_TIME}). A program
+	 * might fail many checks at the same statement (e.g., in different
+	 * contexts): the first warning of each statement is verified before the
+	 * other ones, so that the budget is spent on different statements first.
 	 *
 	 * @param millis the time budget, in milliseconds, or {@code 0} for none
 	 *
@@ -190,9 +190,9 @@ public class FirstViolationVerifier<A extends AbstractLattice<A>, D extends Abst
 	}
 
 	/**
-	 * Yields the given warnings, where the first warning of each statement
-	 * (and violation) comes before the other warnings of the same statement
-	 * (e.g., in other contexts), keeping their order otherwise.
+	 * Yields the given warnings, where the first warning of each statement (and
+	 * violation) comes before the other warnings of the same statement (e.g.,
+	 * in other contexts), keeping their order otherwise.
 	 */
 	private static List<StatementMessage> byStatement(
 			Collection<StatementMessage> warnings) {

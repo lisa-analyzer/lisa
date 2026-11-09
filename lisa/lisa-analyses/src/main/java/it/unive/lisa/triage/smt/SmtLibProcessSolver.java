@@ -472,7 +472,6 @@ public class SmtLibProcessSolver
 		return unquote(response.getChildren().get(1).toString());
 	}
 
-
 	private static String unquote(
 			String text) {
 		if (text.length() >= 2

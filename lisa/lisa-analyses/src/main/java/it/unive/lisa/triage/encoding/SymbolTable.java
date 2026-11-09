@@ -177,10 +177,9 @@ public interface SymbolTable {
 	 * never encoded precisely (e.g., the result of an operator the encoder does
 	 * not know). As for
 	 * {@link #apply(String, Sort, List, SymbolicExpression, Term)}, the same
-	 * function applied to the same arguments yields the same value, but, as
-	 * for {@link #fresh(Sort, SymbolicExpression)}, the value is never
-	 * precise. By default, this is the same as
-	 * {@link #fresh(Sort, SymbolicExpression)}.
+	 * function applied to the same arguments yields the same value, but, as for
+	 * {@link #fresh(Sort, SymbolicExpression)}, the value is never precise. By
+	 * default, this is the same as {@link #fresh(Sort, SymbolicExpression)}.
 	 *
 	 * @param function  the name of the function
 	 * @param result    the sort of the result

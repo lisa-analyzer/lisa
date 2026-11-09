@@ -952,12 +952,12 @@ public final class SymbolicCase {
 	 * Yields the sequential composition of this case with the given one, that
 	 * is, a case describing a transition of this case followed by a transition
 	 * of the given one: its path condition holds if this case's holds and the
-	 * one of the given case holds after it, and identifiers have the values
-	 * the given case gives them, evaluated after this case. Yields
-	 * {@code null} if some condition or value of the composition is larger
-	 * than the given bound (see {@link #isTooLarge(SymbolicExpression, long)}),
-	 * since tracking it would be expensive (it would be summarized,
-	 * losing precision, when assigned).
+	 * one of the given case holds after it, and identifiers have the values the
+	 * given case gives them, evaluated after this case. Yields {@code null} if
+	 * some condition or value of the composition is larger than the given bound
+	 * (see {@link #isTooLarge(SymbolicExpression, long)}), since tracking it
+	 * would be expensive (it would be summarized, losing precision, when
+	 * assigned).
 	 *
 	 * @param next    the case following this one
 	 * @param factory the factory of fresh values (for the identifiers that are
@@ -1022,9 +1022,10 @@ public final class SymbolicCase {
 	/**
 	 * Rewrites the given expression of a case following this one (thus, over
 	 * identifiers and fresh values) into an expression over the values before
-	 * this case, as {@link #substitute(SymbolicExpression, FreshValueFactory,
-	 * ProgramPoint)} does, rewriting each identifier once (so that the unknown
-	 * values replacing unconstrained identifiers are shared).
+	 * this case, as
+	 * {@link #substitute(SymbolicExpression, FreshValueFactory, ProgramPoint)}
+	 * does, rewriting each identifier once (so that the unknown values
+	 * replacing unconstrained identifiers are shared).
 	 */
 	private SymbolicExpression substituteOnce(
 			SymbolicExpression expression,

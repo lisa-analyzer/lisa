@@ -180,8 +180,8 @@ public class EdgeTransition {
 	}
 
 	/**
-	 * Yields the position of the component producing the given fresh value
-	 * (see {@link #componentOf(FreshValue)}): fresh values produced by earlier
+	 * Yields the position of the component producing the given fresh value (see
+	 * {@link #componentOf(FreshValue)}): fresh values produced by earlier
 	 * components have smaller positions, while the ones introduced by the
 	 * composition come last.
 	 *

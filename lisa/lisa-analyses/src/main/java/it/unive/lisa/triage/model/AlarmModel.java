@@ -200,8 +200,8 @@ public class AlarmModel {
 	}
 
 	/**
-	 * The maximum size of the conditions and values of the transitions
-	 * composed by {@link #withLargeBlocks()}.
+	 * The maximum size of the conditions and values of the transitions composed
+	 * by {@link #withLargeBlocks()}.
 	 */
 	public static final long MAX_BLOCK_VALUE_SIZE = 500;
 
@@ -209,14 +209,14 @@ public class AlarmModel {
 	 * Yields a copy of this model where sequences of transitions are composed
 	 * into single ones (<i>large-block encoding</i>), so that executions take
 	 * fewer steps: each location that is neither initial nor the bad one, and
-	 * that is reached by a single transition from another location, is
-	 * removed, composing that transition with each of the ones leaving the
-	 * location. Locations are kept if the compositions have too many cases, or
-	 * too large conditions or values. The removed locations can still be
-	 * queried for their transitions ({@link #getNodeTransitions(ModelLocation)},
-	 * e.g., for the calls they reach), and are the intermediate locations of
-	 * the composed transitions ({@link EdgeTransition#getIntermediateLocations()}).
-	 * Their invariants are not used anymore.
+	 * that is reached by a single transition from another location, is removed,
+	 * composing that transition with each of the ones leaving the location.
+	 * Locations are kept if the compositions have too many cases, or too large
+	 * conditions or values. The removed locations can still be queried for
+	 * their transitions ({@link #getNodeTransitions(ModelLocation)}, e.g., for
+	 * the calls they reach), and are the intermediate locations of the composed
+	 * transitions ({@link EdgeTransition#getIntermediateLocations()}). Their
+	 * invariants are not used anymore.
 	 *
 	 * @return the copy
 	 */
