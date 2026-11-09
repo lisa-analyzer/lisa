@@ -1216,9 +1216,7 @@ public class ExpressionEncoder
 			symbols.exactOnlyIfWritten(Term.app("select", Sort.BOOL, written, key), origin);
 		else
 			symbols.exactOnlyIfWritten(Term.FALSE, origin);
-		// solvers (z3) handle reads of arrays of values much better when they
-		// are named
-		return map.getSort().isArray() ? symbols.name(select(map, key, origin)) : select(map, key, origin);
+		return select(map, key, origin);
 	}
 
 	/**

@@ -66,7 +66,7 @@ public class FirstViolationVerifier<A extends AbstractLattice<A>, D extends Abst
 	/**
 	 * The minimum time given to the verification of each warning when the time
 	 * budget is shared among warnings (see {@link #withTimeBudget(long)}), in
-	 * milliseconds.
+	 * milliseconds (unless less time is left).
 	 */
 	public static final long MIN_SHARE_MILLIS = 10_000;
 
@@ -126,10 +126,14 @@ public class FirstViolationVerifier<A extends AbstractLattice<A>, D extends Abst
 
 	/**
 	 * Sets the time budget of each verification of a set of warnings (default:
-	 * none). The time left is shared among the warnings still to verify: each
-	 * gets an equal share (at least {@link #MIN_SHARE_MILLIS}), when the
-	 * verifier of the phase can be bounded ({@link TimeLimited}), within its own
-	 * budget. When the budget runs out, the warnings not verified yet stay
+	 * none). The time left is shared among the warnings still to verify, when
+	 * the verifier of the phase can be bounded ({@link TimeLimited}): each
+	 * warning can take all the time left (within the own budget of the
+	 * verifier) except {@link #MIN_SHARE_MILLIS} for each of the warnings after
+	 * it, and the time it does not use goes to the next ones. Since the
+	 * verification stops at the first confirmed warning, this lets the first
+	 * warnings be verified as they would be without a budget, as long as
+	 * there is time for the other ones. When the budget runs out, the warnings not verified yet stay
 	 * possible ({@link #NOT_VERIFIED_IN_TIME}). A program might fail many
 	 * checks at the same statement (e.g., in different contexts): the first
 	 * warning of each statement is verified before the other ones, so that the
@@ -245,10 +249,12 @@ public class FirstViolationVerifier<A extends AbstractLattice<A>, D extends Abst
 				continue;
 			}
 			if (deadline != Long.MAX_VALUE && verifier instanceof TimeLimited)
-				// an equal share of the time left, but never beyond the
-				// budget
-				((TimeLimited) verifier)
-						.setTimeLimit(Math.min(deadline - now, Math.max(MIN_SHARE_MILLIS, (deadline - now) / left)));
+				// all the time left (within the own budget of the verifier),
+				// except the minimum share of each of the other warnings to
+				// verify: the time a warning does not use goes to the next
+				// ones, as this is computed again for each warning
+				((TimeLimited) verifier).setTimeLimit(Math.min(deadline - now,
+						Math.max(MIN_SHARE_MILLIS, deadline - now - MIN_SHARE_MILLIS * (left - 1))));
 			left--;
 			VerificationResult result = verifier.verify(tool, warning);
 			results.put(warning, result);

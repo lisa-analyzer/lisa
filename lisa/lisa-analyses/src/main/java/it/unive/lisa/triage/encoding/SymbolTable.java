@@ -172,22 +172,6 @@ public interface SymbolTable {
 	}
 
 	/**
-	 * Yields a constant equal to the given term, that solvers reason about in
-	 * place of the term (see
-	 * {@link it.unive.lisa.triage.smt.SmtSolver#defineConstant(String, Term)}):
-	 * the encoder names the reads of the maps of the heap with this. By
-	 * default, this is the given term itself.
-	 *
-	 * @param term the term
-	 *
-	 * @return the constant, or the term
-	 */
-	default Term name(
-			Term term) {
-		return term;
-	}
-
-	/**
 	 * Yields the application of an unspecified, deterministic function to the
 	 * given arguments, standing for the value of the given expression, that is
 	 * never encoded precisely (e.g., the result of an operator the encoder does

@@ -565,6 +565,10 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 				return previous != null ? previous
 						: new VerificationResult(VerificationOutcome.POSSIBLE,
 								"time budget exhausted while building the model");
+			if (!chain.isEmpty() && !model.getLocations().contains(model.getBadLocation()))
+				// the model does not reach the statement through the chain
+				return new VerificationResult(VerificationOutcome.POSSIBLE,
+						"the calls of the chain of callers cannot be expanded");
 			if (model.getSeeds(model.getBadLocation()) == null)
 				return new VerificationResult(VerificationOutcome.REFUTED, "the statement is unreachable");
 			if (model.getBadCases().isEmpty())

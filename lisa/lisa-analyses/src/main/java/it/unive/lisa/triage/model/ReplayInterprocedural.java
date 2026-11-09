@@ -116,14 +116,12 @@ import org.apache.commons.lang3.tuple.Pair;
  * frames leading to the replayed one;</li>
  * <li>it is not part of the node where the property is checked (since the
  * property must be checked on a single location);</li>
- * <li>the run lost no value and the store contains no unknown value (except for
- * the amounts of objects allocated by summarized calls) in its path conditions
- * and in the values of variables before the call, since an unknown value
- * evaluated again when the node resumes would be a different one; the effects
- * of the part of the node evaluated before the call (e.g., assignments,
- * allocations, writes of the heap, summarized calls whose results are not used
- * afterwards) are allowed, as they are only part of the transition entering the
- * callees;</li>
+ * <li>the run lost no value before the call; the effects of the part of the
+ * node evaluated before the call (e.g., assignments, also of unknown values,
+ * conditions, allocations, writes of the heap, summarized calls) are allowed,
+ * as they are only part of the transition entering the callees, and the
+ * variables they assign are read from the state after the callees when the
+ * node resumes;</li>
  * <li>(<i>operand rule</i>) the operands evaluated in the node before the call
  * that are not actual parameters of the call do not read the heap nor global
  * variables (i.e., their values contain no {@link AccessChild},
@@ -599,18 +597,15 @@ public class ReplayInterprocedural<A extends AbstractLattice<A>, D extends Abstr
 		if (!expansion)
 			return "call in the node where the property is checked";
 		// the effects of the part of the node evaluated before the call (e.g.,
-		// writes of the heap) are only part of the transition entering the
-		// callee, as the store is reset when the node resumes: only the values
-		// they compute and that are used afterwards matter
-		for (SymbolicCase c : entryState.getExecutionState().getStore().getCases()) {
+		// writes of the heap, conditions over unknown values, assignments of
+		// unknown values to the meta variables of other calls) are only part
+		// of the transition entering the callee, as the store is reset when
+		// the node resumes, and the variables they assign are read afterwards
+		// from the state after the callee: only the operands evaluated again
+		// when the node resumes matter (see the operand rule below)
+		for (SymbolicCase c : entryState.getExecutionState().getStore().getCases())
 			if (c.isHavocAll())
 				return "values lost before the call";
-			if (c.getPathCondition().stream().anyMatch(ReplayInterprocedural::hasFreshValues))
-				return "unknown values produced before the call";
-			for (Map.Entry<Identifier, SymbolicExpression> u : c.getUpdates().entrySet())
-				if (!HeapModel.isHeapState(u.getKey()) && hasFreshValues(u.getValue()))
-					return "unknown values produced before the call";
-		}
 
 		// the operand rule
 		Set<SymbolicExpression> actuals = new LinkedHashSet<>();
@@ -705,26 +700,6 @@ public class ReplayInterprocedural<A extends AbstractLattice<A>, D extends Abstr
 			return hasUnknownValues(((TernaryExpression) e).getLeft())
 					|| hasUnknownValues(((TernaryExpression) e).getMiddle())
 					|| hasUnknownValues(((TernaryExpression) e).getRight());
-		return false;
-	}
-
-	private static boolean hasFreshValues(
-			SymbolicExpression e) {
-		if (e instanceof AllocationOffset)
-			// the amount of objects allocated by summarized calls only
-			// affects the counter of allocations
-			return false;
-		if (e instanceof FreshValue)
-			return true;
-		if (e instanceof UnaryExpression)
-			return hasFreshValues(((UnaryExpression) e).getExpression());
-		if (e instanceof BinaryExpression)
-			return hasFreshValues(((BinaryExpression) e).getLeft())
-					|| hasFreshValues(((BinaryExpression) e).getRight());
-		if (e instanceof TernaryExpression)
-			return hasFreshValues(((TernaryExpression) e).getLeft())
-					|| hasFreshValues(((TernaryExpression) e).getMiddle())
-					|| hasFreshValues(((TernaryExpression) e).getRight());
 		return false;
 	}
 

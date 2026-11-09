@@ -85,28 +85,6 @@ public interface SmtSolver
 			Term body);
 
 	/**
-	 * Defines a constant equal to the given term, as
-	 * {@link #define(String, Term)}, but as a constant of its own rather than
-	 * as an abbreviation of the term: solvers reason about the constant,
-	 * instead of the term wherever it is used. This matters for terms that
-	 * solvers handle much better when named (e.g., reads of arrays of
-	 * datatypes, as z3 does). The constant is equal to the term in all later
-	 * queries, also after {@link #pop()}. By default, this is
-	 * {@link #define(String, Term)}.
-	 *
-	 * @param name the name of the constant, that must not be already declared
-	 *                 or defined
-	 * @param body the term
-	 *
-	 * @return the constant
-	 */
-	default Term defineConstant(
-			String name,
-			Term body) {
-		return define(name, body);
-	}
-
-	/**
 	 * Discards all declarations, definitions, assertions and scopes, so that
 	 * the solver can be reused for unrelated queries as if it was new. Solvers
 	 * that cannot be reset are left unchanged.

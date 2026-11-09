@@ -345,27 +345,6 @@ public class Unrolling {
 		return known;
 	}
 
-	/**
-	 * The constants naming terms (see {@link SymbolTable#name(Term)}), for
-	 * each text of the terms.
-	 */
-	private final Map<String, Term> named = new LinkedHashMap<>();
-
-	/**
-	 * Yields a constant equal to the given term, defined in the solver the
-	 * first time the term is named (see {@link SymbolTable#name(Term)}).
-	 */
-	private Term name(
-			Term term) {
-		String text = term.toSmtLib();
-		Term known = named.get(text);
-		if (known == null) {
-			known = solver.defineConstant("read!" + named.size(), term);
-			named.put(text, known);
-		}
-		return known;
-	}
-
 	private String function(
 			String name,
 			List<Sort> arguments,
@@ -540,12 +519,6 @@ public class Unrolling {
 		public Term share(
 				Term term) {
 			return Unrolling.this.share(term);
-		}
-
-		@Override
-		public Term name(
-				Term term) {
-			return Unrolling.this.name(term);
 		}
 
 		@Override
