@@ -422,9 +422,8 @@ public class Unrolling {
 			if (id instanceof FreshValue) {
 				used.add((FreshValue) id);
 				if (id instanceof SummaryValue) {
-					exact = false;
 					SummaryValue summary = (SummaryValue) id;
-					reasons.add(summary.getKind().getDescription() + ": " + summary.getReason());
+					imprecise(summary.getKind().getDescription() + ": " + summary.getReason());
 				}
 				return Unrolling.this.constant(id.getName() + "@" + step + tag, sort);
 			}
@@ -444,6 +443,19 @@ public class Unrolling {
 		 */
 		private final Set<String> reasons = new LinkedHashSet<>();
 
+		/**
+		 * Records that the encoding is not exact, regardless of the model, for
+		 * the given reason. In strict mode, the encoding is then never precise:
+		 * a false guard excludes it.
+		 */
+		private void imprecise(
+				String reason) {
+			exact = false;
+			reasons.add(reason);
+			if (strict)
+				guard(Term.FALSE, reason);
+		}
+
 		private void guard(
 				Term guard,
 				String reason) {
@@ -455,8 +467,7 @@ public class Unrolling {
 		public Term fresh(
 				Sort sort,
 				SymbolicExpression origin) {
-			exact = false;
-			reasons.add(UNSUPPORTED_OPERATIONS + ": " + describe(origin));
+			imprecise(UNSUPPORTED_OPERATIONS + ": " + describe(origin));
 			return Unrolling.this.constant("$havoc#" + (Unrolling.this.fresh++), sort);
 		}
 
@@ -523,8 +534,7 @@ public class Unrolling {
 				Sort result,
 				List<Term> arguments,
 				SymbolicExpression origin) {
-			exact = false;
-			reasons.add(UNSUPPORTED_OPERATIONS + ": " + describe(origin));
+			imprecise(UNSUPPORTED_OPERATIONS + ": " + describe(origin));
 			List<Sort> sorts = new ArrayList<>();
 			for (Term arg : arguments)
 				sorts.add(arg.getSort());

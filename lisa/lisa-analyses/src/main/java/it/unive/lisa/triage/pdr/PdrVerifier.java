@@ -106,7 +106,7 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 	 * The default maximum number of models built per candidate violation, each
 	 * expanding more calls than the previous one.
 	 */
-	public static final int DEFAULT_MAX_ROUNDS = 10;
+	public static final int DEFAULT_MAX_ROUNDS = 20;
 
 	private final int maxLevel;
 
@@ -664,12 +664,21 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 			List<ModelLocation> trace = callTrace;
 			queries += statistics.getOrDefault("queries", 0);
 			Map<String, Integer> last = statistics;
+			// the next round, if any, expands the calls the counterexample
+			// relies on, and keeps more cases if it relies on merged values
+			Set<Frame> more = trace == null ? Collections.emptySet() : model.getExpandableFrames(trace, expanded);
+			boolean grow = merged && cases < maxCases << MAX_CASE_DOUBLINGS;
+			boolean refinable = res.getOutcome() == VerificationOutcome.POSSIBLE && round < maxRounds
+					&& !model.isTruncated() && (!more.isEmpty() || grow);
 			VerificationResult strict = null;
-			if (inexact && model.isConfirmable()) {
+			if (inexact && model.isConfirmable() && !refinable) {
 				// look for a counterexample where all values are computed
 				// precisely: since the strict encoding under-approximates the
 				// executions, only its counterexamples are meaningful (and
-				// only if they can be confirmed)
+				// only if they can be confirmed). This is done only when the
+				// model cannot be refined further, since refined models are
+				// usually more effective in finding precise counterexamples,
+				// while strict searches often fail without finding any
 				statistics = Map.of();
 				// the strict search might not find any counterexample while
 				// failing to refute the under-approximated executions: it
@@ -694,14 +703,7 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 			if (strict != null && strict.getOutcome() == VerificationOutcome.CONFIRMED)
 				return strict;
 
-			if (res.getOutcome() != VerificationOutcome.POSSIBLE || round >= maxRounds
-					|| model.isTruncated() || System.currentTimeMillis() >= deadline)
-				return res;
-			// the next round expands the calls the counterexample relies on,
-			// and keeps more cases if it relies on merged values
-			Set<Frame> more = trace == null ? Collections.emptySet() : model.getExpandableFrames(trace, expanded);
-			boolean grow = merged && cases < maxCases << MAX_CASE_DOUBLINGS;
-			if (more.isEmpty() && !grow)
+			if (!refinable || System.currentTimeMillis() >= deadline)
 				return res;
 			expanded.addAll(more);
 			if (grow) {
