@@ -199,6 +199,36 @@ public class PdrEngineTest {
 					}
 	}
 
+	@Test
+	public void counterexamplesToGeneralization() throws SemanticException {
+		// program, statement, whether the violation is real
+		Object[][] cases = {
+				{ "shallow", "y = 1", true },
+				{ "open", "w = 1", true },
+				{ "loop", "w = 1", true },
+				{ "relational", "w = 1", false },
+				{ "widening", "w = 1", false },
+				{ "bounded", "w = 1", false },
+				{ "bigloop", "w = 1", false } };
+		int ctgs = 0;
+		for (boolean seeding : new boolean[] { true, false })
+			for (Object[] c : cases)
+				try (SmtSolver s = SmtLibProcessSolver.z3()) {
+					PdrEngine engine = engine((String) c[0], (String) c[1], s, PdrEngine.Generalization.LITERALS,
+							seeding);
+					engine.setCtgs(true);
+					PdrEngine.Status status = engine.run(20, 2000, 10_000);
+					if ((boolean) c[2])
+						assertTrue(status != PdrEngine.Status.SAFE && status != PdrEngine.Status.BLOCKED,
+								c[0] + " " + seeding + ": " + status);
+					else
+						assertTrue(status != PdrEngine.Status.COUNTEREXAMPLE, c[0] + " " + seeding + ": " + status);
+					ctgs += engine.getCtgs();
+				}
+		// some counterexamples to generalization are found and blocked
+		assertTrue(ctgs > 0);
+	}
+
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Test
 	public void domainProposals() throws SemanticException {

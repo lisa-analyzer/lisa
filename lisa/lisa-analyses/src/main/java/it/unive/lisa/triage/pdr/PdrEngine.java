@@ -164,6 +164,29 @@ public class PdrEngine {
 
 	private int accepted = 0;
 
+	/**
+	 * The number of counterexamples to generalization blocked.
+	 */
+	private int ctgsBlocked = 0;
+
+	/**
+	 * Whether counterexamples to generalization are blocked (see
+	 * {@link #blockedWithCtgs(ModelLocation, Cube, int, int)}).
+	 */
+	private boolean ctgs = false;
+
+	/**
+	 * The maximum number of counterexamples to generalization blocked when
+	 * trying to drop a literal from a cube.
+	 */
+	public static final int MAX_CTGS = 3;
+
+	/**
+	 * The maximum depth of the recursive generalization of the
+	 * counterexamples to generalization.
+	 */
+	public static final int CTG_DEPTH = 1;
+
 	private final AlarmModel model;
 
 	private final SmtSolver solver;
@@ -300,6 +323,31 @@ public class PdrEngine {
 	public void setAbstraction(
 			CubeAbstraction abstraction) {
 		this.abstraction = abstraction;
+	}
+
+	/**
+	 * Sets whether or not the generalization of blocked cubes blocks the
+	 * counterexamples to generalization it finds (default: {@code false}):
+	 * when dropping a literal from a cube fails because a state reaches the
+	 * smaller cube, that state is blocked at the previous level (if it is not
+	 * an initial state) and the literal is dropped again, as in IC3 with
+	 * counterexamples to generalization.
+	 *
+	 * @param ctgs whether or not to block counterexamples to generalization
+	 */
+	public void setCtgs(
+			boolean ctgs) {
+		this.ctgs = ctgs;
+	}
+
+	/**
+	 * Yields the number of counterexamples to generalization blocked so far
+	 * (see {@link #setCtgs(boolean)}).
+	 *
+	 * @return the number of counterexamples to generalization
+	 */
+	public int getCtgs() {
+		return ctgsBlocked;
 	}
 
 	/**
@@ -779,10 +827,48 @@ public class PdrEngine {
 			return current;
 		for (SymbolicExpression lit : current.getLiterals()) {
 			Cube candidate = current.without(lit);
-			if (predecessor(location, candidate, level, null, null) == null)
+			if (blockedWithCtgs(location, candidate, level, CTG_DEPTH))
 				current = candidate;
 		}
 		return current;
+	}
+
+	/**
+	 * Yields whether the given cube is blocked at the given level, trying to
+	 * block the states that prevent it (counterexamples to generalization,
+	 * CTGs): when a predecessor of the cube exists, but is not an initial
+	 * state, it is blocked at the previous level, if possible (generalizing it
+	 * and adding its lemma), and the cube is checked again, up to
+	 * {@link #MAX_CTGS} times. The lemmas added this way are relatively
+	 * inductive, so they hold whatever the outcome.
+	 */
+	private boolean blockedWithCtgs(
+			ModelLocation location,
+			Cube cube,
+			int level,
+			int depth)
+			throws SemanticException,
+			Stop {
+		for (int ctgs = 0;; ctgs++) {
+			Obligation ctg = predecessor(location, cube, level, null, null);
+			if (ctg == null)
+				return true;
+			if (!this.ctgs || depth == 0 || ctgs >= MAX_CTGS || ctg.getLevel() == 0 || ctg.getEdge() == null)
+				return false;
+			ModelLocation src = ctg.getLocation();
+			Set<SymbolicExpression> core = new LinkedHashSet<>();
+			if (predecessor(src, ctg.getCube(), ctg.getLevel(), null, core) != null)
+				// the counterexample to generalization cannot be blocked
+				return false;
+			Cube blocked = ctg.getCube().restrict(core);
+			for (SymbolicExpression lit : blocked.getLiterals()) {
+				Cube candidate = blocked.without(lit);
+				if (blockedWithCtgs(src, candidate, ctg.getLevel(), depth - 1))
+					blocked = candidate;
+			}
+			frames.add(src, blocked.negate(), ctg.getLevel());
+			ctgsBlocked++;
+		}
 	}
 
 	/**

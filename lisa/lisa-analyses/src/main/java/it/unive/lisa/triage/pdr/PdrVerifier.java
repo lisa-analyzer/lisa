@@ -124,6 +124,8 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 
 	private boolean seeding = true;
 
+	private boolean ctgs = false;
+
 	private boolean fixpointCheck = true;
 
 	private ExpressionEncoderFactory encoders = ExpressionEncoderFactory.DEFAULT;
@@ -338,6 +340,21 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 	public PdrVerifier<A, D> withSeeding(
 			boolean seeding) {
 		this.seeding = seeding;
+		return this;
+	}
+
+	/**
+	 * Sets whether or not the generalization of blocked cubes blocks the
+	 * counterexamples to generalization it finds (default: {@code false}, see
+	 * {@link PdrEngine#setCtgs(boolean)}).
+	 *
+	 * @param ctgs whether or not to block counterexamples to generalization
+	 *
+	 * @return this verifier
+	 */
+	public PdrVerifier<A, D> withCtgs(
+			boolean ctgs) {
+		this.ctgs = ctgs;
 		return this;
 	}
 
@@ -776,6 +793,7 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 			PdrEngine engine = new PdrEngine(model, s, strict, encoders);
 			engine.setGeneralization(generalization);
 			engine.setSeeding(seeding);
+			engine.setCtgs(ctgs);
 			engine.setAbstraction(new DomainAbstraction<>(analysis, cache));
 			PdrEngine.Status status = engine.run(maxLevel, maxQueries,
 					// at least one millisecond, as 0 means no limit
