@@ -7,6 +7,7 @@ import it.unive.lisa.type.Type;
 import it.unive.lisa.type.TypeSystem;
 import it.unive.lisa.type.Untyped;
 import java.util.Collections;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -237,13 +238,13 @@ public final class HeapOperators {
 
 		@Override
 		public int hashCode() {
-			return types.hashCode();
+			return Objects.hashCode(types);
 		}
 
 		@Override
 		public boolean equals(
 				Object obj) {
-			return obj instanceof RuntimeTypeIn && ((RuntimeTypeIn) obj).types.equals(types);
+			return obj instanceof RuntimeTypeIn && Objects.equals(((RuntimeTypeIn) obj).types, types);
 		}
 
 		@Override

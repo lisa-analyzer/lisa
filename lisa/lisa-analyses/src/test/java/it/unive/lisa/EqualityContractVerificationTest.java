@@ -123,6 +123,7 @@ import it.unive.lisa.symbolic.value.HeapLocation;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.triage.inputs.InputSource;
 import it.unive.lisa.triage.model.Frame;
+import it.unive.lisa.triage.model.HeapOperators;
 import it.unive.lisa.triage.model.ModelLocation;
 import it.unive.lisa.triage.model.SymbolicCase;
 import it.unive.lisa.triage.model.SymbolicStore;
@@ -743,6 +744,7 @@ public class EqualityContractVerificationTest {
 		verify(Term.class, verifier -> verifier.withPrefabValues(Sort.class, Sort.INT, Sort.BOOL));
 		verify(Cube.class);
 		verify(Cube.Blocked.class);
+		verify(HeapOperators.RuntimeTypeIn.class);
 	}
 
 	@Test
