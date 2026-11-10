@@ -65,6 +65,11 @@ public class SmtLibProcessSolver
 
 	private final long timeout;
 
+	/**
+	 * The command checking satisfiability.
+	 */
+	private final String check;
+
 	private final Process process;
 
 	private final Writer input;
@@ -158,8 +163,30 @@ public class SmtLibProcessSolver
 		return new SmtLibProcessSolver(
 				List.of(z3Executable(), "-in", "-smt2"),
 				List.of("(set-option :timeout " + timeoutMillis + ")"),
-				timeoutMillis);
+				timeoutMillis,
+				z3Check(timeoutMillis));
 	}
+
+	/**
+	 * The command checking satisfiability with z3: queries are first
+	 * simplified (solving equalities and eliminating unconstrained terms, so
+	 * that, e.g., the values read from the heap model and wrapped in values of
+	 * unknown kind often become plain numbers), and then solved by
+	 * bit-blasting if they are made of floating point numbers and
+	 * bit-vectors only, and by the general solver otherwise. Without the
+	 * simplifications, the general solver often fails on queries mixing
+	 * floating point numbers with the other theories.
+	 */
+	private static String z3Check(
+			long timeoutMillis) {
+		return "(check-sat-using (try-for (then simplify propagate-values solve-eqs elim-uncnstr (or-else qffp smt)) "
+				+ timeoutMillis + "))";
+	}
+
+	/**
+	 * The standard command checking satisfiability.
+	 */
+	private static final String CHECK_SAT = "(check-sat)";
 
 	/**
 	 * Builds a solver running cvc5 (see {@link #setCvc5Path(String)}), with
@@ -245,6 +272,31 @@ public class SmtLibProcessSolver
 			List<String> command,
 			List<String> initialization,
 			long timeoutMillis) {
+		this(command, initialization, timeoutMillis, CHECK_SAT);
+	}
+
+	/**
+	 * Builds a solver running the given command, that must accept SMT-LIB 2
+	 * commands from its standard input, and that checks satisfiability with
+	 * the given command (e.g., {@code (check-sat)}, or a solver-specific
+	 * variant).
+	 *
+	 * @param command        the command line starting the solver, that reads
+	 *                           SMT-LIB 2 commands from its standard input
+	 * @param initialization solver-specific commands to send right after the
+	 *                           solver has started (e.g., to set the timeout)
+	 * @param timeoutMillis  the timeout of satisfiability checks, in
+	 *                           milliseconds
+	 * @param check          the command checking satisfiability
+	 *
+	 * @throws SmtSolverUnavailableException if the process cannot be started
+	 */
+	public SmtLibProcessSolver(
+			List<String> command,
+			List<String> initialization,
+			long timeoutMillis,
+			String check) {
+		this.check = check;
 		this.command = List.copyOf(command);
 		this.timeout = timeoutMillis;
 		this.initialization = List.copyOf(initialization);
@@ -398,7 +450,7 @@ public class SmtLibProcessSolver
 	public SmtResult check() {
 		SExpression response;
 		try {
-			response = query("(check-sat)");
+			response = query(check);
 		} catch (SolverTimeoutException e) {
 			killed = "timeout: " + e.getMessage();
 			return SmtResult.UNKNOWN;
