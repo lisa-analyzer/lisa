@@ -9,13 +9,20 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.interprocedural.ScopeId;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.program.cfg.CodeMember;
+import it.unive.lisa.program.SyntheticLocation;
+import it.unive.lisa.program.cfg.Parameter;
 import it.unive.lisa.program.cfg.statement.Statement;
+import it.unive.lisa.symbolic.SymbolicExpression;
+import it.unive.lisa.symbolic.value.Variable;
+import it.unive.lisa.type.Untyped;
 import it.unive.lisa.triage.reachability.Reachability;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -53,6 +60,116 @@ public class ResultCache<A extends AbstractLattice<A>> {
 	 * code of the members it calls, transitively ({@code null} if unknown).
 	 */
 	private final Map<CodeMember, Optional<Set<String>>> transitiveWrites = new HashMap<>();
+
+	/**
+	 * The identifier standing for the value returned by a member in its
+	 * summaries (see {@link #summaryOf(CodeMember)}).
+	 */
+	public static final Variable RETURNED = new Variable(Untyped.INSTANCE, "$returned", SyntheticLocation.INSTANCE);
+
+	/**
+	 * The facts known to hold whenever each member returns, over its formal
+	 * parameters and {@link #RETURNED}.
+	 */
+	private final Map<CodeMember, List<SymbolicExpression>> summaries = new HashMap<>();
+
+	/**
+	 * Whether the summaries have been computed.
+	 */
+	private boolean summarized;
+
+	/**
+	 * Yields the facts known to hold whenever the given member returns: boolean
+	 * expressions over the formal parameters of the member (as variables named
+	 * after them, that the member never assigns) and {@link #RETURNED}, the
+	 * returned value. They are assumed on the results of the calls to the
+	 * member that are not expanded because of recursion.
+	 *
+	 * @param member the member
+	 *
+	 * @return the facts (empty if none is known)
+	 */
+	public List<SymbolicExpression> summaryOf(
+			CodeMember member) {
+		return summaries.getOrDefault(member, Collections.emptyList());
+	}
+
+	/**
+	 * Sets the facts known to hold whenever the given member returns (see
+	 * {@link #summaryOf(CodeMember)}).
+	 *
+	 * @param member the member
+	 * @param facts  the facts
+	 */
+	public void setSummary(
+			CodeMember member,
+			List<SymbolicExpression> facts) {
+		if (facts.isEmpty())
+			summaries.remove(member);
+		else
+			summaries.put(member, facts);
+	}
+
+	/**
+	 * Yields the variable standing for the given formal parameter in the
+	 * summaries of its member (see {@link #summaryOf(CodeMember)}): variables
+	 * are identified by their names.
+	 *
+	 * @param formal the formal parameter
+	 *
+	 * @return the variable
+	 */
+	public static Variable formal(
+			Parameter formal) {
+		return new Variable(formal.getStaticType(), formal.getName(), formal.getLocation());
+	}
+
+	/**
+	 * Whether the conditions of the models are decided by the analysis to
+	 * strengthen their seeds.
+	 */
+	private boolean decidesConditions = true;
+
+	/**
+	 * Yields whether the conditions of the models built with this cache are
+	 * decided by the analysis, so that the ones it decides become seeds of the
+	 * models (default: {@code true}).
+	 *
+	 * @return whether the conditions are decided by the analysis
+	 */
+	public boolean decidesConditions() {
+		return decidesConditions;
+	}
+
+	/**
+	 * Sets whether the conditions of the models built with this cache are
+	 * decided by the analysis (see {@link #decidesConditions()}): this only
+	 * affects the precision of the seeds of the models, and deciding complex
+	 * conditions might be expensive for some analyses.
+	 *
+	 * @param decidesConditions whether the conditions are decided by the
+	 *                              analysis
+	 */
+	public void setDecidesConditions(
+			boolean decidesConditions) {
+		this.decidesConditions = decidesConditions;
+	}
+
+	/**
+	 * Yields whether the summaries of the members have been computed.
+	 *
+	 * @return whether the summaries have been computed
+	 */
+	public boolean isSummarized() {
+		return summarized;
+	}
+
+	/**
+	 * Records that the summaries of the members have been computed.
+	 */
+	public void setSummarized() {
+		summarized = true;
+	}
 
 	/**
 	 * Sets the global variables written by the code of each member of the

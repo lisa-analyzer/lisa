@@ -128,6 +128,14 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 
 	private boolean invariants = true;
 
+	private boolean recursionSummaries = true;
+
+	/**
+	 * The maximum time spent computing the summaries of recursive members (see
+	 * {@link RecursionSummaries}), in milliseconds.
+	 */
+	public static final long MAX_SUMMARIES_MILLIS = 45_000;
+
 	private boolean fixpointCheck = true;
 
 	private ExpressionEncoderFactory encoders = ExpressionEncoderFactory.DEFAULT;
@@ -375,6 +383,22 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 	}
 
 	/**
+	 * Sets whether or not the summaries of recursive members are computed and
+	 * assumed on the results of the recursive calls that are not expanded
+	 * (default: {@code true}, see {@link RecursionSummaries}).
+	 *
+	 * @param recursionSummaries whether or not to use summaries of recursive
+	 *                               members
+	 *
+	 * @return this verifier
+	 */
+	public PdrVerifier<A, D> withRecursionSummaries(
+			boolean recursionSummaries) {
+		this.recursionSummaries = recursionSummaries;
+		return this;
+	}
+
+	/**
 	 * Sets the maximum number of chains of calls from the beginning of the
 	 * program tried when a violation in a callee (i.e., in a result that is not
 	 * the one of the beginning of the program) is neither confirmed nor refuted
@@ -572,6 +596,16 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 		// (and for the warning, if one is being verified)
 		deadline = throwerDeadline != 0 ? throwerDeadline
 				: warningDeadline != 0 ? warningDeadline : deadlineFromNow();
+		if (recursionSummaries && !cache.isSummarized()) {
+			// the summaries of recursive members are computed once, before the
+			// first violation is verified, and are used by all the models: they
+			// have a budget of their own, of at most half of the time available
+			// to the verifier, and the violation still has its own budget
+			long budget = timeLimit > 0 ? Math.min(MAX_SUMMARIES_MILLIS, timeLimit / 2) : MAX_SUMMARIES_MILLIS;
+			RecursionSummaries.compute(tool, cache, maxCases, solvers, encoders, System.currentTimeMillis() + budget);
+			deadline = throwerDeadline != 0 || warningDeadline != 0 ? Math.max(deadline, deadlineFromNow())
+					: deadlineFromNow();
+		}
 		// when the model cannot start from the beginning of the program, half
 		// of the time is left to the models starting from the callers, that
 		// are the ones whose counterexamples can be confirmed

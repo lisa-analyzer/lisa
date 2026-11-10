@@ -25,6 +25,7 @@ import it.unive.lisa.lattices.GenericMapLattice;
 import it.unive.lisa.lattices.GenericSetLattice;
 import it.unive.lisa.program.Application;
 import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.Parameter;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.fixpoints.CompoundState;
 import it.unive.lisa.program.cfg.statement.Expression;
@@ -145,6 +146,11 @@ public class ReplayInterprocedural<A extends AbstractLattice<A>, D extends Abstr
 	private final AnalyzedCFG<A> result;
 
 	private final ReplayAnalysis<A, D> analysis;
+
+	/**
+	 * The reason why recursive calls are not expanded.
+	 */
+	public static final String RECURSIVE = "recursive call";
 
 	private final Analysis<A, D> plain;
 
@@ -382,6 +388,13 @@ public class ReplayInterprocedural<A extends AbstractLattice<A>, D extends Abstr
 			// expanded call: the semantics of the call would make the
 			// execution non-bottom
 			return entryState.bottomExecution();
+		if (resumed == null && isRecursive(call)) {
+			// recursive calls are never expanded: the results of their callees
+			// (that might be many, one per depth of the recursion) are not
+			// needed
+			calls.add(new ReplayedCall(call, Collections.emptyList(), RECURSIVE, false));
+			return summarize(call, entryState, parameters);
+		}
 		List<AnalyzedCFG<A>> results = calleesOf(call);
 		List<Frame> frames = new ArrayList<>(results.size());
 		for (AnalyzedCFG<A> callee : results)
@@ -409,7 +422,7 @@ public class ReplayInterprocedural<A extends AbstractLattice<A>, D extends Abstr
 		}
 
 		calls.add(new ReplayedCall(call, frames, obstacle, false));
-		return summarize(call, entryState);
+		return summarize(call, entryState, RECURSIVE.equals(obstacle) ? parameters : null);
 	}
 
 	/**
@@ -417,7 +430,8 @@ public class ReplayInterprocedural<A extends AbstractLattice<A>, D extends Abstr
 	 */
 	private AnalysisState<ReplayState<A>> summarize(
 			CFGCall call,
-			AnalysisState<ReplayState<A>> entryState)
+			AnalysisState<ReplayState<A>> entryState,
+			ExpressionSet[] parameters)
 			throws SemanticException {
 		ScopeId<ReplayState<A>> context = getCurrentContext();
 		String reason = "result of call to " + call.getFullTargetName();
@@ -443,7 +457,49 @@ public class ReplayInterprocedural<A extends AbstractLattice<A>, D extends Abstr
 			preserved.addAll(heap.globalsNotIn(written));
 		callres = callres.withExecution(mapState(callres.getExecution(),
 				s -> s.withStore(s.getStore().heapHavoc(preserved, call.getLocation()))));
+		// the facts known to hold when the callee returns
+		for (SymbolicExpression fact : summaryFacts(call, parameters)) {
+			SymbolicExpression assumed = fact;
+			callres = callres.withExecution(mapState(callres.getExecution(),
+					s -> s.withStore(s.getStore().assume(assumed, call))));
+		}
 		return withCalleeFailures(call, entryState, callres);
+	}
+
+	/**
+	 * Yields the facts of the summary of the callee of the given call (see
+	 * {@link ResultCache#summaryOf(it.unive.lisa.program.cfg.CodeMember)}),
+	 * over the actual parameters and the meta variable of the call, if the
+	 * call has a single target and each actual parameter has a single value
+	 * that does not read the heap. Yields no fact if the parameters are
+	 * {@code null}.
+	 */
+	private List<SymbolicExpression> summaryFacts(
+			CFGCall call,
+			ExpressionSet[] parameters) {
+		if (parameters == null || call.getTargetedCFGs().size() != 1 || call.getStaticType().isVoidType())
+			return Collections.emptyList();
+		CFG target = call.getTargetedCFGs().iterator().next();
+		List<SymbolicExpression> facts = cache.summaryOf(target);
+		Parameter[] formals = target.getDescriptor().getFormals();
+		if (facts.isEmpty() || formals.length != parameters.length)
+			return Collections.emptyList();
+		SymbolicExpression[] actuals = new SymbolicExpression[parameters.length];
+		for (int i = 0; i < parameters.length; i++) {
+			if (parameters[i].size() != 1)
+				return Collections.emptyList();
+			actuals[i] = parameters[i].iterator().next();
+			if (actuals[i].mightNeedRewriting())
+				return Collections.emptyList();
+		}
+		List<SymbolicExpression> result = new ArrayList<>(facts.size());
+		for (SymbolicExpression fact : facts) {
+			SymbolicExpression instance = fact.replace(ResultCache.RETURNED, call.getMetaVariable());
+			for (int i = 0; i < formals.length; i++)
+				instance = instance.replace(ResultCache.formal(formals[i]), actuals[i]);
+			result.add(instance);
+		}
+		return result;
 	}
 
 	/**
@@ -582,6 +638,19 @@ public class ReplayInterprocedural<A extends AbstractLattice<A>, D extends Abstr
 	}
 
 	/**
+	 * Yields whether some target of the given call is the code of one of the
+	 * frames of this replay, that is, if the call is recursive.
+	 */
+	private boolean isRecursive(
+			CFGCall call) {
+		for (Frame f = frame; f != null; f = f.getParent())
+			for (CFG target : call.getTargetedCFGs())
+				if (f.getResult().getDescriptor().equals(target.getDescriptor()))
+					return true;
+		return false;
+	}
+
+	/**
 	 * Yields the reason why the given call is not expandable, or {@code null}
 	 * if it is expandable (see the description of this class).
 	 */
@@ -591,10 +660,8 @@ public class ReplayInterprocedural<A extends AbstractLattice<A>, D extends Abstr
 			AnalysisState<ReplayState<A>> entryState,
 			ExpressionSet[] parameters,
 			StatementStore<ReplayState<A>> expressions) {
-		for (Frame f = frame; f != null; f = f.getParent())
-			for (CFG target : call.getTargetedCFGs())
-				if (f.getResult().getDescriptor().equals(target.getDescriptor()))
-					return "recursive call";
+		if (isRecursive(call))
+			return RECURSIVE;
 		if (results.isEmpty())
 			return "no target has a result in the context of the call";
 		if (!expansion)
@@ -792,9 +859,17 @@ public class ReplayInterprocedural<A extends AbstractLattice<A>, D extends Abstr
 	 * the context of the call (e.g., with contexts depending on the states at
 	 * the calls, the call of a loop leads to several results, one for each
 	 * state reached by the fixpoint): the states of all the results of the
-	 * callee soundly describe them.
+	 * callee soundly describe them. Yields {@code null} if the states cannot
+	 * be merged.
+	 *
+	 * @param <A>     the type of the abstract states of the results
+	 * @param cfg     the cfg
+	 * @param results the results of the cfg
+	 * @param id      the context of the merged result
+	 *
+	 * @return the merged result, or {@code null}
 	 */
-	private AnalyzedCFG<A> merge(
+	public static <A extends AbstractLattice<A>> AnalyzedCFG<A> merge(
 			CFG cfg,
 			Collection<AnalyzedCFG<A>> results,
 			ScopeId<A> id) {

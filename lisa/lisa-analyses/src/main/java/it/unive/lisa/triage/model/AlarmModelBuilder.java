@@ -602,7 +602,8 @@ public final class AlarmModelBuilder {
 			// are invariants, even if the domain cannot express them as
 			// constraints
 			AnalysisState<A> pre = preStates.get(loc);
-			for (SymbolicExpression cond : conditions) {
+			for (SymbolicExpression cond : cache.decidesConditions() ? conditions
+					: Collections.<SymbolicExpression>emptySet()) {
 				// conditions over identifiers unknown to the state cannot be
 				// decided by the analysis
 				if (!knowsAll(pre, conditionIds.get(cond)))
