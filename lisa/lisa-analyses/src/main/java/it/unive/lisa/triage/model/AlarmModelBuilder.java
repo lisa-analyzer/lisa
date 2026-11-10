@@ -506,7 +506,11 @@ public final class AlarmModelBuilder {
 		Map<Statement, NodeTransitions> byNode = new LinkedHashMap<>();
 		List<NodeTransitions> others = new ArrayList<>();
 		for (ModelLocation loc : locations)
-			if (loc.getFrame().isRoot() && loc.getResumed() == null)
+			// the synthetic location of the raised errors has the same node
+			// as the location of the bad node: keying it by node would hide
+			// the transitions of the bad node, whose identifiers would then
+			// be missing from the vocabulary
+			if (loc.getFrame().isRoot() && loc.getResumed() == null && !loc.isRaised())
 				byNode.put(loc.getNode(), transitions.get(loc));
 			else
 				others.add(transitions.get(loc));
