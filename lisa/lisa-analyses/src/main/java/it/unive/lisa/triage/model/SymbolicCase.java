@@ -29,7 +29,9 @@ import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonGe;
 import it.unive.lisa.symbolic.value.operator.binary.NumericNonOverflowingAdd;
+import it.unive.lisa.symbolic.value.operator.binary.TypeCheck;
 import it.unive.lisa.type.Type;
+import it.unive.lisa.type.TypeTokenType;
 import it.unive.lisa.type.Untyped;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -323,7 +325,8 @@ public final class SymbolicCase {
 	 */
 	private static boolean isHavockedWithHeap(
 			Identifier id) {
-		return HeapModel.isHeapState(id) || HeapModel.tracksDefinition(id);
+		// the runtime types of objects never change
+		return (HeapModel.isHeapState(id) && !id.equals(HeapModel.TYPES)) || HeapModel.tracksDefinition(id);
 	}
 
 	/**
@@ -386,6 +389,16 @@ public final class SymbolicCase {
 				return value instanceof Identifier && !(value instanceof FreshValue)
 						? HeapModel.definedRead(value, substitute(b.getRight(), factory, pp))
 						: value;
+			}
+			if (b.getOperator() instanceof TypeCheck && isReferenceTyped(b.getLeft())) {
+				// tests of the runtime types of objects read the runtime
+				// types recorded by the model
+				Type target = singleToken(b.getRight());
+				Set<Type> instances = target == null ? null : factory.getHeapModel().instancesOf(target);
+				if (instances != null)
+					return new BinaryExpression(b.getStaticType(), substitute(HeapModel.TYPES, factory, pp),
+							substitute(b.getLeft(), factory, pp), new HeapOperators.RuntimeTypeIn(instances),
+							b.getCodeLocation());
 			}
 			return fold(new BinaryExpression(
 					b.getStaticType(),
@@ -539,6 +552,33 @@ public final class SymbolicCase {
 			if (entry.getName().equals(name))
 				return true;
 		return false;
+	}
+
+	/**
+	 * Yields whether the given expression has the type of references (or
+	 * pointers).
+	 */
+	private static boolean isReferenceTyped(
+			SymbolicExpression e) {
+		Type type = e.getStaticType();
+		return type.isReferenceType() || type.isPointerType();
+	}
+
+	/**
+	 * Yields the type denoted by the given type token, if it is a constant
+	 * denoting a single type, or {@code null}.
+	 */
+	private static Type singleToken(
+			SymbolicExpression token) {
+		if (!(token instanceof Constant))
+			return null;
+		Object value = ((Constant) token).getValue();
+		if (value instanceof Type)
+			return (Type) value;
+		Type type = token.getStaticType();
+		if (type instanceof TypeTokenType && ((TypeTokenType) type).getTypes().size() == 1)
+			return ((TypeTokenType) type).getTypes().iterator().next();
+		return null;
 	}
 
 	private static boolean isArray(
@@ -725,8 +765,16 @@ public final class SymbolicCase {
 			ProgramPoint pp) {
 		CodeLocation loc = allocation.getCodeLocation();
 		SymbolicExpression counter = substitute(HeapModel.ALLOC, factory, pp);
-		SymbolicCase res = update(HeapModel.site(allocation),
-				new UnaryExpression(HeapType.REFERENCE, counter, HeapOperators.NewReference.INSTANCE, loc), factory);
+		UnaryExpression reference = new UnaryExpression(HeapType.REFERENCE, counter,
+				HeapOperators.NewReference.INSTANCE, loc);
+		SymbolicCase res = update(HeapModel.site(allocation), reference, factory);
+		// the runtime type of the new object
+		Type type = HeapModel.objectType(allocation.getStaticType());
+		if (!type.isUntyped())
+			res = res.update(HeapModel.TYPES, new TernaryExpression(HeapType.TYPES,
+					res.substitute(HeapModel.TYPES, factory, pp), reference,
+					new Constant(new TypeTokenType(Collections.singleton(type)), type, loc),
+					HeapOperators.ReferenceStore.INSTANCE, loc), factory);
 		return res.update(HeapModel.ALLOC, fold(new BinaryExpression(HeapType.COUNTER, counter,
 				new Constant(HeapType.COUNTER, 1, loc), NumericNonOverflowingAdd.INSTANCE, loc)), factory);
 	}

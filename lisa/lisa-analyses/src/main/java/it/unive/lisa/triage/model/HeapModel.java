@@ -108,6 +108,22 @@ public class HeapModel {
 	public static final String DEFINED_PREFIX = "$defined:";
 
 	/**
+	 * The identifier of the runtime types of the objects: it maps the
+	 * identifier of each reference to the token of the type of the referenced
+	 * object, recorded when the object is allocated by the model, and to
+	 * {@link #UNKNOWN_TYPE} for the other objects (e.g., the ones existing in
+	 * the initial states, or allocated by code that is not modeled). Since the
+	 * type of an object never changes, the map is preserved by calls.
+	 */
+	public static final Variable TYPES = new Variable(HeapType.TYPES, "$types", SyntheticLocation.INSTANCE);
+
+	/**
+	 * The name of the token standing for an unknown runtime type (see
+	 * {@link #TYPES}).
+	 */
+	public static final String UNKNOWN_TYPE = "$unknown-type";
+
+	/**
 	 * The identifier of the counter of allocations.
 	 */
 	public static final Variable ALLOC = new Variable(HeapType.COUNTER, "$alloc", SyntheticLocation.INSTANCE);
@@ -159,6 +175,11 @@ public class HeapModel {
 	private final Map<String, Type> fieldTypes;
 
 	/**
+	 * All the types of the program.
+	 */
+	private final Collection<Type> types;
+
+	/**
 	 * For each name of a final global variable (see
 	 * {@link #globalName(Unit, Global)}), the unit declaring it.
 	 */
@@ -187,6 +208,7 @@ public class HeapModel {
 		this.globals = Collections.emptySet();
 		this.declarers = Collections.emptyMap();
 		this.fieldTypes = Collections.emptyMap();
+		this.types = Collections.emptySet();
 		this.arrayProperties = DEFAULT_ARRAY_PROPERTIES;
 	}
 
@@ -223,6 +245,7 @@ public class HeapModel {
 		this.finals = new LinkedHashMap<>();
 		this.declarers = new LinkedHashMap<>();
 		this.fieldTypes = new LinkedHashMap<>();
+		this.types = program.getTypes().getTypes();
 		this.finalGlobals = new LinkedHashMap<>();
 		this.globals = new LinkedHashSet<>();
 		for (Unit unit : program.getUnits())
@@ -264,6 +287,48 @@ public class HeapModel {
 	 */
 	public Map<String, Type> fieldTypes() {
 		return fieldTypes;
+	}
+
+	/**
+	 * Yields the runtime type of the objects whose references have the given
+	 * type, or of the objects allocated with the given type: the type itself,
+	 * or the type of the referenced objects if it is the type of references
+	 * (or pointers).
+	 *
+	 * @param type the type
+	 *
+	 * @return the runtime type
+	 */
+	public static Type objectType(
+			Type type) {
+		if (type.isPointerType())
+			return type.asPointerType().getInnerType();
+		if (type.isReferenceType())
+			return type.asReferenceType().getInnerType();
+		return type;
+	}
+
+	/**
+	 * Yields the types of the program that runtime types of objects might be,
+	 * when they can be assigned to the given type (see
+	 * {@link #objectType(Type)}), that is, the types of the objects that are
+	 * instances of the given type. Yields {@code null} if the types of the
+	 * program are not known.
+	 *
+	 * @param type the type
+	 *
+	 * @return the types of the instances
+	 */
+	public Set<Type> instancesOf(
+			Type type) {
+		if (types.isEmpty())
+			return null;
+		Type target = objectType(type);
+		Set<Type> result = new LinkedHashSet<>();
+		for (Type t : types)
+			if (!t.isPointerType() && !t.isReferenceType() && t.canBeAssignedTo(target))
+				result.add(t);
+		return result;
 	}
 
 	/**
@@ -432,6 +497,7 @@ public class HeapModel {
 			SymbolicExpression expression) {
 		return expression instanceof Identifier
 				&& (expression.getStaticType() == HeapType.FIELD
+						|| expression.getStaticType() == HeapType.TYPES
 						|| expression.getStaticType() == HeapType.CELLS
 						|| expression.getStaticType() == HeapType.WRITTEN_FIELD
 						|| expression.getStaticType() == HeapType.WRITTEN_CELLS
@@ -459,6 +525,7 @@ public class HeapModel {
 		if (expression instanceof BinaryExpression) {
 			BinaryExpression b = (BinaryExpression) expression;
 			return b.getOperator() instanceof HeapOperators.CellKey
+					|| b.getOperator() instanceof HeapOperators.RuntimeTypeIn
 					|| b.getOperator() instanceof HeapOperators.WrittenAt
 					|| b.getOperator() instanceof HeapOperators.DefinedRead
 					|| mentionsHeapModel(b.getLeft())

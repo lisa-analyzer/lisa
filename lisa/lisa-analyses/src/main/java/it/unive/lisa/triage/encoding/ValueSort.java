@@ -228,7 +228,20 @@ public final class ValueSort {
 	 */
 	public static Term typeToken(
 			Type type) {
-		BigInteger id = new BigInteger(1, type.toString().getBytes(StandardCharsets.UTF_8));
+		return typeToken(type.toString());
+	}
+
+	/**
+	 * Yields the value standing for the type token with the given name (see
+	 * {@link #typeToken(Type)}).
+	 *
+	 * @param name the name
+	 *
+	 * @return the value
+	 */
+	public static Term typeToken(
+			String name) {
+		BigInteger id = new BigInteger(1, name.getBytes(StandardCharsets.UTF_8));
 		return DATATYPE.construct(OPAQUE, Term.integer(id.negate().subtract(BigInteger.ONE)));
 	}
 

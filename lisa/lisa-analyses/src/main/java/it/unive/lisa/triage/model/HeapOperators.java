@@ -194,6 +194,65 @@ public final class HeapOperators {
 	}
 
 	/**
+	 * Whether the runtime type of the referenced object (the right operand),
+	 * as recorded by the map of runtime types (the left operand, see
+	 * {@link HeapModel#TYPES}), is one of the given types. Values that are not
+	 * references have none of the types, and the test is precise only if the
+	 * runtime type of the object has been recorded by the model.
+	 *
+	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+	 */
+	public static final class RuntimeTypeIn
+			implements
+			BinaryOperator {
+
+		private final Set<Type> types;
+
+		/**
+		 * Builds the operator.
+		 *
+		 * @param types the types
+		 */
+		public RuntimeTypeIn(
+				Set<Type> types) {
+			this.types = types;
+		}
+
+		/**
+		 * Yields the types.
+		 *
+		 * @return the types
+		 */
+		public Set<Type> getTypes() {
+			return types;
+		}
+
+		@Override
+		public Set<Type> typeInference(
+				TypeSystem types,
+				Set<Type> left,
+				Set<Type> right) {
+			return Collections.singleton(types.getBooleanType());
+		}
+
+		@Override
+		public int hashCode() {
+			return types.hashCode();
+		}
+
+		@Override
+		public boolean equals(
+				Object obj) {
+			return obj instanceof RuntimeTypeIn && ((RuntimeTypeIn) obj).types.equals(types);
+		}
+
+		@Override
+		public String toString() {
+			return "type-in " + types;
+		}
+	}
+
+	/**
 	 * The reference whose identifier is the operand (an integer).
 	 *
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>

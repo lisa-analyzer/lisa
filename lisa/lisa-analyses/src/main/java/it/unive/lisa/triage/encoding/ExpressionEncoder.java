@@ -90,6 +90,7 @@ import it.unive.lisa.symbolic.value.operator.unary.NumericNegation;
 import it.unive.lisa.symbolic.value.operator.unary.StringLength;
 import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
 import it.unive.lisa.triage.model.FreshValue;
+import it.unive.lisa.triage.model.HeapModel;
 import it.unive.lisa.triage.model.HeapOperators;
 import it.unive.lisa.triage.model.InputValue;
 import it.unive.lisa.triage.model.SummaryValue;
@@ -857,6 +858,8 @@ public class ExpressionEncoder
 			symbols.exactOnlyIfWritten(coerce(right, Sort.BOOL, expression), expression.getLeft());
 			return left;
 		}
+		if (op instanceof HeapOperators.RuntimeTypeIn)
+			return runtimeTypeIn(left, right, ((HeapOperators.RuntimeTypeIn) op).getTypes(), expression);
 		if (op instanceof HeapOperators.WrittenAt)
 			// locations of maps that do not track writes are never written
 			return left.getSort().isArray() && left.getSort().getElement().equals(Sort.BOOL)
@@ -1171,6 +1174,30 @@ public class ExpressionEncoder
 	 * Encodes the key of a heap map: the key of a cell is used as it is, while
 	 * references are keyed by their identifier.
 	 */
+	/**
+	 * Encodes whether the runtime type of the given reference, as recorded by
+	 * the given map of runtime types, is one of the given types: values that
+	 * are not references have none of them, and the test is precise only if
+	 * the runtime type of the object is known (see
+	 * {@link it.unive.lisa.triage.model.HeapModel#TYPES}).
+	 */
+	private Term runtimeTypeIn(
+			Term map,
+			Term reference,
+			Set<Type> types,
+			SymbolicExpression origin) {
+		if (!map.getSort().isArray() || !reference.getSort().equals(ValueSort.SORT))
+			return symbols.fresh(Sort.BOOL, origin);
+		Term isReference = ValueSort.isReference(reference);
+		Term type = Term.app("select", ValueSort.SORT, map, ValueSort.referenceId(reference));
+		symbols.exactOnlyIf(Term.or(Term.not(isReference),
+				Term.not(Term.eq(type, ValueSort.typeToken(HeapModel.UNKNOWN_TYPE)))), origin);
+		List<Term> matches = new ArrayList<>();
+		for (Type t : types)
+			matches.add(Term.eq(type, ValueSort.typeToken(t)));
+		return Term.and(isReference, matches.isEmpty() ? Term.FALSE : Term.or(matches.toArray(Term[]::new)));
+	}
+
 	private Term heapKey(
 			Term key,
 			SymbolicExpression origin) {

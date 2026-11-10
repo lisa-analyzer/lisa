@@ -844,6 +844,10 @@ public class Unrolling {
 		for (Identifier id : model.getVocabulary())
 			if (isWrittenMap(id))
 				result.add(Term.eq(var(id, 0), nothingWritten(id)));
+			else if (id.equals(HeapModel.TYPES))
+				// the runtime types of existing objects are unknown
+				result.add(Term.eq(var(id, 0), Term.app("(as const " + HeapType.TYPES.getSort().toSmtLib() + ")",
+						HeapType.TYPES.getSort(), ValueSort.typeToken(HeapModel.UNKNOWN_TYPE))));
 		return result;
 	}
 

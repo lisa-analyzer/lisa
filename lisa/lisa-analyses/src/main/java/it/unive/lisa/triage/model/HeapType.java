@@ -34,6 +34,12 @@ public enum HeapType
 	CELLS(Sort.array(CellKeySort.SORT, ValueSort.SORT)),
 
 	/**
+	 * The runtime types of all objects: a map from the identifiers of
+	 * references to type tokens (see {@link HeapModel#TYPES}).
+	 */
+	TYPES(Sort.array(Sort.INT, ValueSort.SORT)),
+
+	/**
 	 * Which fields of which objects have been written: a map from the
 	 * identifiers of references to booleans.
 	 */
