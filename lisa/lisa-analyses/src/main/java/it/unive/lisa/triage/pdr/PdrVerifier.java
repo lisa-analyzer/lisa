@@ -168,6 +168,12 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 	private long deadline;
 
 	/**
+	 * The strict search for a precise counterexample, after an imprecise one
+	 * has been found, takes at most the time left divided by this value.
+	 */
+	private static final int STRICT_SHARE = 4;
+
+	/**
 	 * The bound on the time of each warning set from outside (see
 	 * {@link #setTimeLimit(long)}), or {@code 0}.
 	 */
@@ -179,6 +185,13 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 	 * {@link #verify(SemanticTool, StatementMessage)}), or {@code 0}.
 	 */
 	private long warningDeadline;
+
+	/**
+	 * The time by which the verification of the current violation at one of
+	 * the statements raising the errors of the warning must end (see
+	 * {@link #startThrower(int, int)}), or {@code 0}.
+	 */
+	private long throwerDeadline;
 
 	/**
 	 * The verifier checking violations against the results of the analysis, and
@@ -458,8 +471,26 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 			return super.verify(tool, warning);
 		} finally {
 			warningDeadline = 0;
+			throwerDeadline = 0;
 			release();
 		}
+	}
+
+	/**
+	 * {@inheritDoc}<br>
+	 * <br>
+	 * The time left for the warning is shared among the statements still to
+	 * verify, so that the time spared by a statement is available to the
+	 * following ones.
+	 */
+	@Override
+	protected void startThrower(
+			int index,
+			int count) {
+		if (warningDeadline == 0 || warningDeadline == Long.MAX_VALUE)
+			return;
+		long now = System.currentTimeMillis();
+		throwerDeadline = now + Math.max(0, warningDeadline - now) / (count - index);
 	}
 
 	private long deadlineFromNow() {
@@ -506,7 +537,8 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 		queries = 0;
 		// the time budget is shared by all the models built for the violation
 		// (and for the warning, if one is being verified)
-		deadline = warningDeadline != 0 ? warningDeadline : deadlineFromNow();
+		deadline = throwerDeadline != 0 ? throwerDeadline
+				: warningDeadline != 0 ? warningDeadline : deadlineFromNow();
 		// when the model cannot start from the beginning of the program, half
 		// of the time is left to the models starting from the callers, that
 		// are the ones whose counterexamples can be confirmed
@@ -633,12 +665,25 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 			queries += statistics.getOrDefault("queries", 0);
 			Map<String, Integer> last = statistics;
 			VerificationResult strict = null;
-			if (inexact) {
+			if (inexact && model.isConfirmable()) {
 				// look for a counterexample where all values are computed
 				// precisely: since the strict encoding under-approximates the
-				// executions, only its counterexamples are meaningful
+				// executions, only its counterexamples are meaningful (and
+				// only if they can be confirmed)
 				statistics = Map.of();
-				strict = search(searched, true);
+				// the strict search might not find any counterexample while
+				// failing to refute the under-approximated executions: it
+				// takes a share of the remaining time, so that the following
+				// rounds can still expand the calls the counterexample relies
+				// on
+				long full = deadline;
+				if (full != Long.MAX_VALUE)
+					deadline = System.currentTimeMillis() + (full - System.currentTimeMillis()) / STRICT_SHARE;
+				try {
+					strict = search(searched, true);
+				} finally {
+					deadline = full;
+				}
 				queries += statistics.getOrDefault("queries", 0);
 			}
 			if (!last.isEmpty() || queries > 0) {

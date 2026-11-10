@@ -22,6 +22,7 @@ import it.unive.lisa.program.cfg.statement.call.CFGCall;
 import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.triage.reachability.Reachability;
 import it.unive.lisa.type.Type;
+import it.unive.lisa.program.cfg.ProgramPoint;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -266,10 +267,22 @@ public class TransitionExtractor<A extends AbstractLattice<A>, D extends Abstrac
 		// an unknown value produced by the node is the same value wherever it
 		// is used (e.g., both in the condition and in the result of a
 		// short-circuiting operator)
+		ReplayAnalysis<A, D> analysis = replay.getAnalysis();
 		factory.startRun();
 		try {
+			analysis.startNode(Collections.emptySet());
+			NodeTransitions transitions = extractRun(location, expansion);
+			Set<ProgramPoint> ambiguous = analysis.getAmbiguous();
+			if (ambiguous.isEmpty())
+				return transitions;
+			// the accesses to the heap at some points are ambiguous: the node
+			// is replayed again, with unknown conditions on them
+			factory.endRun();
+			factory.startRun();
+			analysis.startNode(ambiguous);
 			return extractRun(location, expansion);
 		} finally {
+			analysis.startNode(Collections.emptySet());
 			factory.endRun();
 		}
 	}

@@ -79,4 +79,27 @@ public abstract class Violation {
 			Type type) {
 		return new ErrorViolation(type);
 	}
+
+	/**
+	 * Builds a {@link Violation} that might happen whenever the post-state of
+	 * the statement on which the warning is issued contains an error
+	 * continuation (i.e., an error raised by the statement, or propagated to it
+	 * without being caught) for an error whose type is a subtype of
+	 * {@code type}, and that certainly happens if the type of the error is a
+	 * subtype of {@code confirmed} (see {@link ErrorViolation#confirms(Type)}).
+	 * For instance, a value thrown as an instance of a supertype of the errors
+	 * causing a violation might be one of them, and is thus considered when
+	 * refuting the violation, but cannot confirm it.
+	 *
+	 * @param type      the type of the errors that might cause the violation
+	 * @param confirmed the type of the errors that certainly cause the
+	 *                      violation, a subtype of {@code type}
+	 *
+	 * @return the violation
+	 */
+	public static ErrorViolation error(
+			Type type,
+			Type confirmed) {
+		return new ErrorViolation(type, confirmed);
+	}
 }

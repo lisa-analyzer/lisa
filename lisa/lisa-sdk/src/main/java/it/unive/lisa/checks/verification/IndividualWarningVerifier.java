@@ -12,10 +12,12 @@ import it.unive.lisa.lattices.GenericMapLattice;
 import it.unive.lisa.lattices.GenericSetLattice;
 import it.unive.lisa.outputs.messages.StatementMessage;
 import it.unive.lisa.program.cfg.statement.Expression;
+import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.type.Type;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -206,7 +208,8 @@ public abstract class IndividualWarningVerifier<A extends AbstractLattice<A>, D 
 
 		ErrorViolation error = (ErrorViolation) violation;
 		VerificationResult direct = verifyPropagated(result, st, error);
-		if (direct.getOutcome() != VerificationOutcome.POSSIBLE)
+		if (direct.getOutcome() == VerificationOutcome.REFUTED
+				|| (direct.getOutcome() == VerificationOutcome.CONFIRMED && error.getConfirmedType() == null))
 			return direct;
 
 		// the post-states of sub-expressions might not contain the errors they
@@ -224,12 +227,14 @@ public abstract class IndividualWarningVerifier<A extends AbstractLattice<A>, D 
 			// we do not know which errors reach the statement
 			return VerificationResult.POSSIBLE;
 
-		Set<Statement> throwers = new LinkedHashSet<>();
+		// the statements raising the errors, with the types of the errors they
+		// raise
+		Map<Statement, Set<Type>> throwers = new LinkedHashMap<>();
 		if (!errors.isBottom())
 			for (AnalysisState.Error err : errors.getKeys())
 				if (error.matches(err.getType()) && !post.getErrors().getState(err).getState().isBottom()
 						&& (node == st || isWithin(err.getThrower(), st)))
-					throwers.add(err.getThrower());
+					throwers.computeIfAbsent(err.getThrower(), t -> new LinkedHashSet<>()).add(err.getType());
 		if (!smashed.isBottom())
 			for (Map.Entry<Type, GenericSetLattice<Statement>> entry : smashed)
 				if (error.matches(entry.getKey())) {
@@ -237,18 +242,54 @@ public abstract class IndividualWarningVerifier<A extends AbstractLattice<A>, D 
 						return VerificationResult.POSSIBLE;
 					for (Statement thrower : entry.getValue())
 						if (node == st || isWithin(thrower, st))
-							throwers.add(thrower);
+							throwers.computeIfAbsent(thrower, t -> new LinkedHashSet<>()).add(entry.getKey());
 				}
+		// a confirmation by the propagated errors holds if all of them
+		// confirm the violation, and the statements raising them are
+		// verified otherwise
+		if (direct.getOutcome() == VerificationOutcome.CONFIRMED
+				&& throwers.values().stream().allMatch(types -> types.stream().allMatch(error::confirms)))
+			return direct;
 
+		// statements raising the errors themselves are verified before calls,
+		// whose errors are raised by their callees (that are usually costlier
+		// to verify), in the order of the program
+		List<Statement> ordered = new ArrayList<>(throwers.keySet());
+		ordered.sort(Comparator.comparing((Statement s) -> s instanceof Call).thenComparing(Comparator.naturalOrder()));
 		// no matching error reaches the statement
 		VerificationResult outcome = VerificationResult.REFUTED;
-		for (Statement thrower : throwers) {
+		for (int i = 0; i < ordered.size(); i++) {
+			Statement thrower = ordered.get(i);
+			startThrower(i, ordered.size());
 			// a confirmation tells which statement raises the error
-			outcome = outcome.lub(verify(result, thrower, violation).withThrower(thrower));
+			VerificationResult res = verify(result, thrower, violation).withThrower(thrower);
+			if (res.getOutcome() == VerificationOutcome.CONFIRMED
+					&& !throwers.get(thrower).stream().allMatch(error::confirms))
+				// the statement might raise errors that do not confirm the
+				// violation
+				res = new VerificationResult(VerificationOutcome.POSSIBLE,
+						"the error might not be one that certainly causes the violation: " + res.getExplanation());
+			outcome = outcome.lub(res);
 			if (outcome.getOutcome() == VerificationOutcome.CONFIRMED)
 				break;
 		}
 		return outcome;
+	}
+
+	/**
+	 * Notifies this verifier that an error violation is about to be verified
+	 * at one of the statements raising the errors it reports (see
+	 * {@link #verify(AnalyzedCFG, Statement, Violation)}), e.g., so that the
+	 * time available for the violation can be shared among them. By default,
+	 * this does nothing.
+	 *
+	 * @param index the index of the statement, among the ones raising the
+	 *                  errors
+	 * @param count the number of statements raising the errors
+	 */
+	protected void startThrower(
+			int index,
+			int count) {
 	}
 
 	/**

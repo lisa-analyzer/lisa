@@ -144,7 +144,7 @@ public class ReplayInterprocedural<A extends AbstractLattice<A>, D extends Abstr
 
 	private final AnalyzedCFG<A> result;
 
-	private final Analysis<ReplayState<A>, ReplayDomain<A, D>> analysis;
+	private final ReplayAnalysis<A, D> analysis;
 
 	private final Analysis<A, D> plain;
 
@@ -345,7 +345,7 @@ public class ReplayInterprocedural<A extends AbstractLattice<A>, D extends Abstr
 	}
 
 	@Override
-	public Analysis<ReplayState<A>, ReplayDomain<A, D>> getAnalysis() {
+	public ReplayAnalysis<A, D> getAnalysis() {
 		return analysis;
 	}
 
