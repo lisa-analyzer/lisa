@@ -1,17 +1,28 @@
 package it.unive.lisa.triage.pdr;
 
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.program.SyntheticLocation;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.BinaryExpression;
+import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.TernaryExpression;
 import it.unive.lisa.symbolic.value.UnaryExpression;
+import it.unive.lisa.symbolic.value.operator.ComparisonOperator;
+import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
+import it.unive.lisa.symbolic.value.operator.binary.ComparisonEq;
+import it.unive.lisa.symbolic.value.operator.binary.ComparisonGe;
+import it.unive.lisa.symbolic.value.operator.binary.ComparisonLe;
+import it.unive.lisa.symbolic.value.operator.binary.LogicalAnd;
+import it.unive.lisa.symbolic.value.operator.binary.LogicalOr;
+import it.unive.lisa.symbolic.value.operator.unary.LogicalNegation;
 import it.unive.lisa.triage.bmc.Unrolling;
 import it.unive.lisa.triage.encoding.ExpressionEncoderFactory;
 import it.unive.lisa.triage.model.AlarmModel;
 import it.unive.lisa.triage.model.BadCase;
 import it.unive.lisa.triage.model.EdgeTransition;
 import it.unive.lisa.triage.model.FreshValue;
+import it.unive.lisa.triage.model.HeapModel;
 import it.unive.lisa.triage.model.HeapOperators;
 import it.unive.lisa.triage.model.InputValue;
 import it.unive.lisa.triage.model.ModelLocation;
@@ -19,6 +30,7 @@ import it.unive.lisa.triage.model.SymbolicCase;
 import it.unive.lisa.triage.smt.SmtException;
 import it.unive.lisa.triage.smt.SmtResult;
 import it.unive.lisa.triage.smt.SmtSolver;
+import it.unive.lisa.triage.smt.Sort;
 import it.unive.lisa.triage.smt.Term;
 import it.unive.lisa.type.TypeSystem;
 import java.util.ArrayList;
@@ -174,6 +186,43 @@ public class PdrEngine {
 	 * {@link #blockedWithCtgs(ModelLocation, Cube, int, int)}).
 	 */
 	private boolean ctgs = false;
+
+	/**
+	 * Whether candidate invariants are checked before the search (see
+	 * {@link #invariants()}).
+	 */
+	private boolean invariants = true;
+
+	/**
+	 * The number of candidate invariants proved inductive.
+	 */
+	private int invariantsFound = 0;
+
+	/**
+	 * The maximum number of locations with candidate invariants.
+	 */
+	public static final int MAX_CANDIDATE_LOCATIONS = 100;
+
+	/**
+	 * The maximum number of candidate invariants at each location.
+	 */
+	public static final int MAX_CANDIDATES = 60;
+
+	/**
+	 * The maximum number of variables of each location over which candidate
+	 * invariants are built.
+	 */
+	public static final int MAX_CANDIDATE_VARIABLES = 8;
+
+	/**
+	 * The maximum number of constants used by candidate invariants.
+	 */
+	public static final int MAX_CANDIDATE_CONSTANTS = 6;
+
+	/**
+	 * The maximum number of queries spent checking candidate invariants.
+	 */
+	public static final int MAX_INVARIANT_QUERIES = 200;
 
 	/**
 	 * The maximum number of counterexamples to generalization blocked when
@@ -338,6 +387,29 @@ public class PdrEngine {
 	public void setCtgs(
 			boolean ctgs) {
 		this.ctgs = ctgs;
+	}
+
+	/**
+	 * Sets whether or not candidate invariants are checked before the search
+	 * (default: {@code true}): simple relations between the integer variables
+	 * at each location, and between them and the constants of the model, that
+	 * are kept as lemmas if they are inductive (see {@link #invariants()}).
+	 *
+	 * @param invariants whether or not to check candidate invariants
+	 */
+	public void setInvariants(
+			boolean invariants) {
+		this.invariants = invariants;
+	}
+
+	/**
+	 * Yields the number of candidate invariants found inductive so far (see
+	 * {@link #setInvariants(boolean)}).
+	 *
+	 * @return the number of invariants
+	 */
+	public int getInvariantsFound() {
+		return invariantsFound;
 	}
 
 	/**
@@ -514,6 +586,8 @@ public class PdrEngine {
 				counterexample = List.of(bad);
 				return Status.COUNTEREXAMPLE;
 			}
+			if (invariants)
+				invariants();
 
 			for (int k = 1; k <= maxLevel; k++) {
 				while ((bad = badObligation(k)) != null) {
@@ -534,6 +608,238 @@ public class PdrEngine {
 			queue.clear();
 			return s.status;
 		}
+	}
+
+	/**
+	 * Checks candidate invariants, in the style of Houdini: at each location,
+	 * the candidates are the
+	 * equalities and inequalities between the integer variables relevant at
+	 * the location, and between them and the integer constants of the model.
+	 * Candidates that do not hold in the initial states, or that are not
+	 * preserved by the transitions reaching their location (assuming all the
+	 * remaining candidates at the sources, together with the invariants
+	 * computed by the analysis), are dropped until the remaining ones are
+	 * inductive: they hold in every reachable state, and are added as lemmas
+	 * of every level. If the candidates cannot be decided within
+	 * {@link #MAX_INVARIANT_QUERIES} queries, none is kept.
+	 */
+	private void invariants()
+			throws SemanticException,
+			Stop {
+		Map<ModelLocation, Map<Lemma, Term>> candidates = candidates();
+		if (candidates.isEmpty())
+			return;
+		int start = queries;
+		try {
+			boolean changed = true;
+			while (changed) {
+				changed = false;
+				for (Map.Entry<ModelLocation, Map<Lemma, Term>> entry : candidates.entrySet()) {
+					ModelLocation loc = entry.getKey();
+					Map<Lemma, Term> current = entry.getValue();
+					if (current.isEmpty())
+						continue;
+					if (model.getInitialLocations().contains(loc) && !holdInitially(loc, current, start)) {
+						changed = true;
+						if (current.isEmpty())
+							continue;
+					}
+					List<Term> steps = new ArrayList<>();
+					for (EdgeTransition e : incoming.getOrDefault(loc, Collections.emptyList())) {
+						ModelLocation src = e.getSource();
+						if (!model.getLocations().contains(src))
+							continue;
+						List<Term> pre = new ArrayList<>();
+						pre.add(frame(src, 1));
+						Map<Lemma, Term> assumed = candidates.get(src);
+						if (assumed != null)
+							for (Lemma l : assumed.keySet())
+								pre.add(define(List.of(l, 0), () -> l.at(unrolling, 0)));
+						pre.add(define(List.of(e), () -> unrolling.transition(0, e)));
+						steps.add(Term.and(pre.toArray(Term[]::new)));
+					}
+					if (steps.isEmpty())
+						continue;
+					// the candidates after a step
+					Map<Lemma, Term> post = new LinkedHashMap<>();
+					for (Lemma l : current.keySet())
+						post.put(l, define(List.of(l, 1), () -> l.at(unrolling, 1)));
+					while (!current.isEmpty()) {
+						if (queries - start >= MAX_INVARIANT_QUERIES)
+							return;
+						List<Term> violated = new ArrayList<>();
+						for (Lemma l : current.keySet())
+							violated.add(Term.not(post.get(l)));
+						SmtResult res = check(Term.or(steps.toArray(Term[]::new)),
+								Term.or(violated.toArray(Term[]::new)));
+						if (res != SmtResult.SAT) {
+							solver.pop();
+							break;
+						}
+						// the candidates false in the model are dropped
+						List<Term> asked = new ArrayList<>();
+						for (Lemma l : current.keySet())
+							asked.add(post.get(l));
+						Map<Term, String> values = solver.getValues(asked);
+						solver.pop();
+						int before = current.size();
+						current.keySet().removeIf(l -> "false".equals(values.get(post.get(l))));
+						if (current.size() == before)
+							// the model does not tell which candidate is
+							// violated: all are dropped
+							current.clear();
+						changed = true;
+					}
+				}
+			}
+		} catch (Stop s) {
+			if (s.status != Status.UNKNOWN)
+				throw s;
+			// the candidates cannot be decided: none is kept
+			return;
+		}
+		for (Map.Entry<ModelLocation, Map<Lemma, Term>> entry : candidates.entrySet())
+			for (Lemma l : entry.getValue().keySet()) {
+				frames.add(entry.getKey(), l, Frames.INFINITY);
+				invariantsFound++;
+			}
+	}
+
+	/**
+	 * Drops the given candidates of the given initial location that do not
+	 * hold in its initial states, yielding whether all of them hold.
+	 *
+	 * @throws Stop if the budget is exhausted or the solver cannot decide
+	 */
+	private boolean holdInitially(
+			ModelLocation loc,
+			Map<Lemma, Term> current,
+			int start)
+			throws SemanticException,
+			Stop {
+		boolean held = true;
+		Map<Lemma, Term> initial = new LinkedHashMap<>();
+		for (Lemma l : current.keySet())
+			initial.put(l, define(List.of(l, 0), () -> l.at(unrolling, 0)));
+		while (!current.isEmpty() && queries - start < MAX_INVARIANT_QUERIES) {
+			List<Term> violated = new ArrayList<>();
+			for (Lemma l : current.keySet())
+				violated.add(Term.not(initial.get(l)));
+			SmtResult res = check(frame(loc, 0), Term.or(violated.toArray(Term[]::new)));
+			if (res != SmtResult.SAT) {
+				solver.pop();
+				return held;
+			}
+			List<Term> asked = new ArrayList<>();
+			for (Lemma l : current.keySet())
+				asked.add(initial.get(l));
+			Map<Term, String> values = solver.getValues(asked);
+			solver.pop();
+			int before = current.size();
+			current.keySet().removeIf(l -> "false".equals(values.get(initial.get(l))));
+			if (current.size() == before)
+				current.clear();
+			held = false;
+		}
+		return held;
+	}
+
+	/**
+	 * Yields the candidate invariants of each location (see
+	 * {@link #invariants()}).
+	 */
+	private Map<ModelLocation, Map<Lemma, Term>> candidates() {
+		// the integer constants and the variables compared by the model
+		Set<Integer> constants = new LinkedHashSet<>();
+		Set<Identifier> relevant = new LinkedHashSet<>();
+		for (ModelLocation loc : model.getLocations())
+			for (EdgeTransition e : model.getTransitions(loc))
+				for (SymbolicCase c : unrolling.cases(e))
+					for (SymbolicExpression cond : c.getPathCondition())
+						compared(cond, constants, relevant);
+		for (BadCase bad : model.getBadCases())
+			for (SymbolicExpression cond : bad.getPathCondition())
+				compared(cond, constants, relevant);
+		List<SymbolicExpression> numbers = new ArrayList<>();
+		for (Integer c : constants)
+			if (numbers.size() < MAX_CANDIDATE_CONSTANTS)
+				numbers.add(new Constant(types.getIntegerType(), c, SyntheticLocation.INSTANCE));
+
+		Map<ModelLocation, Map<Lemma, Term>> result = new LinkedHashMap<>();
+		for (ModelLocation loc : model.getLocations()) {
+			if (result.size() >= MAX_CANDIDATE_LOCATIONS)
+				break;
+			List<Identifier> vars = new ArrayList<>();
+			for (Identifier id : model.getLive(loc))
+				if (relevant.contains(id) && vars.size() < MAX_CANDIDATE_VARIABLES)
+					vars.add(id);
+			Map<Lemma, Term> cands = new LinkedHashMap<>();
+			for (int i = 0; i < vars.size(); i++) {
+				for (int j = i + 1; j < vars.size(); j++) {
+					candidate(cands, vars.get(i), vars.get(j), ComparisonEq.INSTANCE);
+					candidate(cands, vars.get(i), vars.get(j), ComparisonLe.INSTANCE);
+					candidate(cands, vars.get(i), vars.get(j), ComparisonGe.INSTANCE);
+				}
+				for (SymbolicExpression n : numbers) {
+					candidate(cands, vars.get(i), n, ComparisonLe.INSTANCE);
+					candidate(cands, vars.get(i), n, ComparisonGe.INSTANCE);
+				}
+			}
+			if (!cands.isEmpty())
+				result.put(loc, cands);
+		}
+		return result;
+	}
+
+	/**
+	 * Adds to the given candidates the lemma stating that the given
+	 * expressions are in the given relation, if there is room.
+	 */
+	private void candidate(
+			Map<Lemma, Term> candidates,
+			SymbolicExpression left,
+			SymbolicExpression right,
+			BinaryOperator op) {
+		if (candidates.size() >= MAX_CANDIDATES)
+			return;
+		SymbolicExpression relation = new BinaryExpression(types.getBooleanType(), left, right, op,
+				SyntheticLocation.INSTANCE);
+		// the lemma blocking the states where the relation does not hold
+		SymbolicExpression negated = new UnaryExpression(types.getBooleanType(), relation,
+				LogicalNegation.INSTANCE, SyntheticLocation.INSTANCE);
+		candidates.put(new Cube(List.of(negated)).negate(), null);
+	}
+
+	/**
+	 * Collects the integer constants and the integer variables of the model
+	 * compared by the given condition.
+	 */
+	private void compared(
+			SymbolicExpression cond,
+			Set<Integer> constants,
+			Set<Identifier> variables) {
+		if (cond instanceof UnaryExpression) {
+			compared(((UnaryExpression) cond).getExpression(), constants, variables);
+			return;
+		}
+		if (!(cond instanceof BinaryExpression))
+			return;
+		BinaryExpression b = (BinaryExpression) cond;
+		if (b.getOperator() instanceof LogicalAnd || b.getOperator() instanceof LogicalOr) {
+			compared(b.getLeft(), constants, variables);
+			compared(b.getRight(), constants, variables);
+			return;
+		}
+		if (!(b.getOperator() instanceof ComparisonOperator))
+			return;
+		for (SymbolicExpression operand : List.of(b.getLeft(), b.getRight()))
+			if (operand instanceof Constant && ((Constant) operand).getValue() instanceof Integer)
+				constants.add((Integer) ((Constant) operand).getValue());
+			else if (operand instanceof Identifier && !(operand instanceof FreshValue)
+					&& model.getVocabulary().contains(operand)
+					&& model.getSorts().sortOf((Identifier) operand).equals(Sort.INT)
+					&& !HeapModel.isHeapState(operand))
+				variables.add((Identifier) operand);
 	}
 
 	/**

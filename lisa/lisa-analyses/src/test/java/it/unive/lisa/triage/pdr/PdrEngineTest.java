@@ -91,6 +91,20 @@ public class PdrEngineTest {
 			+ "    }\n"
 			+ "    return w;\n"
 			+ "  }\n"
+			+ "  twovars(n) {\n"
+			+ "    def i = 0;\n"
+			+ "    def j = 0;\n"
+			+ "    def w = 0;\n"
+			+ "    if (n is int) {\n"
+			+ "      while (i < n) {\n"
+			+ "        i = i + 1;\n"
+			+ "        j = j + 1;\n"
+			+ "      }\n"
+			+ "      if (i != j)\n"
+			+ "        w = 1;\n"
+			+ "    }\n"
+			+ "    return w;\n"
+			+ "  }\n"
 			+ "  bigloop() {\n"
 			+ "    def i = 0;\n"
 			+ "    def w = 0;\n"
@@ -227,6 +241,28 @@ public class PdrEngineTest {
 				}
 		// some counterexamples to generalization are found and blocked
 		assertTrue(ctgs > 0);
+	}
+
+	@Test
+	public void candidateInvariants() throws SemanticException {
+		// i == j is an inductive invariant of the loop (whose body is a single
+		// transition in the large-block model, as searched by the verifier),
+		// that intervals cannot express: it is found among the candidates, and
+		// the violation is refuted without searching for lemmas
+		AlarmModel model = model("twovars", "w = 1").withLargeBlocks();
+		try (SmtSolver s = SmtLibProcessSolver.z3()) {
+			PdrEngine engine = new PdrEngine(model, s);
+			engine.setGeneralization(PdrEngine.Generalization.NONE);
+			assertEquals(PdrEngine.Status.SAFE, engine.run(20, 2000, 10_000));
+			assertTrue(engine.getInvariantsFound() > 0);
+		}
+		// without them, the search exhausts its budget
+		try (SmtSolver s = SmtLibProcessSolver.z3()) {
+			PdrEngine engine = new PdrEngine(model, s);
+			engine.setGeneralization(PdrEngine.Generalization.NONE);
+			engine.setInvariants(false);
+			assertTrue(engine.run(20, 300, 10_000) != PdrEngine.Status.SAFE);
+		}
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })

@@ -126,6 +126,8 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 
 	private boolean ctgs = false;
 
+	private boolean invariants = true;
+
 	private boolean fixpointCheck = true;
 
 	private ExpressionEncoderFactory encoders = ExpressionEncoderFactory.DEFAULT;
@@ -355,6 +357,20 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 	public PdrVerifier<A, D> withCtgs(
 			boolean ctgs) {
 		this.ctgs = ctgs;
+		return this;
+	}
+
+	/**
+	 * Sets whether or not candidate invariants are checked before the search
+	 * (default: {@code true}, see {@link PdrEngine#setInvariants(boolean)}).
+	 *
+	 * @param invariants whether or not to check candidate invariants
+	 *
+	 * @return this verifier
+	 */
+	public PdrVerifier<A, D> withInvariants(
+			boolean invariants) {
+		this.invariants = invariants;
 		return this;
 	}
 
@@ -794,6 +810,7 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 			engine.setGeneralization(generalization);
 			engine.setSeeding(seeding);
 			engine.setCtgs(ctgs);
+			engine.setInvariants(invariants);
 			engine.setAbstraction(new DomainAbstraction<>(analysis, cache));
 			PdrEngine.Status status = engine.run(maxLevel, maxQueries,
 					// at least one millisecond, as 0 means no limit
