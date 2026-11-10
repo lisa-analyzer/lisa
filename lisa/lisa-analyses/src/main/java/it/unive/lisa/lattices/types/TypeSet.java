@@ -64,7 +64,7 @@ public class TypeSet
 	public TypeSet(
 			TypeSystem typeSystem,
 			Set<Type> types) {
-		this(true, typeSystem != null && types.equals(typeSystem.getTypes()) ? Collections.emptySet() : types);
+		this(true, typeSystem != null && typeSystem.isAllTypes(types) ? Collections.emptySet() : types);
 	}
 
 	/**
