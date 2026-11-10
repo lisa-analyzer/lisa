@@ -153,6 +153,12 @@ public class HeapModel {
 	private final Map<String, CompilationUnit> declarers;
 
 	/**
+	 * For each identifier of the contents of a field qualified by the class
+	 * declaring it, the declared type of the field.
+	 */
+	private final Map<String, Type> fieldTypes;
+
+	/**
 	 * For each name of a final global variable (see
 	 * {@link #globalName(Unit, Global)}), the unit declaring it.
 	 */
@@ -180,6 +186,7 @@ public class HeapModel {
 		this.finalGlobals = Collections.emptyMap();
 		this.globals = Collections.emptySet();
 		this.declarers = Collections.emptyMap();
+		this.fieldTypes = Collections.emptyMap();
 		this.arrayProperties = DEFAULT_ARRAY_PROPERTIES;
 	}
 
@@ -215,6 +222,7 @@ public class HeapModel {
 		this.qualified = new LinkedHashMap<>();
 		this.finals = new LinkedHashMap<>();
 		this.declarers = new LinkedHashMap<>();
+		this.fieldTypes = new LinkedHashMap<>();
 		this.finalGlobals = new LinkedHashMap<>();
 		this.globals = new LinkedHashSet<>();
 		for (Unit unit : program.getUnits())
@@ -231,6 +239,7 @@ public class HeapModel {
 					String name = unit.getName() + QUALIFIER + g.getName();
 					qualified.computeIfAbsent(g.getName(), n -> new LinkedHashSet<>()).add(name);
 					declarers.put(name, (CompilationUnit) unit);
+					fieldTypes.put(FIELD_PREFIX + name, g.getStaticType());
 					if (g.isFinal())
 						finals.put(name, unit);
 					else
@@ -242,6 +251,19 @@ public class HeapModel {
 			declaring.computeIfAbsent(property, n -> new LinkedHashSet<>());
 		declaring.keySet().removeAll(mutable);
 		this.immutable = declaring;
+	}
+
+	/**
+	 * Yields the declared type of each field qualified by the class declaring
+	 * it, by the name of the identifier of its contents (see
+	 * {@link #field(String)}): since the values of a field always have its
+	 * declared type, their sort is the one of the type (see
+	 * {@link it.unive.lisa.triage.encoding.SortPolicy#sortOf(Identifier)}).
+	 *
+	 * @return the declared types
+	 */
+	public Map<String, Type> fieldTypes() {
+		return fieldTypes;
 	}
 
 	/**

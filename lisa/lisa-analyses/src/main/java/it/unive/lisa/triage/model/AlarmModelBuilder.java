@@ -680,7 +680,7 @@ public final class AlarmModelBuilder {
 				badCases,
 				seeds,
 				vocabulary,
-				new SortPolicy(types, bad.getProgram().getTypes().getTypes()),
+				new SortPolicy(types, bad.getProgram().getTypes().getTypes(), factory.getHeapModel().fieldTypes()),
 				factory.getValues(),
 				parameters,
 				confirmable,

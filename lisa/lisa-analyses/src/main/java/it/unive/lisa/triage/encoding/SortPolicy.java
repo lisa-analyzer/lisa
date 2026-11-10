@@ -2,11 +2,13 @@ package it.unive.lisa.triage.encoding;
 
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.triage.model.HeapModel;
 import it.unive.lisa.triage.model.HeapType;
 import it.unive.lisa.triage.smt.Sort;
 import it.unive.lisa.type.CharacterType;
 import it.unive.lisa.type.Type;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
@@ -28,6 +30,12 @@ public class SortPolicy {
 	private final Collection<Type> programTypes;
 
 	private final boolean floats;
+
+	/**
+	 * The declared type of the values of each field of the heap model, by the
+	 * name of the identifier of its contents.
+	 */
+	private final Map<String, Type> fields;
 
 	/**
 	 * Builds the policy, with no knowledge of the types of the program.
@@ -54,13 +62,37 @@ public class SortPolicy {
 	public SortPolicy(
 			Map<Identifier, Set<Type>> types,
 			Collection<Type> programTypes) {
-		this(types, programTypes, true);
+		this(types, programTypes, Collections.emptyMap(), true);
+	}
+
+	/**
+	 * Builds the policy, where the contents of the fields of the heap model
+	 * with the given declared types are encoded through the sorts of their
+	 * types (see {@link #sortOf(Identifier)}).
+	 *
+	 * @param types        the runtime types that each identifier might have (an
+	 *                         identifier with no types, or that is not in the
+	 *                         map, is encoded through {@link ValueSort})
+	 * @param programTypes all the types of the program, used to decide whether
+	 *                         a type covers all the values of a sort (can be
+	 *                         {@code null} if unknown)
+	 * @param fields       the declared type of the values of each field of the
+	 *                         heap model, by the name of the identifier of its
+	 *                         contents (see {@link HeapModel#fieldTypes()})
+	 */
+	public SortPolicy(
+			Map<Identifier, Set<Type>> types,
+			Collection<Type> programTypes,
+			Map<String, Type> fields) {
+		this(types, programTypes, fields, true);
 	}
 
 	private SortPolicy(
 			Map<Identifier, Set<Type>> types,
 			Collection<Type> programTypes,
+			Map<String, Type> fields,
 			boolean floats) {
+		this.fields = fields;
 		this.floats = floats;
 		this.types = types;
 		this.programTypes = programTypes;
@@ -149,6 +181,14 @@ public class SortPolicy {
 	 */
 	public Sort sortOf(
 			Identifier id) {
+		if (id.getStaticType() == HeapType.FIELD) {
+			// the values of a field whose declared type has a sort of its own
+			// can only be values of that sort
+			Type declared = fields.get(id.getName());
+			Sort element = declared == null ? ValueSort.SORT : sortOf(declared);
+			if (!element.equals(ValueSort.SORT))
+				return Sort.array(Sort.INT, element);
+		}
 		if (id.getStaticType() instanceof HeapType)
 			return ((HeapType) id.getStaticType()).getSort();
 		Set<Type> ts = types.get(id);
@@ -166,7 +206,7 @@ public class SortPolicy {
 	 * @return the policy
 	 */
 	public SortPolicy withoutFloats() {
-		return new SortPolicy(types, programTypes, false);
+		return new SortPolicy(types, programTypes, fields, false);
 	}
 
 	/**
