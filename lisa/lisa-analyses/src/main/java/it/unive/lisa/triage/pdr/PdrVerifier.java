@@ -616,6 +616,20 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 	private List<List<Triple<AnalyzedCFG<A>, Statement, CFGCall>>> chainsTo(
 			AnalyzedCFG<A> result)
 			throws SemanticException {
+		List<List<Triple<AnalyzedCFG<A>, Statement, CFGCall>>> chains = chainsTo(result, false);
+		if (chains.isEmpty())
+			// the result might have been computed for states of its callers
+			// that are not the final ones: the chains of calls reaching the
+			// same code through the same calls reach the statement as well
+			// (chains are only used to confirm violations)
+			chains = chainsTo(result, true);
+		return chains;
+	}
+
+	private List<List<Triple<AnalyzedCFG<A>, Statement, CFGCall>>> chainsTo(
+			AnalyzedCFG<A> result,
+			boolean sameCalls)
+			throws SemanticException {
 		List<List<Triple<AnalyzedCFG<A>, Statement, CFGCall>>> chains = new ArrayList<>();
 		LinkedList<List<Triple<AnalyzedCFG<A>, Statement, CFGCall>>> ws = new LinkedList<>();
 		ws.add(List.of());
@@ -625,7 +639,7 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 			List<Triple<AnalyzedCFG<A>, Statement, CFGCall>> chain = ws.removeFirst();
 			AnalyzedCFG<A> callee = chain.isEmpty() ? result : chain.get(0).getLeft();
 			for (Triple<AnalyzedCFG<A>, Statement, CFGCall> site : reachability.getReachability()
-					.callSitesOf(callee)) {
+					.callSitesOf(callee, sameCalls)) {
 				AnalyzedCFG<A> caller = site.getLeft();
 				if (caller == result || chain.stream().anyMatch(link -> link.getLeft() == caller))
 					// recursion

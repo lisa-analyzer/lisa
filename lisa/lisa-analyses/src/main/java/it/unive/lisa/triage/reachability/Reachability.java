@@ -310,6 +310,32 @@ public class Reachability<A extends AbstractLattice<A>, D extends AbstractDomain
 	public List<Triple<AnalyzedCFG<A>, Statement, CFGCall>> callSitesOf(
 			AnalyzedCFG<A> result)
 			throws SemanticException {
+		return callSitesOf(result, false);
+	}
+
+	/**
+	 * Yields the call sites that reach the given result, as
+	 * {@link #callSitesOf(AnalyzedCFG)}, or, if {@code sameCalls} holds, the
+	 * call sites whose contexts, pushed with the call, are made of the same
+	 * calls as the one of the given result (whatever the states they record).
+	 * The latter are call sites reaching other results of the same code, with
+	 * the same calls: results whose contexts are reached by no call site might
+	 * have been computed for states of the callers that are not the final
+	 * ones (e.g., in the first iterations of a loop), and their code is
+	 * reached by executions through the call sites of the other results.
+	 *
+	 * @param result    the result
+	 * @param sameCalls whether the contexts are compared by their calls only
+	 *
+	 * @return the call sites
+	 *
+	 * @throws SemanticException if something goes wrong while computing the
+	 *                               contexts of the calls
+	 */
+	public List<Triple<AnalyzedCFG<A>, Statement, CFGCall>> callSitesOf(
+			AnalyzedCFG<A> result,
+			boolean sameCalls)
+			throws SemanticException {
 		List<Triple<AnalyzedCFG<A>, Statement, CFGCall>> callers = new ArrayList<>();
 		CFG cfg = owners.get(result);
 		if (cfg == null || callgraph == null || result.getId() == null)
@@ -335,7 +361,8 @@ public class Reachability<A extends AbstractLattice<A>, D extends AbstractDomain
 					if (state == null)
 						state = callState(caller, site, node);
 					ScopeId<A> pushed = caller.getId().push(call, state);
-					if (result.getId().equals(pushed)) {
+					if (sameCalls ? result.getId().toString().equals(pushed.toString())
+							: result.getId().equals(pushed)) {
 						callers.add(Triple.of(caller, node, call));
 						break;
 					}
