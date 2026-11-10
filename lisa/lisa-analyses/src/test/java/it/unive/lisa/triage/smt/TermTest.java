@@ -14,6 +14,11 @@ public class TermTest {
 		assertEquals("x.y$1", Term.symbol("x.y$1"));
 		assertEquals("|a b|", Term.symbol("a b"));
 		assertEquals("|1x|", Term.symbol("1x"));
+		assertEquals("x1", Term.symbol("x1"));
+		assertEquals("||", Term.symbol(""));
+		assertEquals("~!@$%^&*_+=<>.?/-", Term.symbol("~!@$%^&*_+=<>.?/-"));
+		assertEquals("|a#b|", Term.symbol("a#b"));
+		assertEquals("|è|", Term.symbol("è"));
 		assertEquals("|a_b_c|", Term.symbol("a|b\\c"));
 	}
 

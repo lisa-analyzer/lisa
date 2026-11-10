@@ -4,7 +4,6 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.regex.Pattern;
 
 /**
  * An immutable term of the SMT-LIB language, together with its {@link Sort}.
@@ -26,8 +25,11 @@ public final class Term {
 	 */
 	public static final Term FALSE = new Term("false", Sort.BOOL);
 
-	private static final Pattern SIMPLE_SYMBOL = Pattern
-			.compile("[a-zA-Z~!@$%^&*_+=<>.?/\\-][a-zA-Z0-9~!@$%^&*_+=<>.?/\\-]*");
+	/**
+	 * The characters, other than letters and digits, that simple symbols can
+	 * contain.
+	 */
+	private static final String SYMBOL_CHARS = "~!@$%^&*_+=<>.?/-";
 
 	private final String smtlib;
 
@@ -70,9 +72,28 @@ public final class Term {
 	 */
 	public static String symbol(
 			String name) {
-		if (SIMPLE_SYMBOL.matcher(name).matches())
+		if (isSimpleSymbol(name))
 			return name;
 		return "|" + name.replace('|', '_').replace('\\', '_') + "|";
+	}
+
+	/**
+	 * Yields whether the given name is a simple symbol of SMT-LIB: a non-empty
+	 * sequence of (ASCII) letters, digits and the characters of
+	 * {@link #SYMBOL_CHARS}, not starting with a digit.
+	 */
+	private static boolean isSimpleSymbol(
+			String name) {
+		if (name.isEmpty())
+			return false;
+		for (int i = 0; i < name.length(); i++) {
+			char c = name.charAt(i);
+			boolean letter = (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
+			boolean digit = c >= '0' && c <= '9';
+			if (!letter && SYMBOL_CHARS.indexOf(c) < 0 && (!digit || i == 0))
+				return false;
+		}
+		return true;
 	}
 
 	/**
