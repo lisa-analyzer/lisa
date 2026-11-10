@@ -102,6 +102,7 @@ import it.unive.lisa.type.TypeTokenType;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -227,7 +228,56 @@ public class ExpressionEncoder
 	public Term encode(
 			SymbolicExpression expression)
 			throws SemanticException {
-		return expression.accept(this);
+		boolean top = encoded == null;
+		if (top)
+			encoded = new IdentityHashMap<>();
+		try {
+			return encodeShared(expression);
+		} finally {
+			if (top)
+				encoded = null;
+		}
+	}
+
+	/**
+	 * The encodings of the sub-expressions encoded by the current call to
+	 * {@link #encode(SymbolicExpression)}, by identity.
+	 */
+	private Map<SymbolicExpression, Term> encoded;
+
+	/**
+	 * Encodes the given expression, encoding each of its compound
+	 * sub-expressions only once: expressions built by composing transitions
+	 * share their
+	 * sub-expressions (e.g., the value of a variable used more than once), so
+	 * that their trees might be exponentially larger than the expressions
+	 * themselves.
+	 */
+	private Term encodeShared(
+			SymbolicExpression expression)
+			throws SemanticException {
+		Term known = encoded.get(expression);
+		if (known != null)
+			return known;
+		Term result;
+		if (expression instanceof UnaryExpression) {
+			UnaryExpression u = (UnaryExpression) expression;
+			result = visit(u, encodeShared(u.getExpression()));
+		} else if (expression instanceof BinaryExpression) {
+			BinaryExpression b = (BinaryExpression) expression;
+			Term left = encodeShared(b.getLeft());
+			result = visit(b, left, encodeShared(b.getRight()));
+		} else if (expression instanceof TernaryExpression) {
+			TernaryExpression t = (TernaryExpression) expression;
+			Term left = encodeShared(t.getLeft());
+			Term middle = encodeShared(t.getMiddle());
+			result = visit(t, left, middle, encodeShared(t.getRight()));
+		} else
+			// leaves are not shared: each occurrence of an unknown value
+			// (e.g., PushAny) stands for a different value
+			return expression.accept(this);
+		encoded.put(expression, result);
+		return result;
 	}
 
 	/**

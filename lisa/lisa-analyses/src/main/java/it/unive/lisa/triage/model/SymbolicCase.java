@@ -590,11 +590,19 @@ public final class SymbolicCase {
 
 	/**
 	 * The maximum size of the values of the updates of a case (as the number of
-	 * nodes of their trees): larger values are not tracked, since their size
-	 * might grow exponentially (e.g., with repeated writes of the same heap
-	 * contents within one transition).
+	 * their distinct sub-expressions, that is, of the size of their encodings):
+	 * larger values are not tracked, since their size might grow quickly (e.g.,
+	 * with repeated writes of the same heap contents within one transition).
 	 */
 	public static final long MAX_VALUE_SIZE = 1000;
+
+	/**
+	 * The maximum size of the trees of the values of the updates of a case
+	 * (see {@link #MAX_VALUE_SIZE}): values are encoded once per shared
+	 * sub-expression, but other operations (e.g., comparing cases) still visit
+	 * their trees.
+	 */
+	public static final long MAX_VALUE_TREE_SIZE = 100_000;
 
 	/**
 	 * Yields the given value, or a summary if it is too large to be tracked
@@ -604,7 +612,8 @@ public final class SymbolicCase {
 			Identifier id,
 			SymbolicExpression value,
 			FreshValueFactory factory) {
-		if (size(value, new IdentityHashMap<>(), MAX_VALUE_SIZE) <= MAX_VALUE_SIZE)
+		if (distinct(value, Collections.newSetFromMap(new IdentityHashMap<>()), MAX_VALUE_SIZE) <= MAX_VALUE_SIZE
+				&& size(value, new IdentityHashMap<>(), MAX_VALUE_TREE_SIZE) <= MAX_VALUE_TREE_SIZE)
 			return value;
 		return factory.summary(id.getStaticType(),
 				HeapModel.isHeapState(id) ? SummaryValue.Kind.HEAP : SummaryValue.Kind.UNSUPPORTED,
@@ -625,6 +634,30 @@ public final class SymbolicCase {
 			SymbolicExpression expression,
 			long bound) {
 		return size(expression, new IdentityHashMap<>(), bound) > bound;
+	}
+
+	/**
+	 * The number of distinct sub-expressions (by identity) of the given
+	 * expression, that is, the size of its encoding (at most the given bound
+	 * plus one), adding the ones not yet visited to the given set.
+	 */
+	private static long distinct(
+			SymbolicExpression e,
+			Set<SymbolicExpression> visited,
+			long bound) {
+		if (visited.size() > bound || !visited.add(e))
+			return visited.size();
+		if (e instanceof UnaryExpression)
+			distinct(((UnaryExpression) e).getExpression(), visited, bound);
+		else if (e instanceof BinaryExpression) {
+			distinct(((BinaryExpression) e).getLeft(), visited, bound);
+			distinct(((BinaryExpression) e).getRight(), visited, bound);
+		} else if (e instanceof TernaryExpression) {
+			distinct(((TernaryExpression) e).getLeft(), visited, bound);
+			distinct(((TernaryExpression) e).getMiddle(), visited, bound);
+			distinct(((TernaryExpression) e).getRight(), visited, bound);
+		}
+		return visited.size();
 	}
 
 	/**
