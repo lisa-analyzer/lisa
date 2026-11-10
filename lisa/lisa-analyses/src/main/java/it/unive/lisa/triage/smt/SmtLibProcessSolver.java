@@ -66,9 +66,16 @@ public class SmtLibProcessSolver
 	private final long timeout;
 
 	/**
-	 * The command checking satisfiability.
+	 * The alternative command checking satisfiability, tried first for queries
+	 * involving floating point numbers, or {@code null}.
 	 */
-	private final String check;
+	private final String floatCheck;
+
+	/**
+	 * Whether floating point numbers have been sent to the solver since it
+	 * has been started or reset.
+	 */
+	private boolean floats;
 
 	private final Process process;
 
@@ -162,22 +169,25 @@ public class SmtLibProcessSolver
 			long timeoutMillis) {
 		return new SmtLibProcessSolver(
 				List.of(z3Executable(), "-in", "-smt2"),
-				List.of("(set-option :timeout " + timeoutMillis + ")"),
+				// each check might try two strategies (see check())
+				List.of("(set-option :timeout " + timeoutMillis / 2 + ")"),
 				timeoutMillis,
-				z3Check(timeoutMillis));
+				z3FloatCheck(timeoutMillis / 2));
 	}
 
 	/**
-	 * The command checking satisfiability with z3: queries are first
-	 * simplified (solving equalities and eliminating unconstrained terms, so
-	 * that, e.g., the values read from the heap model and wrapped in values of
-	 * unknown kind often become plain numbers), and then solved by
-	 * bit-blasting if they are made of floating point numbers and
-	 * bit-vectors only, and by the general solver otherwise. Without the
-	 * simplifications, the general solver often fails on queries mixing
-	 * floating point numbers with the other theories.
+	 * The command checking satisfiability with z3 of queries involving floating
+	 * point numbers: queries are first simplified (solving equalities and
+	 * eliminating unconstrained terms, so that, e.g., the values read from the
+	 * heap model and wrapped in values of unknown kind often become plain
+	 * numbers), and then solved by bit-blasting if they are made of floating
+	 * point numbers and bit-vectors only, and by the general solver otherwise.
+	 * Without the simplifications, the general solver often fails on queries
+	 * mixing floating point numbers with the other theories, while the general
+	 * solver is often better at other queries (e.g., strings), so that both
+	 * are tried (see {@link #check()}).
 	 */
-	private static String z3Check(
+	private static String z3FloatCheck(
 			long timeoutMillis) {
 		return "(check-sat-using (try-for (then simplify propagate-values solve-eqs elim-uncnstr (or-else qffp smt)) "
 				+ timeoutMillis + "))";
@@ -272,14 +282,15 @@ public class SmtLibProcessSolver
 			List<String> command,
 			List<String> initialization,
 			long timeoutMillis) {
-		this(command, initialization, timeoutMillis, CHECK_SAT);
+		this(command, initialization, timeoutMillis, null);
 	}
 
 	/**
 	 * Builds a solver running the given command, that must accept SMT-LIB 2
 	 * commands from its standard input, and that checks satisfiability with
-	 * the given command (e.g., {@code (check-sat)}, or a solver-specific
-	 * variant).
+	 * the standard command and, if it cannot decide, with the given
+	 * (solver-specific) one, if any, that is instead tried first for queries
+	 * involving floating point numbers (see {@link #check()}).
 	 *
 	 * @param command        the command line starting the solver, that reads
 	 *                           SMT-LIB 2 commands from its standard input
@@ -287,7 +298,9 @@ public class SmtLibProcessSolver
 	 *                           solver has started (e.g., to set the timeout)
 	 * @param timeoutMillis  the timeout of satisfiability checks, in
 	 *                           milliseconds
-	 * @param check          the command checking satisfiability
+	 * @param floatCheck     the alternative command checking satisfiability,
+	 *                           tried first for queries involving floating
+	 *                           point numbers, or {@code null}
 	 *
 	 * @throws SmtSolverUnavailableException if the process cannot be started
 	 */
@@ -295,8 +308,8 @@ public class SmtLibProcessSolver
 			List<String> command,
 			List<String> initialization,
 			long timeoutMillis,
-			String check) {
-		this.check = check;
+			String floatCheck) {
+		this.floatCheck = floatCheck;
 		this.command = List.copyOf(command);
 		this.timeout = timeoutMillis;
 		this.initialization = List.copyOf(initialization);
@@ -344,6 +357,7 @@ public class SmtLibProcessSolver
 	@Override
 	public boolean reset() {
 		command("(reset)");
+		floats = false;
 		// options are reset as well
 		command("(set-option :print-success true)");
 		initialize();
@@ -446,11 +460,30 @@ public class SmtLibProcessSolver
 		command("(pop 1)");
 	}
 
+	/**
+	 * {@inheritDoc}<br>
+	 * <br>
+	 * If an alternative command has been given, it is used when the standard
+	 * one cannot decide, and it is tried first if floating point numbers have
+	 * been sent to the solver.
+	 */
 	@Override
 	public SmtResult check() {
+		if (floatCheck == null)
+			return check(CHECK_SAT);
+		String first = floats ? floatCheck : CHECK_SAT;
+		String second = floats ? CHECK_SAT : floatCheck;
+		SmtResult result = check(first);
+		if (result != SmtResult.UNKNOWN || killed != null)
+			return result;
+		return check(second);
+	}
+
+	private SmtResult check(
+			String command) {
 		SExpression response;
 		try {
-			response = query(check);
+			response = query(command);
 		} catch (SolverTimeoutException e) {
 			killed = "timeout: " + e.getMessage();
 			return SmtResult.UNKNOWN;
@@ -540,6 +573,8 @@ public class SmtLibProcessSolver
 			String cmd) {
 		if (closed)
 			throw new SmtException("The SMT solver has been closed");
+		if (!floats && (cmd.contains("FloatingPoint") || cmd.contains("(fp ") || cmd.contains("to_fp")))
+			floats = true;
 		try {
 			input.write(cmd);
 			input.write("\n");
