@@ -44,6 +44,7 @@ import it.unive.lisa.program.cfg.fixpoints.CompoundState;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.call.CFGCall;
 import it.unive.lisa.program.cfg.statement.call.Call;
+import it.unive.lisa.program.cfg.statement.call.OpenCall;
 import it.unive.lisa.program.language.scoping.ScopingStrategy;
 import it.unive.lisa.util.collections.workset.WorkingSet;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
@@ -401,11 +402,25 @@ public class InliningAnalysis<A extends AbstractLattice<A>,
 			throws SemanticException {
 		callgraph.registerCall(call);
 
-		boolean recursive = isRecursive(call);
+		boolean recursive = maxRecursiveFixpoints >= 0 && isRecursive(call);
 		if (shouldCheckForRecursions() && (maxCallStackDepth == token.size() || recursive && unrolled(call)))
 			if (shouldRaiseException)
 				throw new SemanticException("Maximum call stack depth reached");
-			else {
+			else if (!recursive && !isRecursive(call)) {
+				// the maximum depth is reached by a call outside of the
+				// recursions (e.g., a call to a method performing a
+				// recursion of its own, from a deep recursion): its result is
+				// the one of an open call
+				OpenCall open = new OpenCall(
+						call.getCFG(),
+						call.getLocation(),
+						call.getCallType(),
+						call.getQualifier(),
+						call.getTargetName(),
+						call.getStaticType(),
+						call.getParameters());
+				return getAbstractResultOf(open, entryState, parameters, expressions);
+			} else {
 				Recursion<A> rec = buildRecursionFor(call, entryState, parameters, expressions);
 				AnalysisState<
 						A> result = new RecursionSolver<>(this, rec).solve(call, entryState, parameters, expressions);
@@ -501,8 +516,6 @@ public class InliningAnalysis<A extends AbstractLattice<A>,
 	// same recursion
 	private boolean isRecursive(
 			CFGCall call) {
-		if (maxRecursiveFixpoints < 0)
-			return false;
 		for (Collection<CodeMember> members : callgraph.getRecursionsContaining(call.getCFG()))
 			for (CFG target : call.getTargetedCFGs())
 				if (members.contains(target))

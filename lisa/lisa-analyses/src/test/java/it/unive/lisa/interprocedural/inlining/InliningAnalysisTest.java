@@ -153,4 +153,43 @@ public class InliningAnalysisTest {
 		CFG fib = p.getAllCFGs().iterator().next();
 		assertFalse(analysis.getFixpointResults().get(fib).getAll().isEmpty());
 	}
+
+	@Test
+	public void nestedRecursionsAreSolved()
+			throws InterproceduralAnalysisException,
+			CallGraphConstructionException,
+			ParsingException {
+		// each execution of the recursion of outer performs a recursion of
+		// inner, whose recursive calls must be bounded too
+		Program p = IMPFrontend.processText("class c { "
+				+ "inner(n, m) { if (n <= 0) { return n; } def k = n - m; def r = this.inner(k, m); return r; } "
+				+ "outer(n, m) { if (m <= 1) { return 1; } def x = this.inner(n, m); def k = m - 1; "
+				+ "def r = this.outer(n, k); return r + x; } }");
+		InliningAnalysis<
+				SimpleAbstractState<Monolith, ValueEnvironment<IntInterval>, TypeEnvironment<TypeSet>>,
+				SimpleAbstractDomain<
+						Monolith,
+						ValueEnvironment<IntInterval>,
+						TypeEnvironment<TypeSet>>> analysis = mkAnalysis(new InliningAnalysis<>(20, false, 50), p);
+
+		assertTimeoutPreemptively(Duration.ofSeconds(60), () -> analysis.fixpoint(mkState(), mkConf()));
+	}
+
+	@Test
+	public void callsOutsideOfRecursionsReachingTheStackDepthAreOpenCalls()
+			throws InterproceduralAnalysisException,
+			CallGraphConstructionException,
+			ParsingException {
+		// the call to id reaches the maximum depth, but it is not part of a
+		// recursion that could be solved
+		Program p = IMPFrontend.processText("class c { id(n) { return n; } f(n) { def x = this.id(n); return x; } }");
+		InliningAnalysis<
+				SimpleAbstractState<Monolith, ValueEnvironment<IntInterval>, TypeEnvironment<TypeSet>>,
+				SimpleAbstractDomain<
+						Monolith,
+						ValueEnvironment<IntInterval>,
+						TypeEnvironment<TypeSet>>> analysis = mkAnalysis(new InliningAnalysis<>(0, false), p);
+
+		assertDoesNotThrow(() -> analysis.fixpoint(mkState(), mkConf()));
+	}
 }
