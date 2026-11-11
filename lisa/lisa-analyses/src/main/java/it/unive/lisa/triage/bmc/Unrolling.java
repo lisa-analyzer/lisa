@@ -644,17 +644,22 @@ public class Unrolling {
 			Term term = evaluable(function, result, List.of(argument), evaluator, origin);
 			if (evaluated == null)
 				return term;
-			// each known value bounds the values on the arguments on either
-			// side of its own (comparisons involving NaNs never hold, so they
-			// do not constrain anything)
+			// each known value that is a number bounds the values on the
+			// arguments on either side of its own: monotone functions can
+			// still yield NaN on other arguments (e.g., outside of their
+			// domain), so the bounds hold only for the values that are numbers,
+			// and a known NaN bounds nothing (comparisons with NaNs never hold)
 			String name = function + List.of(argument.getSort()) + result;
+			Term nan = Term.app("fp.isNaN", Sort.BOOL, term);
 			for (Map.Entry<List<String>, String> known : evaluated.valuesOf(name).entrySet()) {
+				if (Double.isNaN(FloatingPoints.parse(known.getValue(), result).doubleValue()))
+					continue;
 				Term point = Term.value(known.getKey().get(0), argument.getSort());
 				Term value = Term.value(known.getValue(), result);
 				Term below = Term.app("fp.leq", Sort.BOOL, argument, point);
 				Term above = Term.app("fp.geq", Sort.BOOL, argument, point);
-				Term lower = Term.app("fp.leq", Sort.BOOL, term, value);
-				Term higher = Term.app("fp.geq", Sort.BOOL, term, value);
+				Term lower = Term.or(nan, Term.app("fp.leq", Sort.BOOL, term, value));
+				Term higher = Term.or(nan, Term.app("fp.geq", Sort.BOOL, term, value));
 				require(Term.implies(below, increasing ? lower : higher));
 				require(Term.implies(above, increasing ? higher : lower));
 			}
