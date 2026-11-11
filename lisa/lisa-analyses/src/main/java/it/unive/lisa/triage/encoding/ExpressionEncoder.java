@@ -241,9 +241,31 @@ public class ExpressionEncoder
 
 	/**
 	 * The encodings of the sub-expressions encoded by the current call to
-	 * {@link #encode(SymbolicExpression)}, by identity.
+	 * {@link #encode(SymbolicExpression)}, by identity, or by all the calls
+	 * since {@link #startSharing()}.
 	 */
 	private Map<SymbolicExpression, Term> encoded;
+
+	/**
+	 * Makes the following calls to {@link #encode(SymbolicExpression)}, until
+	 * {@link #stopSharing()}, share the encodings of their compound
+	 * sub-expressions, as a single call does: expressions that occur in more
+	 * than one of them (e.g., a value written in two heap maps by the same
+	 * transition) are encoded once, so that the auxiliary symbols introduced
+	 * by their encodings are not repeated. This must only be used for
+	 * expressions evaluated in the same state (e.g., the updates of a single
+	 * transition).
+	 */
+	public void startSharing() {
+		encoded = new IdentityHashMap<>();
+	}
+
+	/**
+	 * Ends the sharing started by {@link #startSharing()}.
+	 */
+	public void stopSharing() {
+		encoded = null;
+	}
 
 	/**
 	 * Encodes the given expression, encoding each of its compound

@@ -1103,6 +1103,23 @@ public class Unrolling {
 			ExpressionEncoder encoder,
 			ModelLocation destination)
 			throws SemanticException {
+		// the expressions of the case are evaluated in the same state: the
+		// ones occurring more than once (e.g., values written in more than one
+		// heap map) are encoded once
+		encoder.startSharing();
+		try {
+			return encodeCaseShared(c, step, encoder, destination);
+		} finally {
+			encoder.stopSharing();
+		}
+	}
+
+	private Term encodeCaseShared(
+			SymbolicCase c,
+			int step,
+			ExpressionEncoder encoder,
+			ModelLocation destination)
+			throws SemanticException {
 		List<Term> conj = new ArrayList<>();
 		for (SymbolicExpression cond : c.getPathCondition())
 			conj.add(encoder.encodeCondition(cond));

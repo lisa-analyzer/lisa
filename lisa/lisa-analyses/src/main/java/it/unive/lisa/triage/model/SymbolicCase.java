@@ -1057,16 +1057,20 @@ public final class SymbolicCase {
 		// before it, that is, after this case (identifiers unconstrained
 		// after this case are read as the same unknown value everywhere)
 		Map<Identifier, SymbolicExpression> reads = new LinkedHashMap<>();
+		// sub-expressions shared by the conditions and values of the next case
+		// are rewritten once, so that they stay shared (e.g., a value written
+		// in more than one heap map)
+		Map<SymbolicExpression, SymbolicExpression> done = new IdentityHashMap<>();
 		List<SymbolicExpression> pc = new ArrayList<>(pathCondition);
 		for (SymbolicExpression cond : next.pathCondition) {
-			SymbolicExpression c = substituteOnce(cond, factory, reads);
+			SymbolicExpression c = substituteOnce(cond, factory, reads, done);
 			if (isTooLarge(c, bound))
 				return null;
 			pc.add(c);
 		}
 		Map<Identifier, SymbolicExpression> values = new LinkedHashMap<>();
 		for (Map.Entry<Identifier, SymbolicExpression> u : next.updates.entrySet()) {
-			SymbolicExpression v = substituteOnce(u.getValue(), factory, reads);
+			SymbolicExpression v = substituteOnce(u.getValue(), factory, reads, done);
 			if (isTooLarge(v, bound))
 				return null;
 			values.put(u.getKey(), v);
@@ -1111,7 +1115,24 @@ public final class SymbolicCase {
 	private SymbolicExpression substituteOnce(
 			SymbolicExpression expression,
 			FreshValueFactory factory,
-			Map<Identifier, SymbolicExpression> reads) {
+			Map<Identifier, SymbolicExpression> reads,
+			Map<SymbolicExpression, SymbolicExpression> done) {
+		if (!(expression instanceof UnaryExpression || expression instanceof BinaryExpression
+				|| expression instanceof TernaryExpression))
+			return substituteOnceAux(expression, factory, reads, done);
+		SymbolicExpression known = done.get(expression);
+		if (known == null) {
+			known = substituteOnceAux(expression, factory, reads, done);
+			done.put(expression, known);
+		}
+		return known;
+	}
+
+	private SymbolicExpression substituteOnceAux(
+			SymbolicExpression expression,
+			FreshValueFactory factory,
+			Map<Identifier, SymbolicExpression> reads,
+			Map<SymbolicExpression, SymbolicExpression> done) {
 		if (expression instanceof FreshValue)
 			return expression;
 		if (expression instanceof Identifier) {
@@ -1125,7 +1146,7 @@ public final class SymbolicCase {
 		}
 		if (expression instanceof UnaryExpression) {
 			UnaryExpression u = (UnaryExpression) expression;
-			return new UnaryExpression(u.getStaticType(), substituteOnce(u.getExpression(), factory, reads),
+			return new UnaryExpression(u.getStaticType(), substituteOnce(u.getExpression(), factory, reads, done),
 					u.getOperator(), u.getCodeLocation());
 		}
 		if (expression instanceof BinaryExpression) {
@@ -1138,16 +1159,16 @@ public final class SymbolicCase {
 					value = valueBefore(id, factory);
 				// values written by the model, or unknown, are not guarded
 				return value instanceof Identifier && !(value instanceof FreshValue)
-						? HeapModel.definedRead(value, substituteOnce(b.getRight(), factory, reads))
+						? HeapModel.definedRead(value, substituteOnce(b.getRight(), factory, reads, done))
 						: value;
 			}
-			return fold(new BinaryExpression(b.getStaticType(), substituteOnce(b.getLeft(), factory, reads),
-					substituteOnce(b.getRight(), factory, reads), b.getOperator(), b.getCodeLocation()));
+			return fold(new BinaryExpression(b.getStaticType(), substituteOnce(b.getLeft(), factory, reads, done),
+					substituteOnce(b.getRight(), factory, reads, done), b.getOperator(), b.getCodeLocation()));
 		}
 		if (expression instanceof TernaryExpression) {
 			TernaryExpression t = (TernaryExpression) expression;
-			return new TernaryExpression(t.getStaticType(), substituteOnce(t.getLeft(), factory, reads),
-					substituteOnce(t.getMiddle(), factory, reads), substituteOnce(t.getRight(), factory, reads),
+			return new TernaryExpression(t.getStaticType(), substituteOnce(t.getLeft(), factory, reads, done),
+					substituteOnce(t.getMiddle(), factory, reads, done), substituteOnce(t.getRight(), factory, reads, done),
 					t.getOperator(), t.getCodeLocation());
 		}
 		return substitute(expression, factory, null);
