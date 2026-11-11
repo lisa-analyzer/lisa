@@ -767,6 +767,23 @@ public final class SymbolicCase {
 			SymbolicExpression value,
 			FreshValueFactory factory,
 			ProgramPoint pp) {
+		SymbolicCase res = write(target, value, factory, pp);
+		if (value instanceof PushAny) {
+			// an unknown value written where it is introduced (e.g., the
+			// contents of a string produced by code that is not part of the
+			// program) is consumed here
+			FreshValue fresh = factory.fresh((PushAny) value, pp);
+			if (fresh instanceof InputValue)
+				res = res.withProduced(Collections.singleton((InputValue) fresh));
+		}
+		return res;
+	}
+
+	private SymbolicCase write(
+			AccessChild target,
+			SymbolicExpression value,
+			FreshValueFactory factory,
+			ProgramPoint pp) {
 		String field = fieldOf(target, factory, pp);
 		if (field == UNDECIDED) {
 			// global variables are not part of the heap
