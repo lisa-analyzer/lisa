@@ -1,5 +1,6 @@
 package it.unive.lisa.triage.model;
 
+import it.unive.lisa.symbolic.value.PushAny;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.program.SyntheticLocation;
 import it.unive.lisa.program.cfg.CodeLocation;
@@ -163,6 +164,29 @@ public final class SymbolicStore {
 			SymbolicExpression value,
 			ProgramPoint pp) {
 		return map(c -> c.assign(id, value, factory, pp));
+	}
+
+	/**
+	 * Records, in every case, that the given unknown value is introduced (e.g.,
+	 * as the result of a call to code that is not part of the program): the
+	 * input it stands for is consumed by the executions of the cases (see
+	 * {@link SymbolicCase#withProduced(java.util.Collection)}). Nothing changes
+	 * if the value does not stand for an input.
+	 *
+	 * @param value the unknown value
+	 * @param pp    the program point where the value is introduced (can be
+	 *                  {@code null})
+	 *
+	 * @return the resulting store
+	 */
+	public SymbolicStore introduce(
+			PushAny value,
+			ProgramPoint pp) {
+		FreshValue fresh = factory.fresh(value, pp);
+		if (!(fresh instanceof InputValue))
+			return this;
+		Set<InputValue> input = Collections.singleton((InputValue) fresh);
+		return map(c -> c.withProduced(input));
 	}
 
 	/**

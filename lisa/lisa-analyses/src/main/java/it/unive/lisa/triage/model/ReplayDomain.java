@@ -10,6 +10,7 @@ import it.unive.lisa.interprocedural.ScopeId;
 import it.unive.lisa.lattices.Satisfiability;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.program.cfg.protection.ProtectedBlock;
+import it.unive.lisa.symbolic.value.PushAny;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.MemoryAllocation;
 import it.unive.lisa.symbolic.value.Identifier;
@@ -107,6 +108,10 @@ public class ReplayDomain<A extends AbstractLattice<A>, D extends AbstractDomain
 		if (expression instanceof MemoryAllocation && !inner.isBottom())
 			// the allocation yields a new reference
 			return new ReplayState<>(inner, state.getStore().allocate((MemoryAllocation) expression, pp));
+		if (expression instanceof PushAny && !inner.isBottom())
+			// the unknown value is introduced here (e.g., as the result of a
+			// call to code that is not part of the program)
+			return new ReplayState<>(inner, state.getStore().introduce((PushAny) expression, pp));
 		return state.withInner(inner);
 	}
 

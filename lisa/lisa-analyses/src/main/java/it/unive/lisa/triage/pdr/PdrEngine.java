@@ -34,6 +34,7 @@ import it.unive.lisa.triage.smt.SmtSolver;
 import it.unive.lisa.triage.smt.Sort;
 import it.unive.lisa.triage.smt.Term;
 import it.unive.lisa.type.TypeSystem;
+import java.util.HashSet;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -1023,8 +1024,16 @@ public class PdrEngine {
 		Map<FreshValue, String> all = new LinkedHashMap<>(values);
 		all.putAll(fromCube);
 		// every input of the case, even if not in the cube, is needed to
-		// reproduce the transition
+		// reproduce the transition, except for the ones that the executions
+		// of the case do not consume, while the ones of other cases of the
+		// same transition do (e.g., the result of the right operand of a
+		// short-circuiting operator, not evaluated in this case)
 		Map<FreshValue, String> caseInputs = freshValues(unrolling.getFreshValues(caseKey), caseKey);
+		Set<InputValue> producedElsewhere = new HashSet<>();
+		for (SymbolicCase other : unrolling.cases(e))
+			producedElsewhere.addAll(other.getProduced());
+		producedElsewhere.removeAll(c.getProduced());
+		caseInputs.keySet().removeAll(producedElsewhere);
 		Cube projected = project(lits, all);
 		// values that could not be projected are left unconstrained
 		if (!Projection.freshValues(projected.getLiterals()).isEmpty())

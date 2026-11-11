@@ -34,6 +34,7 @@ import it.unive.lisa.type.Type;
 import it.unive.lisa.type.TypeTokenType;
 import it.unive.lisa.type.Untyped;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
@@ -82,7 +83,7 @@ public final class SymbolicCase {
 			false,
 			Collections.emptySet(),
 			false,
-			Collections.emptyList());
+			Collections.emptyList(), Collections.emptySet());
 
 	private final List<SymbolicExpression> pathCondition;
 
@@ -108,6 +109,15 @@ public final class SymbolicCase {
 	 */
 	private final List<Scoping> scopings;
 
+	/**
+	 * The inputs consumed by the executions of the transition (see
+	 * {@link #withProduced(Collection)}): an input might occur in the
+	 * transition without being consumed by its executions (e.g., the result of
+	 * the right operand of a short-circuiting operator, where the left one
+	 * decides the result, and the right one is not evaluated).
+	 */
+	private final Set<InputValue> produced;
+
 	private SymbolicCase(
 			List<SymbolicExpression> pathCondition,
 			Map<Identifier, SymbolicExpression> updates,
@@ -116,7 +126,8 @@ public final class SymbolicCase {
 			boolean heapHavoc,
 			Set<Identifier> preservedHeap,
 			boolean havocAll,
-			List<Scoping> scopings) {
+			List<Scoping> scopings,
+			Set<InputValue> produced) {
 		this.pathCondition = pathCondition;
 		this.updates = updates;
 		this.forgotten = forgotten;
@@ -125,6 +136,49 @@ public final class SymbolicCase {
 		this.preservedHeap = preservedHeap;
 		this.havocAll = havocAll;
 		this.scopings = scopings;
+		this.produced = produced;
+	}
+
+	/**
+	 * Yields the inputs consumed by the executions of this transition, that
+	 * is, the inputs produced by the evaluations of unknown values introduced
+	 * in this case (e.g., the results of calls to code that is not part of the
+	 * program, see {@link #withProduced(Collection)}).
+	 *
+	 * @return the inputs
+	 */
+	public Set<InputValue> getProduced() {
+		return produced;
+	}
+
+	/**
+	 * Yields this case, where the given inputs are consumed by the executions
+	 * of the transition: the inputs produced by the unknown values introduced
+	 * in this case (e.g., by the evaluation of a call to code that is not part
+	 * of the program), as opposed to the ones that only occur in its values
+	 * (e.g., in the result of a short-circuiting operator whose right operand
+	 * is not evaluated in this case).
+	 *
+	 * @param inputs the inputs
+	 *
+	 * @return the resulting case
+	 */
+	public SymbolicCase withProduced(
+			Collection<InputValue> inputs) {
+		if (produced.containsAll(inputs))
+			return this;
+		return new SymbolicCase(pathCondition, updates, forgotten, forgottenIf, heapHavoc, preservedHeap, havocAll,
+				scopings, union(produced, inputs));
+	}
+
+	private static Set<InputValue> union(
+			Collection<InputValue> first,
+			Collection<InputValue> second) {
+		if (second.isEmpty() && first instanceof Set)
+			return (Set<InputValue>) first;
+		Set<InputValue> result = new LinkedHashSet<>(first);
+		result.addAll(second);
+		return Collections.unmodifiableSet(result);
 	}
 
 	/**
@@ -693,7 +747,7 @@ public final class SymbolicCase {
 		Map<Identifier, SymbolicExpression> upd = new LinkedHashMap<>(updates);
 		upd.put(id, bounded(id, value, factory));
 		return new SymbolicCase(pathCondition, Collections.unmodifiableMap(upd), forgotten, forgottenIf, heapHavoc,
-				preservedHeap, havocAll, scopings);
+				preservedHeap, havocAll, scopings, produced);
 	}
 
 	/**
@@ -835,7 +889,13 @@ public final class SymbolicCase {
 			// heapWrite)
 			return this;
 		Map<Identifier, SymbolicExpression> upd = new LinkedHashMap<>(updates);
-		upd.put(id, bounded(id, substitute(value, factory, pp), factory));
+		SymbolicExpression v = substitute(value, factory, pp);
+		upd.put(id, bounded(id, v, factory));
+		// an unknown value assigned where it is introduced (e.g., the result
+		// of a call to code that is not part of the program) is consumed here
+		Set<InputValue> prod = value instanceof PushAny && v instanceof InputValue
+				? union(produced, Collections.singleton((InputValue) v))
+				: produced;
 		Set<Identifier> forg = forgotten;
 		if (forgotten.contains(id)) {
 			forg = new LinkedHashSet<>(forgotten);
@@ -845,7 +905,7 @@ public final class SymbolicCase {
 		if (HeapModel.tracksDefinition(id))
 			upd.put(HeapModel.defined(id), new Constant(Untyped.INSTANCE, true, value.getCodeLocation()));
 		return new SymbolicCase(pathCondition, Collections.unmodifiableMap(upd), forg, forgottenIf, heapHavoc,
-				preservedHeap, havocAll, scopings);
+				preservedHeap, havocAll, scopings, prod);
 	}
 
 	/**
@@ -866,7 +926,7 @@ public final class SymbolicCase {
 		List<SymbolicExpression> pc = new ArrayList<>(pathCondition);
 		pc.add(substitute(condition, factory, pp));
 		return new SymbolicCase(Collections.unmodifiableList(pc), updates, forgotten, forgottenIf, heapHavoc,
-				preservedHeap, havocAll, scopings);
+				preservedHeap, havocAll, scopings, produced);
 	}
 
 	/**
@@ -886,7 +946,7 @@ public final class SymbolicCase {
 			forg.add(id);
 		}
 		return new SymbolicCase(pathCondition, Collections.unmodifiableMap(upd), Collections.unmodifiableSet(forg),
-				forgottenIf, heapHavoc, preservedHeap, havocAll, scopings);
+				forgottenIf, heapHavoc, preservedHeap, havocAll, scopings, produced);
 	}
 
 	/**
@@ -904,7 +964,7 @@ public final class SymbolicCase {
 		List<Predicate<Identifier>> tests = new ArrayList<>(forgottenIf);
 		tests.add(test);
 		return new SymbolicCase(pathCondition, Collections.unmodifiableMap(upd), forgotten,
-				Collections.unmodifiableList(tests), heapHavoc, preservedHeap, havocAll, scopings);
+				Collections.unmodifiableList(tests), heapHavoc, preservedHeap, havocAll, scopings, produced);
 	}
 
 	/**
@@ -916,7 +976,7 @@ public final class SymbolicCase {
 		if (heapHavoc && preservedHeap.isEmpty())
 			return this;
 		return new SymbolicCase(pathCondition, updates, forgotten, forgottenIf, true, Collections.emptySet(),
-				havocAll, scopings);
+				havocAll, scopings, produced);
 	}
 
 	/**
@@ -937,7 +997,7 @@ public final class SymbolicCase {
 		// heap contents that are not preserved are no longer updated
 		upd.keySet().removeIf(id -> isHavockedWithHeap(id) && !kept.contains(id));
 		return new SymbolicCase(pathCondition, Collections.unmodifiableMap(upd), forgotten, forgottenIf, true,
-				Collections.unmodifiableSet(kept), havocAll, scopings);
+				Collections.unmodifiableSet(kept), havocAll, scopings, produced);
 	}
 
 	/**
@@ -971,7 +1031,7 @@ public final class SymbolicCase {
 		upd.put(HeapModel.ALLOC, new BinaryExpression(HeapType.COUNTER, counter, allocated,
 				NumericNonOverflowingAdd.INSTANCE, location));
 		return new SymbolicCase(Collections.unmodifiableList(pc), Collections.unmodifiableMap(upd), forgotten,
-				forgottenIf, true, Collections.unmodifiableSet(kept), havocAll, scopings);
+				forgottenIf, true, Collections.unmodifiableSet(kept), havocAll, scopings, produced);
 	}
 
 	/**
@@ -1015,7 +1075,7 @@ public final class SymbolicCase {
 		scs.add(scoping);
 		return new SymbolicCase(pathCondition, Collections.unmodifiableMap(upd), Collections.unmodifiableSet(forg),
 				Collections.unmodifiableList(tests), heapHavoc, preservedHeap, havocAll,
-				Collections.unmodifiableList(scs));
+				Collections.unmodifiableList(scs), produced);
 	}
 
 	/**
@@ -1026,7 +1086,7 @@ public final class SymbolicCase {
 	 */
 	public SymbolicCase withHavocAll() {
 		return new SymbolicCase(pathCondition, Collections.emptyMap(), Collections.emptySet(),
-				Collections.emptyList(), true, Collections.emptySet(), true, Collections.emptyList());
+				Collections.emptyList(), true, Collections.emptySet(), true, Collections.emptyList(), produced);
 	}
 
 	/**
@@ -1101,7 +1161,7 @@ public final class SymbolicCase {
 			forg = Collections.unmodifiableSet(forg);
 		}
 		return new SymbolicCase(Collections.unmodifiableList(pc), Collections.unmodifiableMap(upd), forg,
-				result.forgottenIf, result.heapHavoc, result.preservedHeap, result.havocAll, result.scopings);
+				result.forgottenIf, result.heapHavoc, result.preservedHeap, result.havocAll, result.scopings, union(produced, next.produced));
 	}
 
 	/**
@@ -1239,7 +1299,7 @@ public final class SymbolicCase {
 				first.heapHavoc || second.heapHavoc,
 				mergePreserved(first, second),
 				first.havocAll || second.havocAll || !sameScopings,
-				sameScopings ? first.scopings : Collections.emptyList());
+				sameScopings ? first.scopings : Collections.emptyList(), union(first.produced, second.produced));
 	}
 
 	/**
@@ -1272,7 +1332,7 @@ public final class SymbolicCase {
 	@Override
 	public int hashCode() {
 		return Objects.hash(forgotten, forgottenIf, havocAll, heapHavoc, preservedHeap, pathCondition, updates,
-				scopings);
+				scopings, produced);
 	}
 
 	@Override
@@ -1292,7 +1352,8 @@ public final class SymbolicCase {
 				&& Objects.equals(forgottenIf, other.forgottenIf)
 				&& Objects.equals(pathCondition, other.pathCondition)
 				&& Objects.equals(updates, other.updates)
-				&& Objects.equals(scopings, other.scopings);
+				&& Objects.equals(scopings, other.scopings)
+				&& Objects.equals(produced, other.produced);
 	}
 
 	@Override
