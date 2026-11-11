@@ -5,6 +5,10 @@ import it.unive.lisa.interprocedural.ScopeId;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.type.Type;
+import java.util.List;
+import java.util.LinkedHashSet;
+import java.util.Comparator;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Objects;
 import java.util.Set;
@@ -93,9 +97,16 @@ public class InputSource {
 		this.kind = kind;
 		this.location = location;
 		this.type = type;
-		this.constraints = constraints == null || constraints.isEmpty()
-				? Collections.emptySet()
-				: Collections.unmodifiableSet(Set.copyOf(constraints));
+		// the constraints are kept in a deterministic order (by their
+		// textual representation), as the order in which they are encoded
+		// affects the models found by solvers, thus the reproducing inputs
+		if (constraints == null || constraints.isEmpty())
+			this.constraints = Collections.emptySet();
+		else {
+			List<BinaryExpression> sorted = new ArrayList<>(constraints);
+			sorted.sort(Comparator.comparing(BinaryExpression::toString));
+			this.constraints = Collections.unmodifiableSet(new LinkedHashSet<>(sorted));
+		}
 		this.description = description;
 	}
 

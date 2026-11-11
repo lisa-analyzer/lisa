@@ -15,6 +15,9 @@ import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.type.Type;
+import java.util.List;
+import java.util.Comparator;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -97,7 +100,13 @@ public class ConstraintExporter<A extends AbstractLattice<A>, D extends Abstract
 					continue;
 				return null;
 			}
-			result.addAll(cs);
+			// the constraints are added in a deterministic order (by their
+			// textual representation), as the order in which they are encoded
+			// affects the models found by solvers, thus the reproducing
+			// inputs, while domains might yield them in any order
+			List<BinaryExpression> sorted = new ArrayList<>(cs);
+			sorted.sort(Comparator.comparing(BinaryExpression::toString));
+			result.addAll(sorted);
 		}
 		return result;
 	}

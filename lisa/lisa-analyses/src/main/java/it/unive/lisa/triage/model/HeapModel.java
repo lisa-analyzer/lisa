@@ -16,6 +16,7 @@ import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
+import java.util.List;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -138,7 +139,8 @@ public class HeapModel {
 	 * frontends name the variables accessing them: {@code len} (IMP) and
 	 * {@code length} (e.g., Java).
 	 */
-	public static final Set<String> DEFAULT_ARRAY_PROPERTIES = Set.of("len", LENGTH);
+	public static final Set<String> DEFAULT_ARRAY_PROPERTIES = Collections
+			.unmodifiableSet(new LinkedHashSet<>(List.of("len", LENGTH)));
 
 	/**
 	 * The names of the variables that, when accessed on an array, denote a
