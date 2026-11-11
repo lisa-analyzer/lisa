@@ -16,6 +16,7 @@ import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.Untyped;
 import it.unive.lisa.triage.reachability.Reachability;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -48,6 +49,8 @@ public class ResultCache<A extends AbstractLattice<A>> {
 	private final Map<AnalyzedCFG<A>, Map<Statement, AnalysisState<A>>> preStates = new IdentityHashMap<>();
 
 	private final Map<Collection<AnalyzedCFG<A>>, Map<ScopeId<A>, AnalyzedCFG<A>>> merged = new IdentityHashMap<>();
+
+	private final Map<Collection<AnalyzedCFG<A>>, Map<String, List<AnalyzedCFG<A>>>> sameCalls = new IdentityHashMap<>();
 
 	/**
 	 * The global variables written by the code of each member, as the frontend
@@ -267,6 +270,32 @@ public class ResultCache<A extends AbstractLattice<A>> {
 	}
 
 	/**
+	 * Yields the results, among the given ones, whose contexts are made of the
+	 * same calls as the given one, whatever the states they record (compared
+	 * through their textual representation, as
+	 * {@link it.unive.lisa.triage.reachability.Reachability#callSitesOf(AnalyzedCFG, boolean)}
+	 * does), or all the given results if none is. The same collection is
+	 * yielded for the same results and calls, so that its merges are cached
+	 * (see {@link #merged(Collection, ScopeId, Supplier)}).
+	 *
+	 * @param results the results, identified by identity
+	 * @param id      the context
+	 *
+	 * @return the results with the same calls
+	 */
+	public Collection<AnalyzedCFG<A>> withSameCalls(
+			Collection<AnalyzedCFG<A>> results,
+			ScopeId<A> id) {
+		return sameCalls.computeIfAbsent(results, r -> new HashMap<>()).computeIfAbsent(id.toString(), calls -> {
+			List<AnalyzedCFG<A>> same = new ArrayList<>();
+			for (AnalyzedCFG<A> result : results)
+				if (result.getId() != null && calls.equals(result.getId().toString()))
+					same.add(result);
+			return same.isEmpty() ? new ArrayList<>(results) : same;
+		});
+	}
+
+	/**
 	 * Yields the result obtained by merging the given results with the given
 	 * context, computing it through the given supplier if it is not cached. The
 	 * supplier might yield {@code null}, if the results cannot be merged. The
@@ -288,7 +317,9 @@ public class ResultCache<A extends AbstractLattice<A>> {
 		if (byId.containsKey(id))
 			return byId.get(id);
 		AnalyzedCFG<A> res = merge.get();
-		byId.put(id, res);
+		// a merge that failed (e.g., because of a deadline) is not cached
+		if (res != null)
+			byId.put(id, res);
 		return res;
 	}
 }

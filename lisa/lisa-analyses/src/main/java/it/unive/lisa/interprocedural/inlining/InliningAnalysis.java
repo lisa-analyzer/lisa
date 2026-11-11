@@ -100,6 +100,23 @@ public class InliningAnalysis<A extends AbstractLattice<A>,
 	protected final boolean shouldRaiseException;
 
 	/**
+	 * The maximum number of fixpoints computed for each member of a recursion
+	 * by recursive calls (that is, calls to members of a recursion from members
+	 * of the same recursion). When a member exceeds it, recursive calls to it
+	 * are treated as if the maximum call stack depth was reached. A negative
+	 * value means no limit. This bounds the unrolling of recursions with more
+	 * than one recursive call per member (e.g., {@code fib(n - 1) +
+	 * fib(n - 2)}), whose call trees grow exponentially with the depth.
+	 */
+	protected final int maxRecursiveFixpoints;
+
+	/**
+	 * The number of fixpoints computed for each member of a recursion by
+	 * recursive calls.
+	 */
+	protected Map<CFG, Integer> recursiveFixpoints = new HashMap<>();
+
+	/**
 	 * The current call stack.
 	 */
 	protected CallStackId<A> token;
@@ -163,8 +180,33 @@ public class InliningAnalysis<A extends AbstractLattice<A>,
 	public InliningAnalysis(
 			int maxCallStackDepth,
 			boolean shouldRaiseException) {
+		this(maxCallStackDepth, shouldRaiseException, -1);
+	}
+
+	/**
+	 * Builds the analysis.
+	 *
+	 * @param maxCallStackDepth     the maximum call stack depth. A negative
+	 *                                  value means infinite depth. If a call
+	 *                                  chain exceeds this depth
+	 * @param shouldRaiseException  whether an exception should be raised when
+	 *                                  the maximum call stack depth is
+	 *                                  reached. If {@code false}, then top is
+	 *                                  returned instead
+	 * @param maxRecursiveFixpoints the maximum number of fixpoints computed
+	 *                                  for each member of a recursion by
+	 *                                  recursive calls, after which recursive
+	 *                                  calls to it are treated as if the
+	 *                                  maximum call stack depth was reached (a
+	 *                                  negative value means no limit)
+	 */
+	public InliningAnalysis(
+			int maxCallStackDepth,
+			boolean shouldRaiseException,
+			int maxRecursiveFixpoints) {
 		this.maxCallStackDepth = maxCallStackDepth;
 		this.shouldRaiseException = shouldRaiseException;
+		this.maxRecursiveFixpoints = maxRecursiveFixpoints;
 		this.token = CallStackId.create();
 	}
 
@@ -178,6 +220,8 @@ public class InliningAnalysis<A extends AbstractLattice<A>,
 		super(other);
 		this.maxCallStackDepth = other.maxCallStackDepth;
 		this.shouldRaiseException = other.shouldRaiseException;
+		this.maxRecursiveFixpoints = other.maxRecursiveFixpoints;
+		this.recursiveFixpoints = other.recursiveFixpoints;
 		this.token = other.token;
 		this.results = other.results;
 		this.workingSet = other.workingSet;
@@ -207,6 +251,7 @@ public class InliningAnalysis<A extends AbstractLattice<A>,
 
 		this.workingSet = conf.fixpointWorkingSet;
 		this.conf = conf;
+		this.recursiveFixpoints = new HashMap<>();
 
 		// new fixpoint execution: reset
 		CodeUnit unit = new CodeUnit(SyntheticLocation.INSTANCE, app.getPrograms()[0], "singleton");
@@ -356,7 +401,8 @@ public class InliningAnalysis<A extends AbstractLattice<A>,
 			throws SemanticException {
 		callgraph.registerCall(call);
 
-		if (shouldCheckForRecursions() && maxCallStackDepth == token.size())
+		boolean recursive = isRecursive(call);
+		if (shouldCheckForRecursions() && (maxCallStackDepth == token.size() || recursive && unrolled(call)))
 			if (shouldRaiseException)
 				throw new SemanticException("Maximum call stack depth reached");
 			else {
@@ -414,6 +460,8 @@ public class InliningAnalysis<A extends AbstractLattice<A>,
 			} else {
 				// compute the result with a fixpoint iteration
 				AnalyzedCFG<A> fixpointResult = null;
+				if (recursive)
+					recursiveFixpoints.merge(cfg, 1, Integer::sum);
 				try {
 					fixpointResult = computeFixpoint(cfg, token, prepared.getLeft());
 				} catch (FixpointException e) {
@@ -447,6 +495,29 @@ public class InliningAnalysis<A extends AbstractLattice<A>,
 		token = callerToken;
 		entries.remove(call);
 		return result;
+	}
+
+	// whether the call goes from a member of a recursion to a member of the
+	// same recursion
+	private boolean isRecursive(
+			CFGCall call) {
+		if (maxRecursiveFixpoints < 0)
+			return false;
+		for (Collection<CodeMember> members : callgraph.getRecursionsContaining(call.getCFG()))
+			for (CFG target : call.getTargetedCFGs())
+				if (members.contains(target))
+					return true;
+		return false;
+	}
+
+	// whether a target of the given recursive call exceeded the maximum number
+	// of fixpoints computed by recursive calls
+	private boolean unrolled(
+			CFGCall call) {
+		for (CFG target : call.getTargetedCFGs())
+			if (recursiveFixpoints.getOrDefault(target, 0) >= maxRecursiveFixpoints)
+				return true;
+		return false;
 	}
 
 	private Recursion<A> buildRecursionFor(

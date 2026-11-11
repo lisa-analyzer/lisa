@@ -1,7 +1,9 @@
 package it.unive.lisa.interprocedural.inlining;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import it.unive.lisa.DefaultConfiguration;
@@ -28,7 +30,9 @@ import it.unive.lisa.lattices.heap.Monolith;
 import it.unive.lisa.lattices.types.TypeSet;
 import it.unive.lisa.program.Application;
 import it.unive.lisa.program.Program;
+import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.util.numeric.IntInterval;
+import java.time.Duration;
 import org.junit.jupiter.api.Test;
 
 public class InliningAnalysisTest {
@@ -127,5 +131,26 @@ public class InliningAnalysisTest {
 		// with shouldRaiseException = false, the javadoc promises top is
 		// returned once the depth is reached instead of failing the analysis
 		assertDoesNotThrow(() -> analysis.fixpoint(mkState(), mkConf()));
+	}
+
+	@Test
+	public void recursionsWithSeveralRecursiveCallsAreSolvedWhenTheirUnrollingIsTooLarge()
+			throws InterproceduralAnalysisException,
+			CallGraphConstructionException,
+			ParsingException {
+		// two recursive calls per execution: unrolling the recursion up to the
+		// maximum call stack depth would compute 2^200 fixpoints
+		Program p = IMPFrontend.processText("class c { fib(n) { if (n < 2) { return n; } "
+				+ "def m = n - 1; def a = this.fib(m); def k = n - 2; def b = this.fib(k); return a + b; } }");
+		InliningAnalysis<
+				SimpleAbstractState<Monolith, ValueEnvironment<IntInterval>, TypeEnvironment<TypeSet>>,
+				SimpleAbstractDomain<
+						Monolith,
+						ValueEnvironment<IntInterval>,
+						TypeEnvironment<TypeSet>>> analysis = mkAnalysis(new InliningAnalysis<>(200, false, 50), p);
+
+		assertTimeoutPreemptively(Duration.ofSeconds(60), () -> analysis.fixpoint(mkState(), mkConf()));
+		CFG fib = p.getAllCFGs().iterator().next();
+		assertFalse(analysis.getFixpointResults().get(fib).getAll().isEmpty());
 	}
 }

@@ -813,13 +813,15 @@ public class ReplayInterprocedural<A extends AbstractLattice<A>, D extends Abstr
 				// replay might not compute exactly as the analysis did (e.g.,
 				// for calls synthesized by the semantics of other
 				// statements): the states of all the results describe the
-				// executions of the callee
+				// executions of the callee, among the ones with the same calls
+				// (the others are reached through other calls)
+				Collection<AnalyzedCFG<A>> same = cache.withSameCalls(candidates, pushed);
 				if (match == null)
-					match = candidates.size() == 1 ? candidates.iterator().next()
-							: cache.merged(candidates, pushed, () -> merge(target, candidates, context));
-				else if (candidates.size() > 1) {
+					match = same.size() == 1 ? same.iterator().next()
+							: cache.merged(same, pushed, () -> merge(target, same, context));
+				else if (same.size() > 1) {
 					ScopeId<A> id = match.getId();
-					match = cache.merged(candidates, id, () -> merge(target, candidates, id));
+					match = cache.merged(same, id, () -> merge(target, same, id));
 				}
 			}
 			if (match != null)
@@ -873,6 +875,29 @@ public class ReplayInterprocedural<A extends AbstractLattice<A>, D extends Abstr
 			CFG cfg,
 			Collection<AnalyzedCFG<A>> results,
 			ScopeId<A> id) {
+		return merge(cfg, results, id, Long.MAX_VALUE);
+	}
+
+	/**
+	 * Yields a result of the given cfg, with the given context, whose states
+	 * are the lubs of the ones of the given results (see
+	 * {@link #merge(CFG, Collection, ScopeId)}), or {@code null} if the states
+	 * cannot be merged or the given deadline passes before the merge ends.
+	 *
+	 * @param <A>      the type of the abstract states of the results
+	 * @param cfg      the cfg
+	 * @param results  the results of the cfg
+	 * @param id       the context of the merged result
+	 * @param deadline the time by which the merge must end (as
+	 *                     {@link System#currentTimeMillis()} gives it)
+	 *
+	 * @return the merged result, or {@code null}
+	 */
+	public static <A extends AbstractLattice<A>> AnalyzedCFG<A> merge(
+			CFG cfg,
+			Collection<AnalyzedCFG<A>> results,
+			ScopeId<A> id,
+			long deadline) {
 		try {
 			Map<Statement, AnalysisState<A>> after = new LinkedHashMap<>();
 			GraphVisitor<CFG, Statement, Edge, Void> collector = new GraphVisitor<>() {
@@ -891,6 +916,8 @@ public class ReplayInterprocedural<A extends AbstractLattice<A>, D extends Abstr
 				node.accept(collector, null);
 			AnalysisState<A> template = null;
 			for (Map.Entry<Statement, AnalysisState<A>> entry : after.entrySet()) {
+				if (System.currentTimeMillis() >= deadline)
+					return null;
 				AnalysisState<A> lub = null;
 				for (AnalyzedCFG<A> r : results) {
 					AnalysisState<A> state = r.getAnalysisStateAfter(entry.getKey());

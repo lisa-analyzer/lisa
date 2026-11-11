@@ -158,7 +158,9 @@ public final class RecursionSummaries {
 				cache.setSummary(entry.getKey(), new ArrayList<>(entry.getValue()));
 			for (Map.Entry<CFG, List<SymbolicExpression>> entry : candidates.entrySet()) {
 				List<SymbolicExpression> current = entry.getValue();
-				AnalyzedCFG<A> result = allExecutions(tool, cache, entry.getKey());
+				AnalyzedCFG<A> result = allExecutions(tool, cache, entry.getKey(), deadline);
+				if (System.currentTimeMillis() >= deadline)
+					return false;
 				if (result == null) {
 					// the executions of the member cannot be described
 					current.clear();
@@ -184,19 +186,21 @@ public final class RecursionSummaries {
 	/**
 	 * Yields a result describing all the executions of the given cfg: its only
 	 * result, or the one merging all its results (e.g., one for each depth of
-	 * the recursion), or {@code null} if they cannot be merged.
+	 * the recursion), or {@code null} if they cannot be merged within the
+	 * deadline.
 	 */
 	private static <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalyzedCFG<A> allExecutions(
 			SemanticTool<A, D> tool,
 			ResultCache<A> cache,
-			CFG cfg) {
+			CFG cfg,
+			long deadline) {
 		Collection<AnalyzedCFG<A>> results = tool.getResultOf(cfg);
 		if (results.isEmpty())
 			return null;
 		AnalyzedCFG<A> first = results.iterator().next();
 		if (results.size() == 1)
 			return first;
-		return cache.merged(results, first.getId(), () -> ReplayInterprocedural.merge(cfg, results, first.getId()));
+		return cache.merged(results, first.getId(), () -> ReplayInterprocedural.merge(cfg, results, first.getId(), deadline));
 	}
 
 	/**
