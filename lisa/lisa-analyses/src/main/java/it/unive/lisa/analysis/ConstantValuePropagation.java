@@ -421,17 +421,17 @@ public class ConstantValuePropagation
 				rVal = (int) ((Character) rVal).charValue();
 
 			if (lVal instanceof Double || rVal instanceof Double)
-				return new ConstantValue(((Number) lVal).doubleValue() % ((Number) rVal).doubleValue());
+				return new ConstantValue(floorMod(((Number) lVal).doubleValue(), ((Number) rVal).doubleValue()));
 			else if (lVal instanceof Float || rVal instanceof Float)
-				return new ConstantValue(((Number) lVal).floatValue() % ((Number) rVal).floatValue());
+				return new ConstantValue((float) floorMod(((Number) lVal).floatValue(), ((Number) rVal).floatValue()));
 			else if (lVal instanceof Long || rVal instanceof Long)
-				return new ConstantValue(((Number) lVal).longValue() % ((Number) rVal).longValue());
+				return new ConstantValue(Math.floorMod(((Number) lVal).longValue(), ((Number) rVal).longValue()));
 			else if (lVal instanceof Integer || rVal instanceof Integer)
-				return new ConstantValue(((Number) lVal).intValue() % ((Number) rVal).intValue());
+				return new ConstantValue(Math.floorMod(((Number) lVal).intValue(), ((Number) rVal).intValue()));
 			else if (lVal instanceof Short || rVal instanceof Short)
-				return new ConstantValue(((Number) lVal).shortValue() % ((Number) rVal).shortValue());
+				return new ConstantValue(Math.floorMod(((Number) lVal).shortValue(), ((Number) rVal).shortValue()));
 			else if (lVal instanceof Byte || rVal instanceof Byte)
-				return new ConstantValue(((Number) lVal).byteValue() % ((Number) rVal).byteValue());
+				return new ConstantValue(Math.floorMod(((Number) lVal).byteValue(), ((Number) rVal).byteValue()));
 		}
 
 		if (operator instanceof RemainderOperator) {
@@ -1242,5 +1242,23 @@ public class ConstantValuePropagation
 						e,
 						ComparisonEq.INSTANCE,
 						pp.getLocation()));
+	}
+
+	/**
+	 * Yields the modulo of the given values, taking the sign of the divisor (as
+	 * documented by {@link ModuloOperator}).
+	 *
+	 * @param left  the dividend
+	 * @param right the divisor
+	 *
+	 * @return the modulo
+	 */
+	private static double floorMod(
+			double left,
+			double right) {
+		double rem = left % right;
+		if (rem != 0 && (rem < 0) != (right < 0))
+			rem += right;
+		return rem;
 	}
 }
