@@ -72,6 +72,13 @@ public class SmtLibProcessSolver
 	private final String floatCheck;
 
 	/**
+	 * The alternative command checking satisfiability, tried for queries not
+	 * involving floating point numbers when the standard one cannot decide, or
+	 * {@code null} if {@link #floatCheck} is used for them as well.
+	 */
+	private final String otherCheck;
+
+	/**
 	 * Whether floating point numbers have been sent to the solver since it has
 	 * been started or reset.
 	 */
@@ -172,7 +179,8 @@ public class SmtLibProcessSolver
 				// each check might try two strategies (see check())
 				List.of("(set-option :timeout " + timeoutMillis / 2 + ")"),
 				timeoutMillis,
-				z3FloatCheck(timeoutMillis / 2));
+				z3FloatCheck(timeoutMillis / 2),
+				z3SimplifyingCheck(timeoutMillis / 2));
 	}
 
 	/**
@@ -190,6 +198,21 @@ public class SmtLibProcessSolver
 	private static String z3FloatCheck(
 			long timeoutMillis) {
 		return "(check-sat-using (try-for (then simplify propagate-values solve-eqs elim-uncnstr (or-else qffp smt)) "
+				+ timeoutMillis + "))";
+	}
+
+	/**
+	 * The command checking satisfiability with z3 of queries not involving
+	 * floating point numbers, when the standard command cannot decide: the
+	 * same simplifications of {@link #z3FloatCheck(long)}, followed by the
+	 * general solver (bit-blasting would only spend the time of the check
+	 * before failing). The simplifications often decide queries over the heap
+	 * model that the general solver alone does not (e.g., the strings stored in
+	 * the fields of new objects).
+	 */
+	private static String z3SimplifyingCheck(
+			long timeoutMillis) {
+		return "(check-sat-using (try-for (then simplify propagate-values solve-eqs elim-uncnstr smt) "
 				+ timeoutMillis + "))";
 	}
 
@@ -309,7 +332,38 @@ public class SmtLibProcessSolver
 			List<String> initialization,
 			long timeoutMillis,
 			String floatCheck) {
+		this(command, initialization, timeoutMillis, floatCheck, null);
+	}
+
+	/**
+	 * Builds a solver running the given command, as
+	 * {@link #SmtLibProcessSolver(List, List, long, String)}, with a different
+	 * alternative command for queries not involving floating point numbers.
+	 *
+	 * @param command        the command line starting the solver, that reads
+	 *                           SMT-LIB 2 commands from its standard input
+	 * @param initialization solver-specific commands to send right after the
+	 *                           solver has started (e.g., to set the timeout)
+	 * @param timeoutMillis  the timeout of satisfiability checks, in
+	 *                           milliseconds
+	 * @param floatCheck     the alternative command checking satisfiability,
+	 *                           tried first for queries involving floating
+	 *                           point numbers, or {@code null}
+	 * @param otherCheck     the alternative command checking satisfiability,
+	 *                           tried for the other queries when the standard
+	 *                           one cannot decide, or {@code null} to use
+	 *                           {@code floatCheck} for them as well
+	 *
+	 * @throws SmtSolverUnavailableException if the process cannot be started
+	 */
+	public SmtLibProcessSolver(
+			List<String> command,
+			List<String> initialization,
+			long timeoutMillis,
+			String floatCheck,
+			String otherCheck) {
 		this.floatCheck = floatCheck;
+		this.otherCheck = otherCheck;
 		this.command = List.copyOf(command);
 		this.timeout = timeoutMillis;
 		this.initialization = List.copyOf(initialization);
@@ -465,14 +519,15 @@ public class SmtLibProcessSolver
 	 * <br>
 	 * If an alternative command has been given, it is used when the standard
 	 * one cannot decide, and it is tried first if floating point numbers have
-	 * been sent to the solver.
+	 * been sent to the solver. Queries without floating point numbers use the
+	 * alternative command for them, if one has been given.
 	 */
 	@Override
 	public SmtResult check() {
 		if (floatCheck == null)
 			return check(CHECK_SAT);
 		String first = floats ? floatCheck : CHECK_SAT;
-		String second = floats ? CHECK_SAT : floatCheck;
+		String second = floats ? CHECK_SAT : otherCheck != null ? otherCheck : floatCheck;
 		SmtResult result = check(first);
 		if (result != SmtResult.UNKNOWN || killed != null)
 			return result;
