@@ -8,14 +8,14 @@ import it.unive.lisa.analysis.AnalyzedCFG;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.interprocedural.ScopeId;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
-import it.unive.lisa.program.cfg.CodeMember;
 import it.unive.lisa.program.SyntheticLocation;
+import it.unive.lisa.program.cfg.CodeMember;
 import it.unive.lisa.program.cfg.Parameter;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Variable;
-import it.unive.lisa.type.Untyped;
 import it.unive.lisa.triage.reachability.Reachability;
+import it.unive.lisa.type.Untyped;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -28,7 +28,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
-
 
 /**
  * A cache of the information computed from the results of an analysis while
@@ -50,7 +49,8 @@ public class ResultCache<A extends AbstractLattice<A>> {
 
 	private final Map<Collection<AnalyzedCFG<A>>, Map<ScopeId<A>, AnalyzedCFG<A>>> merged = new IdentityHashMap<>();
 
-	private final Map<Collection<AnalyzedCFG<A>>, Map<String, List<AnalyzedCFG<A>>>> sameCalls = new IdentityHashMap<>();
+	private final Map<Collection<AnalyzedCFG<A>>,
+			Map<String, List<AnalyzedCFG<A>>>> sameCalls = new IdentityHashMap<>();
 
 	/**
 	 * The global variables written by the code of each member, as the frontend
@@ -59,8 +59,8 @@ public class ResultCache<A extends AbstractLattice<A>> {
 	private GlobalWrites globalWrites = GlobalWrites.UNKNOWN;
 
 	/**
-	 * For each member, the global variables written by its code and by the
-	 * code of the members it calls, transitively ({@code null} if unknown).
+	 * For each member, the global variables written by its code and by the code
+	 * of the members it calls, transitively ({@code null} if unknown).
 	 */
 	private final Map<CodeMember, Optional<Set<String>>> transitiveWrites = new HashMap<>();
 

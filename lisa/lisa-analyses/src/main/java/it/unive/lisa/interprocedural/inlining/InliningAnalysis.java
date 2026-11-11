@@ -191,15 +191,15 @@ public class InliningAnalysis<A extends AbstractLattice<A>,
 	 *                                  value means infinite depth. If a call
 	 *                                  chain exceeds this depth
 	 * @param shouldRaiseException  whether an exception should be raised when
-	 *                                  the maximum call stack depth is
-	 *                                  reached. If {@code false}, then top is
-	 *                                  returned instead
-	 * @param maxRecursiveFixpoints the maximum number of fixpoints computed
-	 *                                  for each member of a recursion by
-	 *                                  recursive calls, after which recursive
-	 *                                  calls to it are treated as if the
-	 *                                  maximum call stack depth was reached (a
-	 *                                  negative value means no limit)
+	 *                                  the maximum call stack depth is reached.
+	 *                                  If {@code false}, then top is returned
+	 *                                  instead
+	 * @param maxRecursiveFixpoints the maximum number of fixpoints computed for
+	 *                                  each member of a recursion by recursive
+	 *                                  calls, after which recursive calls to it
+	 *                                  are treated as if the maximum call stack
+	 *                                  depth was reached (a negative value
+	 *                                  means no limit)
 	 */
 	public InliningAnalysis(
 			int maxCallStackDepth,

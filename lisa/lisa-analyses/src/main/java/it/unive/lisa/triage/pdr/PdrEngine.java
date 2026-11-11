@@ -231,8 +231,8 @@ public class PdrEngine {
 	public static final int MAX_CTGS = 3;
 
 	/**
-	 * The maximum depth of the recursive generalization of the
-	 * counterexamples to generalization.
+	 * The maximum depth of the recursive generalization of the counterexamples
+	 * to generalization.
 	 */
 	public static final int CTG_DEPTH = 1;
 
@@ -376,10 +376,10 @@ public class PdrEngine {
 
 	/**
 	 * Sets whether or not the generalization of blocked cubes blocks the
-	 * counterexamples to generalization it finds (default: {@code false}):
-	 * when dropping a literal from a cube fails because a state reaches the
-	 * smaller cube, that state is blocked at the previous level (if it is not
-	 * an initial state) and the literal is dropped again, as in IC3 with
+	 * counterexamples to generalization it finds (default: {@code false}): when
+	 * dropping a literal from a cube fails because a state reaches the smaller
+	 * cube, that state is blocked at the previous level (if it is not an
+	 * initial state) and the literal is dropped again, as in IC3 with
 	 * counterexamples to generalization.
 	 *
 	 * @param ctgs whether or not to block counterexamples to generalization
@@ -612,16 +612,15 @@ public class PdrEngine {
 
 	/**
 	 * Checks candidate invariants, in the style of Houdini: at each location,
-	 * the candidates are the
-	 * equalities and inequalities between the integer variables relevant at
-	 * the location, and between them and the integer constants of the model.
-	 * Candidates that do not hold in the initial states, or that are not
-	 * preserved by the transitions reaching their location (assuming all the
-	 * remaining candidates at the sources, together with the invariants
-	 * computed by the analysis), are dropped until the remaining ones are
-	 * inductive: they hold in every reachable state, and are added as lemmas
-	 * of every level. If the candidates cannot be decided within
-	 * {@link #MAX_INVARIANT_QUERIES} queries, none is kept.
+	 * the candidates are the equalities and inequalities between the integer
+	 * variables relevant at the location, and between them and the integer
+	 * constants of the model. Candidates that do not hold in the initial
+	 * states, or that are not preserved by the transitions reaching their
+	 * location (assuming all the remaining candidates at the sources, together
+	 * with the invariants computed by the analysis), are dropped until the
+	 * remaining ones are inductive: they hold in every reachable state, and are
+	 * added as lemmas of every level. If the candidates cannot be decided
+	 * within {@link #MAX_INVARIANT_QUERIES} queries, none is kept.
 	 */
 	private void invariants()
 			throws SemanticException,
@@ -706,8 +705,8 @@ public class PdrEngine {
 	}
 
 	/**
-	 * Drops the given candidates of the given initial location that do not
-	 * hold in its initial states, yielding whether all of them hold.
+	 * Drops the given candidates of the given initial location that do not hold
+	 * in its initial states, yielding whether all of them hold.
 	 *
 	 * @throws Stop if the budget is exhausted or the solver cannot decide
 	 */
@@ -792,8 +791,8 @@ public class PdrEngine {
 	}
 
 	/**
-	 * Adds to the given candidates the lemma stating that the given
-	 * expressions are in the given relation, if there is room.
+	 * Adds to the given candidates the lemma stating that the given expressions
+	 * are in the given relation, if there is room.
 	 */
 	private void candidate(
 			Map<Lemma, Term> candidates,

@@ -35,7 +35,6 @@ import it.unive.lisa.triage.smt.SmtException;
 import it.unive.lisa.triage.smt.SmtLibProcessSolver;
 import it.unive.lisa.triage.smt.SmtSolver;
 import it.unive.lisa.triage.smt.SmtSolverUnavailableException;
-import org.apache.commons.lang3.tuple.Triple;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -46,7 +45,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
-
+import org.apache.commons.lang3.tuple.Triple;
 
 /**
  * An {@link IndividualWarningVerifier} based on property-directed reachability
@@ -199,8 +198,8 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 	private long warningDeadline;
 
 	/**
-	 * The time by which the verification of the current violation at one of
-	 * the statements raising the errors of the warning must end (see
+	 * The time by which the verification of the current violation at one of the
+	 * statements raising the errors of the warning must end (see
 	 * {@link #startThrower(int, int)}), or {@code 0}.
 	 */
 	private long throwerDeadline;

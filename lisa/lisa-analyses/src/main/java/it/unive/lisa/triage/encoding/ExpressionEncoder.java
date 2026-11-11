@@ -248,10 +248,9 @@ public class ExpressionEncoder
 	/**
 	 * Encodes the given expression, encoding each of its compound
 	 * sub-expressions only once: expressions built by composing transitions
-	 * share their
-	 * sub-expressions (e.g., the value of a variable used more than once), so
-	 * that their trees might be exponentially larger than the expressions
-	 * themselves.
+	 * share their sub-expressions (e.g., the value of a variable used more than
+	 * once), so that their trees might be exponentially larger than the
+	 * expressions themselves.
 	 */
 	private Term encodeShared(
 			SymbolicExpression expression)
@@ -1221,14 +1220,10 @@ public class ExpressionEncoder
 	}
 
 	/**
-	 * Encodes the key of a heap map: the key of a cell is used as it is, while
-	 * references are keyed by their identifier.
-	 */
-	/**
 	 * Encodes whether the runtime type of the given reference, as recorded by
 	 * the given map of runtime types, is one of the given types: values that
-	 * are not references have none of them, and the test is precise only if
-	 * the runtime type of the object is known (see
+	 * are not references have none of them, and the test is precise only if the
+	 * runtime type of the object is known (see
 	 * {@link it.unive.lisa.triage.model.HeapModel#TYPES}).
 	 */
 	private Term runtimeTypeIn(

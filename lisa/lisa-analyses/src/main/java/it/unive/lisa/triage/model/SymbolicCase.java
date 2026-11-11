@@ -597,8 +597,8 @@ public final class SymbolicCase {
 	public static final long MAX_VALUE_SIZE = 1000;
 
 	/**
-	 * The maximum size of the trees of the values of the updates of a case
-	 * (see {@link #MAX_VALUE_SIZE}): values are encoded once per shared
+	 * The maximum size of the trees of the values of the updates of a case (see
+	 * {@link #MAX_VALUE_SIZE}): values are encoded once per shared
 	 * sub-expression, but other operations (e.g., comparing cases) still visit
 	 * their trees.
 	 */

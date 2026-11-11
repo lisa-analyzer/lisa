@@ -195,8 +195,8 @@ public final class HeapOperators {
 	}
 
 	/**
-	 * Whether the runtime type of the referenced object (the right operand),
-	 * as recorded by the map of runtime types (the left operand, see
+	 * Whether the runtime type of the referenced object (the right operand), as
+	 * recorded by the map of runtime types (the left operand, see
 	 * {@link HeapModel#TYPES}), is one of the given types. Values that are not
 	 * references have none of the types, and the test is precise only if the
 	 * runtime type of the object has been recorded by the model.

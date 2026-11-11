@@ -238,10 +238,11 @@ public final class Projection {
 			return id instanceof Constant && ((Constant) id).getValue() instanceof BigInteger
 					&& ((BigInteger) ((Constant) id).getValue()).bitLength() < 32
 							? new UnaryExpression(HeapType.REFERENCE,
-							new Constant(HeapType.COUNTER, ((BigInteger) ((Constant) id).getValue()).intValueExact(),
-									loc),
-							HeapOperators.NewReference.INSTANCE, loc)
-					: null;
+									new Constant(HeapType.COUNTER,
+											((BigInteger) ((Constant) id).getValue()).intValueExact(),
+											loc),
+									HeapOperators.NewReference.INSTANCE, loc)
+							: null;
 		}
 		return null;
 	}

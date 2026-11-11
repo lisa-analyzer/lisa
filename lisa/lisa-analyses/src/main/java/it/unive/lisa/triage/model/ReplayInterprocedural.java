@@ -469,9 +469,9 @@ public class ReplayInterprocedural<A extends AbstractLattice<A>, D extends Abstr
 	/**
 	 * Yields the facts of the summary of the callee of the given call (see
 	 * {@link ResultCache#summaryOf(it.unive.lisa.program.cfg.CodeMember)}),
-	 * over the actual parameters and the meta variable of the call, if the
-	 * call has a single target and each actual parameter has a single value
-	 * that does not read the heap. Yields no fact if the parameters are
+	 * over the actual parameters and the meta variable of the call, if the call
+	 * has a single target and each actual parameter has a single value that
+	 * does not read the heap. Yields no fact if the parameters are
 	 * {@code null}.
 	 */
 	private List<SymbolicExpression> summaryFacts(
@@ -861,8 +861,8 @@ public class ReplayInterprocedural<A extends AbstractLattice<A>, D extends Abstr
 	 * the context of the call (e.g., with contexts depending on the states at
 	 * the calls, the call of a loop leads to several results, one for each
 	 * state reached by the fixpoint): the states of all the results of the
-	 * callee soundly describe them. Yields {@code null} if the states cannot
-	 * be merged.
+	 * callee soundly describe them. Yields {@code null} if the states cannot be
+	 * merged.
 	 *
 	 * @param <A>     the type of the abstract states of the results
 	 * @param cfg     the cfg

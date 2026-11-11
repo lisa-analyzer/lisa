@@ -43,8 +43,8 @@ public abstract class TypeSystem {
 
 	/**
 	 * Yields {@code true} if the given set is made of all the types registered
-	 * in this type system, that is, if it is equal to {@link #getTypes()}.
-	 * This does not build the set of all types, and it is thus cheaper than
+	 * in this type system, that is, if it is equal to {@link #getTypes()}. This
+	 * does not build the set of all types, and it is thus cheaper than
 	 * comparing with {@link #getTypes()}.
 	 * 
 	 * @param types the set of types

@@ -292,8 +292,8 @@ public class HeapModel {
 	/**
 	 * Yields the runtime type of the objects whose references have the given
 	 * type, or of the objects allocated with the given type: the type itself,
-	 * or the type of the referenced objects if it is the type of references
-	 * (or pointers).
+	 * or the type of the referenced objects if it is the type of references (or
+	 * pointers).
 	 *
 	 * @param type the type
 	 *

@@ -72,8 +72,8 @@ public class SmtLibProcessSolver
 	private final String floatCheck;
 
 	/**
-	 * Whether floating point numbers have been sent to the solver since it
-	 * has been started or reset.
+	 * Whether floating point numbers have been sent to the solver since it has
+	 * been started or reset.
 	 */
 	private boolean floats;
 
@@ -184,8 +184,8 @@ public class SmtLibProcessSolver
 	 * point numbers and bit-vectors only, and by the general solver otherwise.
 	 * Without the simplifications, the general solver often fails on queries
 	 * mixing floating point numbers with the other theories, while the general
-	 * solver is often better at other queries (e.g., strings), so that both
-	 * are tried (see {@link #check()}).
+	 * solver is often better at other queries (e.g., strings), so that both are
+	 * tried (see {@link #check()}).
 	 */
 	private static String z3FloatCheck(
 			long timeoutMillis) {
@@ -287,8 +287,8 @@ public class SmtLibProcessSolver
 
 	/**
 	 * Builds a solver running the given command, that must accept SMT-LIB 2
-	 * commands from its standard input, and that checks satisfiability with
-	 * the standard command and, if it cannot decide, with the given
+	 * commands from its standard input, and that checks satisfiability with the
+	 * standard command and, if it cannot decide, with the given
 	 * (solver-specific) one, if any, that is instead tried first for queries
 	 * involving floating point numbers (see {@link #check()}).
 	 *

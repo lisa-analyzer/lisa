@@ -167,17 +167,17 @@ public final class RecursionSummaries {
 					continue;
 				}
 				for (Statement node : entry.getKey().getNodes())
-						if (node instanceof Return && !current.isEmpty()) {
-							if (System.currentTimeMillis() >= deadline)
-								return false;
-							int before = current.size();
-							Boolean ok = check(tool, cache, result, (Return) node, current, maxCases, solver,
-									encoders, deadline);
-							if (ok == null)
-								return false;
-							if (current.size() != before)
-								changed = true;
-						}
+					if (node instanceof Return && !current.isEmpty()) {
+						if (System.currentTimeMillis() >= deadline)
+							return false;
+						int before = current.size();
+						Boolean ok = check(tool, cache, result, (Return) node, current, maxCases, solver,
+								encoders, deadline);
+						if (ok == null)
+							return false;
+						if (current.size() != before)
+							changed = true;
+					}
 			}
 		}
 		return true;
@@ -200,7 +200,8 @@ public final class RecursionSummaries {
 		AnalyzedCFG<A> first = results.iterator().next();
 		if (results.size() == 1)
 			return first;
-		return cache.merged(results, first.getId(), () -> ReplayInterprocedural.merge(cfg, results, first.getId(), deadline));
+		return cache.merged(results, first.getId(),
+				() -> ReplayInterprocedural.merge(cfg, results, first.getId(), deadline));
 	}
 
 	/**
@@ -246,9 +247,9 @@ public final class RecursionSummaries {
 
 	/**
 	 * Yields whether the conjunction of the given candidates holds for each of
-	 * the given values returned by the given return (all the candidates
-	 * failing if the model assigns a formal parameter they mention), or
-	 * {@code null} if this could not be decided within the deadline.
+	 * the given values returned by the given return (all the candidates failing
+	 * if the model assigns a formal parameter they mention), or {@code null} if
+	 * this could not be decided within the deadline.
 	 */
 	private static <A extends AbstractLattice<A>, D extends AbstractDomain<A>> Boolean holds(
 			SemanticTool<A, D> tool,

@@ -46,7 +46,8 @@ public class ReplayAnalysis<A extends AbstractLattice<A>, D extends AbstractDoma
 	 * The heap locations read at each program point during the replay of the
 	 * current node, for each state they are read from.
 	 */
-	private final Map<ProgramPoint, Map<AnalysisState<ReplayState<A>>, Set<SymbolicExpression>>> accessed = new HashMap<>();
+	private final Map<ProgramPoint,
+			Map<AnalysisState<ReplayState<A>>, Set<SymbolicExpression>>> accessed = new HashMap<>();
 
 	/**
 	 * The program points where the accesses to the heap are ambiguous (see
@@ -70,12 +71,12 @@ public class ReplayAnalysis<A extends AbstractLattice<A>, D extends AbstractDoma
 	/**
 	 * Starts the replay of a node. A program point where the semantics reads
 	 * more than one heap location from the same state (e.g., one per cell that
-	 * an array access might read) yields alternatives that over-approximate
-	 * the executions (while locations read from different states, e.g., when
-	 * initializing the cells of an array one after the other, are not):
-	 * the replay joins them, losing which location goes with which execution
-	 * (e.g., the cell with the value of the index). The node is then replayed
-	 * again, passing those points: each access there happens under an unknown
+	 * an array access might read) yields alternatives that over-approximate the
+	 * executions (while locations read from different states, e.g., when
+	 * initializing the cells of an array one after the other, are not): the
+	 * replay joins them, losing which location goes with which execution (e.g.,
+	 * the cell with the value of the index). The node is then replayed again,
+	 * passing those points: each access there happens under an unknown
 	 * condition, so that the executions through them are never precise.
 	 *
 	 * @param ambiguous the program points where the accesses to the heap are
@@ -89,8 +90,7 @@ public class ReplayAnalysis<A extends AbstractLattice<A>, D extends AbstractDoma
 
 	/**
 	 * Yields the program points where the replay of the current node read more
-	 * than one heap location from the same state (see
-	 * {@link #startNode(Set)}).
+	 * than one heap location from the same state (see {@link #startNode(Set)}).
 	 *
 	 * @return the program points
 	 */

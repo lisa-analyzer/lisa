@@ -12,8 +12,8 @@ import it.unive.lisa.lattices.GenericMapLattice;
 import it.unive.lisa.lattices.GenericSetLattice;
 import it.unive.lisa.outputs.messages.StatementMessage;
 import it.unive.lisa.program.cfg.statement.Expression;
-import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.program.cfg.statement.Statement;
+import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.type.Type;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -255,7 +255,8 @@ public abstract class IndividualWarningVerifier<A extends AbstractLattice<A>, D 
 		// whose errors are raised by their callees (that are usually costlier
 		// to verify), in the order of the program
 		List<Statement> ordered = new ArrayList<>(throwers.keySet());
-		ordered.sort(Comparator.comparing((Statement s) -> s instanceof Call).thenComparing(Comparator.naturalOrder()));
+		ordered.sort(Comparator.comparing((
+				Statement s) -> s instanceof Call).thenComparing(Comparator.naturalOrder()));
 		// no matching error reaches the statement
 		VerificationResult outcome = VerificationResult.REFUTED;
 		for (int i = 0; i < ordered.size(); i++) {
@@ -277,8 +278,8 @@ public abstract class IndividualWarningVerifier<A extends AbstractLattice<A>, D 
 	}
 
 	/**
-	 * Notifies this verifier that an error violation is about to be verified
-	 * at one of the statements raising the errors it reports (see
+	 * Notifies this verifier that an error violation is about to be verified at
+	 * one of the statements raising the errors it reports (see
 	 * {@link #verify(AnalyzedCFG, Statement, Violation)}), e.g., so that the
 	 * time available for the violation can be shared among them. By default,
 	 * this does nothing.
