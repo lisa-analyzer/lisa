@@ -26,6 +26,8 @@ import it.unive.lisa.triage.model.SymbolicCase;
 import it.unive.lisa.triage.smt.SmtSolver;
 import it.unive.lisa.triage.smt.Sort;
 import it.unive.lisa.triage.smt.Term;
+import it.unive.lisa.triage.smt.FloatingPoints;
+import java.util.function.Function;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.IdentityHashMap;
@@ -106,9 +108,70 @@ public class Unrolling {
 	private final Map<String, List<GuardedReason>> guardedReasons = new LinkedHashMap<>();
 
 	/**
+	 * The applications of functions computed on concrete values (see
+	 * {@link SymbolTable#evaluable}) of each encoding, with the conditions
+	 * under which they are evaluated.
+	 */
+	private final Map<String, List<GuardedApplication>> applications = new LinkedHashMap<>();
+
+	/**
+	 * The known values of the functions computed on concrete values, or
+	 * {@code null} if they are not learned.
+	 */
+	private EvaluatedFunctions evaluated;
+
+	/**
 	 * A reason of imprecision that holds when {@code when} holds and
 	 * {@code guard} does not.
 	 */
+	/**
+	 * An application of a function computed on concrete values.
+	 */
+	private static final class Application {
+
+		private final String function;
+
+		private final List<Term> arguments;
+
+		private final Term term;
+
+		private final Function<List<Number>, Number> evaluator;
+
+		private final String reason;
+
+		private Application(
+				String function,
+				List<Term> arguments,
+				Term term,
+				Function<List<Number>, Number> evaluator,
+				String reason) {
+			this.function = function;
+			this.arguments = arguments;
+			this.term = term;
+			this.evaluator = evaluator;
+			this.reason = reason;
+		}
+	}
+
+	/**
+	 * An application of a function computed on concrete values, evaluated
+	 * when the given condition holds (e.g., the case of a transition holding
+	 * it is taken).
+	 */
+	private static final class GuardedApplication {
+
+		private final Term when;
+
+		private final Application application;
+
+		private GuardedApplication(
+				Term when,
+				Application application) {
+			this.when = when;
+			this.application = application;
+		}
+	}
+
 	private static final class GuardedReason {
 
 		private final Term when;
@@ -542,6 +605,62 @@ public class Unrolling {
 					arguments.toArray(Term[]::new));
 		}
 
+		private final List<Application> evaluations = new ArrayList<>();
+
+		@Override
+		public Term evaluable(
+				String function,
+				Sort result,
+				List<Term> arguments,
+				Function<List<Number>, Number> evaluator,
+				SymbolicExpression origin) {
+			List<Sort> sorts = new ArrayList<>();
+			for (Term arg : arguments)
+				sorts.add(arg.getSort());
+			String name = function + sorts + result;
+			Term term = Term.app(Unrolling.this.function(function, sorts, result), result,
+					arguments.toArray(Term[]::new));
+			// the values learned from previous models
+			if (evaluated != null)
+				for (Map.Entry<List<String>, String> known : evaluated.valuesOf(name).entrySet()) {
+					Term[] same = new Term[arguments.size()];
+					for (int i = 0; i < same.length; i++)
+						same[i] = Term.eq(arguments.get(i), Term.value(known.getKey().get(i), sorts.get(i)));
+					term = Term.ite(Term.and(same), Term.value(known.getValue(), result), term);
+				}
+			evaluations.add(new Application(name, arguments, term, evaluator,
+					UNSUPPORTED_OPERATIONS + ": " + describe(origin)));
+			return term;
+		}
+
+		@Override
+		public Term monotone(
+				String function,
+				Sort result,
+				Term argument,
+				Function<List<Number>, Number> evaluator,
+				boolean increasing,
+				SymbolicExpression origin) {
+			Term term = evaluable(function, result, List.of(argument), evaluator, origin);
+			if (evaluated == null)
+				return term;
+			// each known value bounds the values on the arguments on either
+			// side of its own (comparisons involving NaNs never hold, so they
+			// do not constrain anything)
+			String name = function + List.of(argument.getSort()) + result;
+			for (Map.Entry<List<String>, String> known : evaluated.valuesOf(name).entrySet()) {
+				Term point = Term.value(known.getKey().get(0), argument.getSort());
+				Term value = Term.value(known.getValue(), result);
+				Term below = Term.app("fp.leq", Sort.BOOL, argument, point);
+				Term above = Term.app("fp.geq", Sort.BOOL, argument, point);
+				Term lower = Term.app("fp.leq", Sort.BOOL, term, value);
+				Term higher = Term.app("fp.geq", Sort.BOOL, term, value);
+				require(Term.implies(below, increasing ? lower : higher));
+				require(Term.implies(above, increasing ? higher : lower));
+			}
+			return term;
+		}
+
 		private final List<Term> requirements = new ArrayList<>();
 
 		@Override
@@ -632,12 +751,89 @@ public class Unrolling {
 		if (!isExact(key))
 			return false;
 		List<Term> conditions = guards.getOrDefault(key, List.of());
-		if (conditions.isEmpty())
-			return true;
-		for (String value : solver.getValues(conditions).values())
-			if (!value.equals("true"))
-				return false;
-		return true;
+		if (!conditions.isEmpty())
+			for (String value : solver.getValues(conditions).values())
+				if (!value.equals("true"))
+					return false;
+		return mismatches(key, solver).isEmpty();
+	}
+
+	/**
+	 * Sets the known values of the functions computed on concrete values (see
+	 * {@link SymbolTable#evaluable}): the following encodings give the
+	 * functions those values, and the values of the applications that are not
+	 * the ones of the functions in the models of the solver (see
+	 * {@link #isExact(String, SmtSolver)}) are added to them.
+	 *
+	 * @param evaluated the known values
+	 */
+	public void setEvaluatedFunctions(
+			EvaluatedFunctions evaluated) {
+		this.evaluated = evaluated;
+	}
+
+	/**
+	 * Yields the applications of functions computed on concrete values in the
+	 * encoding with the given key whose value in the current model of the
+	 * given solver is not the one of the function on the values of their
+	 * arguments in the model (learning the right values, see
+	 * {@link #setEvaluatedFunctions(EvaluatedFunctions)}).
+	 */
+	private List<Application> mismatches(
+			String key,
+			SmtSolver solver) {
+		List<GuardedApplication> evaluations = applications.getOrDefault(key, List.of());
+		if (evaluations.isEmpty())
+			return List.of();
+		List<Term> terms = new ArrayList<>();
+		for (GuardedApplication a : evaluations) {
+			terms.add(a.when);
+			terms.addAll(a.application.arguments);
+			terms.add(a.application.term);
+		}
+		Map<Term, String> values = solver.getValues(terms);
+		List<Application> result = new ArrayList<>();
+		for (GuardedApplication a : evaluations) {
+			if (!"true".equals(values.get(a.when)))
+				continue;
+			Application app = a.application;
+			List<String> literals = new ArrayList<>();
+			Number expected;
+			try {
+				List<Number> args = new ArrayList<>();
+				for (Term arg : app.arguments) {
+					String value = values.get(arg);
+					literals.add(value);
+					args.add(FloatingPoints.parse(value, arg.getSort()));
+				}
+				expected = app.evaluator.apply(args);
+				if (sameBits(expected, FloatingPoints.parse(values.get(app.term), app.term.getSort())))
+					continue;
+			} catch (RuntimeException e) {
+				// the function cannot be computed on these values
+				result.add(app);
+				continue;
+			}
+			Term literal = expected instanceof Float ? FloatingPoints.literal(expected.floatValue())
+					: FloatingPoints.literal(expected.doubleValue());
+			if (evaluated != null)
+				evaluated.add(app.function, literals, literal.toSmtLib());
+			result.add(app);
+		}
+		return result;
+	}
+
+	// whether two numbers are the same floating point number (all NaNs being
+	// the same)
+	private static boolean sameBits(
+			Number a,
+			Number b) {
+		if (a instanceof Float && b instanceof Float)
+			return Float.isNaN(a.floatValue()) ? Float.isNaN(b.floatValue())
+					: Float.floatToIntBits(a.floatValue()) == Float.floatToIntBits(b.floatValue());
+		if (Double.isNaN(a.doubleValue()))
+			return Double.isNaN(b.doubleValue());
+		return Double.doubleToRawLongBits(a.doubleValue()) == Double.doubleToRawLongBits(b.doubleValue());
 	}
 
 	/**
@@ -696,6 +892,8 @@ public class Unrolling {
 				if ("true".equals(values.get(g.when)) && !"true".equals(values.get(g.guard)))
 					result.add(g.reason);
 		}
+		for (Application app : mismatches(key, solver))
+			result.add(app.reason);
 		if (result.isEmpty() && !isExact(key, solver))
 			result.add("unknown: imprecision of " + key);
 		return result;
@@ -754,8 +952,27 @@ public class Unrolling {
 			String key,
 			StepSymbols symbols,
 			List<GuardedReason> guarded) {
+		record(key, symbols, guarded, guardedApplications(Term.TRUE, symbols, 0));
+	}
+
+	private void record(
+			String key,
+			StepSymbols symbols,
+			List<GuardedReason> guarded,
+			List<GuardedApplication> evaluations) {
 		reasons.put(key, new LinkedHashSet<>(symbols.reasons));
 		guardedReasons.put(key, guarded);
+		applications.put(key, evaluations);
+	}
+
+	private static List<GuardedApplication> guardedApplications(
+			Term when,
+			StepSymbols symbols,
+			int from) {
+		List<GuardedApplication> result = new ArrayList<>();
+		for (int i = from; i < symbols.evaluations.size(); i++)
+			result.add(new GuardedApplication(when, symbols.evaluations.get(i)));
+		return result;
 	}
 
 	private static List<GuardedReason> guardedReasons(
@@ -1057,17 +1274,20 @@ public class Unrolling {
 		List<Term> cases = new ArrayList<>();
 		List<Term> precise = new ArrayList<>();
 		List<GuardedReason> guarded = new ArrayList<>();
+		List<GuardedApplication> evaluations = new ArrayList<>();
 		for (SymbolicCase c : edge.getStore().getCases()) {
 			int from = symbols.guards.size();
 			int req = symbols.requirements.size();
+			int ev = symbols.evaluations.size();
 			Term ct = required(encodeCase(c, step, encoder, edge.getDestination()), symbols, req);
 			cases.add(strictly(ct, symbols, from));
 			precise.add(preciseCase(ct, symbols, from));
 			guarded.addAll(guardedReasons(ct, symbols, from));
+			evaluations.addAll(guardedApplications(ct, symbols, ev));
 		}
 		exactness.put(key, symbols.exact);
 		guards.put(key, List.of(Term.or(precise.toArray(Term[]::new))));
-		record(key, symbols, guarded);
+		record(key, symbols, guarded, evaluations);
 		inputs.put(key, symbols.used);
 		Term relation = Term.and(
 				at(step, edge.getSource()),
@@ -1315,9 +1535,11 @@ public class Unrolling {
 		List<Term> cases = new ArrayList<>();
 		List<Term> precise = new ArrayList<>();
 		List<GuardedReason> guarded = new ArrayList<>();
+		List<GuardedApplication> evaluations = new ArrayList<>();
 		for (BadCase c : model.getBadCases()) {
 			int from = symbols.guards.size();
 			int req = symbols.requirements.size();
+			int ev = symbols.evaluations.size();
 			List<Term> conj = new ArrayList<>();
 			for (SymbolicExpression cond : c.getPathCondition())
 				conj.add(encoder.encodeCondition(cond));
@@ -1327,10 +1549,11 @@ public class Unrolling {
 			cases.add(strictly(ct, symbols, from));
 			precise.add(preciseCase(ct, symbols, from));
 			guarded.addAll(guardedReasons(ct, symbols, from));
+			evaluations.addAll(guardedApplications(ct, symbols, ev));
 		}
 		exactness.put(key, symbols.exact);
 		guards.put(key, List.of(Term.or(precise.toArray(Term[]::new))));
-		record(key, symbols, guarded);
+		record(key, symbols, guarded, evaluations);
 		inputs.put(key, symbols.used);
 		return Term.and(at(step, model.getBadLocation()), Term.or(cases.toArray(Term[]::new)));
 	}

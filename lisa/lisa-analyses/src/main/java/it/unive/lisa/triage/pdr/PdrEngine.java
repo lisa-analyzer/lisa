@@ -16,6 +16,7 @@ import it.unive.lisa.symbolic.value.operator.binary.ComparisonLe;
 import it.unive.lisa.symbolic.value.operator.binary.LogicalAnd;
 import it.unive.lisa.symbolic.value.operator.binary.LogicalOr;
 import it.unive.lisa.symbolic.value.operator.unary.LogicalNegation;
+import it.unive.lisa.triage.bmc.EvaluatedFunctions;
 import it.unive.lisa.triage.bmc.Unrolling;
 import it.unive.lisa.triage.encoding.ExpressionEncoderFactory;
 import it.unive.lisa.triage.model.AlarmModel;
@@ -387,6 +388,20 @@ public class PdrEngine {
 	public void setCtgs(
 			boolean ctgs) {
 		this.ctgs = ctgs;
+	}
+
+	/**
+	 * Sets the known values of the functions that the encoder computes on
+	 * concrete values (see {@link Unrolling#setEvaluatedFunctions}): the
+	 * encodings give the functions those values, and the values learned from
+	 * the models of the search are added to them, so that a following search
+	 * can use them.
+	 *
+	 * @param evaluated the known values
+	 */
+	public void setEvaluatedFunctions(
+			EvaluatedFunctions evaluated) {
+		unrolling.setEvaluatedFunctions(evaluated);
 	}
 
 	/**

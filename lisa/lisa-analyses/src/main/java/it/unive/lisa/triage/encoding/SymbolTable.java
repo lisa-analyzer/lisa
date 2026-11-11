@@ -5,6 +5,7 @@ import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.triage.smt.Sort;
 import it.unive.lisa.triage.smt.Term;
 import java.util.List;
+import java.util.function.Function;
 
 /**
  * The provider of the SMT constants used by an {@link ExpressionEncoder}:
@@ -194,5 +195,67 @@ public interface SymbolTable {
 			List<Term> arguments,
 			SymbolicExpression origin) {
 		return fresh(result, origin);
+	}
+
+	/**
+	 * Yields the application of a deterministic function to the given
+	 * arguments, standing for the value of the given expression, that the
+	 * encoder cannot encode but can compute on concrete values (e.g., a
+	 * mathematical function of a library, such as the sine of a floating point
+	 * number): the arguments and the result are floating point numbers, and
+	 * the given evaluator computes the result from the values of the arguments
+	 * ({@link Double}s for {@link Sort#FLOAT64}, {@link Float}s for
+	 * {@link Sort#FLOAT32}). Implementations can use the evaluator to decide,
+	 * given a model, whether the value of the application in the model is the
+	 * one of the function, and thus precise. By default, this is the same as
+	 * {@link #unknown(String, Sort, List, SymbolicExpression)}.
+	 *
+	 * @param function  the name of the function
+	 * @param result    the sort of the result
+	 * @param arguments the arguments
+	 * @param evaluator the function computing the result from the values of
+	 *                      the arguments
+	 * @param origin    the expression whose value is the application
+	 *
+	 * @return the application
+	 */
+	default Term evaluable(
+			String function,
+			Sort result,
+			List<Term> arguments,
+			Function<List<Number>, Number> evaluator,
+			SymbolicExpression origin) {
+		return unknown(function, result, arguments, origin);
+	}
+
+	/**
+	 * Yields the application of a function of one argument that the encoder
+	 * can compute on concrete values, as
+	 * {@link #evaluable(String, Sort, List, Function, SymbolicExpression)},
+	 * that is known to be monotone: non-decreasing if {@code increasing}
+	 * holds, non-increasing otherwise (e.g., the exponential function).
+	 * Implementations can use the values of the function they know to bound
+	 * its other values. By default, this is the same as
+	 * {@link #evaluable(String, Sort, List, Function, SymbolicExpression)}.
+	 *
+	 * @param function   the name of the function
+	 * @param result     the sort of the result
+	 * @param argument   the argument
+	 * @param evaluator  the function computing the result from the value of
+	 *                       the argument
+	 * @param increasing whether the function is non-decreasing (or
+	 *                       non-increasing)
+	 * @param origin     the expression whose value is the application
+	 *
+	 * @return the application
+	 */
+	default Term monotone(
+			String function,
+			Sort result,
+			Term argument,
+			Function<List<Number>, Number> evaluator,
+			boolean increasing,
+			SymbolicExpression origin) {
+		return evaluable(function, result, List.of(argument), evaluator, origin);
 	}
 }

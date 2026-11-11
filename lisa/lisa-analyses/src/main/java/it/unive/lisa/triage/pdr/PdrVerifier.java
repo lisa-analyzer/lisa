@@ -16,6 +16,7 @@ import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.call.CFGCall;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.triage.TimeLimited;
+import it.unive.lisa.triage.bmc.EvaluatedFunctions;
 import it.unive.lisa.triage.bmc.Unrolling;
 import it.unive.lisa.triage.encoding.ExpressionEncoderFactory;
 import it.unive.lisa.triage.inputs.InputSource;
@@ -135,6 +136,15 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 	 */
 	public static final long MAX_SUMMARIES_MILLIS = 45_000;
 
+	/**
+	 * The maximum number of searches on the same model learning the values of
+	 * the functions computed on concrete values (see
+	 * {@link EvaluatedFunctions}): a search whose counterexample relies on
+	 * applications of such functions whose values are not the ones of the
+	 * functions learns their right values, and is repeated.
+	 */
+	public static final int MAX_EVALUATION_ROUNDS = 10;
+
 	private boolean fixpointCheck = true;
 
 	private ExpressionEncoderFactory encoders = ExpressionEncoderFactory.DEFAULT;
@@ -144,6 +154,12 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 	private Map<String, Integer> statistics = Map.of();
 
 	private boolean inexact;
+
+	/**
+	 * The values of the functions computed on concrete values learned while
+	 * verifying the current violation.
+	 */
+	private EvaluatedFunctions evaluated = new EvaluatedFunctions();
 
 	/**
 	 * Whether the last counterexample found relies on values merged because
@@ -709,6 +725,7 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 			List<Triple<AnalyzedCFG<A>, Statement, CFGCall>> chain)
 			throws SemanticException {
 		Set<Frame> expanded = new LinkedHashSet<>();
+		evaluated = new EvaluatedFunctions();
 		// the transitions of the locations that are not affected by the calls
 		// expanded by each round are extracted once
 		AlarmModelBuilder.Reuse reuse = new AlarmModelBuilder.Reuse();
@@ -845,6 +862,21 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 			AlarmModel model,
 			boolean strict)
 			throws SemanticException {
+		// searches whose counterexamples rely on wrong values of functions
+		// computed on concrete values learn the right ones, and are repeated
+		for (int round = 1;; round++) {
+			int known = evaluated.size();
+			VerificationResult res = searchEngine(model, strict);
+			if (res.getOutcome() != VerificationOutcome.POSSIBLE || evaluated.size() == known
+					|| round >= MAX_EVALUATION_ROUNDS || System.currentTimeMillis() >= deadline)
+				return res;
+		}
+	}
+
+	private VerificationResult searchEngine(
+			AlarmModel model,
+			boolean strict)
+			throws SemanticException {
 		SmtSolver s;
 		try {
 			s = acquire();
@@ -858,6 +890,7 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 			engine.setSeeding(seeding);
 			engine.setCtgs(ctgs);
 			engine.setInvariants(invariants);
+			engine.setEvaluatedFunctions(evaluated);
 			engine.setAbstraction(new DomainAbstraction<>(analysis, cache));
 			PdrEngine.Status status = engine.run(maxLevel, maxQueries,
 					// at least one millisecond, as 0 means no limit
