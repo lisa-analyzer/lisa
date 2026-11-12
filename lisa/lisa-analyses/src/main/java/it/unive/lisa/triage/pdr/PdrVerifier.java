@@ -998,7 +998,10 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 			// inputs are produced in the order of the transitions producing
 			// them, in the context of their frames
 			List<Map.Entry<InputValue, String>> produced = new ArrayList<>(o.getInputs().entrySet());
-			produced.sort(Comparator.comparingInt(input -> edge.positionOf(input.getKey())));
+			// (and, within a transition, in the order of their evaluation)
+			produced.sort(Comparator
+					.comparingInt((Map.Entry<InputValue, String> input) -> edge.positionOf(input.getKey()))
+					.thenComparingLong(input -> input.getKey().getIndex()));
 			for (Map.Entry<InputValue, String> input : produced)
 				inputs.add(input.getKey().getSource(), input.getValue(),
 						edge.componentOf(input.getKey()).getSource().getFrame().getResult().getId());

@@ -15,6 +15,8 @@ public class InputValue
 
 	private final InputSource source;
 
+	private final long index;
+
 	/**
 	 * Builds the value.
 	 *
@@ -27,6 +29,19 @@ public class InputValue
 			long index) {
 		super(source.getType(), "$input#" + index, source.getLocation());
 		this.source = source;
+		this.index = index;
+	}
+
+	/**
+	 * Yields the number identifying this value among the fresh values of a
+	 * model. Values are numbered as they are created, that is, in the order in
+	 * which the replay of the code evaluates their sources (e.g., the arguments
+	 * of a call from left to right).
+	 *
+	 * @return the number
+	 */
+	public long getIndex() {
+		return index;
 	}
 
 	/**

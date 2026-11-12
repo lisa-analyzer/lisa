@@ -475,7 +475,10 @@ public class BoundedModelChecker<A extends AbstractLattice<A>, D extends Abstrac
 		if (values.isEmpty())
 			return;
 		if (edge != null)
-			values.sort(Comparator.comparingInt(edge::positionOf));
+			// in the order of the transitions producing them, and of their
+			// evaluation within a transition
+			values.sort(Comparator.comparingInt((InputValue v) -> edge.positionOf(v))
+					.thenComparingLong(InputValue::getIndex));
 		List<Term> terms = new ArrayList<>();
 		for (InputValue v : values)
 			terms.add(unrolling.freshConstant(v, key));
