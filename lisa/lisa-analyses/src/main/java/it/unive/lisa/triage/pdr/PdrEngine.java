@@ -40,6 +40,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -109,7 +110,10 @@ public class PdrEngine {
 		BLOCKED,
 
 		/**
-		 * The solver could not decide a query.
+		 * The solver could not decide some queries, and the search went on
+		 * without finding a counterexample: an inductive invariant or the
+		 * blocking of every violation found meanwhile might rely on the states
+		 * of the undecided queries being unreachable, that is not proved.
 		 */
 		UNKNOWN,
 
@@ -201,6 +205,24 @@ public class PdrEngine {
 	 * The number of candidate invariants proved inductive.
 	 */
 	private int invariantsFound = 0;
+
+	/**
+	 * The number of queries that the solver could not decide, after which the
+	 * search went on assuming that the states they asked about are not
+	 * reachable (see {@link #assumeUnreachable(Stop)}).
+	 */
+	private int undecided = 0;
+
+	/**
+	 * The bad cases whose violations could not be decided in the frame of
+	 * {@link #undecidedLevel}, that are not checked again in that frame.
+	 */
+	private final Set<BadCase> undecidedBadCases = Collections.newSetFromMap(new IdentityHashMap<>());
+
+	/**
+	 * The level of {@link #undecidedBadCases}.
+	 */
+	private int undecidedLevel = -1;
 
 	/**
 	 * The maximum number of locations with candidate invariants.
@@ -504,26 +526,25 @@ public class PdrEngine {
 	}
 
 	/**
-	 * Why the solver could not decide the query that stopped the search, if
-	 * any.
+	 * Why the solver could not decide the last undecided query, if any.
 	 */
 	private String reasonUnknown;
 
 	/**
-	 * Yields why the solver could not decide the query that stopped the search
-	 * (with {@link Status#UNKNOWN}).
+	 * Yields why the solver could not decide the last query it could not
+	 * decide (see {@link Status#UNKNOWN}).
 	 *
-	 * @return the reason, or {@code null} if the search did not stop because of
-	 *             an undecided query
+	 * @return the reason, or {@code null} if every query has been decided
 	 */
 	public String getReasonUnknown() {
 		return reasonUnknown;
 	}
 
 	/**
-	 * Stops the search after a query the solver could not decide, recording
-	 * why: the reason is asked before the scope of the query is closed, as
-	 * solvers forget it afterwards.
+	 * Signals a query the solver could not decide, recording why: the reason
+	 * is asked before the scope of the query is closed, as solvers forget it
+	 * afterwards. Callers either go on (see {@link #ignoreUndecided(Stop)} and
+	 * {@link #assumeUnreachable(Stop)}) or stop the search.
 	 */
 	private void unknown()
 			throws Stop {
@@ -534,6 +555,46 @@ public class PdrEngine {
 		}
 		solver.pop();
 		throw new Stop(Status.UNKNOWN);
+	}
+
+	/**
+	 * Goes on after a query the solver could not decide, when giving up on
+	 * what the query was for only loses precision (e.g., a generalization or
+	 * the propagation of a lemma). The search is stopped if the budget is
+	 * exhausted instead.
+	 */
+	private static void ignoreUndecided(
+			Stop stop)
+			throws Stop {
+		if (stop.status != Status.UNKNOWN)
+			throw stop;
+	}
+
+	/**
+	 * Goes on after a query the solver could not decide, assuming that the
+	 * states it asked about are not reachable: counterexamples found
+	 * afterwards are still genuine, since each of their steps is a satisfiable
+	 * query, but the search can no longer prove that the violation is
+	 * impossible, and ends with {@link Status#UNKNOWN} if it finds no
+	 * counterexample. The search is stopped if the budget is exhausted
+	 * instead.
+	 */
+	private void assumeUnreachable(
+			Stop stop)
+			throws Stop {
+		ignoreUndecided(stop);
+		undecided++;
+	}
+
+	/**
+	 * Yields the number of queries the solver could not decide, after which the
+	 * search went on assuming that the states they asked about are not
+	 * reachable.
+	 *
+	 * @return the number of queries
+	 */
+	public int getUndecided() {
+		return undecided;
 	}
 
 	/**
@@ -630,10 +691,10 @@ public class PdrEngine {
 				int converged = frames.convergedLevel();
 				if (converged > 0) {
 					invariantLevel = converged;
-					return Status.SAFE;
+					return undecided > 0 ? Status.UNKNOWN : Status.SAFE;
 				}
 			}
-			return Status.BLOCKED;
+			return undecided > 0 ? Status.UNKNOWN : Status.BLOCKED;
 		} catch (Stop s) {
 			queue.clear();
 			return s.status;
@@ -918,7 +979,13 @@ public class PdrEngine {
 			throws SemanticException,
 			Stop {
 		ModelLocation bad = model.getBadLocation();
+		if (level != undecidedLevel) {
+			undecidedBadCases.clear();
+			undecidedLevel = level;
+		}
 		for (BadCase c : badCases()) {
+			if (undecidedBadCases.contains(c))
+				continue;
 			List<SymbolicExpression> lits = new ArrayList<>(c.getPathCondition());
 			if (c.getViolation() != null)
 				lits.add(c.getViolation());
@@ -926,7 +993,17 @@ public class PdrEngine {
 			Cube cube = new Cube(lits);
 			Term query = cube.at(unrolling, 0, CUBE);
 			String key = "cond@0" + CUBE;
-			if (check(frame(bad, level), query) == SmtResult.SAT) {
+			SmtResult res;
+			try {
+				res = check(frame(bad, level), query);
+			} catch (Stop s) {
+				// the violations of the case are assumed impossible in the
+				// frame
+				assumeUnreachable(s);
+				undecidedBadCases.add(c);
+				continue;
+			}
+			if (res == SmtResult.SAT) {
 				Set<String> imprecisions = new LinkedHashSet<>(unrolling.getImprecisions(key, solver));
 				Map<FreshValue, String> values = freshValues(cube.getLiterals(), key);
 				Cube projected = project(cube.getLiterals(), values);
@@ -962,13 +1039,25 @@ public class PdrEngine {
 				return true;
 			}
 			// already blocked by a lemma found meanwhile
-			SmtResult res = check(frame(o.getLocation(), o.getLevel()), o.getCube().at(unrolling, 0, CUBE));
-			solver.pop();
-			if (res == SmtResult.UNSAT)
-				continue;
+			try {
+				SmtResult res = check(frame(o.getLocation(), o.getLevel()), o.getCube().at(unrolling, 0, CUBE));
+				solver.pop();
+				if (res == SmtResult.UNSAT)
+					continue;
+			} catch (Stop s) {
+				ignoreUndecided(s);
+			}
 
 			Set<SymbolicExpression> core = new LinkedHashSet<>();
-			Obligation pred = predecessor(o.getLocation(), o.getCube(), o.getLevel(), o, core);
+			Obligation pred;
+			try {
+				pred = predecessor(o.getLocation(), o.getCube(), o.getLevel(), o, core);
+			} catch (Stop s) {
+				// the cube is assumed to be blocked, as it is
+				assumeUnreachable(s);
+				frames.add(o.getLocation(), o.getCube().negate(), o.getLevel());
+				continue;
+			}
 			if (pred != null) {
 				queue.add(pred);
 				queue.add(o);
@@ -1197,9 +1286,13 @@ public class PdrEngine {
 			Cube proposal = abstraction.abstractCube(location, current);
 			if (proposal != null && !proposal.equals(current)) {
 				proposals++;
-				if (predecessor(location, proposal, level, null, null) == null) {
-					accepted++;
-					current = proposal;
+				try {
+					if (predecessor(location, proposal, level, null, null) == null) {
+						accepted++;
+						current = proposal;
+					}
+				} catch (Stop s) {
+					ignoreUndecided(s);
 				}
 			}
 		}
@@ -1220,9 +1313,25 @@ public class PdrEngine {
 	 * state, it is blocked at the previous level, if possible (generalizing it
 	 * and adding its lemma), and the cube is checked again, up to
 	 * {@link #MAX_CTGS} times. The lemmas added this way are relatively
-	 * inductive, so they hold whatever the outcome.
+	 * inductive, so they hold whatever the outcome. A cube is not blocked if
+	 * the solver cannot decide whether it is.
 	 */
 	private boolean blockedWithCtgs(
+			ModelLocation location,
+			Cube cube,
+			int level,
+			int depth)
+			throws SemanticException,
+			Stop {
+		try {
+			return blockedWithCtgsOrUndecided(location, cube, level, depth);
+		} catch (Stop s) {
+			ignoreUndecided(s);
+			return false;
+		}
+	}
+
+	private boolean blockedWithCtgsOrUndecided(
 			ModelLocation location,
 			Cube cube,
 			int level,
@@ -1283,7 +1392,13 @@ public class PdrEngine {
 		if (steps.isEmpty())
 			return true;
 		Term post = Term.not(define(List.of(lemma, 1), () -> lemma.at(unrolling, 1)));
-		SmtResult res = check(Term.or(steps.toArray(Term[]::new)), post);
+		SmtResult res;
+		try {
+			res = check(Term.or(steps.toArray(Term[]::new)), post);
+		} catch (Stop s) {
+			ignoreUndecided(s);
+			return false;
+		}
 		solver.pop();
 		return res == SmtResult.UNSAT;
 	}

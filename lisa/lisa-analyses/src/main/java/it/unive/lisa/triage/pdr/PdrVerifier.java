@@ -912,7 +912,7 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 					Math.max(1, deadline - System.currentTimeMillis()));
 			int used = engine.getQueries();
 			statistics = Map.of("queries", used, "level", engine.getFrames().depth(), "proposals",
-					engine.getProposals(), "accepted", engine.getAcceptedProposals());
+					engine.getProposals(), "accepted", engine.getAcceptedProposals(), "undecided", engine.getUndecided());
 			return result(model, engine, status, used);
 		} catch (SmtException e) {
 			// the solver might be unusable
@@ -971,7 +971,8 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 		case UNKNOWN:
 		default:
 			return new VerificationResult(VerificationOutcome.POSSIBLE,
-					"the solver could not decide a query: " + engine.getReasonUnknown());
+					"the solver could not decide " + engine.getUndecided() + " queries (" + engine.getReasonUnknown()
+							+ "), assumed to ask about unreachable states, and no counterexample was found");
 		}
 	}
 

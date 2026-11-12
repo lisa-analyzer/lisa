@@ -33,10 +33,16 @@ import it.unive.lisa.triage.model.AlarmModel;
 import it.unive.lisa.triage.model.AlarmModelBuilder;
 import it.unive.lisa.triage.model.ModelLocation;
 import it.unive.lisa.triage.model.SymbolicStore;
+import it.unive.lisa.triage.smt.Datatype;
 import it.unive.lisa.triage.smt.SmtLibProcessSolver;
+import it.unive.lisa.triage.smt.SmtResult;
 import it.unive.lisa.triage.smt.SmtSolver;
+import it.unive.lisa.triage.smt.Sort;
+import it.unive.lisa.triage.smt.Term;
 import java.nio.file.Files;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -262,6 +268,131 @@ public class PdrEngineTest {
 			engine.setGeneralization(PdrEngine.Generalization.NONE);
 			engine.setInvariants(false);
 			assertTrue(engine.run(20, 300, 10_000) != PdrEngine.Status.SAFE);
+		}
+	}
+
+	@Test
+	public void undecidedQueries() throws SemanticException {
+		// a solver that cannot decide any unsatisfiable query: counterexamples
+		// are still found, while violations are never refuted
+		Object[][] cases = {
+				{ "shallow", "y = 1", true },
+				{ "open", "w = 1", true },
+				{ "loop", "w = 1", true },
+				{ "relational", "w = 1", false },
+				{ "widening", "w = 1", false },
+				{ "bounded", "w = 1", false } };
+		for (Object[] c : cases)
+			try (SmtSolver s = new Undeciding(SmtLibProcessSolver.z3())) {
+				PdrEngine engine = engine((String) c[0], (String) c[1], s, PdrEngine.Generalization.BOTH, true);
+				PdrEngine.Status status = engine.run(20, 2000, 10_000);
+				if ((boolean) c[2])
+					assertEquals(PdrEngine.Status.COUNTEREXAMPLE, status, (String) c[0]);
+				else {
+					assertTrue(status == PdrEngine.Status.UNKNOWN || status == PdrEngine.Status.BUDGET_EXHAUSTED,
+							c[0] + ": " + status);
+					assertTrue(engine.getUndecided() > 0, (String) c[0]);
+				}
+			}
+	}
+
+	/**
+	 * A solver answering {@link SmtResult#UNKNOWN} instead of
+	 * {@link SmtResult#UNSAT}.
+	 */
+	private static class Undeciding
+			implements
+			SmtSolver {
+
+		private final SmtSolver inner;
+
+		private Undeciding(
+				SmtSolver inner) {
+			this.inner = inner;
+		}
+
+		@Override
+		public Sort declareSort(
+				String name) {
+			return inner.declareSort(name);
+		}
+
+		@Override
+		public Sort declareDatatype(
+				Datatype datatype) {
+			return inner.declareDatatype(datatype);
+		}
+
+		@Override
+		public Term declare(
+				String name,
+				Sort sort) {
+			return inner.declare(name, sort);
+		}
+
+		@Override
+		public String declareFunction(
+				String name,
+				List<Sort> arguments,
+				Sort result) {
+			return inner.declareFunction(name, arguments, result);
+		}
+
+		@Override
+		public Term define(
+				String name,
+				Term body) {
+			return inner.define(name, body);
+		}
+
+		@Override
+		public void assertTerm(
+				Term term) {
+			inner.assertTerm(term);
+		}
+
+		@Override
+		public void assertNamed(
+				String name,
+				Term term) {
+			inner.assertNamed(name, term);
+		}
+
+		@Override
+		public void push() {
+			inner.push();
+		}
+
+		@Override
+		public void pop() {
+			inner.pop();
+		}
+
+		@Override
+		public SmtResult check() {
+			SmtResult res = inner.check();
+			return res == SmtResult.UNSAT ? SmtResult.UNKNOWN : res;
+		}
+
+		@Override
+		public Map<Term, String> getValues(
+				Collection<Term> terms) {
+			return inner.getValues(terms);
+		}
+
+		@Override
+		public List<String> getUnsatCore() {
+			return inner.getUnsatCore();
+		}
+
+		@Override
+		public String getReasonUnknown() {
+			return "test";
+		}
+
+		@Override
+		public void close() {
+			inner.close();
 		}
 	}
 
