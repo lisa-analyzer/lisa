@@ -26,6 +26,7 @@ import it.unive.lisa.triage.model.AlarmModelBuilder;
 import it.unive.lisa.triage.model.EdgeTransition;
 import it.unive.lisa.triage.model.Frame;
 import it.unive.lisa.triage.model.GlobalWrites;
+import it.unive.lisa.triage.model.HeapWrites;
 import it.unive.lisa.triage.model.InputValue;
 import it.unive.lisa.triage.model.ModelLocation;
 import it.unive.lisa.triage.model.ResultCache;
@@ -150,6 +151,8 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 	private ExpressionEncoderFactory encoders = ExpressionEncoderFactory.DEFAULT;
 
 	private GlobalWrites globalWrites = GlobalWrites.UNKNOWN;
+
+	private HeapWrites heapWrites = HeapWrites.UNKNOWN;
 
 	private Map<String, Integer> statistics = Map.of();
 
@@ -351,6 +354,23 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 	}
 
 	/**
+	 * Sets the contents of the heap written by the code of each member of the
+	 * program, as the frontend knows them (default:
+	 * {@link HeapWrites#UNKNOWN}): the calls that the models summarize then
+	 * leave unchanged the contents of the heap that their callees cannot write,
+	 * instead of making all of them unknown.
+	 *
+	 * @param heapWrites the heap writes
+	 *
+	 * @return this verifier
+	 */
+	public PdrVerifier<A, D> withHeapWrites(
+			HeapWrites heapWrites) {
+		this.heapWrites = heapWrites;
+		return this;
+	}
+
+	/**
 	 * Sets the factory of the encoders of expressions (default:
 	 * {@link ExpressionEncoderFactory#DEFAULT}, knowing only the operators of
 	 * LiSA). Frontends can pass encoders knowing their own operators (see
@@ -528,6 +548,7 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 		this.reachability.init(tool);
 		this.cache = new ResultCache<>();
 		this.cache.setGlobalWrites(globalWrites);
+		this.cache.setHeapWrites(heapWrites);
 		this.analysis = newAnalysis(tool);
 	}
 
