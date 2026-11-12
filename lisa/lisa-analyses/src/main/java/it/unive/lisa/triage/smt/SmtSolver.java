@@ -3,6 +3,7 @@ package it.unive.lisa.triage.smt;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 /**
  * An incremental SMT solver. Implementations might rely on external tools that
@@ -165,6 +166,30 @@ public interface SmtSolver
 	 * @return the reason
 	 */
 	String getReasonUnknown();
+
+	/**
+	 * Signals that the given declared function stands for a function over
+	 * floating point numbers that can be computed on concrete values (e.g.,
+	 * the sine), so that solvers can use it to look for models where the
+	 * function has its actual values (e.g., when they cannot decide a query
+	 * otherwise). The function is still uninterpreted in the queries. By
+	 * default, this does nothing.
+	 *
+	 * @param function  the function, as returned by
+	 *                      {@link #declareFunction(String, List, Sort)}
+	 * @param arguments the sorts of its arguments
+	 * @param result    the sort of its result
+	 * @param evaluator the function computing the result from the values of
+	 *                      the arguments ({@link Double}s for
+	 *                      {@link Sort#FLOAT64}, {@link Float}s for
+	 *                      {@link Sort#FLOAT32})
+	 */
+	default void evaluable(
+			String function,
+			List<Sort> arguments,
+			Sort result,
+			Function<List<Number>, Number> evaluator) {
+	}
 
 	/**
 	 * Yields whether the solver can still be used: a solver that has been

@@ -104,6 +104,29 @@ public class RealRelaxationTest {
 	}
 
 	@Test
+	public void modelsAgreeWithTheFunctionsComputedOnConcreteValues() {
+		assumeTrue(SmtLibProcessSolver.isZ3Available(), "z3 is not available");
+		try (SmtLibProcessSolver s = SmtLibProcessSolver.z3()) {
+			Term x = s.declare("x", Sort.FLOAT64);
+			String sin = s.declareFunction("sin", List.of(Sort.FLOAT64), Sort.FLOAT64);
+			s.evaluable(sin, List.of(Sort.FLOAT64), Sort.FLOAT64, args -> Math.sin(args.get(0).doubleValue()));
+			Term app = Term.app(sin, Sort.FLOAT64, x);
+			s.push();
+			s.assertTerm(Term.app("fp.gt", Sort.BOOL, app, FloatingPoints.literal(0.5)));
+			s.assertTerm(Term.app("fp.gt", Sort.BOOL, x, FloatingPoints.literal(0.0)));
+			s.assertTerm(Term.app("fp.lt", Sort.BOOL, x, FloatingPoints.literal(3.0)));
+			assertEquals(SmtResult.SAT, s.relaxedCheck());
+			Map<Term, String> values = s.getValues(List.of(x, app));
+			double vx = FloatingPoints.parse(values.get(x), Sort.FLOAT64).doubleValue();
+			double vs = FloatingPoints.parse(values.get(app), Sort.FLOAT64).doubleValue();
+			// the model uses the actual sine
+			assertEquals(Math.sin(vx), vs, values.toString());
+			assertTrue(vs > 0.5 && vx > 0 && vx < 3, values.toString());
+			s.pop();
+		}
+	}
+
+	@Test
 	public void relaxedModelsAreCheckedOnTheOriginalQuery() {
 		assumeTrue(SmtLibProcessSolver.isZ3Available(), "z3 is not available");
 		try (SmtLibProcessSolver s = SmtLibProcessSolver.z3()) {

@@ -9,17 +9,22 @@ import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.math.BigDecimal;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Deque;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 
 /**
  * An {@link SmtSolver} that communicates with an external solver process
@@ -479,6 +484,7 @@ public class SmtLibProcessSolver
 		floats = false;
 		unfix();
 		declarations.clear();
+		evaluators.clear();
 		if (relaxation != null)
 			relaxation.reset();
 		asserted.clear();
@@ -668,24 +674,68 @@ public class SmtLibProcessSolver
 		RealRelaxation.Relaxed relaxed = relaxation.relax();
 		if (relaxed == null)
 			return SmtResult.UNKNOWN;
+		List<RealRelaxation.Application> applications = relaxed.getApplications();
 		List<String> fixes = new ArrayList<>();
 		// the helper is killed if it does not answer within the time of the
 		// relaxed check, and the grace period
 		try (SmtLibProcessSolver helper = new SmtLibProcessSolver(command, initialization, relaxedTimeout)) {
 			for (String cmd : relaxed.getCommands())
 				helper.command(cmd);
-			if (helper.check(relaxedCheck) != SmtResult.SAT)
-				return SmtResult.UNKNOWN;
-			StringBuilder cmd = new StringBuilder("(get-value (");
+			// moderate values are preferred, as the cancellations of large
+			// real numbers are usually lost when rounding them
 			for (RealRelaxation.Pin pin : relaxed.getPins())
-				cmd.append(pin.getRelaxed()).append(" ");
-			cmd.setLength(cmd.length() - 1);
-			SExpression response = helper.query(cmd.append("))").toString());
-			List<RealRelaxation.Pin> pins = relaxed.getPins();
-			for (int i = 0; i < pins.size() && i < response.getChildren().size(); i++) {
-				String fix = pins.get(i).fix(response.getChildren().get(i).getChildren().get(1).toString());
-				if (fix != null)
-					fixes.add(fix);
+				helper.command("(assert (and (<= " + RealRelaxation.real(-MAX_RELAXED_MAGNITUDE) + " "
+						+ pin.getRelaxed() + ") (<= " + pin.getRelaxed() + " "
+						+ RealRelaxation.real(MAX_RELAXED_MAGNITUDE) + ")))");
+			// the functions that can be computed on concrete values are
+			// approximated by the linear interpolation of samples (if they
+			// have one argument), refined with their values at the points of
+			// the models, until the models agree with them
+			Map<String, TreeMap<Double, Double>> samples = new HashMap<>();
+			for (RealRelaxation.Application app : applications)
+				if (app.getRelaxedArguments().size() == 1)
+					samples.computeIfAbsent(app.getFunction(), f -> initialSamples(evaluators.get(f)));
+			long deadline = System.currentTimeMillis() + relaxedTimeout;
+			for (int round = 0;; round++) {
+				helper.command("(push 1)");
+				for (RealRelaxation.Application app : applications)
+					if (app.getRelaxedArguments().size() == 1)
+						helper.command("(assert (= " + app.getRelaxed() + " "
+								+ interpolation(samples.get(app.getFunction()), app.getRelaxedArguments().get(0))
+								+ "))");
+				if (helper.check(relaxedCheck) != SmtResult.SAT) {
+					helper.command("(pop 1)");
+					break;
+				}
+				List<RealRelaxation.Pin> pins = relaxed.getPins();
+				List<String> terms = new ArrayList<>();
+				for (RealRelaxation.Pin pin : pins)
+					terms.add(pin.getRelaxed());
+				List<String> values = helper.values(terms);
+				fixes.clear();
+				for (int i = 0; i < pins.size(); i++) {
+					String fix = pins.get(i).fix(values.get(i));
+					if (fix != null)
+						fixes.add(fix);
+				}
+				List<Mismatch> mismatches;
+				try {
+					mismatches = round >= MAX_RELAXED_REFINEMENTS || System.currentTimeMillis() >= deadline
+							? Collections.emptyList()
+							: relaxedMismatches(helper, applications);
+				} catch (SmtException e) {
+					// the values cannot be read: the last model is used
+					mismatches = Collections.emptyList();
+				}
+				helper.command("(pop 1)");
+				if (mismatches.isEmpty())
+					break;
+				for (Mismatch m : mismatches)
+					if (m.points.size() == 1)
+						samples.get(m.application.getFunction()).put(m.arguments.get(0).doubleValue(), m.actual);
+					else
+						helper.command("(assert (= " + m.application.relaxedAt(m.points) + " "
+								+ RealRelaxation.real(m.actual) + "))");
 			}
 		} catch (SmtException e) {
 			// e.g., the relaxation is not understood by the solver
@@ -706,6 +756,29 @@ public class SmtLibProcessSolver
 			for (String fix : fixes)
 				checker.command(fix);
 			if (checker.check(fixedCheck) == SmtResult.SAT) {
+				// any model is a model of the query, where the functions are
+				// uninterpreted, but the ones where they have their actual
+				// values are preferred
+				for (int round = 0; round < MAX_REFINEMENTS; round++) {
+					List<String> facts;
+					try {
+						facts = fixedFacts(checker, applications);
+					} catch (SmtException e) {
+						// the values cannot be read: the model is kept
+						break;
+					}
+					if (facts.isEmpty())
+						break;
+					checker.command("(push 1)");
+					for (String fact : facts)
+						checker.command(fact);
+					if (checker.check(fixedCheck) != SmtResult.SAT) {
+						checker.command("(pop 1)");
+						if (checker.check(fixedCheck) != SmtResult.SAT)
+							throw new SmtException("The model of the query has been lost");
+						break;
+					}
+				}
 				fixed = checker;
 				relaxations++;
 				return SmtResult.SAT;
@@ -716,6 +789,250 @@ public class SmtLibProcessSolver
 		checker.close();
 		return SmtResult.UNKNOWN;
 	}
+
+	/**
+	 * The maximum number of times the values of the functions that can be
+	 * computed on concrete values are learned from the models of a query with
+	 * fixed floating point constants (see {@link #relaxedCheck()}).
+	 */
+	private static final int MAX_REFINEMENTS = 5;
+
+	/**
+	 * The maximum number of times the values of the functions that can be
+	 * computed on concrete values are learned from the models of a relaxed
+	 * query (see {@link #relaxedCheck()}), within the time of the relaxed
+	 * check: each model usually applies the functions to new points.
+	 */
+	private static final int MAX_RELAXED_REFINEMENTS = 50;
+
+	/**
+	 * The maximum magnitude of the values of the floating point constants in
+	 * the models of relaxed queries (see {@link #relaxedCheck()}).
+	 */
+	private static final double MAX_RELAXED_MAGNITUDE = 1e6;
+
+	/**
+	 * Yields the values of the given terms in the current model.
+	 */
+	private List<String> values(
+			List<String> terms) {
+		List<String> values = new ArrayList<>();
+		if (terms.isEmpty())
+			return values;
+		SExpression response = query("(get-value (" + String.join(" ", terms) + "))");
+		if (response.isAtom() || response.getChildren().size() != terms.size())
+			throw new SmtException("Unexpected response to get-value: " + response);
+		for (SExpression pair : response.getChildren())
+			values.add(pair.getChildren().get(1).toString());
+		return values;
+	}
+
+	/**
+	 * An application of a function that can be computed on concrete values,
+	 * whose value in a model of a relaxed problem is not the actual one.
+	 */
+	private static final class Mismatch {
+
+		private final RealRelaxation.Application application;
+
+		private final List<String> points;
+
+		private final List<Number> arguments;
+
+		private final double actual;
+
+		private Mismatch(
+				RealRelaxation.Application application,
+				List<String> points,
+				List<Number> arguments,
+				double actual) {
+			this.application = application;
+			this.points = points;
+			this.arguments = arguments;
+			this.actual = actual;
+		}
+	}
+
+	/**
+	 * Yields the applications of the functions that can be computed on
+	 * concrete values whose values in the current model of the given relaxed
+	 * problem are not the actual ones (only for rational points and finite
+	 * values).
+	 */
+	private List<Mismatch> relaxedMismatches(
+			SmtLibProcessSolver helper,
+			List<RealRelaxation.Application> applications) {
+		List<String> terms = new ArrayList<>();
+		for (RealRelaxation.Application app : applications) {
+			terms.addAll(app.getRelaxedArguments());
+			terms.add(app.getRelaxed());
+		}
+		List<String> values = helper.values(terms);
+		List<Mismatch> mismatches = new ArrayList<>();
+		int next = 0;
+		for (RealRelaxation.Application app : applications) {
+			int arity = app.getRelaxedArguments().size();
+			List<String> points = values.subList(next, next + arity);
+			String current = values.get(next + arity);
+			next += arity + 1;
+			try {
+				Evaluator evaluator = evaluators.get(app.getFunction());
+				List<Number> args = new ArrayList<>();
+				for (int i = 0; i < arity; i++) {
+					BigDecimal arg = RealRelaxation.rational(points.get(i));
+					if (arg == null)
+						break;
+					args.add(evaluator.arguments.get(i).equals(Sort.FLOAT32) ? (Number) arg.floatValue()
+							: (Number) arg.doubleValue());
+				}
+				if (args.size() != arity)
+					continue;
+				double actual = evaluator.function.apply(args).doubleValue();
+				if (Double.isNaN(actual) || Double.isInfinite(actual))
+					continue;
+				BigDecimal model = RealRelaxation.rational(current);
+				if (model != null
+						&& Math.abs(model.doubleValue() - actual) <= 1e-9 * Math.max(1, Math.abs(actual)))
+					continue;
+				mismatches.add(new Mismatch(app, new ArrayList<>(points), args, actual));
+			} catch (RuntimeException e) {
+				// e.g., values that are not numbers: the application is
+				// ignored
+			}
+		}
+		return mismatches;
+	}
+
+	/**
+	 * Yields the initial samples of the given function of one argument: its
+	 * finite values on a grid of points, dense around zero.
+	 */
+	private static TreeMap<Double, Double> initialSamples(
+			Evaluator evaluator) {
+		List<Double> points = new ArrayList<>();
+		for (int i = -20; i <= 20; i++)
+			points.add(i / 2.0);
+		for (int k = 4; k <= 10; k++) {
+			points.add(Math.pow(2, k));
+			points.add(-Math.pow(2, k));
+		}
+		TreeMap<Double, Double> samples = new TreeMap<>();
+		for (double p : points)
+			try {
+				Number arg = evaluator.arguments.get(0).equals(Sort.FLOAT32) ? (Number) (float) p : (Number) p;
+				double v = evaluator.function.apply(List.of(arg)).doubleValue();
+				if (!Double.isNaN(v) && !Double.isInfinite(v))
+					samples.put(p, v);
+			} catch (RuntimeException e) {
+				// the point is not sampled
+			}
+		return samples;
+	}
+
+	/**
+	 * Yields the linear interpolation of the given samples at the given real
+	 * term (constant out of the sampled range), or the term itself if there
+	 * are no samples.
+	 */
+	private static String interpolation(
+			TreeMap<Double, Double> samples,
+			String x) {
+		if (samples.isEmpty())
+			return x;
+		List<Map.Entry<Double, Double>> points = new ArrayList<>(samples.entrySet());
+		String result = RealRelaxation.real(points.get(points.size() - 1).getValue());
+		for (int i = points.size() - 2; i >= 0; i--) {
+			double x0 = points.get(i).getKey(), y0 = points.get(i).getValue();
+			double x1 = points.get(i + 1).getKey(), y1 = points.get(i + 1).getValue();
+			String segment = "(+ " + RealRelaxation.real(y0) + " (* " + RealRelaxation.real((y1 - y0) / (x1 - x0))
+					+ " (- " + x + " " + RealRelaxation.real(x0) + ")))";
+			result = "(ite (<= " + x + " " + RealRelaxation.real(x1) + ") " + segment + " " + result + ")";
+		}
+		return "(ite (<= " + x + " " + RealRelaxation.real(points.get(0).getKey()) + ") "
+				+ RealRelaxation.real(points.get(0).getValue()) + " " + result + ")";
+	}
+
+	/**
+	 * Yields the assertions stating the actual values of the functions that
+	 * can be computed on concrete values at the points where the current model
+	 * of the original problem applies them with different values.
+	 */
+	private List<String> fixedFacts(
+			SmtLibProcessSolver checker,
+			List<RealRelaxation.Application> applications) {
+		List<String> terms = new ArrayList<>();
+		for (RealRelaxation.Application app : applications) {
+			terms.addAll(app.getOriginalArguments());
+			terms.add(app.getOriginal());
+		}
+		List<String> values = checker.values(terms);
+		List<String> facts = new ArrayList<>();
+		int next = 0;
+		for (RealRelaxation.Application app : applications) {
+			int arity = app.getOriginalArguments().size();
+			List<String> points = values.subList(next, next + arity);
+			String current = values.get(next + arity);
+			next += arity + 1;
+			try {
+				Evaluator evaluator = evaluators.get(app.getFunction());
+				List<Number> args = new ArrayList<>();
+				for (int i = 0; i < arity; i++)
+					args.add(FloatingPoints.parse(points.get(i), evaluator.arguments.get(i)));
+				Number actual = evaluator.function.apply(args);
+				Number model = FloatingPoints.parse(current, evaluator.result);
+				if (Double.compare(model.doubleValue(), actual.doubleValue()) == 0)
+					continue;
+				Term literal = evaluator.result.equals(Sort.FLOAT32) ? FloatingPoints.literal(actual.floatValue())
+						: FloatingPoints.literal(actual.doubleValue());
+				facts.add("(assert (= (" + app.getFunction() + " " + String.join(" ", points) + ") "
+						+ literal.toSmtLib() + "))");
+			} catch (RuntimeException e) {
+				// e.g., values that are not numbers: the application is
+				// ignored
+			}
+		}
+		return facts;
+	}
+
+	/**
+	 * A function that can be computed on concrete values (see
+	 * {@link #evaluable(String, List, Sort, Function)}).
+	 */
+	private static final class Evaluator {
+
+		private final List<Sort> arguments;
+
+		private final Sort result;
+
+		private final Function<List<Number>, Number> function;
+
+		private Evaluator(
+				List<Sort> arguments,
+				Sort result,
+				Function<List<Number>, Number> function) {
+			this.arguments = arguments;
+			this.result = result;
+			this.function = function;
+		}
+	}
+
+	/**
+	 * The functions that can be computed on concrete values, recorded if
+	 * queries are relaxed.
+	 */
+	private final Map<String, Evaluator> evaluators = new HashMap<>();
+
+	@Override
+	public void evaluable(
+			String function,
+			List<Sort> arguments,
+			Sort result,
+			Function<List<Number>, Number> evaluator) {
+		if (relaxation != null
+				&& evaluators.putIfAbsent(function, new Evaluator(List.copyOf(arguments), result, evaluator)) == null)
+			relaxation.markEvaluable(function);
+	}
+
 
 	/**
 	 * Forgets the solver that decided the last check through the relaxation

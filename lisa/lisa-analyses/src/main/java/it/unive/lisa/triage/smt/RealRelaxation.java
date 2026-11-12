@@ -136,6 +136,95 @@ final class RealRelaxation {
 	}
 
 	/**
+	 * An application of a function that can be computed on concrete values
+	 * (see {@link #markEvaluable(String)}), in the original assertions and in
+	 * the relaxed ones.
+	 */
+	static final class Application {
+
+		private final String function;
+
+		private final String original;
+
+		private final List<String> originalArguments;
+
+		private final String relaxedFunction;
+
+		private final List<String> relaxedArguments;
+
+		private Application(
+				String function,
+				String original,
+				List<String> originalArguments,
+				String relaxedFunction,
+				List<String> relaxedArguments) {
+			this.function = function;
+			this.original = original;
+			this.originalArguments = originalArguments;
+			this.relaxedFunction = relaxedFunction;
+			this.relaxedArguments = relaxedArguments;
+		}
+
+		/**
+		 * Yields the function, as declared in the original assertions.
+		 *
+		 * @return the function
+		 */
+		String getFunction() {
+			return function;
+		}
+
+		/**
+		 * Yields the application in the original assertions.
+		 *
+		 * @return the application, in SMT-LIB syntax
+		 */
+		String getOriginal() {
+			return original;
+		}
+
+		/**
+		 * Yields the arguments of the application in the original assertions.
+		 *
+		 * @return the arguments, in SMT-LIB syntax
+		 */
+		List<String> getOriginalArguments() {
+			return originalArguments;
+		}
+
+		/**
+		 * Yields the application in the relaxed assertions.
+		 *
+		 * @return the application, in SMT-LIB syntax
+		 */
+		String getRelaxed() {
+			return relaxedAt(relaxedArguments);
+		}
+
+		/**
+		 * Yields the arguments of the application in the relaxed assertions.
+		 *
+		 * @return the arguments, in SMT-LIB syntax
+		 */
+		List<String> getRelaxedArguments() {
+			return relaxedArguments;
+		}
+
+		/**
+		 * Yields the function of the relaxed assertions applied to the given
+		 * values.
+		 *
+		 * @param values the values, in SMT-LIB syntax
+		 *
+		 * @return the application, in SMT-LIB syntax
+		 */
+		String relaxedAt(
+				List<String> values) {
+			return "(" + relaxedFunction + " " + String.join(" ", values) + ")";
+		}
+	}
+
+	/**
 	 * The relaxation of the current assertions.
 	 */
 	static final class Relaxed {
@@ -144,11 +233,25 @@ final class RealRelaxation {
 
 		private final List<Pin> pins;
 
+		private final List<Application> applications;
+
 		private Relaxed(
 				List<String> commands,
-				List<Pin> pins) {
+				List<Pin> pins,
+				List<Application> applications) {
 			this.commands = commands;
 			this.pins = pins;
+			this.applications = applications;
+		}
+
+		/**
+		 * Yields the applications of the functions that can be computed on
+		 * concrete values occurring in the assertions, outside of quantifiers.
+		 *
+		 * @return the applications
+		 */
+		List<Application> getApplications() {
+			return applications;
 		}
 
 		/**
@@ -211,6 +314,8 @@ final class RealRelaxation {
 
 	private final Set<String> uninterpretedSorts = new HashSet<>();
 
+	private final Set<String> evaluable = new HashSet<>();
+
 	private final List<List<String>> scopes = new ArrayList<>();
 
 	// the state of the current relaxation
@@ -236,6 +341,12 @@ final class RealRelaxation {
 	private Map<String, Map<String, Pin>> definitionPins;
 
 	private Map<SExpression, SExpression> sorts;
+
+	/**
+	 * The applications of the functions that can be computed on concrete
+	 * values, by their text in the original assertions.
+	 */
+	private Map<String, Application> applications;
 
 	/**
 	 * Builds an empty relaxation.
@@ -264,6 +375,17 @@ final class RealRelaxation {
 	void declareSort(
 			String symbol) {
 		uninterpretedSorts.add(symbol);
+	}
+
+	/**
+	 * Records that a declared function can be computed on concrete values, so
+	 * that its applications are collected by {@link #relax()}.
+	 *
+	 * @param symbol the function, as an SMT-LIB symbol
+	 */
+	void markEvaluable(
+			String symbol) {
+		evaluable.add(symbol);
 	}
 
 	/**
@@ -362,6 +484,7 @@ final class RealRelaxation {
 		selectorDatatypes.clear();
 		relaxableDatatypes.clear();
 		uninterpretedSorts.clear();
+		evaluable.clear();
 		scopes.clear();
 		scopes.add(new ArrayList<>());
 	}
@@ -380,6 +503,7 @@ final class RealRelaxation {
 		definitionNames = new HashMap<>();
 		definitionPins = new HashMap<>();
 		sorts = new IdentityHashMap<>();
+		applications = new LinkedHashMap<>();
 		try {
 			List<String> asserted = new ArrayList<>();
 			for (List<String> scope : scopes)
@@ -396,7 +520,7 @@ final class RealRelaxation {
 			definitionNames = null;
 			definitionPins = null;
 		}
-		return new Relaxed(commands, new ArrayList<>(pins.values()));
+		return new Relaxed(commands, new ArrayList<>(pins.values()), new ArrayList<>(applications.values()));
 	}
 
 	// sorts
@@ -862,8 +986,20 @@ final class RealRelaxation {
 		if (d != null) {
 			if (relaxed(d))
 				symbol = rename(h);
-		} else if (functionResults.containsKey(h))
+		} else if (functionResults.containsKey(h)) {
 			symbol = relaxedFunction(h);
+			if (evaluable.contains(h) && bound.isEmpty()) {
+				List<String> original = new ArrayList<>();
+				List<String> relaxed = new ArrayList<>();
+				for (int i = 1; i < ch.size(); i++) {
+					original.add(ch.get(i).toString());
+					relaxed.add(relax(ch.get(i), bound));
+				}
+				Application app = new Application(h, e.toString(), original, symbol, relaxed);
+				applications.putIfAbsent(e.toString(), app);
+				return app.getRelaxed();
+			}
+		}
 		return apply(symbol, ch, 1, bound);
 	}
 
@@ -1002,6 +1138,18 @@ final class RealRelaxation {
 		return symbol;
 	}
 
+	/**
+	 * Yields the given finite number as a real number in SMT-LIB syntax.
+	 *
+	 * @param value the number
+	 *
+	 * @return the real number
+	 */
+	static String real(
+			double value) {
+		return real(new BigDecimal(Double.toString(value)));
+	}
+
 	private static String real(
 			BigDecimal value) {
 		String digits = value.abs().toPlainString();
@@ -1035,6 +1183,23 @@ final class RealRelaxation {
 	 * {@code (- (/ 1.0 3.0))}), approximated to 34 digits, or {@code null} if
 	 * it is not a rational number.
 	 */
+	/**
+	 * Yields the rational number printed by a solver as the given value, as
+	 * {@link #rational(SExpression)}.
+	 *
+	 * @param value the value, as printed by the solver
+	 *
+	 * @return the number, or {@code null} if it is not a rational number
+	 */
+	static BigDecimal rational(
+			String value) {
+		try {
+			return rational(SExpression.parse(value));
+		} catch (SmtException | ArithmeticException | NumberFormatException e) {
+			return null;
+		}
+	}
+
 	private static BigDecimal rational(
 			SExpression value) {
 		if (value.isAtom()) {

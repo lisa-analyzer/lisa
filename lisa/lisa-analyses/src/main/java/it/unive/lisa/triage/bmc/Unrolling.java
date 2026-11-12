@@ -614,8 +614,9 @@ public class Unrolling {
 			for (Term arg : arguments)
 				sorts.add(arg.getSort());
 			String name = function + sorts + result;
-			Term term = Term.app(Unrolling.this.function(function, sorts, result), result,
-					arguments.toArray(Term[]::new));
+			String symbol = Unrolling.this.function(function, sorts, result);
+			solver.evaluable(symbol, sorts, result, evaluator);
+			Term term = Term.app(symbol, result, arguments.toArray(Term[]::new));
 			// the values learned from previous models
 			if (evaluated != null)
 				for (Map.Entry<List<String>, String> known : evaluated.valuesOf(name).entrySet()) {
