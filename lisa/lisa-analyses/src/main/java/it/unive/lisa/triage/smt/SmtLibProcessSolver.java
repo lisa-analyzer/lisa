@@ -113,6 +113,43 @@ public class SmtLibProcessSolver
 	private final List<String> initialization;
 
 	/**
+	 * The relaxation of the queries over floating point numbers to real
+	 * numbers, used to look for models of the queries that cannot be decided
+	 * (see {@link #relaxedCheck()}), or {@code null} if queries are not
+	 * relaxed.
+	 */
+	private RealRelaxation relaxation;
+
+	/**
+	 * The command checking the satisfiability of relaxed queries.
+	 */
+	private String relaxedCheck;
+
+	/**
+	 * The command checking the satisfiability of queries whose floating point
+	 * constants have been fixed to the values of a model of their relaxation.
+	 */
+	private String fixedCheck;
+
+	/**
+	 * Whether the last satisfiability check has been decided through the
+	 * relaxation, in a scope opened by {@link #relaxedCheck()} that is closed
+	 * together with the one of the query.
+	 */
+	private boolean fixed;
+
+	/**
+	 * Why the last satisfiability check is unknown, asked before trying the
+	 * relaxation (whose checks replace it in the solver), or {@code null}.
+	 */
+	private String reasonBeforeRelaxation;
+
+	/**
+	 * The number of queries decided through the relaxation.
+	 */
+	private int relaxations;
+
+	/**
 	 * Sets the path to the z3 executable used by {@link #z3()},
 	 * {@link #z3(long)}, and {@link #isZ3Available()}. If no path is set (or if
 	 * it is set to {@code null}), z3 is expected to be available as {@code z3}
@@ -174,13 +211,20 @@ public class SmtLibProcessSolver
 	 */
 	public static SmtLibProcessSolver z3(
 			long timeoutMillis) {
-		return new SmtLibProcessSolver(
+		SmtLibProcessSolver solver = new SmtLibProcessSolver(
 				List.of(z3Executable(), "-in", "-smt2"),
 				// each check might try two strategies (see check())
 				List.of("(set-option :timeout " + timeoutMillis / 2 + ")"),
 				timeoutMillis,
 				z3FloatCheck(timeoutMillis / 2),
 				z3SimplifyingCheck(timeoutMillis / 2));
+		// undecided queries over floating point numbers are relaxed (see
+		// relaxedCheck()), with a quarter of the timeout for each of the two
+		// further checks
+		solver.relaxation = new RealRelaxation();
+		solver.relaxedCheck = z3SimplifyingCheck(timeoutMillis / 4);
+		solver.fixedCheck = z3FloatCheck(timeoutMillis / 4);
+		return solver;
 	}
 
 	/**
@@ -412,6 +456,9 @@ public class SmtLibProcessSolver
 	public boolean reset() {
 		command("(reset)");
 		floats = false;
+		fixed = false;
+		if (relaxation != null)
+			relaxation.reset();
 		// options are reset as well
 		command("(set-option :print-success true)");
 		initialize();
@@ -426,6 +473,8 @@ public class SmtLibProcessSolver
 		Term constant = Term.constant(name, body.getSort());
 		command("(define-fun " + constant.toSmtLib() + " () " + body.getSort().toSmtLib() + " " + body.toSmtLib()
 				+ ")");
+		if (relaxation != null)
+			relaxation.define(constant.toSmtLib(), body.getSort(), body.toSmtLib());
 		return constant;
 	}
 
@@ -453,6 +502,8 @@ public class SmtLibProcessSolver
 	public Sort declareDatatype(
 			Datatype datatype) {
 		command(datatype.toSmtLibDeclaration());
+		if (relaxation != null)
+			relaxation.declareDatatype(datatype);
 		return datatype.getSort();
 	}
 
@@ -462,6 +513,8 @@ public class SmtLibProcessSolver
 			Sort sort) {
 		Term constant = Term.constant(name, sort);
 		command("(declare-const " + constant.toSmtLib() + " " + sort.toSmtLib() + ")");
+		if (relaxation != null)
+			relaxation.declareConstant(constant.toSmtLib(), sort);
 		return constant;
 	}
 
@@ -476,6 +529,8 @@ public class SmtLibProcessSolver
 			sb.append(k == 0 ? "" : " ").append(arguments.get(k).toSmtLib());
 		sb.append(") ").append(result.toSmtLib()).append(")");
 		command(sb.toString());
+		if (relaxation != null)
+			relaxation.declareFunction(symbol, arguments, result);
 		return symbol;
 	}
 
@@ -483,7 +538,10 @@ public class SmtLibProcessSolver
 	public void assertTerm(
 			Term term) {
 		checkBoolean(term);
+		unfix();
 		command("(assert " + term.toSmtLib() + ")");
+		if (relaxation != null)
+			relaxation.assertion(term.toSmtLib());
 	}
 
 	@Override
@@ -491,7 +549,10 @@ public class SmtLibProcessSolver
 			String name,
 			Term term) {
 		checkBoolean(term);
+		unfix();
 		command("(assert (! " + term.toSmtLib() + " :named " + Term.symbol(name) + "))");
+		if (relaxation != null)
+			relaxation.assertion(term.toSmtLib());
 	}
 
 	private static void checkBoolean(
@@ -502,7 +563,10 @@ public class SmtLibProcessSolver
 
 	@Override
 	public void push() {
+		unfix();
 		command("(push 1)");
+		if (relaxation != null)
+			relaxation.push();
 	}
 
 	@Override
@@ -511,7 +575,10 @@ public class SmtLibProcessSolver
 			// the solver has been killed while checking: its scopes are gone
 			// with it
 			return;
+		unfix();
 		command("(pop 1)");
+		if (relaxation != null)
+			relaxation.pop();
 	}
 
 	/**
@@ -524,6 +591,8 @@ public class SmtLibProcessSolver
 	 */
 	@Override
 	public SmtResult check() {
+		reasonBeforeRelaxation = null;
+		unfix();
 		if (floatCheck == null)
 			return check(CHECK_SAT);
 		String first = floats ? floatCheck : CHECK_SAT;
@@ -531,7 +600,99 @@ public class SmtLibProcessSolver
 		SmtResult result = check(first);
 		if (result != SmtResult.UNKNOWN || killed != null)
 			return result;
-		return check(second);
+		result = check(second);
+		if (result != SmtResult.UNKNOWN || killed != null || relaxation == null)
+			return result;
+		// queries without floating point constants are not relaxed
+		return relaxedCheck();
+	}
+
+	/**
+	 * Looks for a model of the current assertions, that the solver could not
+	 * decide, through their relaxation over real numbers (see
+	 * {@link RealRelaxation}): the relaxed assertions are checked in a new
+	 * scope, and if they are satisfiable the floating point constants of the
+	 * original assertions are fixed to the values of their copies in the model,
+	 * in another scope where the original assertions are checked again. If
+	 * they are satisfiable, the scope is left open until the one of the query
+	 * is closed, so that the model can be read, and the query is decided as
+	 * satisfiable. Otherwise, the query stays undecided, and the solver is left
+	 * as it was. Relaxed queries are never unsatisfiable, as the relaxation is
+	 * not an over-approximation.
+	 *
+	 * @return {@link SmtResult#SAT} if a model has been found,
+	 *             {@link SmtResult#UNKNOWN} otherwise
+	 */
+	SmtResult relaxedCheck() {
+		reasonBeforeRelaxation = getReasonUnknown();
+		RealRelaxation.Relaxed relaxed = relaxation.relax();
+		if (relaxed == null)
+			return SmtResult.UNKNOWN;
+		List<String> fixes = new ArrayList<>();
+		command("(push 1)");
+		try {
+			for (String cmd : relaxed.getCommands())
+				command(cmd);
+			if (check(relaxedCheck) == SmtResult.SAT) {
+				StringBuilder cmd = new StringBuilder("(get-value (");
+				for (RealRelaxation.Pin pin : relaxed.getPins())
+					cmd.append(pin.getRelaxed()).append(" ");
+				cmd.setLength(cmd.length() - 1);
+				SExpression response = query(cmd.append("))").toString());
+				List<RealRelaxation.Pin> pins = relaxed.getPins();
+				for (int i = 0; i < pins.size() && i < response.getChildren().size(); i++) {
+					String fix = pins.get(i).fix(response.getChildren().get(i).getChildren().get(1).toString());
+					if (fix != null)
+						fixes.add(fix);
+				}
+			}
+		} catch (SmtException e) {
+			if (killed != null)
+				return SmtResult.UNKNOWN;
+			// the relaxation is not understood by the solver: it is not tried
+			// again
+			relaxation = null;
+		} finally {
+			if (killed == null)
+				command("(pop 1)");
+		}
+		if (fixes.isEmpty() || killed != null)
+			return SmtResult.UNKNOWN;
+		command("(push 1)");
+		for (String fix : fixes)
+			command(fix);
+		if (check(fixedCheck) == SmtResult.SAT) {
+			fixed = true;
+			relaxations++;
+			return SmtResult.SAT;
+		}
+		if (killed == null)
+			command("(pop 1)");
+		return SmtResult.UNKNOWN;
+	}
+
+	/**
+	 * Closes the scope where the floating point constants have been fixed by
+	 * {@link #relaxedCheck()}, if it is open: it must be closed before the
+	 * scope of the query is changed (or checked again), as its assertions only
+	 * hold for the model found through the relaxation.
+	 */
+	private void unfix() {
+		if (fixed) {
+			fixed = false;
+			command("(pop 1)");
+		}
+	}
+
+	/**
+	 * Yields the number of queries that the solver could not decide, but whose
+	 * models have been found through their relaxation over real numbers (see
+	 * {@link #relaxedCheck()}).
+	 *
+	 * @return the number of queries
+	 */
+	public int getRelaxations() {
+		return relaxations;
 	}
 
 	private SmtResult check(
@@ -606,6 +767,8 @@ public class SmtLibProcessSolver
 	public String getReasonUnknown() {
 		if (closed && killed != null)
 			return killed;
+		if (reasonBeforeRelaxation != null)
+			return reasonBeforeRelaxation;
 		SExpression response = query("(get-info :reason-unknown)");
 		if (response.isAtom() || response.getChildren().size() != 2)
 			throw new SmtException("Unexpected response to get-info: " + response);
