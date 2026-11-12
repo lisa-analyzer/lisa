@@ -38,7 +38,15 @@ import org.apache.commons.lang3.tuple.Pair;
  * cheap verifier is not verified again by the expensive one. Warnings that are
  * not verified because the verification stopped stay possible, and their result
  * explains it ({@link #NOT_VERIFIED}). Warnings that stay possible after being
- * verified keep the explanation of the last verifier that verified them.
+ * verified keep the explanation of the last verifier that verified them.<br>
+ * <br>
+ * If a deadline is set and time is left after the two phases, without a
+ * confirmed warning, the warnings whose verification exhausted the own time
+ * budget of the expensive verifier (see {@link #EXHAUSTED}) are verified again
+ * by it, sharing the time left (see
+ * {@link TimeLimited#setExtendedTimeLimit(long)}): the budget of the verifier
+ * keeps a hard warning from taking the time of the other ones, but the time
+ * that the other ones did not use goes to it.
  *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  *
@@ -69,6 +77,13 @@ public class FirstViolationVerifier<A extends AbstractLattice<A>, D extends Abst
 	 * milliseconds (unless less time is left).
 	 */
 	public static final long MIN_SHARE_MILLIS = 10_000;
+
+	/**
+	 * The text in the explanation of a possible result telling that the
+	 * verification exhausted its time budget, so that verifying the warning
+	 * again with more time might decide it.
+	 */
+	public static final String EXHAUSTED = "time budget exhausted";
 
 	private final IndividualWarningVerifier<A, D> cheap;
 
@@ -180,7 +195,10 @@ public class FirstViolationVerifier<A extends AbstractLattice<A>, D extends Abst
 		try {
 			if (phase(cheap, tool, ordered, results, deadline))
 				return results;
-			phase(expensive, tool, ordered, results, deadline);
+			if (phase(expensive, tool, ordered, results, deadline))
+				return results;
+			if (deadline != Long.MAX_VALUE && expensive instanceof TimeLimited)
+				again(expensive, tool, ordered, results, deadline);
 			return results;
 		} finally {
 			for (IndividualWarningVerifier<A, D> verifier : List.of(cheap, expensive))
@@ -262,5 +280,43 @@ public class FirstViolationVerifier<A extends AbstractLattice<A>, D extends Abst
 				confirmed = true;
 		}
 		return confirmed;
+	}
+
+	/**
+	 * Verifies again, sharing the time left until the deadline, the warnings
+	 * whose verification exhausted the own time budget of the given verifier,
+	 * stopping at the first warning that is confirmed. The time of each warning
+	 * is the time left divided by the number of warnings still to verify, so
+	 * that the time a warning does not use goes to the next ones. The warnings
+	 * that are not verified again keep their result.
+	 */
+	private static <A extends AbstractLattice<A>,
+			D extends AbstractDomain<A>> void again(
+					IndividualWarningVerifier<A, D> verifier,
+					SemanticTool<A, D> tool,
+					List<StatementMessage> warnings,
+					Map<StatementMessage, VerificationResult> results,
+					long deadline)
+					throws SemanticException {
+		List<StatementMessage> exhausted = new ArrayList<>();
+		for (StatementMessage warning : warnings) {
+			VerificationResult previous = results.get(warning);
+			if (previous != null && previous.getOutcome() == VerificationOutcome.POSSIBLE
+					&& previous.getExplanation() != null && previous.getExplanation().contains(EXHAUSTED))
+				exhausted.add(warning);
+		}
+		int left = exhausted.size();
+		for (StatementMessage warning : exhausted) {
+			long now = System.currentTimeMillis();
+			if (deadline - now < MIN_SHARE_MILLIS)
+				// not enough time for a further attempt
+				return;
+			((TimeLimited) verifier).setExtendedTimeLimit((deadline - now) / left--);
+			VerificationResult result = verifier.verify(tool, warning);
+			if (result.getOutcome() != VerificationOutcome.POSSIBLE)
+				results.put(warning, result);
+			if (result.getOutcome() == VerificationOutcome.CONFIRMED)
+				return;
+		}
 	}
 }
