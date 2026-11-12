@@ -703,6 +703,12 @@ public class SmtLibProcessSolver
 		} catch (SolverTimeoutException e) {
 			killed = "timeout: " + e.getMessage();
 			return SmtResult.UNKNOWN;
+		} catch (SmtException e) {
+			// z3 sometimes reports the cancellation of a check whose time is
+			// over as an error
+			if (!closed && e.getMessage() != null && e.getMessage().endsWith("canceled"))
+				return SmtResult.UNKNOWN;
+			throw e;
 		}
 		if (response.isAtom())
 			switch (response.getAtom()) {
