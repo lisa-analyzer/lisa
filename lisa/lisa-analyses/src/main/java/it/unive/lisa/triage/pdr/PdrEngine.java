@@ -261,10 +261,16 @@ public class PdrEngine {
 	private long created = 0;
 
 	/**
-	 * The bad cases of the model, in the order they are checked (computed
-	 * lazily by {@link #badCases()}).
+	 * The bad cases of the model, in the order they are checked (see
+	 * {@link #badCases()}).
 	 */
 	private List<BadCase> sortedBadCases;
+
+	/**
+	 * Whether the bad cases are checked from the one with the fewest literals
+	 * (see {@link #badCases()}).
+	 */
+	private boolean fewestLiteralsFirst = false;
 
 	private int queries = 0;
 
@@ -866,18 +872,38 @@ public class PdrEngine {
 	}
 
 	/**
-	 * Returns the bad cases of the model, from the one with the fewest
-	 * literals. The order is fixed (ties are broken by the textual form of the
-	 * cases), since it decides which obligation is blocked first and an order
-	 * depending on hashes makes the runs not reproducible.
+	 * Sets whether the bad cases are checked from the one with the fewest
+	 * literals (default: {@code false}, that is, in the order in which the
+	 * model yields them, see {@link #badCases()}).
+	 *
+	 * @param fewestLiteralsFirst whether the bad cases are checked from the one
+	 *                                with the fewest literals
+	 */
+	public void setFewestLiteralsFirst(
+			boolean fewestLiteralsFirst) {
+		this.fewestLiteralsFirst = fewestLiteralsFirst;
+		this.sortedBadCases = null;
+	}
+
+	/**
+	 * Returns the bad cases of the model, in the order in which the model
+	 * yields them, that is, the order in which the replay of the bad location
+	 * produces them (e.g., the cases of a short-circuiting condition, in the
+	 * order of its operands), or from the one with the fewest literals (ties
+	 * broken by their textual form), if {@link #setFewestLiteralsFirst(boolean)}
+	 * says so. The order decides which obligation is blocked first, and both
+	 * are reproducible: depending on the model, either can make the search much
+	 * slower, by blocking first the cases that the invariant covering the
+	 * others is not found from.
 	 */
 	private List<BadCase> badCases() {
 		if (sortedBadCases == null) {
 			sortedBadCases = new ArrayList<>(model.getBadCases());
-			sortedBadCases.sort(Comparator
-					.comparingInt((
-							BadCase c) -> c.getPathCondition().size() + (c.getViolation() == null ? 0 : 1))
-					.thenComparing(BadCase::toString));
+			if (fewestLiteralsFirst)
+				sortedBadCases.sort(Comparator
+						.comparingInt((
+								BadCase c) -> c.getPathCondition().size() + (c.getViolation() == null ? 0 : 1))
+						.thenComparing(BadCase::toString));
 		}
 		return sortedBadCases;
 	}

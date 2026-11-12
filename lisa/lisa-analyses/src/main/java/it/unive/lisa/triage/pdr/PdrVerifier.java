@@ -899,42 +899,79 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 		}
 
 		try {
-			PdrEngine engine = new PdrEngine(model, s, strict, encoders);
-			engine.setGeneralization(generalization);
-			engine.setSeeding(seeding);
-			engine.setCtgs(ctgs);
-			engine.setInvariants(invariants);
-			engine.setEvaluatedFunctions(evaluated);
-			engine.setAbstraction(new DomainAbstraction<>(analysis, cache));
+			// the order in which the bad cases are checked decides which
+			// obligation is blocked first, and the search might find the
+			// invariant from some of them only: warnings verified again with
+			// the time left by the other ones (see
+			// setExtendedTimeLimit(long)), after exhausting their own budget
+			// in the order of the model, are verified from the case with the
+			// fewest literals
+			PdrEngine engine = engine(model, s, strict, extended && timeLimit > 0);
+			// at least one millisecond, as 0 means no limit
 			PdrEngine.Status status = engine.run(maxLevel, maxQueries,
-					// at least one millisecond, as 0 means no limit
 					Math.max(1, deadline - System.currentTimeMillis()));
-			statistics = Map.of("queries", engine.getQueries(), "level", engine.getFrames().depth(), "proposals",
+			int used = engine.getQueries();
+			statistics = Map.of("queries", used, "level", engine.getFrames().depth(), "proposals",
 					engine.getProposals(), "accepted", engine.getAcceptedProposals());
-			switch (status) {
-			case SAFE:
-				return new VerificationResult(VerificationOutcome.REFUTED,
-						"inductive invariant found: " + engine.getInvariant());
-			case COUNTEREXAMPLE:
-				return counterexample(model, engine.getCounterexample());
-			case BLOCKED:
-				return new VerificationResult(VerificationOutcome.POSSIBLE, "no violation within " + maxLevel
-						+ " steps, but no inductive invariant found");
-			case BUDGET_EXHAUSTED:
-				// the time and the queries are told apart, since only more
-				// time can change the result of the same search
-				return new VerificationResult(VerificationOutcome.POSSIBLE,
-						(engine.getQueries() >= maxQueries ? "query" : "time") + " budget exhausted after "
-								+ engine.getQueries() + " queries, at level " + engine.getFrames().depth());
-			case UNKNOWN:
-			default:
-				return new VerificationResult(VerificationOutcome.POSSIBLE,
-						"the solver could not decide a query: " + engine.getReasonUnknown());
-			}
+			return result(model, engine, status, used);
 		} catch (SmtException e) {
 			// the solver might be unusable
 			release();
 			return new VerificationResult(VerificationOutcome.POSSIBLE, "the solver failed: " + e.getMessage());
+		}
+	}
+
+	/**
+	 * Yields a new engine searching the given model with the given solver,
+	 * configured as this verifier, checking the bad cases from the one with the
+	 * fewest literals if {@code fewestLiteralsFirst} holds.
+	 */
+	private PdrEngine engine(
+			AlarmModel model,
+			SmtSolver s,
+			boolean strict,
+			boolean fewestLiteralsFirst) {
+		PdrEngine engine = new PdrEngine(model, s, strict, encoders);
+		engine.setGeneralization(generalization);
+		engine.setSeeding(seeding);
+		engine.setCtgs(ctgs);
+		engine.setInvariants(invariants);
+		engine.setEvaluatedFunctions(evaluated);
+		engine.setAbstraction(new DomainAbstraction<>(analysis, cache));
+		engine.setFewestLiteralsFirst(fewestLiteralsFirst);
+		return engine;
+	}
+
+	/**
+	 * Yields the result of the search of the given engine, that ended with the
+	 * given status after the given number of queries (of all the searches on
+	 * the same model).
+	 */
+	private VerificationResult result(
+			AlarmModel model,
+			PdrEngine engine,
+			PdrEngine.Status status,
+			int used)
+			throws SemanticException {
+		switch (status) {
+		case SAFE:
+			return new VerificationResult(VerificationOutcome.REFUTED,
+					"inductive invariant found: " + engine.getInvariant());
+		case COUNTEREXAMPLE:
+			return counterexample(model, engine.getCounterexample());
+		case BLOCKED:
+			return new VerificationResult(VerificationOutcome.POSSIBLE, "no violation within " + maxLevel
+					+ " steps, but no inductive invariant found");
+		case BUDGET_EXHAUSTED:
+			// the time and the queries are told apart, since only more
+			// time can change the result of the same search
+			return new VerificationResult(VerificationOutcome.POSSIBLE,
+					(used >= maxQueries ? "query" : "time") + " budget exhausted after "
+							+ used + " queries, at level " + engine.getFrames().depth());
+		case UNKNOWN:
+		default:
+			return new VerificationResult(VerificationOutcome.POSSIBLE,
+					"the solver could not decide a query: " + engine.getReasonUnknown());
 		}
 	}
 
