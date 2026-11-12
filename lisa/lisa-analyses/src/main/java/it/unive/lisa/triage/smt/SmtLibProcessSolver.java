@@ -126,17 +126,30 @@ public class SmtLibProcessSolver
 	private String relaxedCheck;
 
 	/**
+	 * The timeout of the processes checking relaxed queries, in milliseconds.
+	 */
+	private long relaxedTimeout;
+
+	/**
 	 * The command checking the satisfiability of queries whose floating point
 	 * constants have been fixed to the values of a model of their relaxation.
 	 */
 	private String fixedCheck;
 
 	/**
-	 * Whether the last satisfiability check has been decided through the
-	 * relaxation, in a scope opened by {@link #relaxedCheck()} that is closed
-	 * together with the one of the query.
+	 * The solver that decided the last satisfiability check through the
+	 * relaxation (see {@link #relaxedCheck()}), holding its model until the
+	 * scope of the query is changed, or {@code null}.
 	 */
-	private boolean fixed;
+	private SmtLibProcessSolver fixed;
+
+	/**
+	 * The declarations and definitions sent to the solver since it has been
+	 * started or reset, recorded if queries are relaxed, to send them to the
+	 * solvers checking the queries with fixed floating point constants (see
+	 * {@link #relaxedCheck()}).
+	 */
+	private final List<String> declarations = new ArrayList<>();
 
 	/**
 	 * Why the last satisfiability check is unknown, asked before trying the
@@ -148,6 +161,13 @@ public class SmtLibProcessSolver
 	 * The number of queries decided through the relaxation.
 	 */
 	private int relaxations;
+
+	/**
+	 * The assertion commands sent in each open scope (the first being the
+	 * outermost, that is never closed), recorded if queries are relaxed, to
+	 * rebuild the innermost scope (see {@link #relaxedCheck()}).
+	 */
+	private final List<List<String>> asserted = new ArrayList<>(List.of(new ArrayList<>()));
 
 	/**
 	 * Sets the path to the z3 executable used by {@link #z3()},
@@ -223,6 +243,7 @@ public class SmtLibProcessSolver
 		// further checks
 		solver.relaxation = new RealRelaxation();
 		solver.relaxedCheck = z3SimplifyingCheck(timeoutMillis / 4);
+		solver.relaxedTimeout = timeoutMillis / 4;
 		solver.fixedCheck = z3FloatCheck(timeoutMillis / 4);
 		return solver;
 	}
@@ -456,9 +477,12 @@ public class SmtLibProcessSolver
 	public boolean reset() {
 		command("(reset)");
 		floats = false;
-		fixed = false;
+		unfix();
+		declarations.clear();
 		if (relaxation != null)
 			relaxation.reset();
+		asserted.clear();
+		asserted.add(new ArrayList<>());
 		// options are reset as well
 		command("(set-option :print-success true)");
 		initialize();
@@ -471,7 +495,7 @@ public class SmtLibProcessSolver
 			String name,
 			Term body) {
 		Term constant = Term.constant(name, body.getSort());
-		command("(define-fun " + constant.toSmtLib() + " () " + body.getSort().toSmtLib() + " " + body.toSmtLib()
+		declaration("(define-fun " + constant.toSmtLib() + " () " + body.getSort().toSmtLib() + " " + body.toSmtLib()
 				+ ")");
 		if (relaxation != null)
 			relaxation.define(constant.toSmtLib(), body.getSort(), body.toSmtLib());
@@ -494,14 +518,16 @@ public class SmtLibProcessSolver
 	public Sort declareSort(
 			String name) {
 		Sort sort = Sort.uninterpreted(name);
-		command("(declare-sort " + sort.toSmtLib() + " 0)");
+		declaration("(declare-sort " + sort.toSmtLib() + " 0)");
+		if (relaxation != null)
+			relaxation.declareSort(sort.toSmtLib());
 		return sort;
 	}
 
 	@Override
 	public Sort declareDatatype(
 			Datatype datatype) {
-		command(datatype.toSmtLibDeclaration());
+		declaration(datatype.toSmtLibDeclaration());
 		if (relaxation != null)
 			relaxation.declareDatatype(datatype);
 		return datatype.getSort();
@@ -512,7 +538,7 @@ public class SmtLibProcessSolver
 			String name,
 			Sort sort) {
 		Term constant = Term.constant(name, sort);
-		command("(declare-const " + constant.toSmtLib() + " " + sort.toSmtLib() + ")");
+		declaration("(declare-const " + constant.toSmtLib() + " " + sort.toSmtLib() + ")");
 		if (relaxation != null)
 			relaxation.declareConstant(constant.toSmtLib(), sort);
 		return constant;
@@ -528,7 +554,7 @@ public class SmtLibProcessSolver
 		for (int k = 0; k < arguments.size(); k++)
 			sb.append(k == 0 ? "" : " ").append(arguments.get(k).toSmtLib());
 		sb.append(") ").append(result.toSmtLib()).append(")");
-		command(sb.toString());
+		declaration(sb.toString());
 		if (relaxation != null)
 			relaxation.declareFunction(symbol, arguments, result);
 		return symbol;
@@ -539,9 +565,12 @@ public class SmtLibProcessSolver
 			Term term) {
 		checkBoolean(term);
 		unfix();
-		command("(assert " + term.toSmtLib() + ")");
-		if (relaxation != null)
+		String cmd = "(assert " + term.toSmtLib() + ")";
+		command(cmd);
+		if (relaxation != null) {
 			relaxation.assertion(term.toSmtLib());
+			asserted.get(asserted.size() - 1).add(cmd);
+		}
 	}
 
 	@Override
@@ -550,9 +579,12 @@ public class SmtLibProcessSolver
 			Term term) {
 		checkBoolean(term);
 		unfix();
-		command("(assert (! " + term.toSmtLib() + " :named " + Term.symbol(name) + "))");
-		if (relaxation != null)
+		String cmd = "(assert (! " + term.toSmtLib() + " :named " + Term.symbol(name) + "))";
+		command(cmd);
+		if (relaxation != null) {
 			relaxation.assertion(term.toSmtLib());
+			asserted.get(asserted.size() - 1).add(cmd);
+		}
 	}
 
 	private static void checkBoolean(
@@ -565,8 +597,10 @@ public class SmtLibProcessSolver
 	public void push() {
 		unfix();
 		command("(push 1)");
-		if (relaxation != null)
+		if (relaxation != null) {
 			relaxation.push();
+			asserted.add(new ArrayList<>());
+		}
 	}
 
 	@Override
@@ -577,8 +611,11 @@ public class SmtLibProcessSolver
 			return;
 		unfix();
 		command("(pop 1)");
-		if (relaxation != null)
+		if (relaxation != null) {
 			relaxation.pop();
+			if (asserted.size() > 1)
+				asserted.remove(asserted.size() - 1);
+		}
 	}
 
 	/**
@@ -610,15 +647,18 @@ public class SmtLibProcessSolver
 	/**
 	 * Looks for a model of the current assertions, that the solver could not
 	 * decide, through their relaxation over real numbers (see
-	 * {@link RealRelaxation}): the relaxed assertions are checked in a new
-	 * scope, and if they are satisfiable the floating point constants of the
-	 * original assertions are fixed to the values of their copies in the model,
-	 * in another scope where the original assertions are checked again. If
-	 * they are satisfiable, the scope is left open until the one of the query
-	 * is closed, so that the model can be read, and the query is decided as
-	 * satisfiable. Otherwise, the query stays undecided, and the solver is left
-	 * as it was. Relaxed queries are never unsatisfiable, as the relaxation is
-	 * not an over-approximation.
+	 * {@link RealRelaxation}): the relaxed assertions are checked by another
+	 * process running the same solver (as solvers might not stop in time on
+	 * relaxed problems, that are often non-linear, and killing this one would
+	 * lose its state), and if they are satisfiable the floating point
+	 * constants of the original assertions are fixed to the values of their
+	 * copies in the model, and the original assertions are checked again by
+	 * another process. If they are satisfiable, the query is decided as
+	 * satisfiable, and the model is read from that process until the scope of
+	 * the query is changed. Otherwise, the query stays undecided. This solver
+	 * is never changed (z3 might not answer to commands changing the scopes
+	 * right after an undecided check). Relaxed queries are never
+	 * unsatisfiable, as the relaxation is not an over-approximation.
 	 *
 	 * @return {@link SmtResult#SAT} if a model has been found,
 	 *             {@link SmtResult#UNKNOWN} otherwise
@@ -629,58 +669,78 @@ public class SmtLibProcessSolver
 		if (relaxed == null)
 			return SmtResult.UNKNOWN;
 		List<String> fixes = new ArrayList<>();
-		command("(push 1)");
-		try {
+		// the helper is killed if it does not answer within the time of the
+		// relaxed check, and the grace period
+		try (SmtLibProcessSolver helper = new SmtLibProcessSolver(command, initialization, relaxedTimeout)) {
 			for (String cmd : relaxed.getCommands())
-				command(cmd);
-			if (check(relaxedCheck) == SmtResult.SAT) {
-				StringBuilder cmd = new StringBuilder("(get-value (");
-				for (RealRelaxation.Pin pin : relaxed.getPins())
-					cmd.append(pin.getRelaxed()).append(" ");
-				cmd.setLength(cmd.length() - 1);
-				SExpression response = query(cmd.append("))").toString());
-				List<RealRelaxation.Pin> pins = relaxed.getPins();
-				for (int i = 0; i < pins.size() && i < response.getChildren().size(); i++) {
-					String fix = pins.get(i).fix(response.getChildren().get(i).getChildren().get(1).toString());
-					if (fix != null)
-						fixes.add(fix);
-				}
+				helper.command(cmd);
+			if (helper.check(relaxedCheck) != SmtResult.SAT)
+				return SmtResult.UNKNOWN;
+			StringBuilder cmd = new StringBuilder("(get-value (");
+			for (RealRelaxation.Pin pin : relaxed.getPins())
+				cmd.append(pin.getRelaxed()).append(" ");
+			cmd.setLength(cmd.length() - 1);
+			SExpression response = helper.query(cmd.append("))").toString());
+			List<RealRelaxation.Pin> pins = relaxed.getPins();
+			for (int i = 0; i < pins.size() && i < response.getChildren().size(); i++) {
+				String fix = pins.get(i).fix(response.getChildren().get(i).getChildren().get(1).toString());
+				if (fix != null)
+					fixes.add(fix);
 			}
 		} catch (SmtException e) {
-			if (killed != null)
-				return SmtResult.UNKNOWN;
-			// the relaxation is not understood by the solver: it is not tried
-			// again
-			relaxation = null;
-		} finally {
-			if (killed == null)
-				command("(pop 1)");
-		}
-		if (fixes.isEmpty() || killed != null)
+			// e.g., the relaxation is not understood by the solver
 			return SmtResult.UNKNOWN;
-		command("(push 1)");
-		for (String fix : fixes)
-			command(fix);
-		if (check(fixedCheck) == SmtResult.SAT) {
-			fixed = true;
-			relaxations++;
-			return SmtResult.SAT;
 		}
-		if (killed == null)
-			command("(pop 1)");
+		if (fixes.isEmpty())
+			return SmtResult.UNKNOWN;
+		// the query with fixed constants is checked by another process as
+		// well, since z3 might not answer to further commands changing the
+		// scopes right after an undecided check
+		SmtLibProcessSolver checker = new SmtLibProcessSolver(command, initialization, relaxedTimeout);
+		try {
+			for (String cmd : declarations)
+				checker.command(cmd);
+			for (List<String> scope : asserted)
+				for (String cmd : scope)
+					checker.command(cmd);
+			for (String fix : fixes)
+				checker.command(fix);
+			if (checker.check(fixedCheck) == SmtResult.SAT) {
+				fixed = checker;
+				relaxations++;
+				return SmtResult.SAT;
+			}
+		} catch (SmtException e) {
+			// the query stays undecided
+		}
+		checker.close();
 		return SmtResult.UNKNOWN;
 	}
 
 	/**
-	 * Closes the scope where the floating point constants have been fixed by
-	 * {@link #relaxedCheck()}, if it is open: it must be closed before the
-	 * scope of the query is changed (or checked again), as its assertions only
-	 * hold for the model found through the relaxation.
+	 * Forgets the solver that decided the last check through the relaxation
+	 * (see {@link #relaxedCheck()}), if any: its model is the one of the query
+	 * until the scope of the query is changed (or checked again).
 	 */
 	private void unfix() {
-		if (fixed) {
-			fixed = false;
-			command("(pop 1)");
+		if (fixed != null) {
+			fixed.close();
+			fixed = null;
+		}
+	}
+
+	/**
+	 * Sends a declaration or definition, recording it (and sending it to the
+	 * solver holding the model of the last check, if any) if queries are
+	 * relaxed (see {@link #relaxedCheck()}).
+	 */
+	private void declaration(
+			String cmd) {
+		command(cmd);
+		if (relaxation != null) {
+			declarations.add(cmd);
+			if (fixed != null)
+				fixed.command(cmd);
 		}
 	}
 
@@ -727,6 +787,9 @@ public class SmtLibProcessSolver
 	@Override
 	public Map<Term, String> getValues(
 			Collection<Term> terms) {
+		if (fixed != null)
+			// the model of the last check
+			return fixed.getValues(terms);
 		Map<Term, String> values = new LinkedHashMap<>();
 		// constants need no query, and each term is asked once
 		Set<Term> asked = new LinkedHashSet<>();
@@ -921,6 +984,7 @@ public class SmtLibProcessSolver
 		if (closed)
 			return;
 		closed = true;
+		unfix();
 		try {
 			input.write("(exit)\n");
 			input.flush();

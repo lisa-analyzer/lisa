@@ -26,10 +26,12 @@ import java.util.Set;
  * <br>
  * The declarations, definitions and assertions sent to the solver are recorded
  * (with the scopes of the assertions), and {@link #relax()} yields the
- * commands asserting the relaxation of the current assertions, over copies of
- * the symbols whose sorts involve floating point numbers (whose names end with
- * {@link #SUFFIX}), declared as needed: the copies are declared once, as
- * declarations are global (they survive the scopes where they are made).
+ * commands of a self-contained problem asserting the relaxation of the current
+ * assertions, to be solved by a different solver (relaxed problems are often
+ * non-linear, and solvers might not stop in time on them): the symbols whose
+ * sorts involve floating point numbers are replaced by copies (whose names end
+ * with {@link #SUFFIX}), and the commands declare them, together with every
+ * other symbol the relaxed assertions use.
  *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
@@ -150,8 +152,9 @@ final class RealRelaxation {
 		}
 
 		/**
-		 * Yields the commands declaring the copies of the symbols that have not
-		 * been declared yet, and asserting the relaxed assertions.
+		 * Yields the commands declaring the symbols used by the relaxed
+		 * assertions (and the copies of the ones involving floating point
+		 * numbers), and asserting the relaxed assertions.
 		 *
 		 * @return the commands
 		 */
@@ -206,22 +209,9 @@ final class RealRelaxation {
 
 	private final Set<String> relaxableDatatypes = new HashSet<>();
 
+	private final Set<String> uninterpretedSorts = new HashSet<>();
+
 	private final List<List<String>> scopes = new ArrayList<>();
-
-	// the copies already sent to the solver
-
-	private final Set<String> declared = new HashSet<>();
-
-	/**
-	 * The name used in relaxed assertions for each definition (itself, if its
-	 * relaxation is the same).
-	 */
-	private final Map<String, String> relaxedDefinitions = new HashMap<>();
-
-	/**
-	 * The floating point constants occurring in each definition.
-	 */
-	private final Map<String, Map<String, Pin>> definitionPins = new HashMap<>();
 
 	// the state of the current relaxation
 
@@ -229,11 +219,21 @@ final class RealRelaxation {
 
 	private Map<String, Pin> pins;
 
-	private Set<String> staged;
+	/**
+	 * The symbols (and sorts) declared by {@link #commands}.
+	 */
+	private Set<String> emitted;
 
-	private Map<String, String> stagedDefinitions;
+	/**
+	 * The name used in the relaxed assertions for each definition (itself, if
+	 * its relaxation is the same).
+	 */
+	private Map<String, String> definitionNames;
 
-	private Map<String, Map<String, Pin>> stagedPins;
+	/**
+	 * The floating point constants occurring in each definition.
+	 */
+	private Map<String, Map<String, Pin>> definitionPins;
 
 	private Map<SExpression, SExpression> sorts;
 
@@ -254,6 +254,16 @@ final class RealRelaxation {
 			String symbol,
 			Sort sort) {
 		constants.put(symbol, SExpression.parse(sort.toSmtLib()));
+	}
+
+	/**
+	 * Records the declaration of an uninterpreted sort.
+	 *
+	 * @param symbol the sort, as an SMT-LIB symbol
+	 */
+	void declareSort(
+			String symbol) {
+		uninterpretedSorts.add(symbol);
 	}
 
 	/**
@@ -351,17 +361,14 @@ final class RealRelaxation {
 		selectors.clear();
 		selectorDatatypes.clear();
 		relaxableDatatypes.clear();
+		uninterpretedSorts.clear();
 		scopes.clear();
 		scopes.add(new ArrayList<>());
-		declared.clear();
-		relaxedDefinitions.clear();
-		definitionPins.clear();
 	}
 
 	/**
-	 * Yields the relaxation of the current assertions. The copies of the
-	 * symbols declared by the commands are considered declared from now on, so
-	 * the commands must be sent to the solver.
+	 * Yields the relaxation of the current assertions, as the commands of a
+	 * self-contained problem.
 	 *
 	 * @return the relaxation, or {@code null} if the assertions cannot be
 	 *             relaxed, or if no floating point constant occurs in them
@@ -369,9 +376,9 @@ final class RealRelaxation {
 	Relaxed relax() {
 		commands = new ArrayList<>();
 		pins = new LinkedHashMap<>();
-		staged = new HashSet<>();
-		stagedDefinitions = new HashMap<>();
-		stagedPins = new HashMap<>();
+		emitted = new HashSet<>();
+		definitionNames = new HashMap<>();
+		definitionPins = new HashMap<>();
 		sorts = new IdentityHashMap<>();
 		try {
 			List<String> asserted = new ArrayList<>();
@@ -386,10 +393,9 @@ final class RealRelaxation {
 			return null;
 		} finally {
 			sorts = null;
+			definitionNames = null;
+			definitionPins = null;
 		}
-		declared.addAll(staged);
-		relaxedDefinitions.putAll(stagedDefinitions);
-		definitionPins.putAll(stagedPins);
 		return new Relaxed(commands, new ArrayList<>(pins.values()));
 	}
 
@@ -460,10 +466,16 @@ final class RealRelaxation {
 		if (isFloat(sort))
 			return "Real";
 		if (sort.isAtom()) {
-			if (!relaxableDatatypes.contains(sort.getAtom()))
-				return sort.getAtom();
-			ensureDatatype(sort.getAtom());
-			return rename(sort.getAtom());
+			String name = sort.getAtom();
+			if (relaxableDatatypes.contains(name)) {
+				ensureDatatype(name);
+				return rename(name);
+			}
+			if (datatypes.containsKey(name))
+				ensureOriginalDatatype(name);
+			else if (uninterpretedSorts.contains(name) && emitted.add(name))
+				commands.add("(declare-sort " + name + " 0)");
+			return name;
 		}
 		List<SExpression> ch = sort.getChildren();
 		if ("Array".equals(atom(ch, 0)))
@@ -626,7 +638,46 @@ final class RealRelaxation {
 
 	private boolean isDeclared(
 			String symbol) {
-		return declared.contains(symbol) || staged.contains(symbol);
+		return emitted.contains(symbol);
+	}
+
+	/**
+	 * Declares a datatype that does not involve floating point numbers, as it
+	 * is.
+	 */
+	private void ensureOriginalDatatype(
+			String name) {
+		if (!emitted.add(name))
+			return;
+		Datatype d = datatypes.get(name);
+		// the sorts of the fields first
+		for (List<Datatype.Field> fields : d.getConstructors().values())
+			for (Datatype.Field f : fields)
+				if (!f.getSort().toSmtLib().equals(name))
+					relaxSort(SExpression.parse(f.getSort().toSmtLib()));
+		commands.add(d.toSmtLibDeclaration());
+	}
+
+	/**
+	 * Yields the datatype of the given constructor or selector, declaring it
+	 * (or its copy) if needed, or {@code null} if it is not one.
+	 */
+	private Datatype datatypeOf(
+			String symbol) {
+		Datatype d = constructors.containsKey(symbol) ? constructors.get(symbol) : selectorDatatypes.get(symbol);
+		if (d == null)
+			return null;
+		String name = d.getSort().toSmtLib();
+		if (relaxableDatatypes.contains(name))
+			ensureDatatype(name);
+		else
+			ensureOriginalDatatype(name);
+		return d;
+	}
+
+	private boolean relaxed(
+			Datatype d) {
+		return relaxableDatatypes.contains(d.getSort().toSmtLib());
 	}
 
 	private void ensureDatatype(
@@ -634,7 +685,7 @@ final class RealRelaxation {
 		String relaxed = rename(name);
 		if (isDeclared(relaxed))
 			return;
-		staged.add(relaxed);
+		emitted.add(relaxed);
 		Datatype d = datatypes.get(name);
 		StringBuilder sb = new StringBuilder("(declare-datatypes ((").append(relaxed).append(" 0)) ((");
 		boolean first = true;
@@ -652,12 +703,10 @@ final class RealRelaxation {
 	private String relaxedConstant(
 			String symbol,
 			SExpression sort) {
-		if (!relaxable(sort))
-			return symbol;
-		String relaxed = rename(symbol);
+		String relaxed = relaxable(sort) ? rename(symbol) : symbol;
 		if (!isDeclared(relaxed)) {
 			String s = relaxSort(sort);
-			staged.add(relaxed);
+			emitted.add(relaxed);
 			commands.add("(declare-const " + relaxed + " " + s + ")");
 		}
 		if (isFloat(sort) && (floatWidth(sort) == 32 || floatWidth(sort) == 64))
@@ -672,9 +721,7 @@ final class RealRelaxation {
 		boolean relaxable = relaxable(result);
 		for (SExpression arg : args)
 			relaxable |= relaxable(arg);
-		if (!relaxable)
-			return symbol;
-		String relaxed = rename(symbol);
+		String relaxed = relaxable ? rename(symbol) : symbol;
 		if (!isDeclared(relaxed))
 			declareFunction(relaxed, args, result);
 		return relaxed;
@@ -688,36 +735,27 @@ final class RealRelaxation {
 		for (int i = 0; i < args.size(); i++)
 			sb.append(i == 0 ? "" : " ").append(relaxSort(args.get(i)));
 		sb.append(") ").append(relaxSort(result)).append(")");
-		staged.add(relaxed);
+		emitted.add(relaxed);
 		commands.add(sb.toString());
 	}
 
 	private String relaxedDefinition(
 			String symbol) {
-		String relaxed = relaxedDefinitions.get(symbol);
-		if (relaxed == null)
-			relaxed = stagedDefinitions.get(symbol);
+		String relaxed = definitionNames.get(symbol);
 		if (relaxed != null) {
-			Map<String, Pin> inner = definitionPins.containsKey(symbol) ? definitionPins.get(symbol)
-					: stagedPins.get(symbol);
-			if (inner != null)
-				pins.putAll(inner);
+			pins.putAll(definitionPins.get(symbol));
 			return relaxed;
 		}
 		Map<String, Pin> outer = pins;
 		pins = new LinkedHashMap<>();
 		SExpression body = SExpression.parse(definitions.get(symbol));
 		String relaxedBody = relax(body, Collections.emptyMap());
-		if (relaxedBody.equals(body.toString()))
-			relaxed = symbol;
-		else {
-			relaxed = rename(symbol);
-			commands.add("(define-fun " + relaxed + " () " + relaxSort(definitionSorts.get(symbol)) + " "
-					+ relaxedBody + ")");
-			staged.add(relaxed);
-		}
-		stagedDefinitions.put(symbol, relaxed);
-		stagedPins.put(symbol, pins);
+		relaxed = relaxedBody.equals(body.toString()) ? symbol : rename(symbol);
+		commands.add("(define-fun " + relaxed + " () " + relaxSort(definitionSorts.get(symbol)) + " "
+				+ relaxedBody + ")");
+		emitted.add(relaxed);
+		definitionNames.put(symbol, relaxed);
+		definitionPins.put(symbol, pins);
 		outer.putAll(pins);
 		pins = outer;
 		return relaxed;
@@ -820,10 +858,10 @@ final class RealRelaxation {
 			break;
 		}
 		String symbol = h;
-		Datatype d = constructors.containsKey(h) ? constructors.get(h) : selectorDatatypes.get(h);
-		if (d != null && relaxableDatatypes.contains(d.getSort().toSmtLib())) {
-			ensureDatatype(d.getSort().toSmtLib());
-			symbol = rename(h);
+		Datatype d = datatypeOf(h);
+		if (d != null) {
+			if (relaxed(d))
+				symbol = rename(h);
 		} else if (functionResults.containsKey(h))
 			symbol = relaxedFunction(h);
 		return apply(symbol, ch, 1, bound);
@@ -838,12 +876,8 @@ final class RealRelaxation {
 			return relaxedConstant(a, constants.get(a));
 		if (definitions.containsKey(a))
 			return relaxedDefinition(a);
-		Datatype d = constructors.get(a);
-		if (d != null && relaxableDatatypes.contains(d.getSort().toSmtLib())) {
-			ensureDatatype(d.getSort().toSmtLib());
-			return rename(a);
-		}
-		return a;
+		Datatype d = constructors.containsKey(a) ? datatypeOf(a) : null;
+		return d != null && relaxed(d) ? rename(a) : a;
 	}
 
 	private String relaxIndexed(
@@ -859,11 +893,9 @@ final class RealRelaxation {
 			switch (op) {
 			case "is": {
 				String ctor = idx.get(2).getAtom();
-				Datatype d = constructors.get(ctor);
-				if (d != null && relaxableDatatypes.contains(d.getSort().toSmtLib())) {
-					ensureDatatype(d.getSort().toSmtLib());
+				Datatype d = datatypeOf(ctor);
+				if (d != null && relaxed(d))
 					ctor = rename(ctor);
-				}
 				return "((_ is " + ctor + ") " + relax(ch.get(1), bound) + ")";
 			}
 			case "to_fp": {
@@ -930,12 +962,15 @@ final class RealRelaxation {
 		Sort sort = FloatingPoints.sortOf(e);
 		if (sort == null)
 			throw new GiveUp("unknown floating point literal: " + e);
-		double value = FloatingPoints.parse(e, sort).doubleValue();
+		Number number = FloatingPoints.parse(e, sort);
+		double value = number.doubleValue();
 		if (Double.isNaN(value))
 			return specialConstant("NaN");
 		if (Double.isInfinite(value))
 			return specialConstant(value > 0 ? "+oo" : "-oo");
-		return real(new BigDecimal(value));
+		// the shortest decimal representation of the number, as its exact
+		// value has many more digits that make the relaxed problem harder
+		return real(new BigDecimal(number.toString()));
 	}
 
 	private String special(
@@ -961,7 +996,7 @@ final class RealRelaxation {
 			String kind) {
 		String symbol = Term.symbol("relaxed " + kind);
 		if (!isDeclared(symbol)) {
-			staged.add(symbol);
+			emitted.add(symbol);
 			commands.add("(declare-const " + symbol + " Real)");
 		}
 		return symbol;

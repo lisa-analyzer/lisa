@@ -48,9 +48,12 @@ public class RealRelaxationTest {
 		assertNotNull(relaxed);
 		String all = String.join("\n", relaxed.getCommands());
 		assertTrue(all.contains("(declare-const x!real Real)"), all);
+		// literals are written with the fewest digits
 		assertTrue(all.contains("(define-fun d!real () Real (+ x!real 1.5))"), all);
 		assertTrue(all.contains("(assert (< d!real (- 2.0)))"), all);
-		// constants that do not involve floating point numbers are shared
+		// constants that do not involve floating point numbers are kept, and
+		// declared as well, as the problem is self-contained
+		assertTrue(all.contains("(declare-const n Int)"), all);
 		assertTrue(all.contains("(assert (> n 0))"), all);
 		assertFalse(all.contains("n!real"), all);
 		// datatypes holding floating point numbers are copied
@@ -62,10 +65,10 @@ public class RealRelaxationTest {
 		assertEquals(1, relaxed.getPins().size());
 		assertEquals("x", relaxed.getPins().get(0).getOriginal());
 
-		// copies are declared once
+		// each relaxation is self-contained
 		RealRelaxation.Relaxed again = r.relax();
 		assertNotNull(again);
-		assertFalse(String.join("\n", again.getCommands()).contains("declare"));
+		assertEquals(relaxed.getCommands(), again.getCommands());
 		assertEquals(1, again.getPins().size());
 	}
 
