@@ -26,6 +26,7 @@ import it.unive.lisa.triage.model.HeapModel;
 import it.unive.lisa.triage.model.HeapOperators;
 import it.unive.lisa.triage.model.InputValue;
 import it.unive.lisa.triage.model.ModelLocation;
+import it.unive.lisa.triage.model.SummaryValue;
 import it.unive.lisa.triage.model.SymbolicCase;
 import it.unive.lisa.triage.smt.SmtException;
 import it.unive.lisa.triage.smt.SmtResult;
@@ -36,6 +37,7 @@ import it.unive.lisa.type.TypeSystem;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -255,6 +257,12 @@ public class PdrEngine {
 	private final PriorityQueue<Obligation> queue = new PriorityQueue<>();
 
 	private long created = 0;
+
+	/**
+	 * The bad cases of the model, in the order they are checked (computed
+	 * lazily by {@link #badCases()}).
+	 */
+	private List<BadCase> sortedBadCases;
 
 	private int queries = 0;
 
@@ -842,6 +850,23 @@ public class PdrEngine {
 	}
 
 	/**
+	 * Returns the bad cases of the model, from the one with the fewest
+	 * literals. The order is fixed (ties are broken by the textual form of the
+	 * cases), since it decides which obligation is blocked first and an order
+	 * depending on hashes makes the runs not reproducible.
+	 */
+	private List<BadCase> badCases() {
+		if (sortedBadCases == null) {
+			sortedBadCases = new ArrayList<>(model.getBadCases());
+			sortedBadCases.sort(Comparator
+					.comparingInt((
+							BadCase c) -> c.getPathCondition().size() + (c.getViolation() == null ? 0 : 1))
+					.thenComparing(BadCase::toString));
+		}
+		return sortedBadCases;
+	}
+
+	/**
 	 * Yields an obligation for a state of {@code F_level} (or of the initial
 	 * states, if {@code level} is {@code 0}) at the bad location, violating the
 	 * property, or {@code null} if there is none.
@@ -851,7 +876,7 @@ public class PdrEngine {
 			throws SemanticException,
 			Stop {
 		ModelLocation bad = model.getBadLocation();
-		for (BadCase c : model.getBadCases()) {
+		for (BadCase c : badCases()) {
 			List<SymbolicExpression> lits = new ArrayList<>(c.getPathCondition());
 			if (c.getViolation() != null)
 				lits.add(c.getViolation());
@@ -1338,6 +1363,16 @@ public class PdrEngine {
 			Map<FreshValue, String> values) {
 		Map<FreshValue, SymbolicExpression> constants = new LinkedHashMap<>();
 		for (Map.Entry<FreshValue, String> v : values.entrySet()) {
+			if (v.getKey() instanceof SummaryValue
+					&& ((SummaryValue) v.getKey()).getReason().equals(SummaryValue.MERGED_CONDITIONS)) {
+				// these conditions are encoded as true (they do not constrain
+				// the executions), so their value in the model is arbitrary:
+				// they are projected as true, as encoded, or the cube might
+				// become empty and never be blocked by a lemma
+				constants.put(v.getKey(),
+						new Constant(types.getBooleanType(), true, v.getKey().getCodeLocation()));
+				continue;
+			}
 			SymbolicExpression c = Projection.toConstant(v.getValue(), types);
 			if (c != null)
 				constants.put(v.getKey(), c);
