@@ -561,12 +561,13 @@ public class PdrEngine {
 	 * Goes on after a query the solver could not decide, when giving up on
 	 * what the query was for only loses precision (e.g., a generalization or
 	 * the propagation of a lemma). The search is stopped if the budget is
-	 * exhausted instead.
+	 * exhausted instead, or if the solver cannot be used anymore (e.g., it has
+	 * been killed as it did not answer in time).
 	 */
-	private static void ignoreUndecided(
+	private void ignoreUndecided(
 			Stop stop)
 			throws Stop {
-		if (stop.status != Status.UNKNOWN)
+		if (stop.status != Status.UNKNOWN || !solver.isAlive())
 			throw stop;
 	}
 

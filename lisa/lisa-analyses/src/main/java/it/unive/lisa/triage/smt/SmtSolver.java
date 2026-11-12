@@ -167,6 +167,17 @@ public interface SmtSolver
 	String getReasonUnknown();
 
 	/**
+	 * Yields whether the solver can still be used: a solver that has been
+	 * closed (e.g., because it did not answer in time) cannot. By default, it
+	 * always can.
+	 *
+	 * @return whether the solver can still be used
+	 */
+	default boolean isAlive() {
+		return true;
+	}
+
+	/**
 	 * Releases the resources held by this solver. Further requests to the
 	 * solver will fail.
 	 */

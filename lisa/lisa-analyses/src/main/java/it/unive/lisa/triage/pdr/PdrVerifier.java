@@ -970,6 +970,10 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 							+ used + " queries, at level " + engine.getFrames().depth());
 		case UNKNOWN:
 		default:
+			if (engine.getUndecided() == 0)
+				// the search stopped at the query
+				return new VerificationResult(VerificationOutcome.POSSIBLE,
+						"the solver could not decide a query: " + engine.getReasonUnknown());
 			return new VerificationResult(VerificationOutcome.POSSIBLE,
 					"the solver could not decide " + engine.getUndecided() + " queries (" + engine.getReasonUnknown()
 							+ "), assumed to ask about unreachable states, and no counterexample was found");

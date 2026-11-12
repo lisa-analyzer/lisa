@@ -764,6 +764,11 @@ public class SmtLibProcessSolver
 	}
 
 	@Override
+	public boolean isAlive() {
+		return !closed;
+	}
+
+	@Override
 	public String getReasonUnknown() {
 		if (closed && killed != null)
 			return killed;
