@@ -18,4 +18,18 @@ public interface TimeLimited {
 	 */
 	void setTimeLimit(
 			long millis);
+
+	/**
+	 * Bounds the time of the verification of each of the next warnings, also
+	 * replacing the own budget of the verifier: the verification of a warning
+	 * takes at most the given time. This is used to verify again, with the time
+	 * left, the warnings whose verification exhausted that budget. By default,
+	 * this is the same as {@link #setTimeLimit(long)}.
+	 *
+	 * @param millis the time, in milliseconds, or {@code 0} to remove the bound
+	 */
+	default void setExtendedTimeLimit(
+			long millis) {
+		setTimeLimit(millis);
+	}
 }

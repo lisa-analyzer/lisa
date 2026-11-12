@@ -207,6 +207,12 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 	private long timeLimit;
 
 	/**
+	 * Whether {@link #timeLimit} replaces the own time budget of this verifier
+	 * (see {@link #setExtendedTimeLimit(long)}).
+	 */
+	private boolean extended;
+
+	/**
 	 * The time by which the verification of the current warning must end, if
 	 * one is being verified (see
 	 * {@link #verify(SemanticTool, StatementMessage)}), or {@code 0}.
@@ -566,7 +572,7 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 	}
 
 	private long deadlineFromNow() {
-		long millis = maxMillis > 0 ? maxMillis : Long.MAX_VALUE;
+		long millis = maxMillis > 0 && !(extended && timeLimit > 0) ? maxMillis : Long.MAX_VALUE;
 		if (timeLimit > 0)
 			millis = Math.min(millis, timeLimit);
 		return millis == Long.MAX_VALUE ? Long.MAX_VALUE : System.currentTimeMillis() + millis;
@@ -576,6 +582,14 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 	public void setTimeLimit(
 			long millis) {
 		timeLimit = millis;
+		extended = false;
+	}
+
+	@Override
+	public void setExtendedTimeLimit(
+			long millis) {
+		timeLimit = millis;
+		extended = true;
 	}
 
 	@Override
@@ -907,9 +921,11 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 				return new VerificationResult(VerificationOutcome.POSSIBLE, "no violation within " + maxLevel
 						+ " steps, but no inductive invariant found");
 			case BUDGET_EXHAUSTED:
+				// the time and the queries are told apart, since only more
+				// time can change the result of the same search
 				return new VerificationResult(VerificationOutcome.POSSIBLE,
-						"budget exhausted after " + engine.getQueries() + " queries, at level "
-								+ engine.getFrames().depth());
+						(engine.getQueries() >= maxQueries ? "query" : "time") + " budget exhausted after "
+								+ engine.getQueries() + " queries, at level " + engine.getFrames().depth());
 			case UNKNOWN:
 			default:
 				return new VerificationResult(VerificationOutcome.POSSIBLE,
