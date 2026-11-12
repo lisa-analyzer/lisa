@@ -5,11 +5,11 @@ import it.unive.lisa.interprocedural.ScopeId;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.type.Type;
-import java.util.List;
-import java.util.LinkedHashSet;
-import java.util.Comparator;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 

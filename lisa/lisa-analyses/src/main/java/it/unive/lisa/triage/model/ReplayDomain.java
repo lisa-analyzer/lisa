@@ -10,10 +10,10 @@ import it.unive.lisa.interprocedural.ScopeId;
 import it.unive.lisa.lattices.Satisfiability;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.program.cfg.protection.ProtectedBlock;
-import it.unive.lisa.symbolic.value.PushAny;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.MemoryAllocation;
 import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.symbolic.value.PushAny;
 import java.util.Collection;
 import org.apache.commons.lang3.tuple.Pair;
 

@@ -15,6 +15,8 @@ import java.util.Map;
  * (see {@link Unrolling#setEvaluatedFunctions(EvaluatedFunctions)}) give the
  * function its value on those arguments. Arguments and values are kept as
  * literals in SMT-LIB syntax.
+ *
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public class EvaluatedFunctions {
 

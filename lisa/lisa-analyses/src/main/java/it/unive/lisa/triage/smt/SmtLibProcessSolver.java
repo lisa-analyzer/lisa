@@ -203,12 +203,12 @@ public class SmtLibProcessSolver
 
 	/**
 	 * The command checking satisfiability with z3 of queries not involving
-	 * floating point numbers, when the standard command cannot decide: the
-	 * same simplifications of {@link #z3FloatCheck(long)}, followed by the
-	 * general solver (bit-blasting would only spend the time of the check
-	 * before failing). The simplifications often decide queries over the heap
-	 * model that the general solver alone does not (e.g., the strings stored in
-	 * the fields of new objects).
+	 * floating point numbers, when the standard command cannot decide: the same
+	 * simplifications of {@link #z3FloatCheck(long)}, followed by the general
+	 * solver (bit-blasting would only spend the time of the check before
+	 * failing). The simplifications often decide queries over the heap model
+	 * that the general solver alone does not (e.g., the strings stored in the
+	 * fields of new objects).
 	 */
 	private static String z3SimplifyingCheck(
 			long timeoutMillis) {

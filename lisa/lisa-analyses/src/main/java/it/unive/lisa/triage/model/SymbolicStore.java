@@ -1,6 +1,5 @@
 package it.unive.lisa.triage.model;
 
-import it.unive.lisa.symbolic.value.PushAny;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.program.SyntheticLocation;
 import it.unive.lisa.program.cfg.CodeLocation;
@@ -9,6 +8,7 @@ import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.AccessChild;
 import it.unive.lisa.symbolic.heap.MemoryAllocation;
 import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.symbolic.value.PushAny;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashSet;

@@ -23,11 +23,10 @@ import it.unive.lisa.triage.model.InputValue;
 import it.unive.lisa.triage.model.ModelLocation;
 import it.unive.lisa.triage.model.SummaryValue;
 import it.unive.lisa.triage.model.SymbolicCase;
+import it.unive.lisa.triage.smt.FloatingPoints;
 import it.unive.lisa.triage.smt.SmtSolver;
 import it.unive.lisa.triage.smt.Sort;
 import it.unive.lisa.triage.smt.Term;
-import it.unive.lisa.triage.smt.FloatingPoints;
-import java.util.function.Function;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.IdentityHashMap;
@@ -36,6 +35,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 
 /**
  * The encoding of the executions of an {@link AlarmModel} as SMT formulas over
@@ -121,10 +121,6 @@ public class Unrolling {
 	private EvaluatedFunctions evaluated;
 
 	/**
-	 * A reason of imprecision that holds when {@code when} holds and
-	 * {@code guard} does not.
-	 */
-	/**
 	 * An application of a function computed on concrete values.
 	 */
 	private static final class Application {
@@ -154,9 +150,9 @@ public class Unrolling {
 	}
 
 	/**
-	 * An application of a function computed on concrete values, evaluated
-	 * when the given condition holds (e.g., the case of a transition holding
-	 * it is taken).
+	 * An application of a function computed on concrete values, evaluated when
+	 * the given condition holds (e.g., the case of a transition holding it is
+	 * taken).
 	 */
 	private static final class GuardedApplication {
 
@@ -779,9 +775,9 @@ public class Unrolling {
 
 	/**
 	 * Yields the applications of functions computed on concrete values in the
-	 * encoding with the given key whose value in the current model of the
-	 * given solver is not the one of the function on the values of their
-	 * arguments in the model (learning the right values, see
+	 * encoding with the given key whose value in the current model of the given
+	 * solver is not the one of the function on the values of their arguments in
+	 * the model (learning the right values, see
 	 * {@link #setEvaluatedFunctions(EvaluatedFunctions)}).
 	 */
 	private List<Application> mismatches(

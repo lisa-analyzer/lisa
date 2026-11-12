@@ -140,9 +140,9 @@ public final class SymbolicCase {
 	}
 
 	/**
-	 * Yields the inputs consumed by the executions of this transition, that
-	 * is, the inputs produced by the evaluations of unknown values introduced
-	 * in this case (e.g., the results of calls to code that is not part of the
+	 * Yields the inputs consumed by the executions of this transition, that is,
+	 * the inputs produced by the evaluations of unknown values introduced in
+	 * this case (e.g., the results of calls to code that is not part of the
 	 * program, see {@link #withProduced(Collection)}).
 	 *
 	 * @return the inputs
@@ -1178,7 +1178,8 @@ public final class SymbolicCase {
 			forg = Collections.unmodifiableSet(forg);
 		}
 		return new SymbolicCase(Collections.unmodifiableList(pc), Collections.unmodifiableMap(upd), forg,
-				result.forgottenIf, result.heapHavoc, result.preservedHeap, result.havocAll, result.scopings, union(produced, next.produced));
+				result.forgottenIf, result.heapHavoc, result.preservedHeap, result.havocAll, result.scopings,
+				union(produced, next.produced));
 	}
 
 	/**
@@ -1245,7 +1246,8 @@ public final class SymbolicCase {
 		if (expression instanceof TernaryExpression) {
 			TernaryExpression t = (TernaryExpression) expression;
 			return new TernaryExpression(t.getStaticType(), substituteOnce(t.getLeft(), factory, reads, done),
-					substituteOnce(t.getMiddle(), factory, reads, done), substituteOnce(t.getRight(), factory, reads, done),
+					substituteOnce(t.getMiddle(), factory, reads, done),
+					substituteOnce(t.getRight(), factory, reads, done),
 					t.getOperator(), t.getCodeLocation());
 		}
 		return substitute(expression, factory, null);
