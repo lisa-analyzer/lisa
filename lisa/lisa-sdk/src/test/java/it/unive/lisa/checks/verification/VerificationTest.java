@@ -158,6 +158,36 @@ public class VerificationTest {
 	}
 
 	@Test
+	public void testResultCandidates() {
+		ReproducingInput input = new ReproducingInput(new SourceCodeLocation("test", 1, 0), "x", null, 0, "42");
+		VerificationResult candidate = new VerificationResult(VerificationOutcome.CONFIRMED, "c", List.of(input));
+		VerificationResult possible = new VerificationResult(VerificationOutcome.POSSIBLE, "p");
+
+		// only possible results have candidates, and only confirmed ones
+		VerificationResult withCandidate = possible.withCandidate(candidate);
+		assertSame(candidate, withCandidate.getCandidate());
+		assertEquals(possible, withCandidate);
+		assertSame(candidate, candidate.withCandidate(candidate));
+		assertSame(possible, possible.withCandidate(possible));
+		assertSame(possible, possible.withCandidate(null));
+
+		// the thrower of a possible result goes to its candidate
+		Statement thrower = new NoOp(new CFG(new CodeMemberDescriptor(new SourceCodeLocation("test", 1, 0),
+				new Program(new TestLanguageFeatures(), new TestTypeSystem()), false, "f")),
+				new SourceCodeLocation("test", 2, 0));
+		VerificationResult thrown = withCandidate.withThrower(thrower);
+		assertSame(thrower, thrown.getCandidate().getThrower());
+		assertEquals(null, thrown.getThrower());
+
+		// lubs keep the candidates
+		VerificationResult refuted = new VerificationResult(VerificationOutcome.REFUTED, "r");
+		assertSame(candidate, withCandidate.lub(refuted).getCandidate());
+		assertSame(candidate, refuted.lub(withCandidate).getCandidate());
+		assertSame(candidate, possible.lub(withCandidate).getCandidate());
+		assertEquals(null, withCandidate.lub(candidate).getCandidate());
+	}
+
+	@Test
 	public void testWarningsWithoutViolations() throws Exception {
 		Program program = new Program(new TestLanguageFeatures(), new TestTypeSystem());
 		CFG cfg = new CFG(new CodeMemberDescriptor(new SourceCodeLocation("test", 1, 0), program, false, "f"));

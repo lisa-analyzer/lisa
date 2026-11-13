@@ -156,6 +156,13 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 	private boolean inexact;
 
 	/**
+	 * The confirmation the violation being verified would have if the inputs
+	 * of the last imprecise counterexample found from the initial states of
+	 * the program reproduced it, or {@code null}.
+	 */
+	private VerificationResult candidate;
+
+	/**
 	 * The values of the functions computed on concrete values learned while
 	 * verifying the current violation.
 	 */
@@ -599,7 +606,11 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 			Violation violation)
 			throws SemanticException {
 		try {
-			return verifyViolation(result, st, violation);
+			candidate = null;
+			// a violation that stays possible carries the confirmation it would
+			// have if the inputs of the last imprecise counterexample reproduce
+			// it, to be checked by other means (e.g., executing the program)
+			return verifyViolation(result, st, violation).withCandidate(candidate);
 		} finally {
 			if (warningDeadline == 0)
 				// no warning is being verified
@@ -1050,7 +1061,17 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 		}
 
 		String path = COUNTEREXAMPLE_PREFIX + (trace.size() - 1) + " steps through " + trace;
+		// the statement raising the error of an error violation, if the
+		// counterexample ends with a transition to a raised error
+		Statement thrower = null;
+		for (Obligation o : cex)
+			if (o.getEdge() != null && o.getEdge().getThrower() != null
+					&& o.getEdge().getDestination().equals(model.getBadLocation()))
+				thrower = o.getEdge().getThrower();
 		if (!imprecisions.isEmpty()) {
+			if (model.isConfirmable())
+				candidate = new VerificationResult(VerificationOutcome.CONFIRMED,
+						path + ", certified by execution", inputs.get()).withThrower(thrower);
 			if (!inexact && Unrolling.dueToCalls(imprecisions))
 				callTrace = trace;
 			if (imprecisions.stream().anyMatch(r -> r.startsWith(SummaryValue.Kind.MERGE.getDescription())))
@@ -1061,13 +1082,6 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 		if (!model.isConfirmable())
 			return new VerificationResult(VerificationOutcome.POSSIBLE,
 					path + ", from states that are not the initial ones of the program");
-		// the statement raising the error of an error violation, if the
-		// counterexample ends with a transition to a raised error
-		Statement thrower = null;
-		for (Obligation o : cex)
-			if (o.getEdge() != null && o.getEdge().getThrower() != null
-					&& o.getEdge().getDestination().equals(model.getBadLocation()))
-				thrower = o.getEdge().getThrower();
 		return new VerificationResult(VerificationOutcome.CONFIRMED,
 				path + " (not yet certified by execution)", inputs.get()).withThrower(thrower);
 	}

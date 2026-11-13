@@ -270,6 +270,9 @@ public abstract class IndividualWarningVerifier<A extends AbstractLattice<A>, D 
 				// violation
 				res = new VerificationResult(VerificationOutcome.POSSIBLE,
 						"the error might not be one that certainly causes the violation: " + res.getExplanation());
+			else if (res.getCandidate() != null && !throwers.get(thrower).stream().allMatch(error::confirms))
+				// neither would its candidate confirmation
+				res = new VerificationResult(VerificationOutcome.POSSIBLE, res.getExplanation());
 			outcome = outcome.lub(res);
 			if (outcome.getOutcome() == VerificationOutcome.CONFIRMED)
 				break;

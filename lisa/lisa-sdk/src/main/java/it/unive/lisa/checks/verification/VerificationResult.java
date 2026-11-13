@@ -40,6 +40,8 @@ public class VerificationResult {
 
 	private final Statement thrower;
 
+	private final VerificationResult candidate;
+
 	/**
 	 * Builds the result, with no reproducing inputs.
 	 *
@@ -77,21 +79,26 @@ public class VerificationResult {
 				? Collections.emptyList()
 				: Collections.unmodifiableList(List.copyOf(reproducingInputs));
 		this.thrower = null;
+		this.candidate = null;
 	}
 
 	private VerificationResult(
 			VerificationResult result,
-			Statement thrower) {
+			Statement thrower,
+			VerificationResult candidate) {
 		this.outcome = result.outcome;
 		this.explanation = result.explanation;
 		this.reproducingInputs = result.reproducingInputs;
 		this.thrower = thrower;
+		this.candidate = candidate;
 	}
 
 	/**
 	 * Yields a copy of this result recording the statement raising the error of
-	 * a confirmed error violation (see {@link #getThrower()}). This result is
-	 * returned if it is not confirmed, or if it already records one.
+	 * a confirmed error violation (see {@link #getThrower()}), or, for a
+	 * possible result, of its candidate confirmation (see
+	 * {@link #getCandidate()}). This result is returned if it is (or its
+	 * candidate is) not confirmed, or if it already records one.
 	 *
 	 * @param thrower the statement raising the error
 	 *
@@ -99,9 +106,44 @@ public class VerificationResult {
 	 */
 	public VerificationResult withThrower(
 			Statement thrower) {
+		if (outcome == VerificationOutcome.POSSIBLE && candidate != null) {
+			VerificationResult withThrower = candidate.withThrower(thrower);
+			return withThrower == candidate ? this : new VerificationResult(this, this.thrower, withThrower);
+		}
 		if (outcome != VerificationOutcome.CONFIRMED || this.thrower != null || thrower == null)
 			return this;
-		return new VerificationResult(this, thrower);
+		return new VerificationResult(this, thrower, candidate);
+	}
+
+	/**
+	 * Yields a copy of this possible result recording a candidate confirmation
+	 * (see {@link #getCandidate()}). This result is returned if it is not
+	 * possible, if it already records one, or if the given one is not
+	 * confirmed.
+	 *
+	 * @param candidate the candidate confirmation
+	 *
+	 * @return the result
+	 */
+	public VerificationResult withCandidate(
+			VerificationResult candidate) {
+		if (outcome != VerificationOutcome.POSSIBLE || this.candidate != null || candidate == null
+				|| !candidate.isConfirmed())
+			return this;
+		return new VerificationResult(this, thrower, candidate);
+	}
+
+	/**
+	 * Yields the candidate confirmation of a possible result, if any: the
+	 * confirmed result (with its reproducing inputs) that the violation would
+	 * have if the inputs of a counterexample that the verifier could not
+	 * confirm were shown to reproduce it (e.g., by executing the program with
+	 * them). This is not part of the equality of results.
+	 *
+	 * @return the candidate, or {@code null} if there is none
+	 */
+	public VerificationResult getCandidate() {
+		return candidate;
 	}
 
 	/**
@@ -183,7 +225,8 @@ public class VerificationResult {
 	 * and its explanation and reproducing inputs are the ones of the result
 	 * determining the outcome. If both results determine it, their explanations
 	 * are joined, and the reproducing inputs of {@code this} result are kept
-	 * (or the ones of {@code other}, if {@code this} has none).
+	 * (or the ones of {@code other}, if {@code this} has none), and so are the
+	 * thrower and the candidate.
 	 *
 	 * @param other the other result
 	 *
@@ -205,11 +248,13 @@ public class VerificationResult {
 		List<ReproducingInput> inputs = reproducingInputs.isEmpty() ? other.reproducingInputs : reproducingInputs;
 
 		Statement thr = thrower == null ? other.thrower : thrower;
-		if (Objects.equals(expl, explanation) && inputs == reproducingInputs && thr == thrower)
+		VerificationResult cand = candidate == null ? other.candidate : candidate;
+		if (Objects.equals(expl, explanation) && inputs == reproducingInputs && thr == thrower && cand == candidate)
 			return this;
-		if (Objects.equals(expl, other.explanation) && inputs == other.reproducingInputs && thr == other.thrower)
+		if (Objects.equals(expl, other.explanation) && inputs == other.reproducingInputs && thr == other.thrower
+				&& cand == other.candidate)
 			return other;
-		return new VerificationResult(lub, expl, inputs).withThrower(thr);
+		return new VerificationResult(lub, expl, inputs).withThrower(thr).withCandidate(cand);
 	}
 
 	@Override
