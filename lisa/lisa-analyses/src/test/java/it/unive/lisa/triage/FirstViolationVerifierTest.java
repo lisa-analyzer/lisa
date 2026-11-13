@@ -1,0 +1,344 @@
+package it.unive.lisa.triage;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
+
+import it.unive.lisa.DefaultConfiguration;
+import it.unive.lisa.LiSA;
+import it.unive.lisa.LiSAReport;
+import it.unive.lisa.analysis.AbstractDomain;
+import it.unive.lisa.analysis.AbstractLattice;
+import it.unive.lisa.analysis.AnalyzedCFG;
+import it.unive.lisa.checks.semantic.SemanticCheck;
+import it.unive.lisa.checks.semantic.SemanticTool;
+import it.unive.lisa.checks.verification.IndividualWarningVerifier;
+import it.unive.lisa.checks.verification.VerificationOutcome;
+import it.unive.lisa.checks.verification.VerificationResult;
+import it.unive.lisa.checks.verification.Violation;
+import it.unive.lisa.checks.verification.WarningVerifier;
+import it.unive.lisa.imp.IMPFrontend;
+import it.unive.lisa.interprocedural.callgraph.RTACallGraph;
+import it.unive.lisa.interprocedural.context.ContextBasedAnalysis;
+import it.unive.lisa.outputs.messages.Message;
+import it.unive.lisa.outputs.messages.StatementMessage;
+import it.unive.lisa.program.Program;
+import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.statement.Assignment;
+import it.unive.lisa.program.cfg.statement.BinaryExpression;
+import it.unive.lisa.program.cfg.statement.Expression;
+import it.unive.lisa.program.cfg.statement.Statement;
+import it.unive.lisa.program.cfg.statement.call.Call;
+import it.unive.lisa.triage.smt.SmtLibProcessSolver;
+import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import org.junit.jupiter.api.Test;
+
+/**
+ * End-to-end tests for the verification of warnings after the semantic checks,
+ * through a {@link FirstViolationVerifier}. Each method of the analyzed
+ * programs contains an assignment {@code w = 1}, on which a warning is issued
+ * (with the name of the method as message, so that warnings are verified in
+ * alphabetical order) reporting its reachability.
+ */
+public class FirstViolationVerifierTest {
+
+	private static class WarnOnAssignments<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
+			implements
+			SemanticCheck<A, D> {
+
+		@Override
+		public boolean visit(
+				SemanticTool<A, D> tool,
+				CFG graph,
+				Statement node) {
+			if (node.toString().equals("w = 1"))
+				tool.warnOn(node, Violation.reach(), graph.getDescriptor().getName());
+			return true;
+		}
+
+	}
+
+	private static class WarnOnFirstThrow<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
+			implements
+			SemanticCheck<A, D> {
+
+		@Override
+		public boolean visit(
+				SemanticTool<A, D> tool,
+				CFG graph,
+				Statement node) {
+			if (node.toString().startsWith("throw") && node.getLocation().toString().contains(":3:"))
+				tool.warnOn(node, Violation.error(), graph.getDescriptor().getName());
+			return true;
+		}
+
+	}
+
+	private static class WarnOnAssignedCalls<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
+			implements
+			SemanticCheck<A, D> {
+
+		@Override
+		public boolean visit(
+				SemanticTool<A, D> tool,
+				CFG graph,
+				Statement node) {
+			// the warning is on a call, a sub-expression of the node: the
+			// assigned one, or the right operand of the assigned expression
+			if (node instanceof Assignment) {
+				Expression right = ((Assignment) node).getRight();
+				if (right instanceof BinaryExpression)
+					right = ((BinaryExpression) right).getRight();
+				if (right instanceof Call)
+					tool.warnOn(right, Violation.error(), graph.getDescriptor().getName());
+			}
+			return true;
+		}
+
+	}
+
+	private static Map<String, Message> analyze(
+			String program)
+			throws Exception {
+		return analyze(program, new WarnOnAssignments<>());
+	}
+
+	private static Map<String, Message> analyze(
+			String program,
+			SemanticCheck<?, ?> check)
+			throws Exception {
+		return analyze(program, check, false);
+	}
+
+	private static Map<String, Message> analyze(
+			String program,
+			SemanticCheck<?, ?> check,
+			boolean contextSensitive)
+			throws Exception {
+		return analyze(program, check, contextSensitive, new FirstViolationVerifier<>());
+	}
+
+	private static Map<String, Message> analyze(
+			String program,
+			SemanticCheck<?, ?> check,
+			boolean contextSensitive,
+			WarningVerifier<?, ?> verifier)
+			throws Exception {
+		Program p = IMPFrontend.processText(program);
+		for (CFG cfg : p.getAllCFGs())
+			if (!p.getEntryPoints().contains(cfg))
+				p.addEntryPoint(cfg);
+		DefaultConfiguration conf = new DefaultConfiguration();
+		conf.analysis = DefaultConfiguration.defaultAbstractDomain();
+		conf.workdir = Files.createTempDirectory("first-violation").toString();
+		conf.semanticChecks.add(check);
+		if (contextSensitive) {
+			conf.callGraph = new RTACallGraph();
+			conf.interproceduralAnalysis = new ContextBasedAnalysis<>();
+		}
+		conf.warningVerifier = verifier;
+		LiSAReport report = new LiSA(conf).run(p);
+		Map<String, Message> warnings = new HashMap<>();
+		for (Message warning : report.getWarnings())
+			warnings.put(warning.getMessage(), warning);
+		return warnings;
+	}
+
+	private static void assertPossible(
+			Message warning) {
+		assertFalse(warning.isDefinite(), warning.toString());
+		assertFalse(warning.isRefuted(), warning.toString());
+	}
+
+	/**
+	 * A verifier leaving every warning possible, after the given time,
+	 * recording the bounds on the time of each warning it is given.
+	 */
+	private static class Slow<A extends AbstractLattice<A>, D extends AbstractDomain<A>>
+			extends
+			IndividualWarningVerifier<A, D>
+			implements
+			TimeLimited {
+
+		private final long millis;
+
+		private final List<Long> limits = new ArrayList<>();
+
+		private long limit;
+
+		private Slow(
+				long millis) {
+			this.millis = millis;
+		}
+
+		@Override
+		public void init(
+				SemanticTool<A, D> tool) {
+		}
+
+		@Override
+		public VerificationResult verify(
+				SemanticTool<A, D> tool,
+				StatementMessage warning) {
+			limits.add(limit);
+			try {
+				Thread.sleep(millis);
+			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
+			}
+			return new VerificationResult(VerificationOutcome.POSSIBLE, "slow");
+		}
+
+		@Override
+		public VerificationResult verify(
+				AnalyzedCFG<A> result,
+				Statement st,
+				Violation violation) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public void setTimeLimit(
+				long millis) {
+			limit = millis;
+		}
+	}
+
+	@Test
+	public void theTimeBudgetIsSharedAmongWarnings() throws Exception {
+		Slow<?, ?> cheap = new Slow<>(0);
+		Slow<?, ?> expensive = new Slow<>(600);
+		@SuppressWarnings({ "rawtypes", "unchecked" })
+		FirstViolationVerifier<?, ?> verifier = new FirstViolationVerifier(cheap, expensive).withTimeBudget(1000);
+		Map<String, Message> warnings = analyze("class test {\n"
+				+ "  a() { def w = 0; w = 1; return w; }\n"
+				+ "  b() { def w = 0; w = 1; return w; }\n"
+				+ "  c() { def w = 0; w = 1; return w; }\n"
+				+ "}", new WarnOnAssignments<>(), false, verifier);
+		assertEquals(3, warnings.size(), warnings.toString());
+		// the first warning gets the whole budget, as the minimum share is
+		// larger than the budget; the second one the time left
+		assertEquals(2, expensive.limits.size(), expensive.limits.toString());
+		assertTrue(expensive.limits.get(0) > 900 && expensive.limits.get(0) <= 1000, expensive.limits.toString());
+		assertTrue(expensive.limits.get(1) > 0 && expensive.limits.get(1) < 500, expensive.limits.toString());
+		// the budget ran out before the third warning
+		assertEquals(1, warnings.values().stream()
+				.filter(w -> FirstViolationVerifier.NOT_VERIFIED_IN_TIME.equals(w.getExplanation())).count(),
+				warnings.toString());
+		// the bound is removed after the verification
+		assertEquals(0, expensive.limit);
+	}
+
+	@Test
+	public void stopsAtTheFirstWarningConfirmedByReachability() throws Exception {
+		Map<String, Message> warnings = analyze("class test {\n"
+				+ "  a_dead() { def z = 0; def w = 0; if (z > 5) w = 1; return w; }\n"
+				+ "  b_always() { def w = 0; w = 1; return w; }\n"
+				+ "  c_always() { def w = 0; w = 1; return w; }\n"
+				+ "}");
+		assertEquals(3, warnings.size(), warnings.toString());
+		assertTrue(warnings.get("a_dead").isRefuted(), warnings.toString());
+		assertTrue(warnings.get("b_always").isDefinite(), warnings.toString());
+		// not verified, since b_always has been confirmed first
+		assertPossible(warnings.get("c_always"));
+		assertEquals(FirstViolationVerifier.NOT_VERIFIED, warnings.get("c_always").getExplanation());
+	}
+
+	@Test
+	public void movesToPdrIfReachabilityConfirmsNothing() throws Exception {
+		assumeTrue(SmtLibProcessSolver.isZ3Available(), "z3 is not available");
+		Map<String, Message> warnings = analyze("class test {\n"
+				+ "  a_dead() { def z = 0; def w = 0; if (z > 5) w = 1; return w; }\n"
+				+ "  b_relational(x) { def y = x; def w = 0; if (x is int) if (x != y) w = 1; return w; }\n"
+				+ "  c_shallow(x) { def w = 0; if (x is int) if (x == 42) w = 1; return w; }\n"
+				+ "  d_shallow(x) { def w = 0; if (x is int) if (x == 7) w = 1; return w; }\n"
+				+ "}");
+		assertEquals(4, warnings.size(), warnings.toString());
+		// refuted by reachability
+		assertTrue(warnings.get("a_dead").isRefuted(), warnings.toString());
+		// refuted by pdr
+		assertTrue(warnings.get("b_relational").isRefuted(), warnings.toString());
+		// confirmed by pdr, with the reproducing inputs
+		Message confirmed = warnings.get("c_shallow");
+		assertTrue(confirmed.isDefinite(), warnings.toString());
+		assertTrue(confirmed.getReproducingInputs().stream()
+				.anyMatch(i -> i.getSource().startsWith("parameter x of") && i.getValue().equals("42")),
+				confirmed.getReproducingInputs().toString());
+		// not verified, since c_shallow has been confirmed first
+		assertPossible(warnings.get("d_shallow"));
+		assertEquals(FirstViolationVerifier.NOT_VERIFIED, warnings.get("d_shallow").getExplanation());
+	}
+
+	@Test
+	public void errorsReachingAllExitsAreConfirmed() throws Exception {
+		// every execution ends with an error, but no single throw is always
+		// executed: reachability confirms the warning, with no inputs
+		Map<String, Message> warnings = analyze("class A { ~A() {} }\n"
+				+ "class test { both(x) { if (x > 0)\n throw new A();\n else\n throw new A(); } }",
+				new WarnOnFirstThrow<>());
+		assertTrue(warnings.get("both").isDefinite(), warnings.toString());
+		assertTrue(warnings.get("both").getReproducingInputs().isEmpty(), warnings.toString());
+
+		// some executions return normally: reachability cannot confirm the
+		// warning, while pdr does, with a positive x
+		assumeTrue(SmtLibProcessSolver.isZ3Available(), "z3 is not available");
+		warnings = analyze("class A { ~A() {} }\n"
+				+ "class test { some(x) { if (x > 0)\n throw new A();\n return x; } }",
+				new WarnOnFirstThrow<>());
+		Message some = warnings.get("some");
+		assertTrue(some.isDefinite(), warnings.toString());
+		assertTrue(some.getReproducingInputs().stream()
+				.anyMatch(i -> i.getSource().startsWith("parameter x of") && Integer.parseInt(i.getValue()) > 0),
+				some.getReproducingInputs().toString());
+	}
+
+	@Test
+	public void errorsOfSubExpressionsAreConfirmed() throws Exception {
+		// the post-state of the call does not contain the error it raises,
+		// that is part of the post-state of the assignment
+		Map<String, Message> warnings = analyze("class A { ~A() {} }\n"
+				+ "class test { h(a) { throw new A(); } main() { def x = this.h(0); return x; } }",
+				new WarnOnAssignedCalls<>(), true);
+		assertTrue(warnings.get("main").isDefinite(), warnings.toString());
+		// errors raised by the actual parameters of the call are raised when
+		// evaluating it
+		warnings = analyze("class A { ~A() {} }\n"
+				+ "class test { h(a) { throw new A(); } g(a) { return a; } "
+				+ "main() { def x = this.g(this.h(0)); return x; } }",
+				new WarnOnAssignedCalls<>(), true);
+		assertTrue(warnings.get("main").isDefinite(), warnings.toString());
+		// while errors raised by other parts of the node are not
+		warnings = analyze("class A { ~A() {} }\n"
+				+ "class test { h(a) { throw new A(); } g(a) { return a; } "
+				+ "main() { def x = this.h(0) + this.g(1); return x; } }",
+				new WarnOnAssignedCalls<>(), true);
+		assertTrue(warnings.get("main").isRefuted(), warnings.toString());
+	}
+
+	@Test
+	public void caughtErrorsAreRefuted() throws Exception {
+		// the only exit is the throw, but its error is caught by a handler
+		// that never terminates: the error never leaves the method
+		Map<String, Message> warnings = analyze("class A { ~A() {} }\n"
+				+ "class test { caught(x) { def w = 0; try {\n throw new A();\n } catch (A e) { while (true) w = 1; } } }",
+				new WarnOnFirstThrow<>());
+		assertTrue(warnings.get("caught").isRefuted(), warnings.toString());
+	}
+
+	@Test
+	public void noVerificationWithoutVerifier() throws Exception {
+		Program p = IMPFrontend.processText("class test { a_dead() { def z = 0; def w = 0; if (z > 5) w = 1; } }");
+		DefaultConfiguration conf = new DefaultConfiguration();
+		conf.analysis = DefaultConfiguration.defaultAbstractDomain();
+		conf.workdir = Files.createTempDirectory("first-violation").toString();
+		conf.semanticChecks.add(new WarnOnAssignments<>());
+		LiSAReport report = new LiSA(conf).run(p);
+		assertEquals(1, report.getWarnings().size());
+		assertPossible(report.getWarnings().iterator().next());
+	}
+}

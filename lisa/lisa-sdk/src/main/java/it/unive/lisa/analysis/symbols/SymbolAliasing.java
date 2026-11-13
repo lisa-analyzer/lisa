@@ -2,7 +2,7 @@ package it.unive.lisa.analysis.symbols;
 
 import it.unive.lisa.analysis.FixpointInfo;
 import it.unive.lisa.lattices.FunctionalLattice;
-import java.util.Map;
+import it.unive.lisa.util.datastructures.trie.PatriciaTrieMap;
 
 /**
  * A {@link FunctionalLattice} mapping {@link Symbol}s to {@link Aliases}, that
@@ -33,7 +33,7 @@ public class SymbolAliasing
 
 	private SymbolAliasing(
 			Aliases lattice,
-			Map<Symbol, Aliases> function) {
+			PatriciaTrieMap<Symbol, Aliases> function) {
 		super(lattice, function);
 	}
 
@@ -65,7 +65,7 @@ public class SymbolAliasing
 	@Override
 	public SymbolAliasing mk(
 			Aliases lattice,
-			Map<Symbol, Aliases> function) {
+			PatriciaTrieMap<Symbol, Aliases> function) {
 		return new SymbolAliasing(lattice, function);
 	}
 

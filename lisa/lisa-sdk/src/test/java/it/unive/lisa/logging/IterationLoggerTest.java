@@ -69,7 +69,7 @@ public class IterationLoggerTest {
 		Integer[] array = generateArray();
 
 		int sum = 0;
-		Counter counter = new Counter(logger, Level.INFO, "Manual test", "integers", array.length, 0.1);
+		Counter counter = new Counter(logger, Level.INFO, "Manual test", "integers", array.length);
 		counter.on();
 		for (Integer i : array) {
 			sum += i;

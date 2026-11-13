@@ -6,13 +6,15 @@ import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.ExpressionVisitor;
 import it.unive.lisa.symbolic.SymbolicExpression;
+import it.unive.lisa.symbolic.value.operator.ComparisonOperator;
+import it.unive.lisa.symbolic.value.operator.NegatableOperator;
 import it.unive.lisa.symbolic.value.operator.TypeOperator;
 import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
 import it.unive.lisa.symbolic.value.operator.binary.TypeCheck;
 import it.unive.lisa.type.Type;
 
 /**
- * A bynary expression that applies a {@link BinaryOperator} to two
+ * A binary expression that applies a {@link BinaryOperator} to two
  * {@link SymbolicExpression}s.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
@@ -179,6 +181,25 @@ public class BinaryExpression
 	public BinaryExpression withOperator(
 			BinaryOperator operator) {
 		return new BinaryExpression(getStaticType(), left, right, operator, getCodeLocation());
+	}
+
+	@Override
+	public ValueExpression negate() {
+		if (!(operator instanceof NegatableOperator))
+			return super.negate();
+
+		BinaryOperator opposite = (BinaryOperator) ((NegatableOperator) operator).opposite();
+		if (operator instanceof ComparisonOperator)
+			return new BinaryExpression(getStaticType(), left, right, opposite, getCodeLocation());
+
+		// operator is a LogicalOperator (e.g., && or ||): De Morgan's law
+		// requires negating both operands as well, not just the connective
+		return new BinaryExpression(
+				getStaticType(),
+				((ValueExpression) left).negate(),
+				((ValueExpression) right).negate(),
+				opposite,
+				getCodeLocation());
 	}
 
 	@Override

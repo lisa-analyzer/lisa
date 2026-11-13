@@ -1021,18 +1021,22 @@ public class CFG
 		Statement st = (Statement) pp;
 		Collection<ControlFlowStructure> cfs = getControlFlowsContaining(pp);
 		Statement recent = null;
-		int min = Integer.MAX_VALUE, m;
+		int min = Integer.MAX_VALUE;
+		boolean sawUnresolvable = false;
 		for (ControlFlowStructure cf : cfs)
-			if (filter.test(cf))
-				if (recent == null) {
-					recent = cf.getCondition();
-					min = cf.distance(st);
-				} else if ((m = cf.distance(st)) < min || min == -1) {
+			if (filter.test(cf)) {
+				int m = cf.distance(st);
+				if (m == -1) {
+					sawUnresolvable = true;
+					continue;
+				}
+				if (recent == null || m < min) {
 					recent = cf.getCondition();
 					min = m;
 				}
+			}
 
-		if (min == -1)
+		if (recent == null && sawUnresolvable)
 			throw new IllegalStateException(
 					"Conditional flow structures containing "
 							+ pp

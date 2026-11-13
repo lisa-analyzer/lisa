@@ -69,7 +69,8 @@ public class NoOp
 			InterproceduralAnalysis<A, D> interprocedural,
 			StatementStore<A> expressions)
 			throws SemanticException {
-		return interprocedural.getAnalysis().smallStepSemantics(entryState, new Skip(getLocation()), this);
+		return interprocedural.getAnalysis().smallStepSemantics(entryState, new Skip(getLocation()),
+				interprocedural.getCurrentContext(), this);
 	}
 
 	@Override

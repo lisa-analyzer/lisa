@@ -257,7 +257,7 @@ public abstract class NonRedundantSetLattice<S extends NonRedundantSetLattice<S,
 			return mk(Collections.emptySet());
 		Set<L> newSet = new HashSet<>();
 
-		L completeLub = elements.iterator().next().bottom();
+		L completeLub = (elements.isEmpty() ? other.elements : elements).iterator().next().bottom();
 		for (L element : elements)
 			completeLub = completeLub.lub(element);
 		for (L element : other.elements)

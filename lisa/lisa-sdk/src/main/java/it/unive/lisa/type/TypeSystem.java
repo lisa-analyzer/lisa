@@ -42,6 +42,21 @@ public abstract class TypeSystem {
 	}
 
 	/**
+	 * Yields {@code true} if the given set is made of all the types registered
+	 * in this type system, that is, if it is equal to {@link #getTypes()}. This
+	 * does not build the set of all types, and it is thus cheaper than
+	 * comparing with {@link #getTypes()}.
+	 * 
+	 * @param types the set of types
+	 * 
+	 * @return whether the set contains exactly all the types
+	 */
+	public boolean isAllTypes(
+			Set<Type> types) {
+		return types.size() == this.types.size() && types.containsAll(this.types.values());
+	}
+
+	/**
 	 * Yields the {@link Type} instance with the given name.
 	 * 
 	 * @param name the name of the type

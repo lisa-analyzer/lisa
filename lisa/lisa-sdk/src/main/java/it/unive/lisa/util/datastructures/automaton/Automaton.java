@@ -669,10 +669,14 @@ public abstract class Automaton<A extends Automaton<A, T>,
 	 * @return a boolean value that tells if {@code this} has any cycle.
 	 */
 	public boolean hasCycle() {
-		// BFS: move one step each time starting from the initial states
+		// BFS: move one step each time starting from the initial states,
+		// following only states reachable from them (states that cannot be
+		// reached at all, e.g. leftover garbage states, do not affect the
+		// language and must not be waited on, or the loop below never
+		// terminates since visited can never grow to include them)
 		Set<State> currentStates = getInitialStates();
 		Set<State> visited = new TreeSet<>();
-		while (!visited.containsAll(states)) {
+		while (!currentStates.isEmpty()) {
 			Set<State> temp = new TreeSet<>();
 			for (State s : currentStates)
 				for (State follower : getNextStates(s))
@@ -1960,7 +1964,11 @@ public abstract class Automaton<A extends Automaton<A, T>,
 		SortedSet<Transition<T>> newDelta = new TreeSet<>();
 
 		for (State q : states) {
-			State mock = new State(q.getId(), q == s ? true : false, true);
+			// s is identified by value, not by reference: the only current
+			// caller happens to pass one of this automaton's own State
+			// instances, but nothing in the contract of this method requires
+			// that
+			State mock = new State(q.getId(), q.equals(s), true);
 			newStates.add(mock);
 			nameToStates.put(q.getId(), mock);
 		}
@@ -2062,7 +2070,11 @@ public abstract class Automaton<A extends Automaton<A, T>,
 	 */
 	public IntInterval length() {
 		int max = lengthOfLongestString();
-		int min = toRegex().minLength();
+		// toRegex() is not simplified (see its javadoc): the raw
+		// Brzozowski output is littered with EmptySet/Star sub-expressions
+		// that make minLength() collapse to 0 regardless of the actual
+		// minimum length of the recognized language
+		int min = toRegex().simplify().minLength();
 		return new IntInterval(Integer.valueOf(min), max == Integer.MAX_VALUE ? null : max);
 	}
 

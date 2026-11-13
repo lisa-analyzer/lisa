@@ -34,6 +34,7 @@ import it.unive.lisa.symbolic.value.operator.binary.NumericMax;
 import it.unive.lisa.symbolic.value.operator.binary.NumericMin;
 import it.unive.lisa.symbolic.value.operator.binary.NumericNonOverflowingAdd;
 import it.unive.lisa.symbolic.value.operator.binary.NumericNonOverflowingDiv;
+import it.unive.lisa.symbolic.value.operator.binary.NumericNonOverflowingMod;
 import it.unive.lisa.symbolic.value.operator.binary.NumericNonOverflowingMul;
 import it.unive.lisa.symbolic.value.operator.binary.NumericNonOverflowingRem;
 import it.unive.lisa.symbolic.value.operator.binary.NumericNonOverflowingSub;
@@ -306,6 +307,20 @@ public class ConstantValuePropagationTest {
 	void evalRemainderIntegers() throws SemanticException {
 		assertEquals(mk(1),
 				domain.evalBinaryExpression(mkBin(NumericNonOverflowingRem.INSTANCE), mk(10), mk(3), pp, oracle));
+	}
+
+	@Test
+	void evalModuloTakesTheSignOfTheDivisor() throws SemanticException {
+		assertEquals(mk(2), domain.evalBinaryExpression(mkBin(NumericNonOverflowingMod.INSTANCE), mk(-7), mk(3), pp,
+				oracle));
+		assertEquals(mk(-2), domain.evalBinaryExpression(mkBin(NumericNonOverflowingMod.INSTANCE), mk(7), mk(-3), pp,
+				oracle));
+		assertEquals(mk(2L), domain.evalBinaryExpression(mkBin(NumericNonOverflowingMod.INSTANCE), mk(-7L), mk(3L), pp,
+				oracle));
+		assertEquals(mk(2.5), domain.evalBinaryExpression(mkBin(NumericNonOverflowingMod.INSTANCE), mk(-7.5), mk(5.0),
+				pp, oracle));
+		assertEquals(mk(-1), domain.evalBinaryExpression(mkBin(NumericNonOverflowingRem.INSTANCE), mk(-7), mk(3), pp,
+				oracle));
 	}
 
 	@Test

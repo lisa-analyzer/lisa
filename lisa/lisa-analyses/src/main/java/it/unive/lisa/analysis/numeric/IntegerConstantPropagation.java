@@ -81,10 +81,12 @@ import java.util.Set;
 
 /**
  * The overflow-insensitive basic integer constant propagation analysis,
- * tracking if a certain integer value has constant value or not, implemented as
+ * tracking whether an integer value is a known constant or not, implemented as
  * a {@link BaseNonRelationalValueDomain}. The lattice structure used by this
- * domain is {@link IntegerConstant}.
- * 
+ * domain is {@link IntegerConstant}, representing either a single known
+ * constant or "unknown" (top): every arithmetic and comparison operator is
+ * evaluated exactly whenever all of its operands are themselves constants.
+ *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public class IntegerConstantPropagation
@@ -194,10 +196,10 @@ public class IntegerConstantPropagation
 		}
 
 		if (operator instanceof DivisionOperator)
-			if (!left.isTop() && left.value == 0)
-				return new IntegerConstant(0);
-			else if (!right.isTop() && right.value == 0)
+			if (!right.isTop() && right.value == 0)
 				return IntegerConstant.BOTTOM;
+			else if (!left.isTop() && left.value == 0)
+				return new IntegerConstant(0);
 			else if (left.isTop() || right.isTop() || left.value % right.value != 0)
 				return IntegerConstant.TOP;
 			else
@@ -231,9 +233,10 @@ public class IntegerConstantPropagation
 		if (operator instanceof AdditionOperator)
 			return new IntegerConstant(left.value + right.value);
 		if (operator instanceof ModuloOperator)
-			return new IntegerConstant(Math.floorMod(left.value, right.value));
+			return right.value == 0 ? IntegerConstant.BOTTOM
+					: new IntegerConstant(Math.floorMod(left.value, right.value));
 		if (operator instanceof RemainderOperator)
-			return new IntegerConstant(left.value % right.value);
+			return right.value == 0 ? IntegerConstant.BOTTOM : new IntegerConstant(left.value % right.value);
 		if (operator instanceof SubtractionOperator)
 			return new IntegerConstant(left.value - right.value);
 

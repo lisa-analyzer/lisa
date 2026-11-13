@@ -34,15 +34,16 @@ public class TopExecutionPolicy
 			OpenCall call,
 			AnalysisState<A> entryState,
 			Analysis<A, D> analysis,
+			ScopeId<?> context,
 			ExpressionSet[] params)
 			throws SemanticException {
 		AnalysisState<A> poststate = entryState.topExecution();
 
 		if (call.getStaticType().isVoidType())
-			return analysis.smallStepSemantics(poststate, new Skip(call.getLocation()), call);
+			return analysis.smallStepSemantics(poststate, new Skip(call.getLocation()), context, call);
 		else {
 			Identifier var = call.getMetaVariable();
-			return analysis.smallStepSemantics(poststate, var, call);
+			return analysis.smallStepSemantics(poststate, var, context, call);
 		}
 	}
 

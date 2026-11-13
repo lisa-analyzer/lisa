@@ -20,8 +20,18 @@ import java.util.Set;
 import java.util.function.Predicate;
 
 /**
- * A heap lattice tracking sets of {@link AllocationSite}.
- * 
+ * A heap lattice tracking sets of {@link AllocationSite}s, used as the value of
+ * the points-to map maintained by allocation-site-based heap domains (see
+ * {@link it.unive.lisa.analysis.heap.pointbased.AllocationSiteBasedAnalysis}).
+ * Since an identifier may point to a strong allocation site (which uniquely
+ * identifies a single runtime object) or to one or more weak allocation sites
+ * (which may each identify more than one runtime object), the ordering and join
+ * of two sets are not simple set inclusion and union: a weak site always
+ * subsumes any strong site with the same name, so
+ * {@link #lessOrEqualAux(AllocationSites)} and {@link #lubAux(AllocationSites)}
+ * only compare/merge sites with the same name, preferring the weak variant
+ * whenever both a strong and a weak alternative are present.
+ *
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
 public class AllocationSites
@@ -89,6 +99,12 @@ public class AllocationSites
 		return this.elements.iterator();
 	}
 
+	/**
+	 * {@inheritDoc} This set is less or equal than {@code other} if every site
+	 * that appears only in this set is strong and has a weak counterpart with
+	 * the same name in {@code other} (a weak site can always safely stand in
+	 * for a strong one with the same name, but not vice versa).
+	 */
 	@Override
 	public boolean lessOrEqualAux(
 			AllocationSites other)
@@ -128,6 +144,12 @@ public class AllocationSites
 		return true;
 	}
 
+	/**
+	 * {@inheritDoc} All weak sites of both operands are kept, and a strong site
+	 * is kept only if no weak site with the same name is already present, so
+	 * that at most one site per name (preferring the weak one) survives in the
+	 * result.
+	 */
 	@Override
 	public AllocationSites lubAux(
 			AllocationSites other)

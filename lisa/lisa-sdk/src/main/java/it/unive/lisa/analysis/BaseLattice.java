@@ -105,7 +105,7 @@ public interface BaseLattice<L extends BaseLattice<L>>
 	default L narrowing(
 			L other)
 			throws SemanticException {
-		if (other == null || this.isBottom() || this == other || this.equals(other))
+		if (other == null || this.isBottom() || other.isTop() || this == other || this.equals(other))
 			return (L) this;
 
 		if (this.isTop() || other.isBottom())

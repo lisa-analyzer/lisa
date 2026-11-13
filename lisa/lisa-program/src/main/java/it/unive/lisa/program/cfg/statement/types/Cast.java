@@ -76,11 +76,12 @@ public class Cast
 				.smallStepSemantics(
 						state,
 						new BinaryExpression(
-								getProgram().getTypes().getBooleanType(),
+								getStaticType(),
 								left,
 								right,
 								target.castIsConversion() ? TypeConv.INSTANCE : TypeCast.INSTANCE,
 								getLocation()),
+						interprocedural.getCurrentContext(),
 						this);
 	}
 

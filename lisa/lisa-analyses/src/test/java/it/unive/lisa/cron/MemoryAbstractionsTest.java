@@ -5,6 +5,7 @@ import it.unive.lisa.analysis.heap.TypeBasedHeap;
 import it.unive.lisa.analysis.heap.pointbased.FieldSensitivePointBasedHeap;
 import it.unive.lisa.analysis.heap.pointbased.PointBasedHeap;
 import it.unive.lisa.interprocedural.context.ContextBasedAnalysis;
+import it.unive.lisa.interprocedural.inlining.InliningAnalysis;
 import it.unive.lisa.outputs.JSONResults;
 import org.junit.jupiter.api.Test;
 
@@ -87,6 +88,86 @@ public class MemoryAbstractionsTest
 		conf.testDir = "heap";
 		conf.testSubDir = "pp-field-gc";
 		conf.programFile = "gc.imp";
+		perform(conf);
+	}
+
+	@Test
+	public void contextInsensitivePointBasedHeapTest() {
+		CronConfiguration conf = new CronConfiguration();
+		conf.outputs.add(new JSONResults<>());
+		conf.analysis = DefaultConfiguration.simpleDomain(
+				new PointBasedHeap(),
+				DefaultConfiguration.defaultValueDomain(),
+				DefaultConfiguration.defaultTypeDomain());
+		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(-1);
+		conf.testDir = "heap";
+		conf.testSubDir = "context/pp";
+		conf.programFile = "heap-context.imp";
+		conf.allMethods = true;
+		perform(conf);
+	}
+
+	@Test
+	public void contextSensitivePointBasedHeapTest() {
+		CronConfiguration conf = new CronConfiguration();
+		conf.outputs.add(new JSONResults<>());
+		conf.analysis = DefaultConfiguration.simpleDomain(
+				new PointBasedHeap(true),
+				DefaultConfiguration.defaultValueDomain(),
+				DefaultConfiguration.defaultTypeDomain());
+		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(-1);
+		conf.testDir = "heap";
+		conf.testSubDir = "context/pp-ctx";
+		conf.programFile = "heap-context.imp";
+		conf.allMethods = true;
+		perform(conf);
+	}
+
+	@Test
+	public void contextInsensitiveFieldSensitivePointBasedHeapTest() {
+		CronConfiguration conf = new CronConfiguration();
+		conf.outputs.add(new JSONResults<>());
+		conf.analysis = DefaultConfiguration.simpleDomain(
+				new FieldSensitivePointBasedHeap(),
+				DefaultConfiguration.defaultValueDomain(),
+				DefaultConfiguration.defaultTypeDomain());
+		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(-1);
+		conf.testDir = "heap";
+		conf.testSubDir = "context/pp-field";
+		conf.programFile = "heap-context.imp";
+		conf.allMethods = true;
+		perform(conf);
+	}
+
+	@Test
+	public void contextSensitiveFieldSensitivePointBasedHeapTest() {
+		CronConfiguration conf = new CronConfiguration();
+		conf.outputs.add(new JSONResults<>());
+		conf.analysis = DefaultConfiguration.simpleDomain(
+				new FieldSensitivePointBasedHeap(true),
+				DefaultConfiguration.defaultValueDomain(),
+				DefaultConfiguration.defaultTypeDomain());
+		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(-1);
+		conf.testDir = "heap";
+		conf.testSubDir = "context/pp-field-ctx";
+		conf.programFile = "heap-context.imp";
+		conf.allMethods = true;
+		perform(conf);
+	}
+
+	@Test
+	public void contextSensitiveFieldSensitivePointBasedHeapInliningTest() {
+		CronConfiguration conf = new CronConfiguration();
+		conf.outputs.add(new JSONResults<>());
+		conf.analysis = DefaultConfiguration.simpleDomain(
+				new FieldSensitivePointBasedHeap(true),
+				DefaultConfiguration.defaultValueDomain(),
+				DefaultConfiguration.defaultTypeDomain());
+		conf.interproceduralAnalysis = new InliningAnalysis<>();
+		conf.testDir = "heap";
+		conf.testSubDir = "context/pp-field-ctx-inlining";
+		conf.programFile = "heap-context.imp";
+		conf.allMethods = true;
 		perform(conf);
 	}
 

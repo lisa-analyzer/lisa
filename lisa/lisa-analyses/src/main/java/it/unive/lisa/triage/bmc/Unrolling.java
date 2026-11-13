@@ -1,0 +1,1578 @@
+package it.unive.lisa.triage.bmc;
+
+import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.symbolic.SymbolicExpression;
+import it.unive.lisa.symbolic.value.BinaryExpression;
+import it.unive.lisa.symbolic.value.Constant;
+import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.symbolic.value.TernaryExpression;
+import it.unive.lisa.symbolic.value.UnaryExpression;
+import it.unive.lisa.triage.encoding.CellKeySort;
+import it.unive.lisa.triage.encoding.ExpressionEncoder;
+import it.unive.lisa.triage.encoding.ExpressionEncoderFactory;
+import it.unive.lisa.triage.encoding.SortPolicy;
+import it.unive.lisa.triage.encoding.SymbolTable;
+import it.unive.lisa.triage.encoding.ValueSort;
+import it.unive.lisa.triage.model.AlarmModel;
+import it.unive.lisa.triage.model.BadCase;
+import it.unive.lisa.triage.model.EdgeTransition;
+import it.unive.lisa.triage.model.FreshValue;
+import it.unive.lisa.triage.model.HeapModel;
+import it.unive.lisa.triage.model.HeapType;
+import it.unive.lisa.triage.model.InputValue;
+import it.unive.lisa.triage.model.ModelLocation;
+import it.unive.lisa.triage.model.SummaryValue;
+import it.unive.lisa.triage.model.SymbolicCase;
+import it.unive.lisa.triage.smt.FloatingPoints;
+import it.unive.lisa.triage.smt.SmtSolver;
+import it.unive.lisa.triage.smt.Sort;
+import it.unive.lisa.triage.smt.Term;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.IdentityHashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Function;
+
+/**
+ * The encoding of the executions of an {@link AlarmModel} as SMT formulas over
+ * <i>steps</i>. At each step {@code t}, the state of an execution is given by a
+ * program counter ({@code pc@t}, an integer identifying the current location)
+ * and by the values of the identifiers of the model ({@code id@t}). The
+ * encoding provides:
+ * <ul>
+ * <li>the initial condition ({@link #initial()});</li>
+ * <li>the invariants that hold at each step ({@link #invariants(int)}), from
+ * the results of the analysis;</li>
+ * <li>the transition relation between steps {@code t} and {@code t+1}
+ * ({@link #transition(int)});</li>
+ * <li>the bad condition at step {@code t} ({@link #bad(int)}).</li>
+ * </ul>
+ * Fresh values get a new constant at each step, since each execution of a
+ * transition produces new ones. The encoding also records whether each
+ * transition is <i>exact</i>, that is, whether it does not rely on values that
+ * are unconstrained because of imprecision (summary values, or operations that
+ * the encoder cannot encode).
+ *
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ */
+public class Unrolling {
+
+	private final AlarmModel model;
+
+	private final SmtSolver solver;
+
+	private final Map<ModelLocation, Integer> index;
+
+	private final List<ModelLocation> locations;
+
+	private final Map<String, Term> constants;
+
+	private final Map<String, String> functions = new LinkedHashMap<>();
+
+	private final Map<String, Boolean> exactness;
+
+	private final Map<String, List<Term>> guards = new LinkedHashMap<>();
+
+	/**
+	 * The length of the SMT-LIB text of the terms beyond which they are defined
+	 * as constants when shared (see {@link SymbolTable#share(Term)}).
+	 */
+	private static final int SHARE_THRESHOLD = 2000;
+
+	/**
+	 * The constants defined as shared terms, by their text.
+	 */
+	private final Map<String, Term> shared = new LinkedHashMap<>();
+
+	/**
+	 * The relations of the transitions encoded by
+	 * {@link #transition(int, EdgeTransition)}, by key.
+	 */
+	private final Map<String, Term> relations = new LinkedHashMap<>();
+
+	/**
+	 * The reasons why the encoding with each key is not exact, regardless of
+	 * the model (see {@link #getImprecisions(String, SmtSolver)})
+	 */
+	private final Map<String, Set<String>> reasons = new LinkedHashMap<>();
+
+	/**
+	 * The reasons why the encoding with each key is not exact in models where a
+	 * condition holds and a guard does not (see
+	 * {@link #getImprecisions(String, SmtSolver)})
+	 */
+	private final Map<String, List<GuardedReason>> guardedReasons = new LinkedHashMap<>();
+
+	/**
+	 * The applications of functions computed on concrete values (see
+	 * {@link SymbolTable#evaluable}) of each encoding, with the conditions
+	 * under which they are evaluated.
+	 */
+	private final Map<String, List<GuardedApplication>> applications = new LinkedHashMap<>();
+
+	/**
+	 * The known values of the functions computed on concrete values, or
+	 * {@code null} if they are not learned.
+	 */
+	private EvaluatedFunctions evaluated;
+
+	/**
+	 * An application of a function computed on concrete values.
+	 */
+	private static final class Application {
+
+		private final String function;
+
+		private final List<Term> arguments;
+
+		private final Term term;
+
+		private final Function<List<Number>, Number> evaluator;
+
+		private final String reason;
+
+		private Application(
+				String function,
+				List<Term> arguments,
+				Term term,
+				Function<List<Number>, Number> evaluator,
+				String reason) {
+			this.function = function;
+			this.arguments = arguments;
+			this.term = term;
+			this.evaluator = evaluator;
+			this.reason = reason;
+		}
+	}
+
+	/**
+	 * An application of a function computed on concrete values, evaluated when
+	 * the given condition holds (e.g., the case of a transition holding it is
+	 * taken).
+	 */
+	private static final class GuardedApplication {
+
+		private final Term when;
+
+		private final Application application;
+
+		private GuardedApplication(
+				Term when,
+				Application application) {
+			this.when = when;
+			this.application = application;
+		}
+	}
+
+	private static final class GuardedReason {
+
+		private final Term when;
+
+		private final Term guard;
+
+		private final String reason;
+
+		private GuardedReason(
+				Term when,
+				Term guard,
+				String reason) {
+			this.when = when;
+			this.guard = guard;
+			this.reason = reason;
+		}
+	}
+
+	private final boolean strict;
+
+	private final ExpressionEncoderFactory encoders;
+
+	private final Map<String, Set<FreshValue>> inputs;
+
+	private final Map<EdgeTransition, Integer> edgeIds;
+
+	private final Map<EdgeTransition, List<SymbolicCase>> cases = new IdentityHashMap<>();
+
+	private int fresh;
+
+	/**
+	 * Builds the encoding, declaring the needed datatypes on the given solver.
+	 *
+	 * @param model  the model to encode
+	 * @param solver the solver where constants are declared
+	 */
+	public Unrolling(
+			AlarmModel model,
+			SmtSolver solver) {
+		this(model, solver, false);
+	}
+
+	/**
+	 * Builds the unrolling, declaring the {@link ValueSort} datatype in the
+	 * given solver. In strict mode, transitions, bad cases, and conditions also
+	 * require the values they use to have the sorts that make their encoding
+	 * precise (e.g., operands of arithmetic operations must be integers): the
+	 * encoding then under-approximates the executions of the model, and every
+	 * execution it admits is encoded precisely (except for summaries, see
+	 * {@link #isExact(String)}).
+	 *
+	 * @param model  the model to encode
+	 * @param solver the solver where constants are declared
+	 * @param strict whether or not to encode in strict mode
+	 */
+	public Unrolling(
+			AlarmModel model,
+			SmtSolver solver,
+			boolean strict) {
+		this(model, solver, strict, ExpressionEncoderFactory.DEFAULT);
+	}
+
+	/**
+	 * Builds the unrolling, as
+	 * {@link #Unrolling(AlarmModel, SmtSolver, boolean)}, encoding expressions
+	 * with the encoders built by the given factory (e.g., encoders knowing the
+	 * operators of a frontend).
+	 *
+	 * @param model    the model to encode
+	 * @param solver   the solver where constants are declared
+	 * @param strict   whether or not to encode in strict mode
+	 * @param encoders the factory of the encoders of expressions
+	 */
+	public Unrolling(
+			AlarmModel model,
+			SmtSolver solver,
+			boolean strict,
+			ExpressionEncoderFactory encoders) {
+		this.strict = strict;
+		this.encoders = encoders;
+		// floating point numbers are encoded only if they might be used, since
+		// the theory of floating point numbers can make queries much slower
+		this.model = involvesFloats(model) ? model : model.withSorts(model.getSorts().withoutFloats());
+		this.solver = solver;
+		this.index = new LinkedHashMap<>();
+		this.locations = new ArrayList<>(model.getLocations());
+		for (int i = 0; i < locations.size(); i++)
+			index.put(locations.get(i), i);
+		this.constants = new LinkedHashMap<>();
+		this.exactness = new LinkedHashMap<>();
+		this.inputs = new LinkedHashMap<>();
+		this.edgeIds = new IdentityHashMap<>();
+		// the constructors of floating point values are declared only if
+		// they might be used
+		solver.declareDatatype(
+				this.model.getSorts().encodesFloats() ? ValueSort.DATATYPE : ValueSort.DATATYPE_WITHOUT_FLOATS);
+		solver.declareDatatype(CellKeySort.DATATYPE);
+	}
+
+	/**
+	 * Yields {@code true} if the encoding of the given model might involve
+	 * floating point numbers: they are encoded by the sorts of the model, and
+	 * some identifier of the vocabulary or fresh value might hold them, or some
+	 * expression that is encoded has a floating point type or is a floating
+	 * point constant.
+	 *
+	 * @param model the model
+	 *
+	 * @return whether or not the encoding might involve floating point numbers
+	 */
+	public static boolean involvesFloats(
+			AlarmModel model) {
+		SortPolicy sorts = model.getSorts();
+		if (!sorts.encodesFloats())
+			return false;
+		for (Identifier id : model.getVocabulary())
+			if (sorts.sortOf(id).isFloatingPoint() || sorts.mayBeFloat(id))
+				return true;
+		for (FreshValue v : model.getFreshValues().values())
+			if (SortPolicy.isFloat(v.getStaticType()))
+				return true;
+		List<SymbolicExpression> encoded = new ArrayList<>(model.getInitialConstraints());
+		for (ModelLocation loc : model.getLocations()) {
+			Set<SymbolicExpression> seeds = model.getSeeds(loc);
+			if (seeds != null)
+				encoded.addAll(seeds);
+			for (EdgeTransition e : model.getTransitions(loc))
+				for (SymbolicCase c : e.getStore().getCases()) {
+					encoded.addAll(c.getPathCondition());
+					for (Map.Entry<Identifier, SymbolicExpression> u : c.getUpdates().entrySet())
+						if (model.getVocabulary().contains(u.getKey()))
+							encoded.add(u.getValue());
+				}
+		}
+		for (BadCase c : model.getBadCases()) {
+			encoded.addAll(c.getPathCondition());
+			if (c.getViolation() != null)
+				encoded.add(c.getViolation());
+		}
+		for (SymbolicExpression e : encoded)
+			if (involvesFloats(e, sorts))
+				return true;
+		return false;
+	}
+
+	private static boolean involvesFloats(
+			SymbolicExpression e,
+			SortPolicy sorts) {
+		if (SortPolicy.isFloat(e.getStaticType()))
+			return true;
+		if (e instanceof Constant)
+			return ((Constant) e).getValue() instanceof Double || ((Constant) e).getValue() instanceof Float;
+		if (e instanceof Identifier)
+			return sorts.sortOf((Identifier) e).isFloatingPoint() || sorts.mayBeFloat((Identifier) e);
+		if (e instanceof UnaryExpression)
+			return involvesFloats(((UnaryExpression) e).getExpression(), sorts);
+		if (e instanceof BinaryExpression)
+			return involvesFloats(((BinaryExpression) e).getLeft(), sorts)
+					|| involvesFloats(((BinaryExpression) e).getRight(), sorts);
+		if (e instanceof TernaryExpression)
+			return involvesFloats(((TernaryExpression) e).getLeft(), sorts)
+					|| involvesFloats(((TernaryExpression) e).getMiddle(), sorts)
+					|| involvesFloats(((TernaryExpression) e).getRight(), sorts);
+		return false;
+	}
+
+	/**
+	 * Yields the model being encoded.
+	 *
+	 * @return the model
+	 */
+	public AlarmModel getModel() {
+		return model;
+	}
+
+	/**
+	 * Yields the index of the given location, used as value of the program
+	 * counter.
+	 *
+	 * @param location the location
+	 *
+	 * @return the index
+	 */
+	public int indexOf(
+			ModelLocation location) {
+		return index.get(location);
+	}
+
+	/**
+	 * Yields the location with the given index.
+	 *
+	 * @param index the index
+	 *
+	 * @return the location
+	 */
+	public ModelLocation locationAt(
+			int index) {
+		return locations.get(index);
+	}
+
+	/**
+	 * Yields a new encoder of expressions, using the given symbols.
+	 */
+	private ExpressionEncoder encoder(
+			SymbolTable symbols) {
+		return encoders.create(model.getSorts(), symbols);
+	}
+
+	private Term constant(
+			String name,
+			Sort sort) {
+		return constants.computeIfAbsent(name, n -> solver.declare(n, sort));
+	}
+
+	/**
+	 * Yields the given term, or a constant defined as the given term if its
+	 * text is large, so that encodings using it more than once do not repeat it
+	 * (see {@link SymbolTable#share(Term)}).
+	 */
+	private Term share(
+			Term term) {
+		String text = term.toSmtLib();
+		if (text.length() <= SHARE_THRESHOLD)
+			return term;
+		Term known = shared.get(text);
+		if (known == null) {
+			known = solver.define("share!" + shared.size(), term);
+			shared.put(text, known);
+		}
+		return known;
+	}
+
+	private String function(
+			String name,
+			List<Sort> arguments,
+			Sort result) {
+		String key = name + arguments + result;
+		return functions.computeIfAbsent(key,
+				k -> solver.declareFunction(name + "#" + functions.size(), arguments, result));
+	}
+
+	/**
+	 * Yields the program counter at the given step.
+	 *
+	 * @param step the step
+	 *
+	 * @return the program counter
+	 */
+	public Term pc(
+			int step) {
+		return constant("pc@" + step, Sort.INT);
+	}
+
+	/**
+	 * Yields the value of the given identifier at the given step.
+	 *
+	 * @param id   the identifier
+	 * @param step the step
+	 *
+	 * @return the value
+	 */
+	public Term var(
+			Identifier id,
+			int step) {
+		return constant(id.getName() + "@" + step, model.getSorts().sortOf(id));
+	}
+
+	/**
+	 * Yields the condition stating that the program counter is at the given
+	 * location at the given step.
+	 *
+	 * @param step     the step
+	 * @param location the location
+	 *
+	 * @return the condition
+	 */
+	public Term at(
+			int step,
+			ModelLocation location) {
+		return Term.eq(pc(step), Term.integer(index.get(location)));
+	}
+
+	/**
+	 * A symbol table naming identifiers at a given step, and fresh values with
+	 * a given tag (distinguishing different transitions at the same step).
+	 * Fresh constants created by the encoder make the encoding inexact.
+	 */
+	private class StepSymbols
+			implements
+			SymbolTable {
+
+		private final int step;
+
+		private final String tag;
+
+		private boolean exact = true;
+
+		private final Set<FreshValue> used = new LinkedHashSet<>();
+
+		private StepSymbols(
+				int step,
+				String tag) {
+			this.step = step;
+			this.tag = tag;
+		}
+
+		@Override
+		public Term constant(
+				Identifier id,
+				Sort sort) {
+			if (id instanceof FreshValue) {
+				used.add((FreshValue) id);
+				if (id instanceof SummaryValue) {
+					SummaryValue summary = (SummaryValue) id;
+					imprecise(summary.getKind().getDescription() + ": " + summary.getReason());
+				}
+				return Unrolling.this.constant(id.getName() + "@" + step + tag, sort);
+			}
+			return var(id, step);
+		}
+
+		private final List<Term> guards = new ArrayList<>();
+
+		/**
+		 * The reasons of the imprecision signaled by each guard, aligned with
+		 * {@link #guards}.
+		 */
+		private final List<String> guardReasons = new ArrayList<>();
+
+		/**
+		 * The reasons why the encoding is not exact, regardless of the model.
+		 */
+		private final Set<String> reasons = new LinkedHashSet<>();
+
+		/**
+		 * Records that the encoding is not exact, regardless of the model, for
+		 * the given reason. In strict mode, the encoding is then never precise:
+		 * a false guard excludes it.
+		 */
+		private void imprecise(
+				String reason) {
+			exact = false;
+			reasons.add(reason);
+			if (strict)
+				guard(Term.FALSE, reason);
+		}
+
+		private void guard(
+				Term guard,
+				String reason) {
+			guards.add(guard);
+			guardReasons.add(reason);
+		}
+
+		@Override
+		public Term fresh(
+				Sort sort,
+				SymbolicExpression origin) {
+			imprecise(UNSUPPORTED_OPERATIONS + ": " + describe(origin));
+			return Unrolling.this.constant("$havoc#" + (Unrolling.this.fresh++), sort);
+		}
+
+		@Override
+		public Term fresh(
+				Sort sort,
+				SymbolicExpression origin,
+				Term guard) {
+			guard(guard, OTHER_KINDS + ": " + describe(origin));
+			return Unrolling.this.constant("$havoc#" + (Unrolling.this.fresh++), sort);
+		}
+
+		@Override
+		public void exactOnlyIf(
+				Term guard) {
+			exactOnlyIf(guard, null);
+		}
+
+		@Override
+		public void exactOnlyIf(
+				Term guard,
+				SymbolicExpression origin) {
+			guard(guard, OTHER_KINDS + ": " + describe(origin));
+		}
+
+		@Override
+		public void exactOnlyIfWritten(
+				Term written,
+				SymbolicExpression origin) {
+			// the location might hold a value that the model does not know
+			// (e.g., one existing in the initial states, or written by code
+			// that is not modeled)
+			SymbolicExpression contents = origin instanceof TernaryExpression
+					? ((TernaryExpression) origin).getLeft()
+					: origin;
+			guard(written, SummaryValue.Kind.HEAP.getDescription() + ": contents of " + contents
+					+ " not written by the model");
+		}
+
+		@Override
+		public Term apply(
+				String function,
+				Sort result,
+				List<Term> arguments,
+				SymbolicExpression origin,
+				Term guard) {
+			guard(guard, reasonOf(function, origin));
+			List<Sort> sorts = new ArrayList<>();
+			for (Term arg : arguments)
+				sorts.add(arg.getSort());
+			return Term.app(Unrolling.this.function(function, sorts, result), result,
+					arguments.toArray(Term[]::new));
+		}
+
+		@Override
+		public Term share(
+				Term term) {
+			return Unrolling.this.share(term);
+		}
+
+		@Override
+		public Term unknown(
+				String function,
+				Sort result,
+				List<Term> arguments,
+				SymbolicExpression origin) {
+			imprecise(UNSUPPORTED_OPERATIONS + ": " + describe(origin));
+			List<Sort> sorts = new ArrayList<>();
+			for (Term arg : arguments)
+				sorts.add(arg.getSort());
+			return Term.app(Unrolling.this.function(function, sorts, result), result,
+					arguments.toArray(Term[]::new));
+		}
+
+		private final List<Application> evaluations = new ArrayList<>();
+
+		@Override
+		public Term evaluable(
+				String function,
+				Sort result,
+				List<Term> arguments,
+				Function<List<Number>, Number> evaluator,
+				SymbolicExpression origin) {
+			List<Sort> sorts = new ArrayList<>();
+			for (Term arg : arguments)
+				sorts.add(arg.getSort());
+			String name = function + sorts + result;
+			String symbol = Unrolling.this.function(function, sorts, result);
+			solver.evaluable(symbol, sorts, result, evaluator);
+			Term term = Term.app(symbol, result, arguments.toArray(Term[]::new));
+			// the values learned from previous models
+			if (evaluated != null)
+				for (Map.Entry<List<String>, String> known : evaluated.valuesOf(name).entrySet()) {
+					Term[] same = new Term[arguments.size()];
+					for (int i = 0; i < same.length; i++)
+						same[i] = Term.eq(arguments.get(i), Term.value(known.getKey().get(i), sorts.get(i)));
+					term = Term.ite(Term.and(same), Term.value(known.getValue(), result), term);
+				}
+			evaluations.add(new Application(name, arguments, term, evaluator,
+					UNSUPPORTED_OPERATIONS + ": " + describe(origin)));
+			return term;
+		}
+
+		@Override
+		public Term monotone(
+				String function,
+				Sort result,
+				Term argument,
+				Function<List<Number>, Number> evaluator,
+				boolean increasing,
+				SymbolicExpression origin) {
+			Term term = evaluable(function, result, List.of(argument), evaluator, origin);
+			if (evaluated == null)
+				return term;
+			// each known value that is a number bounds the values on the
+			// arguments on either side of its own: monotone functions can
+			// still yield NaN on other arguments (e.g., outside of their
+			// domain), so the bounds hold only for the values that are numbers,
+			// and a known NaN bounds nothing (comparisons with NaNs never hold)
+			String name = function + List.of(argument.getSort()) + result;
+			Term nan = Term.app("fp.isNaN", Sort.BOOL, term);
+			for (Map.Entry<List<String>, String> known : evaluated.valuesOf(name).entrySet()) {
+				if (Double.isNaN(FloatingPoints.parse(known.getValue(), result).doubleValue()))
+					continue;
+				Term point = Term.value(known.getKey().get(0), argument.getSort());
+				Term value = Term.value(known.getValue(), result);
+				Term below = Term.app("fp.leq", Sort.BOOL, argument, point);
+				Term above = Term.app("fp.geq", Sort.BOOL, argument, point);
+				Term lower = Term.or(nan, Term.app("fp.leq", Sort.BOOL, term, value));
+				Term higher = Term.or(nan, Term.app("fp.geq", Sort.BOOL, term, value));
+				require(Term.implies(below, increasing ? lower : higher));
+				require(Term.implies(above, increasing ? higher : lower));
+			}
+			return term;
+		}
+
+		private final List<Term> requirements = new ArrayList<>();
+
+		@Override
+		public void require(
+				Term condition) {
+			requirements.add(condition);
+		}
+
+	}
+
+	/**
+	 * Yields the constant used for the given fresh value in the transition (or
+	 * bad case) with the given key.
+	 *
+	 * @param value the fresh value
+	 * @param key   the key of the transition, as returned by
+	 *                  {@link #edgeKey(int, EdgeTransition)} or
+	 *                  {@link #badKey(int)}
+	 *
+	 * @return the constant
+	 */
+	public Term freshConstant(
+			FreshValue value,
+			String key) {
+		String step = key.substring(key.indexOf('@') + 1, key.indexOf('#'));
+		String tag = key.substring(key.indexOf('#'));
+		return constant(value.getName() + "@" + step + tag, model.getSorts().sortOf(value));
+	}
+
+	/**
+	 * Yields the key identifying the encoding of the given transition at the
+	 * given step.
+	 *
+	 * @param step the step
+	 * @param edge the transition
+	 *
+	 * @return the key
+	 */
+	public String edgeKey(
+			int step,
+			EdgeTransition edge) {
+		int id = edgeIds.computeIfAbsent(edge, e -> edgeIds.size());
+		return "edge@" + step + "#e" + id;
+	}
+
+	/**
+	 * Yields the key identifying the encoding of the bad condition at the given
+	 * step.
+	 *
+	 * @param step the step
+	 *
+	 * @return the key
+	 */
+	public String badKey(
+			int step) {
+		return "bad@" + step + "#bad";
+	}
+
+	/**
+	 * Yields {@code true} if the encoding with the given key is exact.
+	 *
+	 * @param key the key
+	 *
+	 * @return whether or not the encoding is exact
+	 */
+	public boolean isExact(
+			String key) {
+		return exactness.getOrDefault(key, false);
+	}
+
+	/**
+	 * Yields {@code true} if the encoding with the given key is exact in the
+	 * current model of the given solver, that must have just answered
+	 * {@link it.unive.lisa.triage.smt.SmtResult#SAT}: the encoding must be
+	 * exact (see {@link #isExact(String)}), except for values that are
+	 * imprecise only under some condition (e.g., arithmetic over values that
+	 * are not integers), provided that none of these conditions holds in the
+	 * model.
+	 *
+	 * @param key    the key
+	 * @param solver the solver
+	 *
+	 * @return whether or not the encoding is exact in the model
+	 */
+	public boolean isExact(
+			String key,
+			SmtSolver solver) {
+		if (!isExact(key))
+			return false;
+		List<Term> conditions = guards.getOrDefault(key, List.of());
+		if (!conditions.isEmpty())
+			for (String value : solver.getValues(conditions).values())
+				if (!value.equals("true"))
+					return false;
+		return mismatches(key, solver).isEmpty();
+	}
+
+	/**
+	 * Sets the known values of the functions computed on concrete values (see
+	 * {@link SymbolTable#evaluable}): the following encodings give the
+	 * functions those values, and the values of the applications that are not
+	 * the ones of the functions in the models of the solver (see
+	 * {@link #isExact(String, SmtSolver)}) are added to them.
+	 *
+	 * @param evaluated the known values
+	 */
+	public void setEvaluatedFunctions(
+			EvaluatedFunctions evaluated) {
+		this.evaluated = evaluated;
+	}
+
+	/**
+	 * Yields the applications of functions computed on concrete values in the
+	 * encoding with the given key whose value in the current model of the given
+	 * solver is not the one of the function on the values of their arguments in
+	 * the model (learning the right values, see
+	 * {@link #setEvaluatedFunctions(EvaluatedFunctions)}).
+	 */
+	private List<Application> mismatches(
+			String key,
+			SmtSolver solver) {
+		List<GuardedApplication> evaluations = applications.getOrDefault(key, List.of());
+		if (evaluations.isEmpty())
+			return List.of();
+		List<Term> terms = new ArrayList<>();
+		for (GuardedApplication a : evaluations) {
+			terms.add(a.when);
+			terms.addAll(a.application.arguments);
+			terms.add(a.application.term);
+		}
+		Map<Term, String> values = solver.getValues(terms);
+		List<Application> result = new ArrayList<>();
+		for (GuardedApplication a : evaluations) {
+			if (!"true".equals(values.get(a.when)))
+				continue;
+			Application app = a.application;
+			List<String> literals = new ArrayList<>();
+			Number expected;
+			try {
+				List<Number> args = new ArrayList<>();
+				for (Term arg : app.arguments) {
+					String value = values.get(arg);
+					literals.add(value);
+					args.add(FloatingPoints.parse(value, arg.getSort()));
+				}
+				expected = app.evaluator.apply(args);
+				if (sameBits(expected, FloatingPoints.parse(values.get(app.term), app.term.getSort())))
+					continue;
+			} catch (RuntimeException e) {
+				// the function cannot be computed on these values
+				result.add(app);
+				continue;
+			}
+			Term literal = expected instanceof Float ? FloatingPoints.literal(expected.floatValue())
+					: FloatingPoints.literal(expected.doubleValue());
+			if (evaluated != null)
+				evaluated.add(app.function, literals, literal.toSmtLib());
+			result.add(app);
+		}
+		return result;
+	}
+
+	// whether two numbers are the same floating point number (all NaNs being
+	// the same)
+	private static boolean sameBits(
+			Number a,
+			Number b) {
+		if (a instanceof Float && b instanceof Float)
+			return Float.isNaN(a.floatValue()) ? Float.isNaN(b.floatValue())
+					: Float.floatToIntBits(a.floatValue()) == Float.floatToIntBits(b.floatValue());
+		if (Double.isNaN(a.doubleValue()))
+			return Double.isNaN(b.doubleValue());
+		return Double.doubleToRawLongBits(a.doubleValue()) == Double.doubleToRawLongBits(b.doubleValue());
+	}
+
+	/**
+	 * The kind of imprecision of values whose meaning the encoder does not
+	 * model (e.g., the results of unsupported operations).
+	 */
+	public static final String UNSUPPORTED_OPERATIONS = "unsupported operations";
+
+	/**
+	 * The kind of imprecision of operations applied to values of kinds they are
+	 * not modeled for (e.g., arithmetic over floating point numbers).
+	 */
+	public static final String OTHER_KINDS = "operations on values of other kinds";
+
+	/**
+	 * The kind of imprecision of comparisons and equalities between values that
+	 * might not be integers (e.g., floating point numbers).
+	 */
+	public static final String NON_INTEGER_COMPARISONS = "comparisons of non-integers";
+
+	/**
+	 * The kind of imprecision of type tests that the encoder cannot decide.
+	 */
+	public static final String TYPE_TESTS = "type tests";
+
+	/**
+	 * Yields the reasons why the encoding with the given key is not exact in
+	 * the current model of the given solver, that must have just answered
+	 * {@link it.unive.lisa.triage.smt.SmtResult#SAT}. Each reason has the form
+	 * {@code kind: detail}, where the kind is the one of a {@link SummaryValue}
+	 * ({@link SummaryValue.Kind#getDescription()}) or one of the constants of
+	 * this class, and the detail tells which value or operation is not encoded
+	 * precisely. The result is empty if and only if the encoding is exact in
+	 * the model ({@link #isExact(String, SmtSolver)}).
+	 *
+	 * @param key    the key
+	 * @param solver the solver
+	 *
+	 * @return the reasons
+	 */
+	public Set<String> getImprecisions(
+			String key,
+			SmtSolver solver) {
+		Set<String> result = new LinkedHashSet<>();
+		if (!isExact(key))
+			result.addAll(reasons.getOrDefault(key, Set.of()));
+		List<GuardedReason> guarded = guardedReasons.getOrDefault(key, List.of());
+		if (!guarded.isEmpty()) {
+			List<Term> terms = new ArrayList<>();
+			for (GuardedReason g : guarded) {
+				terms.add(g.when);
+				terms.add(g.guard);
+			}
+			Map<Term, String> values = solver.getValues(terms);
+			for (GuardedReason g : guarded)
+				if ("true".equals(values.get(g.when)) && !"true".equals(values.get(g.guard)))
+					result.add(g.reason);
+		}
+		for (Application app : mismatches(key, solver))
+			result.add(app.reason);
+		if (result.isEmpty() && !isExact(key, solver))
+			result.add("unknown: imprecision of " + key);
+		return result;
+	}
+
+	/**
+	 * Yields {@code true} if some of the given reasons of imprecision (in the
+	 * form yielded by {@link #getImprecisions(String, SmtSolver)}) might be
+	 * caused by summarized calls: results of calls (see
+	 * {@link SummaryValue.Kind#CALL_RESULT}), or contents of the heap after
+	 * writes that are not modeled (see {@link SummaryValue.Kind#HEAP}), such as
+	 * the ones of summarized callees.
+	 *
+	 * @param imprecisions the reasons
+	 *
+	 * @return whether or not calls might cause imprecision
+	 */
+	public static boolean dueToCalls(
+			Collection<String> imprecisions) {
+		String calls = SummaryValue.Kind.CALL_RESULT.getDescription() + ":";
+		String heap = SummaryValue.Kind.HEAP.getDescription() + ":";
+		return imprecisions.stream().anyMatch(r -> r.startsWith(calls) || r.startsWith(heap));
+	}
+
+	/**
+	 * The number of details listed by {@link #explain(Collection)}.
+	 */
+	private static final int MAX_DETAILS = 5;
+
+	/**
+	 * Explains that a counterexample relies on values that are not computed
+	 * precisely, for the given reasons (in the form yielded by
+	 * {@link #getImprecisions(String, SmtSolver)}): the distinct kinds of the
+	 * reasons are listed between parentheses, separated by commas, followed by
+	 * (some of) their details, separated by semicolons.
+	 *
+	 * @param imprecisions the reasons
+	 *
+	 * @return the explanation
+	 */
+	public static String explain(
+			Collection<String> imprecisions) {
+		Set<String> kinds = new LinkedHashSet<>();
+		List<String> details = new ArrayList<>();
+		for (String reason : imprecisions) {
+			int sep = reason.indexOf(": ");
+			kinds.add(sep < 0 ? reason : reason.substring(0, sep));
+			if (sep >= 0 && details.size() < MAX_DETAILS)
+				details.add(reason.substring(sep + 2));
+		}
+		String res = "relying on values that are not computed precisely (" + String.join(", ", kinds) + ")";
+		return details.isEmpty() ? res : res + ": " + String.join("; ", details);
+	}
+
+	private void record(
+			String key,
+			StepSymbols symbols,
+			List<GuardedReason> guarded) {
+		record(key, symbols, guarded, guardedApplications(Term.TRUE, symbols, 0));
+	}
+
+	private void record(
+			String key,
+			StepSymbols symbols,
+			List<GuardedReason> guarded,
+			List<GuardedApplication> evaluations) {
+		reasons.put(key, new LinkedHashSet<>(symbols.reasons));
+		guardedReasons.put(key, guarded);
+		applications.put(key, evaluations);
+	}
+
+	private static List<GuardedApplication> guardedApplications(
+			Term when,
+			StepSymbols symbols,
+			int from) {
+		List<GuardedApplication> result = new ArrayList<>();
+		for (int i = from; i < symbols.evaluations.size(); i++)
+			result.add(new GuardedApplication(when, symbols.evaluations.get(i)));
+		return result;
+	}
+
+	private static List<GuardedReason> guardedReasons(
+			Term when,
+			StepSymbols symbols,
+			int from) {
+		List<GuardedReason> result = new ArrayList<>();
+		for (int i = from; i < symbols.guards.size(); i++)
+			result.add(new GuardedReason(when, symbols.guards.get(i), symbols.guardReasons.get(i)));
+		return result;
+	}
+
+	private static String reasonOf(
+			String function,
+			SymbolicExpression origin) {
+		if (function.startsWith("$is "))
+			return TYPE_TESTS + ": " + function.substring(4);
+		switch (function) {
+		case "$==":
+		case "$<":
+		case "$<=":
+		case "$>":
+		case "$>=":
+			return NON_INTEGER_COMPARISONS + ": " + describe(origin);
+		default:
+			return OTHER_KINDS + ": " + describe(origin);
+		}
+	}
+
+	/**
+	 * Yields a short description of the given expression, naming its operator,
+	 * if any.
+	 */
+	private static String describe(
+			SymbolicExpression origin) {
+		if (origin == null)
+			return "unknown";
+		if (origin instanceof UnaryExpression)
+			return ((UnaryExpression) origin).getOperator().getClass().getSimpleName();
+		if (origin instanceof BinaryExpression)
+			return ((BinaryExpression) origin).getOperator().getClass().getSimpleName();
+		if (origin instanceof TernaryExpression)
+			return ((TernaryExpression) origin).getOperator().getClass().getSimpleName();
+		return origin.getClass().getSimpleName();
+	}
+
+	/**
+	 * Yields the constraints stating that the references held by identifiers in
+	 * the initial states have been allocated before the ones that the model
+	 * allocates, that is, their identifiers are smaller than the initial value
+	 * of the counter of allocations (see {@link HeapModel}). These constraints
+	 * hold in every concrete state, for a large enough counter, and they ensure
+	 * that new references never alias the ones of identifiers. The references
+	 * stored in fields of objects and in cells of arrays in the initial states
+	 * are not constrained, as this would need quantifiers, that solvers often
+	 * cannot decide: this is sound, as the contents of the heap in the initial
+	 * states are not written by the model, so that executions reading them are
+	 * never considered precise (see {@link SymbolTable#exactOnlyIfWritten}).
+	 */
+	private List<Term> existingReferences() {
+		if (!model.getVocabulary().contains(HeapModel.ALLOC))
+			return List.of();
+		Term counter = var(HeapModel.ALLOC, 0);
+		// only the references that might be read matter
+		Set<Identifier> live = new LinkedHashSet<>();
+		for (ModelLocation init : model.getInitialLocations())
+			live.addAll(model.getLive(init));
+		List<Term> result = new ArrayList<>();
+		for (Identifier id : model.getVocabulary()) {
+			if (HeapModel.isHeapState(id) || !live.contains(id))
+				continue;
+			Term value = var(id, 0);
+			if (value.getSort().equals(ValueSort.SORT))
+				result.add(allocated(value, counter));
+		}
+		return result;
+	}
+
+	/**
+	 * Yields the constraints stating that no location of the heap, and no
+	 * global variable, has been written by the model in the initial states (see
+	 * {@link HeapModel}).
+	 */
+	private List<Term> nothingWritten() {
+		List<Term> result = new ArrayList<>();
+		for (Identifier id : model.getVocabulary())
+			if (isWrittenMap(id))
+				result.add(Term.eq(var(id, 0), nothingWritten(id)));
+			else if (id.equals(HeapModel.TYPES))
+				// the runtime types of existing objects are unknown
+				result.add(Term.eq(var(id, 0), Term.app("(as const " + HeapType.TYPES.getSort().toSmtLib() + ")",
+						HeapType.TYPES.getSort(), ValueSort.typeToken(HeapModel.UNKNOWN_TYPE))));
+		return result;
+	}
+
+	private static boolean isWrittenMap(
+			Identifier id) {
+		return id.getStaticType() == HeapType.WRITTEN_FIELD || id.getStaticType() == HeapType.WRITTEN_CELLS
+				|| id.getStaticType() == HeapType.DEFINED;
+	}
+
+	/**
+	 * Yields the map recording that no location has been written, for the given
+	 * identifier of the heap model recording written locations.
+	 */
+	private static Term nothingWritten(
+			Identifier id) {
+		if (id.getStaticType() == HeapType.DEFINED)
+			return Term.FALSE;
+		Sort sort = ((HeapType) id.getStaticType()).getSort();
+		return Term.app("(as const " + sort.toSmtLib() + ")", sort, Term.FALSE);
+	}
+
+	private static Term allocated(
+			Term value,
+			Term counter) {
+		return Term.implies(ValueSort.isReference(value),
+				Term.app("<", Sort.BOOL, ValueSort.referenceId(value), counter));
+	}
+
+	/**
+	 * Yields the input values used by the encoding with the given key.
+	 *
+	 * @param key the key
+	 *
+	 * @return the input values
+	 */
+	public Set<FreshValue> getFreshValues(
+			String key) {
+		return inputs.getOrDefault(key, Set.of());
+	}
+
+	/**
+	 * Yields the initial condition: the program counter is at an initial
+	 * location, and the initial constraints hold.
+	 *
+	 * @return the initial condition
+	 *
+	 * @throws SemanticException if an expression cannot be encoded
+	 */
+	public Term initial()
+			throws SemanticException {
+		List<Term> locs = new ArrayList<>();
+		for (ModelLocation init : model.getInitialLocations())
+			locs.add(at(0, init));
+		List<Term> conj = new ArrayList<>();
+		conj.add(Term.or(locs.toArray(Term[]::new)));
+		ExpressionEncoder encoder = encoder(new StepSymbols(0, "#init"));
+		for (SymbolicExpression c : model.getInitialConstraints())
+			if (!floating(c))
+				conj.add(encoder.encodeCondition(c));
+		SortPolicy sorts = model.getSorts();
+		if (!sorts.encodesFloats())
+			// floating point numbers that are not encoded are opaque values,
+			// so that operations over them are never precise
+			for (Identifier id : model.getVocabulary())
+				if (!(id instanceof FreshValue) && sorts.sortOf(id).equals(ValueSort.SORT)
+						&& sorts.holdsOnlyFloats(id))
+					conj.add(ValueSort.isOpaque(encoder.encode(id)));
+		conj.addAll(existingReferences());
+		conj.addAll(nothingWritten());
+		return Term.and(conj.toArray(Term[]::new));
+	}
+
+	/**
+	 * Yields the invariants computed by the analysis, as they hold at the given
+	 * step: the program counter is at a reachable location, and the invariant
+	 * of the current location holds.
+	 *
+	 * @param step the step
+	 *
+	 * @return the invariants
+	 *
+	 * @throws SemanticException if an expression cannot be encoded
+	 */
+	public Term invariants(
+			int step)
+			throws SemanticException {
+		List<Term> locs = new ArrayList<>();
+		List<Term> conj = new ArrayList<>();
+		ExpressionEncoder encoder = encoder(new StepSymbols(step, "#inv"));
+		for (ModelLocation loc : locations) {
+			if (model.getSeeds(loc) == null)
+				// unreachable location
+				continue;
+			locs.add(at(step, loc));
+			conj.add(Term.implies(at(step, loc), seeds(loc, step, encoder)));
+		}
+		conj.add(Term.or(locs.toArray(Term[]::new)));
+		return Term.and(conj.toArray(Term[]::new));
+	}
+
+	/**
+	 * Yields the invariant computed by the analysis for the given location, as
+	 * it holds at the given step (regardless of the program counter).
+	 *
+	 * @param location the location
+	 * @param step     the step
+	 *
+	 * @return the invariant, that is {@code false} if the location is
+	 *             unreachable
+	 *
+	 * @throws SemanticException if an expression cannot be encoded
+	 */
+	public Term seeds(
+			ModelLocation location,
+			int step)
+			throws SemanticException {
+		return seeds(location, step,
+				encoder(new StepSymbols(step, "#inv")));
+	}
+
+	private Term seeds(
+			ModelLocation location,
+			int step,
+			ExpressionEncoder encoder)
+			throws SemanticException {
+		Set<SymbolicExpression> seeds = model.getSeeds(location);
+		if (seeds == null)
+			return Term.FALSE;
+		List<Term> inv = new ArrayList<>();
+		for (SymbolicExpression c : seeds)
+			if (!floating(c))
+				inv.add(encoder.encodeCondition(c));
+		return Term.and(inv.toArray(Term[]::new));
+	}
+
+	/**
+	 * Yields {@code true} if the given constraint computed by the analysis (an
+	 * invariant, or an initial constraint) involves floating point numbers.
+	 * Such constraints are not encoded: analyses often reason about floating
+	 * point numbers as real numbers (e.g., ignoring NaN, or rounding), and
+	 * their constraints are not sound with respect to the IEEE 754 semantics of
+	 * the encoding (e.g., the constraint {@code x == NaN}, stating that
+	 * {@code x} is NaN, never holds in IEEE 754). Not encoding them is sound,
+	 * since they only restrict the states.
+	 */
+	private boolean floating(
+			SymbolicExpression constraint) {
+		if (constraint instanceof Identifier)
+			return model.getSorts().sortOf((Identifier) constraint).isFloatingPoint()
+					|| model.getSorts().sortOf(constraint.getStaticType()).isFloatingPoint();
+		if (constraint instanceof Constant)
+			return ((Constant) constraint).getValue() instanceof Double
+					|| ((Constant) constraint).getValue() instanceof Float;
+		if (constraint instanceof UnaryExpression)
+			return floating(((UnaryExpression) constraint).getExpression());
+		if (constraint instanceof BinaryExpression)
+			return floating(((BinaryExpression) constraint).getLeft())
+					|| floating(((BinaryExpression) constraint).getRight());
+		if (constraint instanceof TernaryExpression)
+			return floating(((TernaryExpression) constraint).getLeft())
+					|| floating(((TernaryExpression) constraint).getMiddle())
+					|| floating(((TernaryExpression) constraint).getRight());
+		return false;
+	}
+
+	/**
+	 * Yields the transition relation from step {@code step} to step
+	 * {@code step + 1}.
+	 *
+	 * @param step the step
+	 *
+	 * @return the transition relation
+	 *
+	 * @throws SemanticException if an expression cannot be encoded
+	 */
+	public Term transition(
+			int step)
+			throws SemanticException {
+		List<Term> edges = new ArrayList<>();
+		for (ModelLocation loc : locations)
+			for (EdgeTransition edge : model.getTransitions(loc))
+				edges.add(transition(step, edge));
+		return Term.or(edges.toArray(Term[]::new));
+	}
+
+	/**
+	 * Yields the relation of the given transition from step {@code step} to
+	 * step {@code step + 1}: the program counter moves from the source to the
+	 * destination of the edge, and one of the cases of the transition holds.
+	 * The exactness and the fresh values of the encoding are recorded under
+	 * {@link #edgeKey(int, EdgeTransition)}.
+	 *
+	 * @param step the step
+	 * @param edge the transition
+	 *
+	 * @return the transition relation
+	 *
+	 * @throws SemanticException if an expression cannot be encoded
+	 */
+	public Term transition(
+			int step,
+			EdgeTransition edge)
+			throws SemanticException {
+		String key = edgeKey(step, edge);
+		StepSymbols symbols = new StepSymbols(step, key.substring(key.indexOf('#')));
+		ExpressionEncoder encoder = encoder(symbols);
+		List<Term> cases = new ArrayList<>();
+		List<Term> precise = new ArrayList<>();
+		List<GuardedReason> guarded = new ArrayList<>();
+		List<GuardedApplication> evaluations = new ArrayList<>();
+		for (SymbolicCase c : edge.getStore().getCases()) {
+			int from = symbols.guards.size();
+			int req = symbols.requirements.size();
+			int ev = symbols.evaluations.size();
+			Term ct = required(encodeCase(c, step, encoder, edge.getDestination()), symbols, req);
+			cases.add(strictly(ct, symbols, from));
+			precise.add(preciseCase(ct, symbols, from));
+			guarded.addAll(guardedReasons(ct, symbols, from));
+			evaluations.addAll(guardedApplications(ct, symbols, ev));
+		}
+		exactness.put(key, symbols.exact);
+		guards.put(key, List.of(Term.or(precise.toArray(Term[]::new))));
+		record(key, symbols, guarded, evaluations);
+		inputs.put(key, symbols.used);
+		Term relation = Term.and(
+				at(step, edge.getSource()),
+				Term.eq(pc(step + 1), Term.integer(indexOf(edge.getDestination()))),
+				Term.or(cases.toArray(Term[]::new)));
+		relations.put(key, relation);
+		return relation;
+	}
+
+	/**
+	 * Yields {@code true} if the transition encoded with the given key (by
+	 * {@link #transition(int, EdgeTransition)}) holds in the current model of
+	 * the given solver, that must have just answered
+	 * {@link it.unive.lisa.triage.smt.SmtResult#SAT}: this tells which of the
+	 * transitions between the same locations has been taken.
+	 *
+	 * @param key    the key, as returned by
+	 *                   {@link #edgeKey(int, EdgeTransition)}
+	 * @param solver the solver
+	 *
+	 * @return whether or not the transition holds
+	 */
+	public boolean holds(
+			String key,
+			SmtSolver solver) {
+		Term relation = relations.get(key);
+		return relation != null && "true".equals(solver.getValues(List.of(relation)).get(relation));
+	}
+
+	private Term encodeCase(
+			SymbolicCase c,
+			int step,
+			ExpressionEncoder encoder,
+			ModelLocation destination)
+			throws SemanticException {
+		// the expressions of the case are evaluated in the same state: the
+		// ones occurring more than once (e.g., values written in more than one
+		// heap map) are encoded once
+		encoder.startSharing();
+		try {
+			return encodeCaseShared(c, step, encoder, destination);
+		} finally {
+			encoder.stopSharing();
+		}
+	}
+
+	private Term encodeCaseShared(
+			SymbolicCase c,
+			int step,
+			ExpressionEncoder encoder,
+			ModelLocation destination)
+			throws SemanticException {
+		List<Term> conj = new ArrayList<>();
+		for (SymbolicExpression cond : c.getPathCondition())
+			conj.add(encoder.encodeCondition(cond));
+		// identifiers that are not live at the destination are left
+		// unconstrained, unless they are updated (the values assigned to them
+		// might use inputs, that are still produced)
+		Set<Identifier> live = model.getLive(destination);
+		for (Identifier id : model.getVocabulary()) {
+			SymbolicExpression value = c.getUpdates().get(id);
+			Term post = var(id, step + 1);
+			if (value != null)
+				conj.add(Term.eq(post, encoder.encodeAs(value, post.getSort())));
+			else if (c.isUnconstrained(id) && isWrittenMap(id))
+				// the heap is unconstrained after writes that are not
+				// modeled: no location counts as written by the model, so that
+				// reading the unconstrained contents is not precise (as done
+				// for the initial states)
+				conj.add(Term.eq(post, nothingWritten(id)));
+			else if (!c.isUnconstrained(id) && live.contains(id)) {
+				// the identifier might have been renamed by scoping
+				Identifier pre = c.preIdentifier(id);
+				conj.add(Term.eq(post, pre.equals(id) ? var(id, step) : encoder.encodeAs(pre, post.getSort())));
+			}
+		}
+		return Term.and(conj.toArray(Term[]::new));
+	}
+
+	/**
+	 * Conjoins to the given term the conditions required by the given symbols
+	 * (from the given index) for the encoded expressions to be evaluated (see
+	 * {@link SymbolTable#require(Term)}).
+	 */
+	private static Term required(
+			Term term,
+			StepSymbols symbols,
+			int from) {
+		if (symbols.requirements.size() == from)
+			return term;
+		List<Term> conj = new ArrayList<>();
+		conj.add(term);
+		conj.addAll(symbols.requirements.subList(from, symbols.requirements.size()));
+		return Term.and(conj.toArray(Term[]::new));
+	}
+
+	/**
+	 * In strict mode, conjoins to the given term the conditions recorded by the
+	 * given symbols (from the given index) under which its encoding is precise.
+	 */
+	private Term strictly(
+			Term term,
+			StepSymbols symbols,
+			int from) {
+		if (!strict || symbols.guards.size() == from)
+			return term;
+		List<Term> conj = new ArrayList<>();
+		conj.add(term);
+		conj.addAll(symbols.guards.subList(from, symbols.guards.size()));
+		return Term.and(conj.toArray(Term[]::new));
+	}
+
+	/**
+	 * Yields the condition under which the given case holds and is encoded
+	 * precisely, that is, the case and the conditions recorded by the given
+	 * symbols (from the given index) hold. Used for encodings that are
+	 * disjunctions of cases: they are precise in a model if one of the cases
+	 * that hold is precise.
+	 */
+	private static Term preciseCase(
+			Term term,
+			StepSymbols symbols,
+			int from) {
+		List<Term> conj = new ArrayList<>();
+		conj.add(term);
+		conj.addAll(symbols.guards.subList(from, symbols.guards.size()));
+		return Term.and(conj.toArray(Term[]::new));
+	}
+
+	/**
+	 * Yields the cases of the given transition, in a fixed order (the one used
+	 * by {@link #transition(int, EdgeTransition, int)}).
+	 *
+	 * @param edge the transition
+	 *
+	 * @return the cases
+	 */
+	public List<SymbolicCase> cases(
+			EdgeTransition edge) {
+		return cases.computeIfAbsent(edge, e -> new ArrayList<>(e.getStore().getCases()));
+	}
+
+	/**
+	 * Yields the key identifying the encoding of a single case of the given
+	 * transition at the given step.
+	 *
+	 * @param step  the step
+	 * @param edge  the transition
+	 * @param index the index of the case in {@link #cases(EdgeTransition)}
+	 *
+	 * @return the key
+	 */
+	public String caseKey(
+			int step,
+			EdgeTransition edge,
+			int index) {
+		return edgeKey(step, edge) + "c" + index;
+	}
+
+	/**
+	 * Yields the relation of a single case of the given transition from step
+	 * {@code step} to step {@code step + 1}: the program counter moves from the
+	 * source to the destination of the edge, and the case holds. The exactness
+	 * and the fresh values of the encoding are recorded under
+	 * {@link #caseKey(int, EdgeTransition, int)}.
+	 *
+	 * @param step  the step
+	 * @param edge  the transition
+	 * @param index the index of the case in {@link #cases(EdgeTransition)}
+	 *
+	 * @return the relation
+	 *
+	 * @throws SemanticException if an expression cannot be encoded
+	 */
+	public Term transition(
+			int step,
+			EdgeTransition edge,
+			int index)
+			throws SemanticException {
+		String key = caseKey(step, edge, index);
+		StepSymbols symbols = new StepSymbols(step, key.substring(key.indexOf('#')));
+		ExpressionEncoder encoder = encoder(symbols);
+		Term c = strictly(required(encodeCase(cases(edge).get(index), step, encoder, edge.getDestination()), symbols,
+				0), symbols, 0);
+		exactness.put(key, symbols.exact);
+		guards.put(key, symbols.guards);
+		record(key, symbols, guardedReasons(Term.TRUE, symbols, 0));
+		inputs.put(key, symbols.used);
+		return Term.and(
+				at(step, edge.getSource()),
+				Term.eq(pc(step + 1), Term.integer(indexOf(edge.getDestination()))),
+				c);
+	}
+
+	/**
+	 * Encodes the given boolean expression over the values of identifiers at
+	 * the given step. Fresh values are encoded as constants named after the
+	 * given tag, so that the same fresh value is encoded by the same constant
+	 * for the same step and tag, and can be read through
+	 * {@link #freshConstant(FreshValue, String)} with key
+	 * {@code "cond@" + step + tag}, under which the exactness and the fresh
+	 * values of the encoding are also recorded.
+	 *
+	 * @param condition the expression
+	 * @param step      the step
+	 * @param tag       the tag, starting with {@code #}
+	 *
+	 * @return the encoded condition
+	 *
+	 * @throws SemanticException if the expression cannot be encoded
+	 */
+	public Term condition(
+			SymbolicExpression condition,
+			int step,
+			String tag)
+			throws SemanticException {
+		StepSymbols symbols = new StepSymbols(step, tag);
+		Term result = strictly(
+				required(encoder(symbols).encodeCondition(condition), symbols, 0),
+				symbols, 0);
+		String key = "cond@" + step + tag;
+		exactness.put(key, symbols.exact);
+		guards.put(key, symbols.guards);
+		record(key, symbols, guardedReasons(Term.TRUE, symbols, 0));
+		inputs.put(key, symbols.used);
+		return result;
+	}
+
+	/**
+	 * Yields the bad condition at the given step: the program counter is at the
+	 * bad location, and one of the bad cases holds.
+	 *
+	 * @param step the step
+	 *
+	 * @return the bad condition
+	 *
+	 * @throws SemanticException if an expression cannot be encoded
+	 */
+	public Term bad(
+			int step)
+			throws SemanticException {
+		String key = badKey(step);
+		StepSymbols symbols = new StepSymbols(step, key.substring(key.indexOf('#')));
+		ExpressionEncoder encoder = encoder(symbols);
+		List<Term> cases = new ArrayList<>();
+		List<Term> precise = new ArrayList<>();
+		List<GuardedReason> guarded = new ArrayList<>();
+		List<GuardedApplication> evaluations = new ArrayList<>();
+		for (BadCase c : model.getBadCases()) {
+			int from = symbols.guards.size();
+			int req = symbols.requirements.size();
+			int ev = symbols.evaluations.size();
+			List<Term> conj = new ArrayList<>();
+			for (SymbolicExpression cond : c.getPathCondition())
+				conj.add(encoder.encodeCondition(cond));
+			if (c.getViolation() != null)
+				conj.add(encoder.encodeCondition(c.getViolation()));
+			Term ct = required(Term.and(conj.toArray(Term[]::new)), symbols, req);
+			cases.add(strictly(ct, symbols, from));
+			precise.add(preciseCase(ct, symbols, from));
+			guarded.addAll(guardedReasons(ct, symbols, from));
+			evaluations.addAll(guardedApplications(ct, symbols, ev));
+		}
+		exactness.put(key, symbols.exact);
+		guards.put(key, List.of(Term.or(precise.toArray(Term[]::new))));
+		record(key, symbols, guarded, evaluations);
+		inputs.put(key, symbols.used);
+		return Term.and(at(step, model.getBadLocation()), Term.or(cases.toArray(Term[]::new)));
+	}
+
+	/**
+	 * Yields the input values of the given set, in order.
+	 *
+	 * @param values the fresh values
+	 *
+	 * @return the input values
+	 */
+	public static List<InputValue> inputsOf(
+			Set<FreshValue> values) {
+		List<InputValue> result = new ArrayList<>();
+		for (FreshValue v : values)
+			if (v instanceof InputValue)
+				result.add((InputValue) v);
+		return result;
+	}
+}

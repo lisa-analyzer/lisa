@@ -33,6 +33,7 @@ import it.unive.lisa.checks.semantic.SemanticTool;
 import it.unive.lisa.imp.constructs.StringContains.IMPStringContains;
 import it.unive.lisa.imp.expressions.IMPAssert;
 import it.unive.lisa.interprocedural.ReturnTopPolicy;
+import it.unive.lisa.interprocedural.ScopeId;
 import it.unive.lisa.interprocedural.callgraph.RTACallGraph;
 import it.unive.lisa.interprocedural.context.ContextBasedAnalysis;
 import it.unive.lisa.lattices.Satisfiability;
@@ -124,9 +125,9 @@ public class WholeValueAnalysesTest
 							if (ch.getValue().length() == 1)
 								containsCharAssertion(tool, node, res, target, ch);
 							else
-								assertion(tool, node, post, domain, state);
+								assertion(tool, node, res, post, domain, state);
 						} else
-							assertion(tool, node, post, domain, state);
+							assertion(tool, node, res, post, domain, state);
 					} catch (SemanticException e) {
 						throw new AnalysisExecutionException("Error while checking assertions", e);
 					}
@@ -170,38 +171,40 @@ public class WholeValueAnalysesTest
 					sat = dom.containsChar(state, ch.getValue().charAt(0));
 				}
 				if (sat == Satisfiability.UNKNOWN)
-					warnOn(tool, node, "This assertion might fail");
+					warnOn(tool, node, res.getId(), "This assertion might fail");
 				else if (sat == Satisfiability.NOT_SATISFIED)
-					warnOn(tool, node, "This assertion always fails");
+					warnOn(tool, node, res.getId(), "This assertion always fails");
 				else
-					warnOn(tool, node, null);
+					warnOn(tool, node, res.getId(), null);
 			}
 		}
 
 		private void assertion(
 				SemanticTool<A, D> tool,
 				Statement node,
+				AnalyzedCFG<A> res,
 				AnalysisState<A> post,
 				D domain,
 				A state)
 				throws SemanticException {
 			for (SymbolicExpression expr : post.getExecutionExpressions()) {
-				Satisfiability sat = domain.satisfies(state, expr, node);
+				Satisfiability sat = domain.satisfies(state, expr, null, node);
 				if (sat == Satisfiability.UNKNOWN)
-					warnOn(tool, node, "This assertion might fail");
+					warnOn(tool, node, res.getId(), "This assertion might fail");
 				else if (sat == Satisfiability.NOT_SATISFIED)
-					warnOn(tool, node, "This assertion always fails");
+					warnOn(tool, node, res.getId(), "This assertion always fails");
 				else
-					warnOn(tool, node, null);
+					warnOn(tool, node, res.getId(), null);
 			}
 		}
 
 		private void warnOn(
 				SemanticTool<A, D> tool,
 				Statement node,
+				ScopeId<A> context,
 				String message) {
 			if (message != null) {
-				tool.warnOn(node, message);
+				tool.warnOn(node, context, message);
 				assertions.put(node.getLocation(), message.contains("might fail") ? "possible" : "definite");
 			} else
 				assertions.put(node.getLocation(), "-");

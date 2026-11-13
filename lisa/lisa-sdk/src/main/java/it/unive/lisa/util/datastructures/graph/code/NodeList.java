@@ -833,8 +833,8 @@ public class NodeList<G extends CodeGraph<G, N, E>, N extends CodeNode<G, N, E>,
 
 		private NodeEdges(
 				NodeEdges<G, N, E> other) {
-			ingoing = new TreeSet<>(other.ingoing);
-			outgoing = new TreeSet<>(other.outgoing);
+			ingoing = new HashSet<>(other.ingoing);
+			outgoing = new HashSet<>(other.outgoing);
 		}
 
 		/**

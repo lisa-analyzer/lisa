@@ -36,13 +36,20 @@ public class GenericSetLattice<E>
 	}
 
 	/**
-	 * Builds a set with all the given elements.
-	 * 
+	 * Builds a set with all the given elements. If {@code elements} is empty,
+	 * the built instance is bottom: in a normal (non-inverse) set lattice, the
+	 * empty set is the least element (it is a subset of every other set), so an
+	 * incidentally-empty concrete set (e.g., produced by
+	 * {@link #remove(Object)} or by {@link #glbAux(SetLattice)} on disjoint
+	 * sets) must be bottom, not top. Use
+	 * {@link #GenericSetLattice(Set, boolean)} to build an explicit top value
+	 * out of an empty set.
+	 *
 	 * @param elements the elements
 	 */
 	public GenericSetLattice(
 			Set<E> elements) {
-		super(elements, true);
+		super(elements, false);
 	}
 
 	/**

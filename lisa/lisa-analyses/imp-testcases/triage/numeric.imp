@@ -1,0 +1,240 @@
+// Triage benchmark, numeric programs (analyzed with intervals).
+// Each method contains one alarm: the call to this.bug(), checked for
+// reachability. Methods named safe_* contain unreachable alarms (false
+// positives of the analysis, the right verdict is REFUTED), methods named
+// bug_* contain reachable alarms (the right verdict is CONFIRMED).
+// this.rand() is an open call: each invocation yields an arbitrary value.
+class numeric {
+
+	// ---------- shallow bugs ----------
+
+	bug_eq(x) {
+		if (x == 42)
+			this.bug();
+	}
+
+	bug_linear(x, y) {
+		if (x + y == 10 && x - y == 4)
+			this.bug();
+	}
+
+	bug_nested(x, y) {
+		if (x > 100)
+			if (y < x)
+				if (y > 99)
+					this.bug();
+	}
+
+	// ---------- relational false positives ----------
+
+	safe_copy(x) {
+		def y = x;
+		if (x != y)
+			this.bug();
+	}
+
+	// reachable with floating point numbers (e.g., x = 1e16, y = 1)
+	bug_float_sum(x, y) {
+		def s = x + y;
+		if (s - x != y)
+			this.bug();
+	}
+
+	safe_order(x, y) {
+		if (x < y) {
+			def z = y - x;
+			if (z <= 0)
+				this.bug();
+		}
+	}
+
+	// ---------- integer versions of the programs above ----------
+	// (parameters are untyped: they might be floats unless checked)
+
+	safe_int_sum(x, y) {
+		if (x is int && y is int) {
+			def s = x + y;
+			if (s - x != y)
+				this.bug();
+		}
+	}
+
+	safe_int_order(x, y) {
+		if (x is int && y is int)
+			if (x < y) {
+				def z = y - x;
+				if (z <= 0)
+					this.bug();
+			}
+	}
+
+	safe_int_down(n) {
+		if (n is int) {
+			def i = n;
+			while (i > 0)
+				i = i - 1;
+			if (n >= 0)
+				if (i < 0)
+					this.bug();
+		}
+	}
+
+	bug_int_linear(x, y) {
+		if (x is int && y is int)
+			if (x + y == 10 && x - y == 4)
+				this.bug();
+	}
+
+	bug_int_down(n) {
+		if (n is int) {
+			def i = n;
+			while (i > 0)
+				i = i - 2;
+			if (i < 0)
+				this.bug();
+		}
+	}
+
+	// ---------- false positives caused by widening ----------
+
+	safe_count(n) {
+		def i = 0;
+		while (i < n)
+			i = i + 1;
+		if (n >= 0)
+			if (i > n)
+				this.bug();
+	}
+
+	safe_bigloop() {
+		def i = 0;
+		while (i < 1000)
+			i = i + 1;
+		if (i > 1000)
+			this.bug();
+	}
+
+	safe_twovars() {
+		def i = 0;
+		def j = 0;
+		while (i < 100) {
+			i = i + 1;
+			j = j + 1;
+		}
+		if (i != j)
+			this.bug();
+	}
+
+	// reachable with floating point numbers (e.g., n = 0.5)
+	bug_float_down(n) {
+		def i = n;
+		while (i > 0)
+			i = i - 1;
+		if (n >= 0)
+			if (i < 0)
+				this.bug();
+	}
+
+	safe_even() {
+		def i = 0;
+		while (i < 100)
+			i = i + 2;
+		if (i == 101)
+			this.bug();
+	}
+
+	// ---------- bugs after a few loop iterations ----------
+
+	bug_loop() {
+		def i = 0;
+		while (i < 3)
+			i = i + 1;
+		if (i == 3)
+			this.bug();
+	}
+
+	bug_loop_param(n) {
+		def i = 0;
+		while (i < n)
+			i = i + 1;
+		if (i == 5)
+			this.bug();
+	}
+
+	// ---------- nondeterminism inside loops ----------
+
+	bug_rand_sum() {
+		def s = 0;
+		def i = 0;
+		while (i < 3) {
+			s = s + this.rand();
+			i = i + 1;
+		}
+		if (s == 77)
+			this.bug();
+	}
+
+	safe_rand_bounded() {
+		def s = 0;
+		def i = 0;
+		while (i < 5) {
+			def r = this.rand();
+			if (r >= 0 && r <= 10)
+				s = s + r;
+			i = i + 1;
+		}
+		if (s > 50)
+			this.bug();
+	}
+
+	safe_rand_clamp() {
+		def x = this.rand();
+		if (x < 0)
+			x = 0;
+		if (x > 10)
+			x = 10;
+		if (x > 10 || x < 0)
+			this.bug();
+	}
+
+	safe_rand_monotone() {
+		def x = 0;
+		def i = 0;
+		while (i < 10) {
+			def r = this.rand();
+			if (r > 0)
+				x = x + r;
+			i = i + 1;
+		}
+		if (x < 0)
+			this.bug();
+	}
+
+	// ---------- deep bugs (beyond any reasonable bound) ----------
+
+	bug_deep() {
+		def i = 0;
+		while (i < 1000)
+			i = i + 1;
+		if (i == 1000)
+			this.bug();
+	}
+
+	// ---------- calls (summarized in the model) ----------
+
+	inc(x) {
+		return x + 1;
+	}
+
+	safe_call(x) {
+		def y = this.inc(x);
+		if (y == x)
+			this.bug();
+	}
+
+	bug_call(x) {
+		def y = this.inc(x);
+		if (y == 5)
+			this.bug();
+	}
+}

@@ -41,27 +41,34 @@ public class WorstCasePolicy
 			OpenCall call,
 			AnalysisState<A> entryState,
 			Analysis<A, D> analysis,
+			ScopeId<?> context,
 			ExpressionSet[] params)
 			throws SemanticException {
 		AnalysisState<A> poststate = entryState.topExecution();
 
 		AnalysisState<A> result;
 		if (call.getStaticType().isVoidType())
-			result = analysis.smallStepSemantics(poststate, new Skip(call.getLocation()), call);
+			result = analysis.smallStepSemantics(poststate, new Skip(call.getLocation()), context, call);
 		else {
 			Identifier var = call.getMetaVariable();
-			result = analysis.smallStepSemantics(poststate, var, call);
+			result = analysis.smallStepSemantics(poststate, var, context, call);
 		}
 
 		Map<Error, ProgramState<A>> errors = new HashMap<>();
 		Map<Type, Set<Statement>> smashedErrors = new HashMap<>();
 		ProgramState<A> top = poststate.getExecution();
 		for (Type t : call.getProgram().getTypes().getTypes())
-			if (t.isErrorType())
+			if (t.isErrorType()) {
+				// Error's constructor normalizes the thrower to the original
+				// call site (see Error#Error(Type, Statement)): we reuse its
+				// result so that smashed and non-smashed errors attribute the
+				// same call consistently
+				Error error = new Error(t, call);
 				if (analysis.shouldSmashError != null && analysis.shouldSmashError.test(t))
-					smashedErrors.put(t, Set.of(call));
+					smashedErrors.put(t, Set.of(error.getThrower()));
 				else
-					errors.put(new Error(t, call), top);
+					errors.put(error, top);
+			}
 
 		return result.addErrors(errors).addSmashedErrors(smashedErrors, top);
 	}

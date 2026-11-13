@@ -127,7 +127,7 @@ public class Assignment
 			SymbolicExpression right,
 			StatementStore<A> expressions)
 			throws SemanticException {
-		return interprocedural.getAnalysis().assign(state, left, right, this);
+		return interprocedural.getAnalysis().assign(state, left, right, interprocedural.getCurrentContext(), this);
 	}
 
 }

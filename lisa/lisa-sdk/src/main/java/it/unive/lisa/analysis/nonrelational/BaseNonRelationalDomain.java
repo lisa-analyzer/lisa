@@ -34,7 +34,7 @@ import it.unive.lisa.symbolic.value.operator.binary.TypeCast;
 import it.unive.lisa.symbolic.value.operator.binary.TypeConv;
 import it.unive.lisa.symbolic.value.operator.unary.LogicalNegation;
 import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
-import java.util.Map;
+import it.unive.lisa.util.datastructures.trie.PatriciaTrieMap;
 
 /**
  * Base implementation for {@link NonRelationalDomain}s that can evaluate
@@ -75,7 +75,7 @@ public interface BaseNonRelationalDomain<L extends Lattice<L>,
 		if (state.isBottom() || !id.canBeAssigned() || !canProcess(expression, pp, oracle))
 			return state;
 
-		Map<Identifier, L> func = state.mkNewFunction(state.function, false);
+		PatriciaTrieMap<Identifier, L> func = state.mkNewFunction(state.function, false);
 		L value = eval(state, expression, pp, oracle);
 		L v = fixedVariable(id, pp, oracle);
 		if (!v.isBottom())
@@ -86,7 +86,7 @@ public interface BaseNonRelationalDomain<L extends Lattice<L>,
 			// if we have a weak identifier for which we already have
 			// information, we we perform a weak assignment
 			value = value.lub(state.getState(id));
-		func.put(id, value);
+		func = func.put(id, value);
 		return state.mk(state.lattice, func);
 	}
 

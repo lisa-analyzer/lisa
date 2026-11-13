@@ -106,7 +106,8 @@ public abstract class CallWithResult
 		if (this.returnsVoid(returned))
 			// no need to add the meta variable since nothing has been pushed on
 			// the stack
-			return interprocedural.getAnalysis().smallStepSemantics(returned, new Skip(getLocation()), this);
+			return interprocedural.getAnalysis().smallStepSemantics(returned, new Skip(getLocation()),
+					interprocedural.getCurrentContext(), this);
 
 		Identifier meta = getMetaVariable();
 		for (SymbolicExpression expr : returned.getExecutionExpressions())

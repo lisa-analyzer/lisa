@@ -2,6 +2,7 @@ package it.unive.lisa.analysis;
 
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.events.EventQueue;
+import it.unive.lisa.interprocedural.ScopeId;
 import it.unive.lisa.lattices.ExpressionSet;
 import it.unive.lisa.lattices.Satisfiability;
 import it.unive.lisa.program.cfg.ProgramPoint;
@@ -35,6 +36,17 @@ public interface SemanticOracle {
 	 * @return the event queue
 	 */
 	EventQueue getEventQueue();
+
+	/**
+	 * Yields the interprocedural context (i.e., the {@link ScopeId}) where the
+	 * operation that is querying this oracle is being evaluated. This can be
+	 * used by {@link SemanticComponent}s to make their semantics
+	 * context-sensitive. Note that the return value might be {@code null} if no
+	 * context information is available.
+	 * 
+	 * @return the current context, or {@code null}
+	 */
+	ScopeId<?> getContext();
 
 	/**
 	 * Yields whether or not this oracle is able to provide whole value analysis

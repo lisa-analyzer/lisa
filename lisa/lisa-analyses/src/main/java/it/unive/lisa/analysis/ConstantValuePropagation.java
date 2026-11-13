@@ -100,9 +100,16 @@ import java.util.Collections;
 import java.util.Set;
 
 /**
- * A non-relational value domain tracking {@link ConstantValue}s of variables
- * for numeric, character, string and boolean values.
- * 
+ * A non-relational value domain implementing constant propagation and constant
+ * folding over numeric, character, string and boolean values, tracking
+ * {@link ConstantValue}s of variables. Unary, binary and ternary operators are
+ * evaluated concretely, by delegating to their corresponding Java operation
+ * (e.g., addition, {@link String#indexOf(String)},
+ * {@link Character#isLetter(int)}, ...), whenever all of their operands are
+ * themselves constants; {@link ConstantValue#TOP} is returned in every other
+ * case. As a consequence, this domain is exact on constants but, being
+ * non-relational, it cannot track any relation between variables.
+ *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public class ConstantValuePropagation
@@ -414,17 +421,17 @@ public class ConstantValuePropagation
 				rVal = (int) ((Character) rVal).charValue();
 
 			if (lVal instanceof Double || rVal instanceof Double)
-				return new ConstantValue(((Number) lVal).doubleValue() % ((Number) rVal).doubleValue());
+				return new ConstantValue(floorMod(((Number) lVal).doubleValue(), ((Number) rVal).doubleValue()));
 			else if (lVal instanceof Float || rVal instanceof Float)
-				return new ConstantValue(((Number) lVal).floatValue() % ((Number) rVal).floatValue());
+				return new ConstantValue((float) floorMod(((Number) lVal).floatValue(), ((Number) rVal).floatValue()));
 			else if (lVal instanceof Long || rVal instanceof Long)
-				return new ConstantValue(((Number) lVal).longValue() % ((Number) rVal).longValue());
+				return new ConstantValue(Math.floorMod(((Number) lVal).longValue(), ((Number) rVal).longValue()));
 			else if (lVal instanceof Integer || rVal instanceof Integer)
-				return new ConstantValue(((Number) lVal).intValue() % ((Number) rVal).intValue());
+				return new ConstantValue(Math.floorMod(((Number) lVal).intValue(), ((Number) rVal).intValue()));
 			else if (lVal instanceof Short || rVal instanceof Short)
-				return new ConstantValue(((Number) lVal).shortValue() % ((Number) rVal).shortValue());
+				return new ConstantValue(Math.floorMod(((Number) lVal).shortValue(), ((Number) rVal).shortValue()));
 			else if (lVal instanceof Byte || rVal instanceof Byte)
-				return new ConstantValue(((Number) lVal).byteValue() % ((Number) rVal).byteValue());
+				return new ConstantValue(Math.floorMod(((Number) lVal).byteValue(), ((Number) rVal).byteValue()));
 		}
 
 		if (operator instanceof RemainderOperator) {
@@ -1235,5 +1242,23 @@ public class ConstantValuePropagation
 						e,
 						ComparisonEq.INSTANCE,
 						pp.getLocation()));
+	}
+
+	/**
+	 * Yields the modulo of the given values, taking the sign of the divisor (as
+	 * documented by {@link ModuloOperator}).
+	 *
+	 * @param left  the dividend
+	 * @param right the divisor
+	 *
+	 * @return the modulo
+	 */
+	private static double floorMod(
+			double left,
+			double right) {
+		double rem = left % right;
+		if (rem != 0 && (rem < 0) != (right < 0))
+			rem += right;
+		return rem;
 	}
 }

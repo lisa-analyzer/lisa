@@ -34,6 +34,7 @@ import it.unive.lisa.symbolic.value.operator.binary.StringEqualsIgnoreCase;
 import it.unive.lisa.symbolic.value.operator.binary.StringIndexOf;
 import it.unive.lisa.symbolic.value.operator.binary.StringIndexOfChar;
 import it.unive.lisa.symbolic.value.operator.binary.StringIsPrefixOf;
+import it.unive.lisa.symbolic.value.operator.binary.StringIsSubstringOf;
 import it.unive.lisa.symbolic.value.operator.binary.StringIsSuffixOf;
 import it.unive.lisa.symbolic.value.operator.binary.StringLastIndexOf;
 import it.unive.lisa.symbolic.value.operator.binary.StringLastIndexOfChar;
@@ -65,12 +66,16 @@ import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 
 /**
- * The string constant propagation abstract domain, tracking if a certain string
- * value has constant value or not. Top and bottom cases for least upper bounds,
- * widening and less or equals operations are handled by {@link BaseLattice} in
+ * The string constant propagation abstract domain, tracking whether a string
+ * value is a known constant or not. Every string operator (concatenation,
+ * indexing, replacement, case conversion, ...) is evaluated exactly, by
+ * delegating to the corresponding {@link String} operation, whenever all of its
+ * operands are themselves constants; the result collapses to top in every other
+ * case. Top and bottom cases for least upper bounds, widening and less or
+ * equals operations are handled by {@link BaseLattice} in
  * {@link BaseLattice#lub}, {@link BaseLattice#widening} and
  * {@link BaseLattice#lessOrEqual}, respectively.
- * 
+ *
  * @author <a href="mailto:michele.martelli1@studenti.unipr.it">Michele
  *             Martelli</a>
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
@@ -219,6 +224,17 @@ public class StringConstantPropagation
 			StringConstant right,
 			ProgramPoint pp,
 			SemanticOracle oracle) {
+		if (expression.getOperator() == StringIsSubstringOf.INSTANCE)
+			// the left string is a substring of the right one iff the right
+			// one contains the left one
+			return satisfiesBinaryExpression(
+					new BinaryExpression(expression.getStaticType(), expression.getRight(), expression.getLeft(),
+							StringContains.INSTANCE, expression.getCodeLocation()),
+					right,
+					left,
+					pp,
+					oracle);
+
 		if (left.isTop() || right.isTop())
 			return Satisfiability.UNKNOWN;
 
@@ -463,7 +479,8 @@ public class StringConstantPropagation
 					|| operator == StringMatches.INSTANCE
 					|| operator == StringStartsWith.INSTANCE
 					|| operator == StringIsPrefixOf.INSTANCE
-					|| operator == StringIsSuffixOf.INSTANCE) {
+					|| operator == StringIsSuffixOf.INSTANCE
+					|| operator == StringIsSubstringOf.INSTANCE) {
 				Satisfiability sat = satisfies(state, e, pp, oracle);
 				if (sat == Satisfiability.SATISFIED)
 					return ValueDomain.makeEqConstraint(pp.getProgram().getTypes().getBooleanType(), true, e, pp);

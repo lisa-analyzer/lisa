@@ -8,6 +8,7 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.imp.types.ArrayType;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
+import it.unive.lisa.interprocedural.ScopeId;
 import it.unive.lisa.lattices.ExpressionSet;
 import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.cfg.CFG;
@@ -28,10 +29,10 @@ import java.util.Objects;
 
 /**
  * An expression modeling the array allocation operation
- * ({@code new type[...]}). The type of this expression is the {@link Type} of
- * the array's elements. Note that the dimensions of the array are ignored. This
- * expression corresponds to a {@link MemoryAllocation}.
- * 
+ * ({@code new type[...]}). The type of this expression is an {@link ArrayType}
+ * wrapping the given element {@link Type}. Note that the dimensions of the
+ * array are ignored. This expression corresponds to a {@link MemoryAllocation}.
+ *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public class IMPNewArray
@@ -85,6 +86,7 @@ public class IMPNewArray
 			ExpressionSet[] params,
 			StatementStore<A> expressions)
 			throws SemanticException {
+		ScopeId<A> context = interprocedural.getCurrentContext();
 		Analysis<A, D> analysis = interprocedural.getAnalysis();
 		Type type = getStaticType();
 		ReferenceType reftype = new ReferenceType(type);
@@ -92,12 +94,12 @@ public class IMPNewArray
 		HeapReference ref = new HeapReference(reftype, creation, getLocation());
 
 		// we start by allocating the memory region
-		AnalysisState<A> allocated = analysis.smallStepSemantics(state, creation, this);
+		AnalysisState<A> allocated = analysis.smallStepSemantics(state, creation, context, this);
 
 		// we create the synthetic variable that will hold the reference to the
 		// newly allocated array until it is assigned to a variable
 		InstrumentedReceiver array = new InstrumentedReceiver(reftype, true, getLocation());
-		AnalysisState<A> tmp = analysis.assign(allocated, array, ref, this);
+		AnalysisState<A> tmp = analysis.assign(allocated, array, ref, context, this);
 
 		// we define the length of the array as a child element
 		AccessChild len = new AccessChild(
@@ -109,7 +111,7 @@ public class IMPNewArray
 		AnalysisState<A> lenSt = state.bottomExecution();
 		// TODO fix when we'll support multidimensional arrays
 		for (SymbolicExpression dim : params[0])
-			lenSt = lenSt.lub(analysis.assign(tmp, len, dim, this));
+			lenSt = lenSt.lub(analysis.assign(tmp, len, dim, context, this));
 
 		// we leave the synthetic array in the program variables
 		// until it is popped from the stack to keep a reference to the
@@ -117,7 +119,7 @@ public class IMPNewArray
 		getMetaVariables().add(array);
 
 		// finally, we leave a reference to the newly created array on the stack
-		return analysis.smallStepSemantics(lenSt, array, this);
+		return analysis.smallStepSemantics(lenSt, array, context, this);
 	}
 
 	@Override

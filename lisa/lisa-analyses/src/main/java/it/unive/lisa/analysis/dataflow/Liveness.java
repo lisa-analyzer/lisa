@@ -17,13 +17,23 @@ import java.util.stream.Collectors;
 
 /**
  * An implementation of the liveness dataflow analysis, that determines which
- * values might be used later on in the program. <br/>
+ * values might be used later on in the program. An identifier is live at a
+ * program point if there is a path, starting at that point, along which its
+ * current value may be read before being overwritten. This is a backward,
+ * may-style dataflow analysis, instantiated as a {@link DataflowDomain} over
+ * {@link PossibleSet}s of {@link Liv} elements: an identifier is generated
+ * wherever it is read, and killed wherever it is (re)assigned. <br/>
  * <br/>
  * As a dataflow analysis, this domain does not take part in
  * {@link WholeValueAnalysis}, meaning that it will never generate constraints
  * when asked to.
- * 
+ *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ *
+ * @see <a href="https://doi.org/10.1145/512927.512945">Gary A. Kildall. A
+ *          Unified Approach to Global Program Optimization. In Proceedings of
+ *          the 1st Annual ACM SIGACT-SIGPLAN Symposium on Principles of
+ *          Programming Languages (POPL '73), pages 194-206, ACM, 1973.</a>
  */
 public class Liveness
 		extends

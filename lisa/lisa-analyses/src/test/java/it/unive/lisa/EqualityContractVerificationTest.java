@@ -21,6 +21,10 @@ import it.unive.lisa.analysis.informationFlow.NonInterference;
 import it.unive.lisa.analysis.numeric.Interval;
 import it.unive.lisa.analysis.numeric.Sign;
 import it.unive.lisa.analysis.symbols.Symbol;
+import it.unive.lisa.checks.verification.ConditionViolation;
+import it.unive.lisa.checks.verification.ErrorViolation;
+import it.unive.lisa.checks.verification.ReproducingInput;
+import it.unive.lisa.checks.verification.VerificationResult;
 import it.unive.lisa.conf.FixpointConfiguration;
 import it.unive.lisa.conf.LiSAConfiguration;
 import it.unive.lisa.cron.CronConfiguration;
@@ -29,17 +33,16 @@ import it.unive.lisa.imp.IMPFeatures;
 import it.unive.lisa.imp.types.IMPTypeSystem;
 import it.unive.lisa.interprocedural.CFGResults;
 import it.unive.lisa.interprocedural.FixpointResults;
+import it.unive.lisa.interprocedural.Recursion;
 import it.unive.lisa.interprocedural.ScopeId;
 import it.unive.lisa.interprocedural.UniqueScope;
 import it.unive.lisa.interprocedural.callgraph.CallGraphEdge;
 import it.unive.lisa.interprocedural.callgraph.CallGraphNode;
 import it.unive.lisa.interprocedural.context.KDepthToken;
-import it.unive.lisa.interprocedural.context.recursion.Recursion;
 import it.unive.lisa.interprocedural.inlining.CallStackId;
 import it.unive.lisa.lattices.FunctionalLattice;
 import it.unive.lisa.lattices.HistoryState;
 import it.unive.lisa.lattices.InverseSetLattice;
-import it.unive.lisa.lattices.ReachLattice;
 import it.unive.lisa.lattices.SetLattice;
 import it.unive.lisa.lattices.SingleHeapLattice;
 import it.unive.lisa.lattices.SingleTypeLattice;
@@ -55,7 +58,9 @@ import it.unive.lisa.lattices.traces.TraceToken;
 import it.unive.lisa.lattices.types.Supertype;
 import it.unive.lisa.outputs.json.JsonReport;
 import it.unive.lisa.outputs.json.JsonReport.JsonMessage;
+import it.unive.lisa.outputs.json.JsonReport.JsonReproducingInput;
 import it.unive.lisa.outputs.messages.Message;
+import it.unive.lisa.outputs.messages.StatementMessage;
 import it.unive.lisa.outputs.serializableGraph.SerializableEdge;
 import it.unive.lisa.outputs.serializableGraph.SerializableGraph;
 import it.unive.lisa.outputs.serializableGraph.SerializableNode;
@@ -86,6 +91,18 @@ import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.edge.ErrorEdge;
 import it.unive.lisa.program.cfg.edge.SequentialEdge;
 import it.unive.lisa.program.cfg.fixpoints.CompoundState;
+import it.unive.lisa.program.cfg.fixpoints.backward.BackwardAscendingFixpoint;
+import it.unive.lisa.program.cfg.fixpoints.backward.BackwardDescendingGLBFixpoint;
+import it.unive.lisa.program.cfg.fixpoints.backward.BackwardDescendingNarrowingFixpoint;
+import it.unive.lisa.program.cfg.fixpoints.forward.ForwardAscendingFixpoint;
+import it.unive.lisa.program.cfg.fixpoints.forward.ForwardDescendingGLBFixpoint;
+import it.unive.lisa.program.cfg.fixpoints.forward.ForwardDescendingNarrowingFixpoint;
+import it.unive.lisa.program.cfg.fixpoints.optbackward.OptimizedBackwardAscendingFixpoint;
+import it.unive.lisa.program.cfg.fixpoints.optbackward.OptimizedBackwardDescendingGLBFixpoint;
+import it.unive.lisa.program.cfg.fixpoints.optbackward.OptimizedBackwardDescendingNarrowingFixpoint;
+import it.unive.lisa.program.cfg.fixpoints.optforward.OptimizedForwardAscendingFixpoint;
+import it.unive.lisa.program.cfg.fixpoints.optforward.OptimizedForwardDescendingGLBFixpoint;
+import it.unive.lisa.program.cfg.fixpoints.optforward.OptimizedForwardDescendingNarrowingFixpoint;
 import it.unive.lisa.program.cfg.protection.CatchBlock;
 import it.unive.lisa.program.cfg.protection.ProtectedBlock;
 import it.unive.lisa.program.cfg.protection.ProtectionBlock;
@@ -104,6 +121,15 @@ import it.unive.lisa.program.type.Int32Type;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.HeapLocation;
 import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.triage.inputs.InputSource;
+import it.unive.lisa.triage.model.Frame;
+import it.unive.lisa.triage.model.HeapOperators;
+import it.unive.lisa.triage.model.ModelLocation;
+import it.unive.lisa.triage.model.SymbolicCase;
+import it.unive.lisa.triage.model.SymbolicStore;
+import it.unive.lisa.triage.pdr.Cube;
+import it.unive.lisa.triage.smt.Sort;
+import it.unive.lisa.triage.smt.Term;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.TypeTokenType;
 import it.unive.lisa.type.Untyped;
@@ -125,6 +151,7 @@ import it.unive.lisa.util.datastructures.automaton.State;
 import it.unive.lisa.util.datastructures.automaton.Transition;
 import it.unive.lisa.util.datastructures.graph.AdjacencyMatrix;
 import it.unive.lisa.util.datastructures.graph.AdjacencyMatrix.NodeEdges;
+import it.unive.lisa.util.datastructures.graph.Graph;
 import it.unive.lisa.util.datastructures.graph.code.NodeList;
 import it.unive.lisa.util.datastructures.regex.Atom;
 import it.unive.lisa.util.datastructures.regex.Comp;
@@ -137,12 +164,35 @@ import it.unive.lisa.util.datastructures.regex.TopAtom;
 import it.unive.lisa.util.datastructures.regex.symbolic.SymbolicChar;
 import it.unive.lisa.util.datastructures.regex.symbolic.SymbolicString;
 import it.unive.lisa.util.datastructures.regex.symbolic.UnknownSymbolicChar;
+import it.unive.lisa.util.datastructures.trie.PatriciaTrieBranch;
+import it.unive.lisa.util.datastructures.trie.PatriciaTrieCollision;
+import it.unive.lisa.util.datastructures.trie.PatriciaTrieLeaf;
+import it.unive.lisa.util.datastructures.trie.PatriciaTrieMap;
+import it.unive.lisa.util.datastructures.trie.PatriciaTrieNode;
 import it.unive.lisa.util.frontend.ParsedBlock;
 import it.unive.lisa.util.numeric.IntInterval;
 import it.unive.lisa.util.numeric.MathNumber;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
 import it.unive.lisa.util.testing.TestConfiguration;
+import it.unive.lisa.witness.v2.CorrectnessWitness;
+import it.unive.lisa.witness.v2.Location;
+import it.unive.lisa.witness.v2.ViolationWitness;
+import it.unive.lisa.witness.v2.correctness.FunctionContract;
+import it.unive.lisa.witness.v2.correctness.Invariant;
+import it.unive.lisa.witness.v2.correctness.InvariantSet;
+import it.unive.lisa.witness.v2.correctness.ghost.GhostAssignment;
+import it.unive.lisa.witness.v2.correctness.ghost.GhostContent;
+import it.unive.lisa.witness.v2.correctness.ghost.GhostInstrumentation;
+import it.unive.lisa.witness.v2.correctness.ghost.GhostUpdate;
+import it.unive.lisa.witness.v2.correctness.ghost.GhostVariable;
+import it.unive.lisa.witness.v2.metadata.Metadata;
+import it.unive.lisa.witness.v2.metadata.Producer;
+import it.unive.lisa.witness.v2.metadata.Task;
+import it.unive.lisa.witness.v2.violation.Constraint;
+import it.unive.lisa.witness.v2.violation.Segment;
+import it.unive.lisa.witness.v2.violation.ViolationSequence;
+import it.unive.lisa.witness.v2.violation.Waypoint;
 import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.Collections;
@@ -325,6 +375,7 @@ public class EqualityContractVerificationTest {
 		SingleTypeEqualsVerifierApi<T> verifier = EqualsVerifier.forClass(clazz)
 				.suppress(suppressions)
 				.withPrefabValues(CFG.class, cfg1, cfg2)
+				.withPrefabValues(Graph.class, cfg1, cfg2)
 				.withPrefabValues(AbstractCodeMember.class, signCfg1, signCfg2)
 				.withPrefabValues(CodeMemberDescriptor.class, descr1, descr2)
 				.withPrefabValues(ClassUnit.class, unit1, unit2)
@@ -339,6 +390,10 @@ public class EqualityContractVerificationTest {
 				.withPrefabValues(UnresolvedCall.class, uc1, uc2)
 				.withPrefabValues(EventQueue.class, new EventQueue(null), new EventQueue(null))
 				.withPrefabValues(Set.class, s1, s2)
+				.withPrefabValues(PatriciaTrieMap.class, PatriciaTrieMap.empty().put(2, 1),
+						PatriciaTrieMap.empty().put(3, 2))
+				.withPrefabValues(PatriciaTrieNode.class, new PatriciaTrieLeaf<>(2, 2, 1),
+						new PatriciaTrieLeaf<>(3, 3, 2))
 				.withPrefabValues(
 						AbstractDomain.class,
 						DefaultConfiguration.simpleDomain(
@@ -359,7 +414,8 @@ public class EqualityContractVerificationTest {
 								DefaultConfiguration.defaultHeapDomain(),
 								new Sign(),
 								DefaultConfiguration.defaultTypeDomain()).makeLattice()))
-				.withPrefabValues(MutableGraph.class, g1, g2);
+				.withPrefabValues(MutableGraph.class, g1, g2)
+				.withPrefabValues(ScopeId.class, new UniqueScope<>(), KDepthToken.create(1));
 
 		if (getClass)
 			verifier = verifier.usingGetClass();
@@ -378,6 +434,27 @@ public class EqualityContractVerificationTest {
 		verify(FixpointConfiguration.class);
 		verify(TestConfiguration.class, Warning.NONFINAL_FIELDS);
 		verify(CronConfiguration.class, Warning.NONFINAL_FIELDS);
+	}
+
+	private static <T> void verifyFixpoint(
+			Class<T> clazz) {
+		verify(clazz, verifier -> verifier.withIgnoredFields("events"));
+	}
+
+	@Test
+	public void testFixpoints() {
+		verifyFixpoint(ForwardAscendingFixpoint.class);
+		verifyFixpoint(ForwardDescendingGLBFixpoint.class);
+		verifyFixpoint(ForwardDescendingNarrowingFixpoint.class);
+		verifyFixpoint(BackwardAscendingFixpoint.class);
+		verifyFixpoint(BackwardDescendingGLBFixpoint.class);
+		verifyFixpoint(BackwardDescendingNarrowingFixpoint.class);
+		verifyFixpoint(OptimizedForwardAscendingFixpoint.class);
+		verifyFixpoint(OptimizedForwardDescendingGLBFixpoint.class);
+		verifyFixpoint(OptimizedForwardDescendingNarrowingFixpoint.class);
+		verifyFixpoint(OptimizedBackwardAscendingFixpoint.class);
+		verifyFixpoint(OptimizedBackwardDescendingGLBFixpoint.class);
+		verifyFixpoint(OptimizedBackwardDescendingNarrowingFixpoint.class);
 	}
 
 	@Test
@@ -408,6 +485,11 @@ public class EqualityContractVerificationTest {
 		verify(DuplicateFreeFIFOWorkingSet.class);
 		verify(DuplicateFreeLIFOWorkingSet.class);
 		verify(OrderBasedWorkingSet.class);
+
+		verify(PatriciaTrieMap.class);
+		verify(PatriciaTrieLeaf.class);
+		verify(PatriciaTrieBranch.class, verifier -> verifier.withIgnoredFields("size"));
+		verify(PatriciaTrieCollision.class);
 	}
 
 	@Test
@@ -443,7 +525,8 @@ public class EqualityContractVerificationTest {
 	public void testTypes() {
 		Reflections scanner = mkReflections();
 		for (Class<? extends Type> type : scanner.getSubTypesOf(Type.class))
-			if (!type.getName().contains("BaseCallGraphTest"))
+			// testing classes are skipped
+			if (!type.getName().contains("Test"))
 				// type token is the only one with an eclipse-like equals
 				verify(
 						type,
@@ -565,7 +648,6 @@ public class EqualityContractVerificationTest {
 			else if (subject == SingleHeapLattice.class
 					|| subject == SingleTypeLattice.class
 					|| subject == SingleValueLattice.class
-					|| subject == ReachLattice.ReachabilityStatus.class
 					|| subject == Monolith.class)
 				verify(subject, Warning.INHERITED_DIRECTLY_FROM_OBJECT);
 			else if (subject != AnalyzedCFG.class
@@ -613,11 +695,58 @@ public class EqualityContractVerificationTest {
 	@Test
 	public void testMessages() {
 		// serialization requires non final fields
-		verify(JsonMessage.class, Warning.NONFINAL_FIELDS);
-		verify(Message.class);
+		// the explanation of the verification of a message is not part of its
+		// identity
+		verify(JsonMessage.class, verifier -> verifier.withIgnoredFields("explanation"), Warning.NONFINAL_FIELDS);
+		verify(JsonReproducingInput.class, Warning.NONFINAL_FIELDS);
+		// neither the violation reported by a message nor the explanation of
+		// its verification (and the statement raising a confirmed error) are
+		// part of its identity
+		verify(Message.class, verifier -> verifier.withIgnoredFields("violation", "explanation"));
 		Reflections scanner = mkReflections();
 		for (Class<? extends Message> message : scanner.getSubTypesOf(Message.class))
-			verify(message);
+			if (StatementMessage.class.isAssignableFrom(message))
+				verify(message, verifier -> verifier.withIgnoredFields("violation", "explanation", "thrower"));
+			else
+				verify(message, verifier -> verifier.withIgnoredFields("violation", "explanation"));
+	}
+
+	@Test
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public void testVerification() throws ClassNotFoundException {
+		verify(ConditionViolation.class);
+		verify(ErrorViolation.class);
+		// the statement raising a confirmed error and the candidate
+		// confirmation are not part of the identity of a result
+		verify(VerificationResult.class, verifier -> verifier.withIgnoredFields("thrower", "candidate")
+				.withPrefabValues(VerificationResult.class, VerificationResult.CONFIRMED,
+						VerificationResult.REFUTED));
+		verify(ReproducingInput.class);
+		// array sorts refer to their index and element sorts
+		verify(Sort.class, verifier -> verifier.withPrefabValues(Sort.class, Sort.INT, Sort.BOOL));
+		verify(InputSource.class);
+		verify(SymbolicCase.class);
+		// the scopes pushed and popped by cases are private
+		verify(Class.forName(SymbolicCase.class.getName() + "$Scoping"), false);
+		// results are identified by their cfg and context, and the depth is
+		// derived from the parent
+		AnalyzedCFG<?> result1 = new AnalyzedCFG(cfg1, new UniqueScope(), (AnalysisState) null);
+		AnalyzedCFG<?> result2 = new AnalyzedCFG(cfg2, new UniqueScope(), (AnalysisState) null);
+		verify(Frame.class, verifier -> verifier
+				.withPrefabValues(AnalyzedCFG.class, result1, result2)
+				.withPrefabValues(Frame.class, Frame.root(result1), Frame.root(result2))
+				.withIgnoredFields("depth")
+				.suppress(Warning.ALL_FIELDS_SHOULD_BE_USED));
+		verify(ModelLocation.class, verifier -> verifier
+				.withPrefabValues(AnalyzedCFG.class, result1, result2)
+				.withPrefabValues(Frame.class, Frame.root(result1), Frame.root(result2)));
+		// the factory of fresh values and the bound on cases do not affect
+		// the represented transition
+		verify(SymbolicStore.class, verifier -> verifier.withIgnoredFields("factory", "maxCases"));
+		verify(Term.class, verifier -> verifier.withPrefabValues(Sort.class, Sort.INT, Sort.BOOL));
+		verify(Cube.class);
+		verify(Cube.Blocked.class);
+		verify(HeapOperators.RuntimeTypeIn.class);
 	}
 
 	@Test
@@ -630,15 +759,20 @@ public class EqualityContractVerificationTest {
 		Reflections scanner = mkReflections();
 		for (@SuppressWarnings("rawtypes")
 		Class<? extends ScopeId> token : scanner.getSubTypesOf(ScopeId.class))
-			if (token == KDepthToken.class)
-				// k is just a bound on the maximum length, it does not matter
-				verify(token, verifier -> verifier.withIgnoredFields("k"));
+			if (token.getName().contains("Test"))
+				// testing classes are skipped
+				continue;
+			else if (token == KDepthToken.class)
+				// k is just a bound on the maximum length, it does not matter,
+				// while the hash is derived from the calls
+				verify(token, verifier -> verifier.withIgnoredFields("k", "hash"));
 			else if (token == UniqueScope.class)
 				verify(token, Warning.INHERITED_DIRECTLY_FROM_OBJECT);
 			else if (token == CallStackId.class) {
+				// the hash is derived from the calls
 				verify(
 						token,
-						verifier -> verifier.withPrefabValues(
+						verifier -> verifier.withIgnoredFields("hash").withPrefabValues(
 								Pair.class,
 								Pair.of(cc1,
 										new Analysis<>(DefaultConfiguration.defaultAbstractDomain()).makeLattice()),
@@ -702,6 +836,34 @@ public class EqualityContractVerificationTest {
 		Reflections scanner = mkReflections();
 		for (Class<? extends Symbol> sym : scanner.getSubTypesOf(Symbol.class))
 			verify(sym);
+	}
+
+	@Test
+	public void testWitnesses() {
+		verify(Location.class, Warning.NULL_FIELDS);
+		// the entries of a witness have an abstract type
+		verify(ViolationWitness.class, verifier -> verifier.withPrefabValues(List.class, List.of("a"), List.of("b")),
+				Warning.NULL_FIELDS);
+		verify(CorrectnessWitness.class, verifier -> verifier.withPrefabValues(List.class, List.of("a"), List.of("b")),
+				Warning.NULL_FIELDS);
+		verify(Metadata.class, Warning.NULL_FIELDS);
+		verify(Producer.class, Warning.NULL_FIELDS);
+		verify(Task.class, Warning.NULL_FIELDS);
+		verify(ViolationSequence.class, Warning.NULL_FIELDS);
+		verify(Segment.class, Warning.NULL_FIELDS);
+		verify(Waypoint.class, Warning.NULL_FIELDS);
+		verify(Constraint.class, Warning.NULL_FIELDS);
+		// the items of an invariant set have an abstract type
+		verify(InvariantSet.class, verifier -> verifier.withPrefabValues(List.class, List.of("a"), List.of("b")),
+				Warning.NULL_FIELDS);
+		verify(Invariant.class, Warning.NULL_FIELDS);
+		verify(FunctionContract.class, Warning.NULL_FIELDS);
+		verify(GhostInstrumentation.class, Warning.NULL_FIELDS);
+		verify(GhostContent.class, Warning.NULL_FIELDS);
+		verify(GhostVariable.class, Warning.NULL_FIELDS);
+		verify(GhostUpdate.class, Warning.NULL_FIELDS);
+		verify(GhostAssignment.class, Warning.NULL_FIELDS);
+		verify(it.unive.lisa.witness.v2.correctness.ghost.Expression.class, Warning.NULL_FIELDS);
 	}
 
 }

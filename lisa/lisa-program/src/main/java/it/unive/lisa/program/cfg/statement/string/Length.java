@@ -7,6 +7,7 @@ import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
+import it.unive.lisa.interprocedural.ScopeId;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.NativeCFG;
@@ -76,13 +77,15 @@ public class Length
 			SymbolicExpression expr,
 			StatementStore<A> expressions)
 			throws SemanticException {
+		ScopeId<A> context = interprocedural.getCurrentContext();
 		Analysis<A, D> analysis = interprocedural.getAnalysis();
-		if (analysis.getRuntimeTypesOf(state, expr, this).stream().noneMatch(Type::isStringType))
+		if (analysis.getRuntimeTypesOf(state, expr, context, this).stream().noneMatch(Type::isStringType))
 			return state.bottomExecution();
 
 		return analysis.smallStepSemantics(
 				state,
 				new UnaryExpression(getStaticType(), expr, StringLength.INSTANCE, getLocation()),
+				context,
 				originating == null ? this : originating);
 	}
 

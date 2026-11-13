@@ -2,6 +2,7 @@ package it.unive.lisa.analysis.heap.pointbased;
 
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
+import it.unive.lisa.interprocedural.ScopeId;
 import it.unive.lisa.lattices.ExpressionSet;
 import it.unive.lisa.lattices.GenericMapLattice;
 import it.unive.lisa.lattices.heap.allocations.AllocationSite;
@@ -17,28 +18,58 @@ import it.unive.lisa.symbolic.heap.AccessChild;
 import it.unive.lisa.symbolic.heap.MemoryAllocation;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.MemoryPointer;
-import java.util.HashMap;
+import it.unive.lisa.util.datastructures.trie.PatriciaTrieMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import org.apache.commons.lang3.tuple.Pair;
 
 /**
- * A field-insensitive program point-based {@link AllocationSiteBasedAnalysis}.
- * The implementation follows X. Rival and K. Yi, "Introduction to Static
- * Analysis An Abstract Interpretation Perspective", Section 8.3.4
- * 
+ * A field-sensitive, allocation-site-based heap domain: in addition to the
+ * allocation site of an object or array, heap locations also track, for each
+ * allocation site, the fields (or elements) that have been accessed on it and
+ * the allocation sites they in turn point to. The implementation follows X.
+ * Rival and K. Yi, "Introduction to Static Analysis: An Abstract Interpretation
+ * Perspective", Section 8.3.4.<br>
+ * <br>
+ * Instances built with {@link #FieldSensitivePointBasedHeap(boolean)} can also
+ * be context-sensitive, qualifying allocation sites with the interprocedural
+ * context where the allocation happens (see
+ * {@link AllocationSiteBasedAnalysis}). This only adds precision when used
+ * together with a context-sensitive interprocedural analysis (e.g.,
+ * {@link it.unive.lisa.interprocedural.context.ContextBasedAnalysis} or
+ * {@link it.unive.lisa.interprocedural.inlining.InliningAnalysis}).
+ *
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
- * 
- * @see <a href=
- *          "https://mitpress.mit.edu/books/introduction-static-analysis">https://mitpress.mit.edu/books/introduction-static-analysis</a>
+ *
+ * @see <a href="https://mitpress.mit.edu/books/introduction-static-analysis">
+ *          Xavier Rival, Kwangkeun Yi. Introduction to Static Analysis: An
+ *          Abstract Interpretation Perspective. MIT Press, 2020.</a>
  */
 public class FieldSensitivePointBasedHeap
 		extends
 		AllocationSiteBasedAnalysis<HeapEnvWithFields> {
+
+	/**
+	 * Builds a context-insensitive, field-sensitive heap domain.
+	 */
+	public FieldSensitivePointBasedHeap() {
+		super();
+	}
+
+	/**
+	 * Builds a field-sensitive heap domain.
+	 * 
+	 * @param contextSensitive whether or not allocation sites should be
+	 *                             qualified by the interprocedural context
+	 *                             where the allocation happens
+	 */
+	public FieldSensitivePointBasedHeap(
+			boolean contextSensitive) {
+		super(contextSensitive);
+	}
 
 	@Override
 	public HeapEnvWithFields makeLattice() {
@@ -50,6 +81,7 @@ public class FieldSensitivePointBasedHeap
 			HeapEnvWithFields state,
 			Identifier id,
 			StackAllocationSite site,
+			ScopeId<?> context,
 			List<HeapReplacement> replacements)
 			throws SemanticException {
 		// no aliasing: star_y must be cloned and the clone must
@@ -57,11 +89,13 @@ public class FieldSensitivePointBasedHeap
 		StackAllocationSite clone = new StackAllocationSite(
 				site.getStaticType(),
 				id.getCodeLocation().toString(),
+				context,
 				site.isWeak(),
 				id.getCodeLocation());
 		HeapEnvWithFields heap = store(state, id, clone);
 
-		Map<AllocationSite, ExpressionSet> newFields = new HashMap<>(state.fields.getMap());
+		PatriciaTrieMap<AllocationSite,
+				ExpressionSet> newFields = state.fields.mkNewFunction(state.fields.function, false);
 
 		// all the allocation sites fields of star_y
 		if (state.fields.getKeys().contains(site)) {
@@ -70,6 +104,7 @@ public class FieldSensitivePointBasedHeap
 						field.getStaticType(),
 						id.getCodeLocation().toString(),
 						field,
+						context,
 						site.isWeak(),
 						id.getCodeLocation());
 
@@ -77,6 +112,7 @@ public class FieldSensitivePointBasedHeap
 						field.getStaticType(),
 						site.getCodeLocation().toString(),
 						field,
+						site.getContext(),
 						site.isWeak(),
 						site.getCodeLocation());
 				HeapReplacement replacement = new HeapReplacement();
@@ -85,7 +121,7 @@ public class FieldSensitivePointBasedHeap
 				replacement.addTarget(star_yWithField);
 
 				// need to update also the fields of the clone
-				addField(clone, field, newFields);
+				newFields = addField(clone, field, newFields);
 
 				replacements.add(replacement);
 			}
@@ -117,7 +153,7 @@ public class FieldSensitivePointBasedHeap
 
 		if (expression instanceof AccessChild) {
 			AccessChild accessChild = (AccessChild) expression;
-			Map<AllocationSite, ExpressionSet> mapping = new HashMap<>(st.fields.getMap());
+			PatriciaTrieMap<AllocationSite, ExpressionSet> mapping = st.fields.mkNewFunction(st.fields.function, false);
 
 			ExpressionSet exprs;
 			SymbolicExpression cont = accessChild.getContainer();
@@ -134,14 +170,14 @@ public class FieldSensitivePointBasedHeap
 					ExpressionSet childs = rewrite(sss.getLeft(), accessChild.getChild(), pp, oracle);
 
 					for (SymbolicExpression child : childs)
-						addField(site, child, mapping);
+						mapping = addField(site, child, mapping);
 
 				} else if (rec instanceof AllocationSite) {
 					AllocationSite site = (AllocationSite) rec;
 					ExpressionSet childs = rewrite(sss.getLeft(), accessChild.getChild(), pp, oracle);
 
 					for (SymbolicExpression child : childs)
-						addField(site, child, mapping);
+						mapping = addField(site, child, mapping);
 				}
 
 			return Pair.of(
@@ -149,7 +185,7 @@ public class FieldSensitivePointBasedHeap
 					sss.getRight());
 		} else if (expression instanceof MemoryAllocation) {
 			String loc = expression.getCodeLocation().getCodeLocation();
-			Set<AllocationSite> alreadyAllocated = getAllocatedAt(st, loc);
+			Set<AllocationSite> alreadyAllocated = getAllocatedAt(st, loc, contextOf(oracle));
 
 			if (!alreadyAllocated.isEmpty()) {
 				// we must turn all these sites to weak ones, including the one
@@ -178,7 +214,7 @@ public class FieldSensitivePointBasedHeap
 
 				if (!replacements.isEmpty()) {
 					// we must apply the replacements to our mapping as well
-					Map<Identifier, AllocationSites> map = new HashMap<>(st.getMap());
+					PatriciaTrieMap<Identifier, AllocationSites> map = st.mkNewFunction(st.function, false);
 					for (Entry<Identifier, AllocationSites> entry : st) {
 						Identifier id = entry.getKey();
 						AllocationSites sites = entry.getValue();
@@ -188,7 +224,7 @@ public class FieldSensitivePointBasedHeap
 								id = repl.getTargets().iterator().next();
 							sites = sites.applyReplacement(repl, pp);
 						}
-						map.put(id, sites);
+						map = map.put(id, sites);
 					}
 					st = new HeapEnvWithFields(st.lattice, map, st.fields);
 				}
@@ -200,13 +236,25 @@ public class FieldSensitivePointBasedHeap
 		return sss;
 	}
 
-	private void addField(
+	/**
+	 * Tracks a new field for the given allocation site by inserting it in the
+	 * given mapping, returning the updated mapping. If the site is already
+	 * present in the mapping, the field is added to the existing set of fields,
+	 * otherwise a new set is created and added to the mapping.
+	 *
+	 * @param site    the allocation site
+	 * @param field   the field to track
+	 * @param mapping the mapping to update
+	 * 
+	 * @return the updated mapping
+	 */
+	protected PatriciaTrieMap<AllocationSite, ExpressionSet> addField(
 			AllocationSite site,
 			SymbolicExpression field,
-			Map<AllocationSite, ExpressionSet> mapping) {
+			PatriciaTrieMap<AllocationSite, ExpressionSet> mapping) {
 		Set<SymbolicExpression> tmp = new HashSet<>(mapping.getOrDefault(site, new ExpressionSet()).elements());
 		tmp.add(field);
-		mapping.put(site, new ExpressionSet(tmp));
+		return mapping.put(site, new ExpressionSet(tmp));
 	}
 
 	@Override
@@ -255,11 +303,14 @@ public class FieldSensitivePointBasedHeap
 		for (SymbolicExpression target : child) {
 			AllocationSite e;
 
+			// the field belongs to the same object of the receiver, so it is
+			// qualified by the receiver's context
 			if (site instanceof StackAllocationSite)
 				e = new StackAllocationSite(
 						expression.getStaticType(),
 						site.getLocationName(),
 						target,
+						site.getContext(),
 						site.isWeak(),
 						site.getCodeLocation());
 			else
@@ -267,6 +318,7 @@ public class FieldSensitivePointBasedHeap
 						expression.getStaticType(),
 						site.getLocationName(),
 						target,
+						site.getContext(),
 						site.isWeak(),
 						site.getCodeLocation());
 
@@ -288,18 +340,19 @@ public class FieldSensitivePointBasedHeap
 			SemanticOracle oracle)
 			throws SemanticException {
 		String loc = expression.getCodeLocation().getCodeLocation();
+		ScopeId<?> context = contextOf(oracle);
 
 		boolean weak;
-		if (!getAllocatedAt(state, loc).isEmpty())
+		if (!getAllocatedAt(state, loc, context).isEmpty())
 			weak = true;
 		else
 			weak = false;
 
 		AllocationSite e;
 		if (expression.isStackAllocation())
-			e = new StackAllocationSite(expression.getStaticType(), loc, weak, expression.getCodeLocation());
+			e = new StackAllocationSite(expression.getStaticType(), loc, context, weak, expression.getCodeLocation());
 		else
-			e = new HeapAllocationSite(expression.getStaticType(), loc, weak, expression.getCodeLocation());
+			e = new HeapAllocationSite(expression.getStaticType(), loc, context, weak, expression.getCodeLocation());
 		e.setAllocation(true);
 
 		// propagates the annotations of expression

@@ -7,7 +7,7 @@ import java.util.Objects;
 
 /**
  * A holder for the configuration of a {@link LiSA} analysis.
- * 
+ *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public abstract class BaseConfiguration {
