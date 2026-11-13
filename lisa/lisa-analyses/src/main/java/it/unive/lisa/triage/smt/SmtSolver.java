@@ -169,20 +169,19 @@ public interface SmtSolver
 
 	/**
 	 * Signals that the given declared function stands for a function over
-	 * floating point numbers that can be computed on concrete values (e.g.,
-	 * the sine), so that solvers can use it to look for models where the
-	 * function has its actual values (e.g., when they cannot decide a query
-	 * otherwise). The function is still uninterpreted in the queries. By
-	 * default, this does nothing.
+	 * floating point numbers that can be computed on concrete values (e.g., the
+	 * sine), so that solvers can use it to look for models where the function
+	 * has its actual values (e.g., when they cannot decide a query otherwise).
+	 * The function is still uninterpreted in the queries. By default, this does
+	 * nothing.
 	 *
 	 * @param function  the function, as returned by
 	 *                      {@link #declareFunction(String, List, Sort)}
 	 * @param arguments the sorts of its arguments
 	 * @param result    the sort of its result
-	 * @param evaluator the function computing the result from the values of
-	 *                      the arguments ({@link Double}s for
-	 *                      {@link Sort#FLOAT64}, {@link Float}s for
-	 *                      {@link Sort#FLOAT32})
+	 * @param evaluator the function computing the result from the values of the
+	 *                      arguments ({@link Double}s for {@link Sort#FLOAT64},
+	 *                      {@link Float}s for {@link Sort#FLOAT32})
 	 */
 	default void evaluable(
 			String function,

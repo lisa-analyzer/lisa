@@ -531,8 +531,8 @@ public class PdrEngine {
 	private String reasonUnknown;
 
 	/**
-	 * Yields why the solver could not decide the last query it could not
-	 * decide (see {@link Status#UNKNOWN}).
+	 * Yields why the solver could not decide the last query it could not decide
+	 * (see {@link Status#UNKNOWN}).
 	 *
 	 * @return the reason, or {@code null} if every query has been decided
 	 */
@@ -541,8 +541,8 @@ public class PdrEngine {
 	}
 
 	/**
-	 * Signals a query the solver could not decide, recording why: the reason
-	 * is asked before the scope of the query is closed, as solvers forget it
+	 * Signals a query the solver could not decide, recording why: the reason is
+	 * asked before the scope of the query is closed, as solvers forget it
 	 * afterwards. Callers either go on (see {@link #ignoreUndecided(Stop)} and
 	 * {@link #assumeUnreachable(Stop)}) or stop the search.
 	 */
@@ -558,11 +558,11 @@ public class PdrEngine {
 	}
 
 	/**
-	 * Goes on after a query the solver could not decide, when giving up on
-	 * what the query was for only loses precision (e.g., a generalization or
-	 * the propagation of a lemma). The search is stopped if the budget is
-	 * exhausted instead, or if the solver cannot be used anymore (e.g., it has
-	 * been killed as it did not answer in time).
+	 * Goes on after a query the solver could not decide, when giving up on what
+	 * the query was for only loses precision (e.g., a generalization or the
+	 * propagation of a lemma). The search is stopped if the budget is exhausted
+	 * instead, or if the solver cannot be used anymore (e.g., it has been
+	 * killed as it did not answer in time).
 	 */
 	private void ignoreUndecided(
 			Stop stop)
@@ -573,12 +573,11 @@ public class PdrEngine {
 
 	/**
 	 * Goes on after a query the solver could not decide, assuming that the
-	 * states it asked about are not reachable: counterexamples found
-	 * afterwards are still genuine, since each of their steps is a satisfiable
-	 * query, but the search can no longer prove that the violation is
-	 * impossible, and ends with {@link Status#UNKNOWN} if it finds no
-	 * counterexample. The search is stopped if the budget is exhausted
-	 * instead.
+	 * states it asked about are not reachable: counterexamples found afterwards
+	 * are still genuine, since each of their steps is a satisfiable query, but
+	 * the search can no longer prove that the violation is impossible, and ends
+	 * with {@link Status#UNKNOWN} if it finds no counterexample. The search is
+	 * stopped if the budget is exhausted instead.
 	 */
 	private void assumeUnreachable(
 			Stop stop)
@@ -952,11 +951,11 @@ public class PdrEngine {
 	 * yields them, that is, the order in which the replay of the bad location
 	 * produces them (e.g., the cases of a short-circuiting condition, in the
 	 * order of its operands), or from the one with the fewest literals (ties
-	 * broken by their textual form), if {@link #setFewestLiteralsFirst(boolean)}
-	 * says so. The order decides which obligation is blocked first, and both
-	 * are reproducible: depending on the model, either can make the search much
-	 * slower, by blocking first the cases that the invariant covering the
-	 * others is not found from.
+	 * broken by their textual form), if
+	 * {@link #setFewestLiteralsFirst(boolean)} says so. The order decides which
+	 * obligation is blocked first, and both are reproducible: depending on the
+	 * model, either can make the search much slower, by blocking first the
+	 * cases that the invariant covering the others is not found from.
 	 */
 	private List<BadCase> badCases() {
 		if (sortedBadCases == null) {

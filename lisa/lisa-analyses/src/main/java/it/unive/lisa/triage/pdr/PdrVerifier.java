@@ -159,9 +159,9 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 	private boolean inexact;
 
 	/**
-	 * The confirmation the violation being verified would have if the inputs
-	 * of the last imprecise counterexample found from the initial states of
-	 * the program reproduced it, or {@code null}.
+	 * The confirmation the violation being verified would have if the inputs of
+	 * the last imprecise counterexample found from the initial states of the
+	 * program reproduced it, or {@code null}.
 	 */
 	private VerificationResult candidate;
 
@@ -944,7 +944,8 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 					Math.max(1, deadline - System.currentTimeMillis()));
 			int used = engine.getQueries();
 			statistics = Map.of("queries", used, "level", engine.getFrames().depth(), "proposals",
-					engine.getProposals(), "accepted", engine.getAcceptedProposals(), "undecided", engine.getUndecided());
+					engine.getProposals(), "accepted", engine.getAcceptedProposals(), "undecided",
+					engine.getUndecided());
 			return result(model, engine, status, used);
 		} catch (SmtException e) {
 			// the solver might be unusable
@@ -1074,7 +1075,8 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 			List<Map.Entry<InputValue, String>> produced = new ArrayList<>(o.getInputs().entrySet());
 			// (and, within a transition, in the order of their evaluation)
 			produced.sort(Comparator
-					.comparingInt((Map.Entry<InputValue, String> input) -> edge.positionOf(input.getKey()))
+					.comparingInt((
+							Map.Entry<InputValue, String> input) -> edge.positionOf(input.getKey()))
 					.thenComparingLong(input -> input.getKey().getIndex()));
 			for (Map.Entry<InputValue, String> input : produced)
 				inputs.add(input.getKey().getSource(), input.getValue(),

@@ -13,20 +13,20 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * A relaxation of the assertions sent to a solver, where floating point
- * numbers are replaced by real numbers, used to look for values of the
- * floating point constants that satisfy queries the solver cannot decide over
- * floating point numbers: the values of the constants in a model of the relaxed
- * assertions, rounded to floating point numbers, are candidates to be checked
- * against the original assertions (where fixing them makes the query much
- * easier). The relaxation is neither an over- nor an under-approximation
- * (rounding is ignored, NaNs and infinities are not numbers, and operations
- * that cannot be expressed over real numbers are uninterpreted functions), so
- * it is only a source of candidates.<br>
+ * A relaxation of the assertions sent to a solver, where floating point numbers
+ * are replaced by real numbers, used to look for values of the floating point
+ * constants that satisfy queries the solver cannot decide over floating point
+ * numbers: the values of the constants in a model of the relaxed assertions,
+ * rounded to floating point numbers, are candidates to be checked against the
+ * original assertions (where fixing them makes the query much easier). The
+ * relaxation is neither an over- nor an under-approximation (rounding is
+ * ignored, NaNs and infinities are not numbers, and operations that cannot be
+ * expressed over real numbers are uninterpreted functions), so it is only a
+ * source of candidates.<br>
  * <br>
  * The declarations, definitions and assertions sent to the solver are recorded
- * (with the scopes of the assertions), and {@link #relax()} yields the
- * commands of a self-contained problem asserting the relaxation of the current
+ * (with the scopes of the assertions), and {@link #relax()} yields the commands
+ * of a self-contained problem asserting the relaxation of the current
  * assertions, to be solved by a different solver (relaxed problems are often
  * non-linear, and solvers might not stop in time on them): the symbols whose
  * sorts involve floating point numbers are replaced by copies (whose names end
@@ -70,8 +70,8 @@ final class RealRelaxation {
 			"str.replace_all", "str.from_int", "int.to.str", "str.from_code");
 
 	/**
-	 * A floating point constant of the original assertions, and its copy in
-	 * the relaxed ones.
+	 * A floating point constant of the original assertions, and its copy in the
+	 * relaxed ones.
 	 */
 	static final class Pin {
 
@@ -136,9 +136,9 @@ final class RealRelaxation {
 	}
 
 	/**
-	 * An application of a function that can be computed on concrete values
-	 * (see {@link #markEvaluable(String)}), in the original assertions and in
-	 * the relaxed ones.
+	 * An application of a function that can be computed on concrete values (see
+	 * {@link #markEvaluable(String)}), in the original assertions and in the
+	 * relaxed ones.
 	 */
 	static final class Application {
 
@@ -1068,8 +1068,8 @@ final class RealRelaxation {
 
 	/**
 	 * Relaxes an operation that cannot be expressed over real numbers as the
-	 * application of an uninterpreted function to the relaxed operands (but
-	 * the rounding mode).
+	 * application of an uninterpreted function to the relaxed operands (but the
+	 * rounding mode).
 	 */
 	private String uninterpreted(
 			SExpression e,
@@ -1178,11 +1178,6 @@ final class RealRelaxation {
 		}
 	}
 
-	/**
-	 * Yields the rational number printed by a solver as the given value (e.g.,
-	 * {@code (- (/ 1.0 3.0))}), approximated to 34 digits, or {@code null} if
-	 * it is not a rational number.
-	 */
 	/**
 	 * Yields the rational number printed by a solver as the given value, as
 	 * {@link #rational(SExpression)}.

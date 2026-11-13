@@ -13,6 +13,8 @@ import java.util.function.Predicate;
  * instead of making all of them unknown. The writes of a member are the ones of
  * its own code, excluding the members it calls: these are found through the
  * call graph, as for {@link GlobalWrites}.
+ *
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 @FunctionalInterface
 public interface HeapWrites {

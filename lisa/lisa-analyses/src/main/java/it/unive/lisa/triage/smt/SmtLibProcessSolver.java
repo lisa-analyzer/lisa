@@ -6,10 +6,10 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Deque;
@@ -656,15 +656,15 @@ public class SmtLibProcessSolver
 	 * {@link RealRelaxation}): the relaxed assertions are checked by another
 	 * process running the same solver (as solvers might not stop in time on
 	 * relaxed problems, that are often non-linear, and killing this one would
-	 * lose its state), and if they are satisfiable the floating point
-	 * constants of the original assertions are fixed to the values of their
-	 * copies in the model, and the original assertions are checked again by
-	 * another process. If they are satisfiable, the query is decided as
-	 * satisfiable, and the model is read from that process until the scope of
-	 * the query is changed. Otherwise, the query stays undecided. This solver
-	 * is never changed (z3 might not answer to commands changing the scopes
-	 * right after an undecided check). Relaxed queries are never
-	 * unsatisfiable, as the relaxation is not an over-approximation.
+	 * lose its state), and if they are satisfiable the floating point constants
+	 * of the original assertions are fixed to the values of their copies in the
+	 * model, and the original assertions are checked again by another process.
+	 * If they are satisfiable, the query is decided as satisfiable, and the
+	 * model is read from that process until the scope of the query is changed.
+	 * Otherwise, the query stays undecided. This solver is never changed (z3
+	 * might not answer to commands changing the scopes right after an undecided
+	 * check). Relaxed queries are never unsatisfiable, as the relaxation is not
+	 * an over-approximation.
 	 *
 	 * @return {@link SmtResult#SAT} if a model has been found,
 	 *             {@link SmtResult#UNKNOWN} otherwise
@@ -854,10 +854,9 @@ public class SmtLibProcessSolver
 	}
 
 	/**
-	 * Yields the applications of the functions that can be computed on
-	 * concrete values whose values in the current model of the given relaxed
-	 * problem are not the actual ones (only for rational points and finite
-	 * values).
+	 * Yields the applications of the functions that can be computed on concrete
+	 * values whose values in the current model of the given relaxed problem are
+	 * not the actual ones (only for rational points and finite values).
 	 */
 	private List<Mismatch> relaxedMismatches(
 			SmtLibProcessSolver helper,
@@ -931,8 +930,8 @@ public class SmtLibProcessSolver
 
 	/**
 	 * Yields the linear interpolation of the given samples at the given real
-	 * term (constant out of the sampled range), or the term itself if there
-	 * are no samples.
+	 * term (constant out of the sampled range), or the term itself if there are
+	 * no samples.
 	 */
 	private static String interpolation(
 			TreeMap<Double, Double> samples,
@@ -953,9 +952,9 @@ public class SmtLibProcessSolver
 	}
 
 	/**
-	 * Yields the assertions stating the actual values of the functions that
-	 * can be computed on concrete values at the points where the current model
-	 * of the original problem applies them with different values.
+	 * Yields the assertions stating the actual values of the functions that can
+	 * be computed on concrete values at the points where the current model of
+	 * the original problem applies them with different values.
 	 */
 	private List<String> fixedFacts(
 			SmtLibProcessSolver checker,
@@ -1032,7 +1031,6 @@ public class SmtLibProcessSolver
 				&& evaluators.putIfAbsent(function, new Evaluator(List.copyOf(arguments), result, evaluator)) == null)
 			relaxation.markEvaluable(function);
 	}
-
 
 	/**
 	 * Forgets the solver that decided the last check through the relaxation
