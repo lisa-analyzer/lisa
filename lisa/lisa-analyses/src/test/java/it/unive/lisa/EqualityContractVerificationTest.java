@@ -716,9 +716,11 @@ public class EqualityContractVerificationTest {
 	public void testVerification() throws ClassNotFoundException {
 		verify(ConditionViolation.class);
 		verify(ErrorViolation.class);
-		// the statement raising a confirmed error is not part of the identity
-		// of a result
-		verify(VerificationResult.class, verifier -> verifier.withIgnoredFields("thrower"));
+		// the statement raising a confirmed error and the candidate
+		// confirmation are not part of the identity of a result
+		verify(VerificationResult.class, verifier -> verifier.withIgnoredFields("thrower", "candidate")
+				.withPrefabValues(VerificationResult.class, VerificationResult.CONFIRMED,
+						VerificationResult.REFUTED));
 		verify(ReproducingInput.class);
 		// array sorts refer to their index and element sorts
 		verify(Sort.class, verifier -> verifier.withPrefabValues(Sort.class, Sort.INT, Sort.BOOL));
