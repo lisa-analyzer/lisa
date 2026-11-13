@@ -65,6 +65,18 @@ public class ResultCache<A extends AbstractLattice<A>> {
 	private final Map<CodeMember, Optional<Set<String>>> transitiveWrites = new HashMap<>();
 
 	/**
+	 * The contents of the heap written by the code of each member, as the
+	 * frontend knows them.
+	 */
+	private HeapWrites heapWrites = HeapWrites.UNKNOWN;
+
+	/**
+	 * For each member, the contents of the heap written by its code and by the
+	 * code of the members it calls, transitively (empty if unknown).
+	 */
+	private final Map<CodeMember, Optional<HeapWrites.Written>> transitiveHeapWrites = new HashMap<>();
+
+	/**
 	 * The identifier standing for the value returned by a member in its
 	 * summaries (see {@link #summaryOf(CodeMember)}).
 	 */
@@ -210,6 +222,66 @@ public class ResultCache<A extends AbstractLattice<A>> {
 			if (written.isEmpty())
 				return null;
 			result.addAll(written.get());
+		}
+		return result;
+	}
+
+	/**
+	 * Sets the contents of the heap written by the code of each member of the
+	 * program, as the frontend knows them (by default, none is known).
+	 *
+	 * @param heapWrites the heap writes
+	 */
+	public void setHeapWrites(
+			HeapWrites heapWrites) {
+		this.heapWrites = heapWrites;
+		transitiveHeapWrites.clear();
+	}
+
+	/**
+	 * Returns the contents of the heap that the given members might write, also
+	 * through the members they call, transitively, as the given call graph
+	 * tells them, or {@code null} if they are not known (see
+	 * {@link HeapWrites}).
+	 *
+	 * @param members   the members
+	 * @param callgraph the call graph
+	 *
+	 * @return the written contents, or {@code null}
+	 */
+	public HeapWrites.Written heapWrittenBy(
+			Collection<? extends CodeMember> members,
+			CallGraph callgraph) {
+		HeapWrites.Written result = HeapWrites.Written.NOTHING;
+		for (CodeMember member : members) {
+			Optional<HeapWrites.Written> written = transitiveHeapWrites.get(member);
+			if (written == null) {
+				written = Optional.ofNullable(heapTransitively(member, callgraph));
+				transitiveHeapWrites.put(member, written);
+			}
+			if (written.isEmpty())
+				return null;
+			result = result.union(written.get());
+		}
+		return result;
+	}
+
+	private HeapWrites.Written heapTransitively(
+			CodeMember member,
+			CallGraph callgraph) {
+		HeapWrites.Written result = HeapWrites.Written.NOTHING;
+		Set<CodeMember> seen = new HashSet<>();
+		LinkedList<CodeMember> ws = new LinkedList<>();
+		ws.add(member);
+		while (!ws.isEmpty()) {
+			CodeMember current = ws.removeFirst();
+			if (!seen.add(current))
+				continue;
+			HeapWrites.Written written = heapWrites.writtenBy(current);
+			if (written == null || callgraph == null)
+				return null;
+			result = result.union(written);
+			ws.addAll(callgraph.getCallees(current));
 		}
 		return result;
 	}

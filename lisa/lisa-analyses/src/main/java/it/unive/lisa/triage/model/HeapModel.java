@@ -707,6 +707,61 @@ public class HeapModel {
 	}
 
 	/**
+	 * Returns whether code writing the given contents might write a field with
+	 * the given name (not qualified by the class declaring it): a field with
+	 * that name accessed without knowing its class, or declared by any class.
+	 *
+	 * @param written the written contents
+	 * @param name    the name of the field
+	 *
+	 * @return whether the field might be written
+	 */
+	public boolean mightWrite(
+			HeapWrites.Written written,
+			String name) {
+		if (written.writesField(name))
+			return true;
+		for (String q : qualified.getOrDefault(name, Collections.emptySet()))
+			if (written.writesField(q))
+				return true;
+		return false;
+	}
+
+	/**
+	 * Returns the identifiers of the heap contents that code writing the given
+	 * contents leaves unchanged (and the ones recording which of their
+	 * locations have been written): the fields that it does not write, and the
+	 * cells of arrays if it does not write them. A field accessed without
+	 * knowing the class declaring it (see {@link #qualify(Type, String)}) and
+	 * the same field qualified by its class denote the same locations: they are
+	 * unchanged only if none of them is written.
+	 *
+	 * @param written the written contents
+	 *
+	 * @return the identifiers of the unchanged contents
+	 */
+	public Set<Identifier> notWritten(
+			HeapWrites.Written written) {
+		Set<Identifier> result = new LinkedHashSet<>();
+		for (Map.Entry<String, Set<String>> e : qualified.entrySet()) {
+			Set<String> names = new LinkedHashSet<>(e.getValue());
+			names.add(e.getKey());
+			if (names.stream().anyMatch(written::writesField))
+				continue;
+			for (String name : names) {
+				Variable contents = field(name);
+				result.add(contents);
+				result.add(written(contents));
+			}
+		}
+		if (!written.writesCells()) {
+			result.add(CELLS);
+			result.add(WRITTEN_CELLS);
+		}
+		return result;
+	}
+
+	/**
 	 * Yields the identifiers of the contents of all the immutable fields: the
 	 * values of final fields of existing objects cannot be changed by any code,
 	 * as they are only written when objects are initialized.

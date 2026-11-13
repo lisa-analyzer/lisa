@@ -455,6 +455,10 @@ public class ReplayInterprocedural<A extends AbstractLattice<A>, D extends Abstr
 		Set<String> written = cache.globalsWrittenBy(call.getTargets(), tool.getCallGraph());
 		if (written != null)
 			preserved.addAll(heap.globalsNotIn(written));
+		// and the contents of the heap they cannot write
+		HeapWrites.Written heapWritten = cache.heapWrittenBy(call.getTargets(), tool.getCallGraph());
+		if (heapWritten != null)
+			preserved.addAll(heap.notWritten(heapWritten));
 		callres = callres.withExecution(mapState(callres.getExecution(),
 				s -> s.withStore(s.getStore().heapHavoc(preserved, call.getLocation()))));
 		// the facts known to hold when the callee returns
@@ -690,7 +694,7 @@ public class ReplayInterprocedural<A extends AbstractLattice<A>, D extends Abstr
 				continue;
 			for (SymbolicExpression e : state.getExecutionExpressions())
 				if (!actuals.contains(e))
-					if (readsMemory(e))
+					if (readsMemory(e) && !unchangedBy(e, call, entryState))
 						return "operand reading the heap or globals evaluated before the call";
 					else if (hasUnknownValues(e))
 						return "unknown values produced before the call";
@@ -731,6 +735,56 @@ public class ReplayInterprocedural<A extends AbstractLattice<A>, D extends Abstr
 			current = ((Expression) current).getParentStatement();
 		}
 		return false;
+	}
+
+	/**
+	 * Yields {@code true} if the given expression, evaluated before the given
+	 * call, has the same value after it: it only reads fields of objects (and
+	 * values that are not part of the memory) that the callees cannot write
+	 * (see {@link HeapWrites}), so that evaluating it again when the node
+	 * resumes after the call yields the same value.
+	 */
+	private boolean unchangedBy(
+			SymbolicExpression e,
+			CFGCall call,
+			AnalysisState<ReplayState<A>> entryState) {
+		HeapWrites.Written written = cache.heapWrittenBy(call.getTargets(), tool.getCallGraph());
+		if (written == null)
+			return false;
+		HeapModel heap = entryState.getExecutionState().getStore().getFactory().getHeapModel();
+		return readsOnlyUnwritten(e, written, heap);
+	}
+
+	private static boolean readsOnlyUnwritten(
+			SymbolicExpression e,
+			HeapWrites.Written written,
+			HeapModel heap) {
+		if (e instanceof AccessChild) {
+			AccessChild access = (AccessChild) e;
+			// fields are named by global variables, while other children
+			// are indexes of cells of arrays (or their properties)
+			if (!(access.getChild() instanceof GlobalVariable)
+					|| heap.mightWrite(written, ((GlobalVariable) access.getChild()).getName()))
+				return false;
+			return readsOnlyUnwritten(access.getContainer(), written, heap);
+		}
+		if (e instanceof HeapLocation || e instanceof GlobalVariable || e instanceof MemoryPointer
+				|| e instanceof MemoryAllocation)
+			return false;
+		if (e instanceof HeapReference)
+			return readsOnlyUnwritten(((HeapReference) e).getExpression(), written, heap);
+		if (e instanceof HeapDereference)
+			return readsOnlyUnwritten(((HeapDereference) e).getExpression(), written, heap);
+		if (e instanceof UnaryExpression)
+			return readsOnlyUnwritten(((UnaryExpression) e).getExpression(), written, heap);
+		if (e instanceof BinaryExpression)
+			return readsOnlyUnwritten(((BinaryExpression) e).getLeft(), written, heap)
+					&& readsOnlyUnwritten(((BinaryExpression) e).getRight(), written, heap);
+		if (e instanceof TernaryExpression)
+			return readsOnlyUnwritten(((TernaryExpression) e).getLeft(), written, heap)
+					&& readsOnlyUnwritten(((TernaryExpression) e).getMiddle(), written, heap)
+					&& readsOnlyUnwritten(((TernaryExpression) e).getRight(), written, heap);
+		return true;
 	}
 
 	/**
