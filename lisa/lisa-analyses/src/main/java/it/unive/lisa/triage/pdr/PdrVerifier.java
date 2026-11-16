@@ -96,7 +96,7 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 	/**
 	 * The default maximum number of queries per candidate violation.
 	 */
-	public static final int DEFAULT_MAX_QUERIES = 10_000;
+	public static final int DEFAULT_MAX_QUERIES = 100_000;
 
 	/**
 	 * The default maximum time per candidate violation, in milliseconds.
