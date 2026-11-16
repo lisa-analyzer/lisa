@@ -183,11 +183,22 @@ public class ReplayState<A extends AbstractLattice<A>>
 		return new ReplayState<>(inner.upchain(other.inner), store.lub(other.store));
 	}
 
+	/**
+	 * {@inheritDoc}<br>
+	 * <br>
+	 * Widenings happen when statements compute fixpoints within their own
+	 * semantics (e.g., the comprehensions of some frontends): stores never
+	 * stabilize under joins, as each iteration introduces fresh values, so a
+	 * store that does not include the other one is widened to the store losing
+	 * all values (see {@link SymbolicStore#top()}), that includes every store,
+	 * so that the fixpoint converges.
+	 */
 	@Override
 	public ReplayState<A> wideningAux(
 			ReplayState<A> other)
 			throws SemanticException {
-		return new ReplayState<>(inner.widening(other.inner), store.lub(other.store));
+		SymbolicStore widened = other.store.lessOrEqual(store) ? store : store.top();
+		return new ReplayState<>(inner.widening(other.inner), widened);
 	}
 
 	@Override
