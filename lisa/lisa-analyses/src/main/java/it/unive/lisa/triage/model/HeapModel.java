@@ -240,6 +240,26 @@ public class HeapModel {
 	public HeapModel(
 			Program program,
 			Set<String> arrayProperties) {
+		this(program, arrayProperties, Collections.emptySet());
+	}
+
+	/**
+	 * Builds the heap model of the given program, as
+	 * {@link #HeapModel(Program, Set)}, also knowing the global variables with
+	 * the given names, that the program does not declare as globals of its
+	 * units (see {@link GlobalWrites#globalsOf(Program)}).
+	 *
+	 * @param program         the program
+	 * @param arrayProperties the names of the variables that, when accessed on
+	 *                            an array, denote a property of the array
+	 *                            (e.g., its length) rather than an index
+	 * @param globals         the names of the global variables that are not
+	 *                            declared
+	 */
+	public HeapModel(
+			Program program,
+			Set<String> arrayProperties,
+			Collection<String> globals) {
 		this.arrayProperties = arrayProperties;
 		Map<String, Set<Unit>> declaring = new LinkedHashMap<>();
 		Set<String> mutable = new LinkedHashSet<>();
@@ -257,6 +277,7 @@ public class HeapModel {
 				if (g.isFinal())
 					finalGlobals.put(name, unit);
 			}
+		this.globals.addAll(globals);
 		for (Unit unit : program.getUnits())
 			if (unit instanceof CompilationUnit)
 				for (Global g : ((CompilationUnit) unit).getInstanceGlobals(false)) {
