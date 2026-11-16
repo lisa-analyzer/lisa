@@ -19,7 +19,9 @@ import java.util.Set;
  * strings, and floating point numbers of 32 or 64 bits as IEEE 754 floating
  * point numbers. Values of any other type (e.g., references), and values whose
  * type is unknown or not unique, are encoded through the {@link ValueSort}
- * datatype.
+ * datatype. Frontends whose floating point numbers are all 64-bits ones, but
+ * whose types are 32-bits ones, can encode them all as 64-bits ones (see
+ * {@link #withDoubleFloats()}).
  *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
@@ -30,6 +32,8 @@ public class SortPolicy {
 	private final Collection<Type> programTypes;
 
 	private final boolean floats;
+
+	private final boolean doubleFloats;
 
 	/**
 	 * The declared type of the values of each field of the heap model, by the
@@ -62,7 +66,7 @@ public class SortPolicy {
 	public SortPolicy(
 			Map<Identifier, Set<Type>> types,
 			Collection<Type> programTypes) {
-		this(types, programTypes, Collections.emptyMap(), true);
+		this(types, programTypes, Collections.emptyMap(), true, false);
 	}
 
 	/**
@@ -84,16 +88,18 @@ public class SortPolicy {
 			Map<Identifier, Set<Type>> types,
 			Collection<Type> programTypes,
 			Map<String, Type> fields) {
-		this(types, programTypes, fields, true);
+		this(types, programTypes, fields, true, false);
 	}
 
 	private SortPolicy(
 			Map<Identifier, Set<Type>> types,
 			Collection<Type> programTypes,
 			Map<String, Type> fields,
-			boolean floats) {
+			boolean floats,
+			boolean doubleFloats) {
 		this.fields = fields;
 		this.floats = floats;
+		this.doubleFloats = doubleFloats;
 		this.types = types;
 		this.programTypes = programTypes;
 	}
@@ -139,6 +145,8 @@ public class SortPolicy {
 			return ((HeapType) type).getSort();
 		if (isIntegral(type))
 			return Sort.INT;
+		if (floats && doubleFloats && isFloat(type))
+			return Sort.FLOAT64;
 		if (floats && type.isNumericType() && type.asNumericType().is32Bits())
 			return Sort.FLOAT32;
 		if (floats && type.isNumericType() && type.asNumericType().is64Bits())
@@ -206,7 +214,30 @@ public class SortPolicy {
 	 * @return the policy
 	 */
 	public SortPolicy withoutFloats() {
-		return new SortPolicy(types, programTypes, fields, false);
+		return new SortPolicy(types, programTypes, fields, false, doubleFloats);
+	}
+
+	/**
+	 * Yields a policy deciding the same sorts as this one, except that the
+	 * values of all floating point types are encoded as 64-bits floating point
+	 * numbers ({@link Sort#FLOAT64}), whatever their width: this is meant for
+	 * frontends whose floating point numbers are all 64-bits ones, but whose
+	 * types do not tell (e.g., using 32-bits types for them).
+	 *
+	 * @return the policy
+	 */
+	public SortPolicy withDoubleFloats() {
+		return new SortPolicy(types, programTypes, fields, floats, true);
+	}
+
+	/**
+	 * Yields {@code true} if the values of all floating point types are encoded
+	 * as 64-bits floating point numbers (see {@link #withDoubleFloats()}).
+	 *
+	 * @return whether or not all floating point numbers are 64-bits ones
+	 */
+	public boolean encodesDoubleFloats() {
+		return doubleFloats;
 	}
 
 	/**

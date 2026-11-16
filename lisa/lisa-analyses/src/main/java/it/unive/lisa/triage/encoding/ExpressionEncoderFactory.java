@@ -35,4 +35,21 @@ public interface ExpressionEncoderFactory {
 	ExpressionEncoder create(
 			SortPolicy sorts,
 			SymbolTable symbols);
+
+	/**
+	 * Yields the policy deciding the sorts of the identifiers and of the
+	 * unknown values of a model encoded with the encoders of this factory,
+	 * given the one computed for the model (e.g., to encode floating point
+	 * numbers of a frontend as 64-bits ones, see
+	 * {@link SortPolicy#withDoubleFloats()}): the encoders built by this
+	 * factory receive the yielded policy. By default, this is the given policy.
+	 *
+	 * @param sorts the policy computed for the model
+	 *
+	 * @return the policy to use
+	 */
+	default SortPolicy sorts(
+			SortPolicy sorts) {
+		return sorts;
+	}
 }

@@ -186,16 +186,24 @@ public final class Projection {
 
 	/**
 	 * Yields a floating point type of the program whose values are encoded with
-	 * the given sort, or {@code null} if there is none.
+	 * the given sort, or {@code null} if there is none: a type of the width of
+	 * the sort, or any floating point type if there is none (e.g., if all
+	 * floating point numbers are encoded as 64-bits ones, see
+	 * {@link SortPolicy#withDoubleFloats()}), since the constant keeps the value
+	 * of the sort.
 	 */
 	private static Type floatType(
 			TypeSystem types,
 			Sort sort) {
+		Type any = null;
 		for (Type t : types.getTypes())
-			if (SortPolicy.isFloat(t)
-					&& (sort.equals(Sort.FLOAT32) ? t.asNumericType().is32Bits() : t.asNumericType().is64Bits()))
-				return t;
-		return null;
+			if (SortPolicy.isFloat(t)) {
+				if (sort.equals(Sort.FLOAT32) ? t.asNumericType().is32Bits() : t.asNumericType().is64Bits())
+					return t;
+				if (any == null)
+					any = t;
+			}
+		return any;
 	}
 
 	private static SymbolicExpression toConstant(
