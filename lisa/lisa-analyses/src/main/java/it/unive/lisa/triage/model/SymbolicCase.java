@@ -445,9 +445,12 @@ public final class SymbolicCase {
 						? HeapModel.definedRead(value, substitute(b.getRight(), factory, pp))
 						: value;
 			}
-			if (b.getOperator() instanceof TypeCheck && isReferenceTyped(b.getLeft())) {
-				// tests of the runtime types of objects read the runtime
-				// types recorded by the model
+			if (b.getOperator() instanceof TypeCheck
+					&& (isReferenceTyped(b.getLeft()) || isReferenceTyped(b.getRight(), singleToken(b.getRight())))) {
+				// tests of the runtime types of objects (also of values that
+				// are not typed, e.g. in dynamically typed languages, tested
+				// against the type of objects) read the runtime types recorded
+				// by the model
 				Type target = singleToken(b.getRight());
 				Set<Type> instances = target == null ? null : factory.getHeapModel().instancesOf(target);
 				if (instances != null)
@@ -627,6 +630,13 @@ public final class SymbolicCase {
 			SymbolicExpression e) {
 		Type type = e.getStaticType();
 		return type.isReferenceType() || type.isPointerType();
+	}
+
+	// whether the given type token denotes the type of references to objects
+	private static boolean isReferenceTyped(
+			SymbolicExpression token,
+			Type type) {
+		return type != null && (type.isReferenceType() || type.isPointerType());
 	}
 
 	/**
