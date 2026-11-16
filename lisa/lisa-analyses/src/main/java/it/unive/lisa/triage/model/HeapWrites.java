@@ -39,6 +39,32 @@ public interface HeapWrites {
 			CodeMember member);
 
 	/**
+	 * Yields the names of the identifiers that, as children of heap accesses,
+	 * denote any of several locations of the accessed object (e.g., an unknown
+	 * element of a list, standing for all of them), rather than a field or a
+	 * cell: the alarm models do not model the accesses through them, whose
+	 * reads yield unknown values, and whose writes might write any cell (see
+	 * {@link HeapModel}). By default, there is none.
+	 *
+	 * @return the names
+	 */
+	default Set<String> summaryChildren() {
+		return Collections.emptySet();
+	}
+
+	/**
+	 * Yields the names of the variables that, when accessed on an array,
+	 * denote a property of the array (e.g., its length), that never changes,
+	 * rather than an index (see {@link HeapModel#isArrayProperty(String)}).
+	 * By default, these are {@link HeapModel#DEFAULT_ARRAY_PROPERTIES}.
+	 *
+	 * @return the names
+	 */
+	default Set<String> arrayProperties() {
+		return HeapModel.DEFAULT_ARRAY_PROPERTIES;
+	}
+
+	/**
 	 * Contents of the heap that some code might write: fields, by the names of
 	 * the identifiers of their contents (see {@link HeapModel#field(String)}:
 	 * qualified by the classes declaring them, or not), and the cells of

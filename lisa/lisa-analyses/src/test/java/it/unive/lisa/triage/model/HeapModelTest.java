@@ -1,6 +1,7 @@
 package it.unive.lisa.triage.model;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -98,6 +99,15 @@ public class HeapModelTest {
 			+ "        if (arr[i] == 7)\n"
 			+ "          w = 1;\n"
 			+ "    }\n"
+			+ "    return w;\n"
+			+ "  }\n"
+			+ "  summarywrite(i) {\n"
+			+ "    def w = 0;\n"
+			+ "    def arr = new int[3];\n"
+			+ "    arr[0] = 5;\n"
+			+ "    arr[i] = 6;\n"
+			+ "    if (arr[0] != 5)\n"
+			+ "      w = 1;\n"
 			+ "    return w;\n"
 			+ "  }\n"
 			+ "  unwritten() {\n"
@@ -217,6 +227,58 @@ public class HeapModelTest {
 		VerificationResult result = verify("cell");
 		assertEquals(VerificationOutcome.CONFIRMED, result.getOutcome(), result.toString());
 		assertEquals("1", valueOf(result, "parameter i of"));
+	}
+
+	/**
+	 * A verifier where the variable {@code i}, as the child of a heap access,
+	 * is a summary of several locations (see
+	 * {@link HeapWrites#summaryChildren()}).
+	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private static VerificationResult verifyWithSummary(
+			String name) {
+		PdrVerifier summaries = new PdrVerifier<>().withFixpointCheck(false).withHeapWrites(new HeapWrites() {
+
+			@Override
+			public Written writtenBy(
+					it.unive.lisa.program.cfg.CodeMember member) {
+				return null;
+			}
+
+			@Override
+			public java.util.Set<String> summaryChildren() {
+				return java.util.Set.of("i");
+			}
+		});
+		CFG cfg = cfg(name);
+		Statement st = cfg.getNodes().stream().filter(n -> n.toString().equals("w = 1")).findFirst()
+				.orElseThrow(() -> new AssertionError("No alarm in " + name));
+		try {
+			summaries.init(tool);
+			return summaries.verify(tool, new StatementMessage(st, "alarm", null, Violation.reach()));
+		} catch (SemanticException e) {
+			throw new AssertionError(e);
+		}
+	}
+
+	@Test
+	public void readsThroughSummariesAreNotPrecise() {
+		// arr[i] is any of the cells: the read is not known
+		VerificationResult result = verifyWithSummary("cell");
+		assertEquals(VerificationOutcome.POSSIBLE, result.getOutcome(), result.toString());
+		// reads at known indexes are still precise
+		result = verifyWithSummary("cells");
+		assertEquals(VerificationOutcome.REFUTED, result.getOutcome(), result.toString());
+	}
+
+	@Test
+	public void writesThroughSummariesMightWriteAnyCell() {
+		// arr[i] = 6 might write arr[0] (with i = 0): the alarm is reachable
+		VerificationResult result = verifyWithSummary("summarywrite");
+		assertNotEquals(VerificationOutcome.REFUTED, result.getOutcome(), result.toString());
+		// as the model knows without summaries
+		result = verify("summarywrite");
+		assertNotEquals(VerificationOutcome.REFUTED, result.getOutcome(), result.toString());
 	}
 
 	@Test

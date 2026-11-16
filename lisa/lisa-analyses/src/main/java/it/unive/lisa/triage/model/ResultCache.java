@@ -237,6 +237,16 @@ public class ResultCache<A extends AbstractLattice<A>> {
 	}
 
 	/**
+	 * Yields the contents of the heap written by the code of each member of the
+	 * program, as the frontend knows them.
+	 *
+	 * @return the heap writes
+	 */
+	public HeapWrites getHeapWrites() {
+		return heapWrites;
+	}
+
+	/**
 	 * Sets the contents of the heap written by the code of each member of the
 	 * program, as the frontend knows them (by default, none is known).
 	 *
