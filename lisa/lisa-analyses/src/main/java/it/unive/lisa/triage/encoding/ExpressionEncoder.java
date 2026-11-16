@@ -1358,6 +1358,9 @@ public class ExpressionEncoder
 			Term term,
 			Type target,
 			BinaryExpression origin) {
+		if (target.isNullType())
+			// the null value is the only one of its type
+			return term.getSort().equals(ValueSort.SORT) ? Term.eq(term, ValueSort.nullValue()) : Term.FALSE;
 		Sort sort = sorts.sortOf(target);
 		if (sort.equals(ValueSort.SORT))
 			// types encoded as values (e.g., references) cannot be told
