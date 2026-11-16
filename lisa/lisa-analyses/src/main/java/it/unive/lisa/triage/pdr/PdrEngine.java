@@ -706,13 +706,14 @@ public class PdrEngine {
 	 * the candidates are the equalities and inequalities between the integer
 	 * variables relevant at the location, and between them and the integer
 	 * constants of the model, together with the candidates of the model at the
-	 * location (see {@link AlarmModel#getCandidates(ModelLocation)}). Candidates that do not hold in the initial
-	 * states, or that are not preserved by the transitions reaching their
-	 * location (assuming all the remaining candidates at the sources, together
-	 * with the invariants computed by the analysis), are dropped until the
-	 * remaining ones are inductive: they hold in every reachable state, and are
-	 * added as lemmas of every level. If the candidates cannot be decided
-	 * within {@link #MAX_INVARIANT_QUERIES} queries, none is kept.
+	 * location (see {@link AlarmModel#getCandidates(ModelLocation)}).
+	 * Candidates that do not hold in the initial states, or that are not
+	 * preserved by the transitions reaching their location (assuming all the
+	 * remaining candidates at the sources, together with the invariants
+	 * computed by the analysis), are dropped until the remaining ones are
+	 * inductive: they hold in every reachable state, and are added as lemmas of
+	 * every level. If the candidates cannot be decided within
+	 * {@link #MAX_INVARIANT_QUERIES} queries, none is kept.
 	 */
 	private void invariants()
 			throws SemanticException,

@@ -407,7 +407,7 @@ public class Reachability<A extends AbstractLattice<A>, D extends AbstractDomain
 	 * have no root in the cfg: in that case, the node containing an expression
 	 * at the same location is returned.
 	 *
-	 * @param st the statement
+	 * @param statement the statement
 	 *
 	 * @return the node containing the statement, or {@code null} if it cannot
 	 *             be found
@@ -446,9 +446,8 @@ public class Reachability<A extends AbstractLattice<A>, D extends AbstractDomain
 
 	/**
 	 * Yields the statement of the program that the given one originates from:
-	 * the call of the cfg a call has been resolved from (following the chain
-	 * of sources of calls, see {@link Call#getSource()}), or the statement
-	 * itself.
+	 * the call of the cfg a call has been resolved from (following the chain of
+	 * sources of calls, see {@link Call#getSource()}), or the statement itself.
 	 *
 	 * @param st the statement
 	 *

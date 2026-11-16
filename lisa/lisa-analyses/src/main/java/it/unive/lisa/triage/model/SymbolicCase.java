@@ -1,8 +1,8 @@
 package it.unive.lisa.triage.model;
 
-import it.unive.lisa.program.SyntheticLocation;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.program.SyntheticLocation;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.CodeMemberDescriptor;
 import it.unive.lisa.program.cfg.Parameter;
@@ -632,6 +632,10 @@ public final class SymbolicCase {
 	/**
 	 * Yields the type denoted by the given type token, if it is a constant
 	 * denoting a single type, or {@code null}.
+	 *
+	 * @param token the token
+	 * 
+	 * @return the type denoted by the token, or {@code null}
 	 */
 	static Type singleToken(
 			SymbolicExpression token) {

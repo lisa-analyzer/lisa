@@ -200,15 +200,14 @@ public class AlarmModel {
 			SortPolicy sorts) {
 		return new AlarmModel(root, badLocation, locations, initial, transitions, initialConstraints, badCases,
 				seeds, vocabulary, sorts, freshValues, parameters, confirmable, frames, truncated)
-				.withCandidates(candidates);
+						.withCandidates(candidates);
 	}
 
 	/**
 	 * Yields a copy of this model with the given candidate invariants: unlike
 	 * the seeds ({@link #getSeeds(ModelLocation)}), they are not known to hold,
 	 * and searches keep them only if they are inductive (e.g., conditions that
-	 * the analysis decides with a meaning different from the one of the
-	 * model).
+	 * the analysis decides with a meaning different from the one of the model).
 	 *
 	 * @param candidates the candidate invariants of each location
 	 *

@@ -233,8 +233,8 @@ public class Analysis<
 	 * @param pp       the program point (e.g., the operand of a statement)
 	 * @param computed the expression computed by the program point
 	 *
-	 * @return the executions of the state where the program point computed
-	 *             the expression
+	 * @return the executions of the state where the program point computed the
+	 *             expression
 	 *
 	 * @throws SemanticException if an error occurs during the computation
 	 */

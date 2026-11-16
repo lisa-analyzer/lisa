@@ -50,8 +50,8 @@ import it.unive.lisa.symbolic.value.PushAny;
 import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.symbolic.value.TernaryExpression;
 import it.unive.lisa.symbolic.value.UnaryExpression;
-import it.unive.lisa.type.Type;
 import it.unive.lisa.triage.reachability.Reachability;
+import it.unive.lisa.type.Type;
 import it.unive.lisa.util.datastructures.graph.GraphVisitor;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
 import java.util.ArrayList;
@@ -429,11 +429,11 @@ public class ReplayInterprocedural<A extends AbstractLattice<A>, D extends Abstr
 	/**
 	 * Yields the state computed by the analysis after the given call: the one
 	 * after the call of the program it has been resolved from (see
-	 * {@link Reachability#sourceOf(Statement)}), or, if the results do not
-	 * have it (e.g., for calls that frontends perform within other
-	 * expressions, whose parent is the expression performing them), the one
-	 * after the closest expression containing it that the results have.
-	 * Yields the state of the call if none is found.
+	 * {@link Reachability#sourceOf(Statement)}), or, if the results do not have
+	 * it (e.g., for calls that frontends perform within other expressions,
+	 * whose parent is the expression performing them), the one after the
+	 * closest expression containing it that the results have. Yields the state
+	 * of the call if none is found.
 	 */
 	private AnalysisState<A> stateAfter(
 			Call call) {
@@ -802,9 +802,9 @@ public class ReplayInterprocedural<A extends AbstractLattice<A>, D extends Abstr
 	 * call, has the same value after it: it only reads fields of objects that
 	 * the callees cannot write (see {@link HeapWrites}), global variables that
 	 * the callees cannot write (see {@link GlobalWrites}), and values that are
-	 * not part of the memory, so that evaluating it again when the node
-	 * resumes after the call yields the same value (e.g., the function called
-	 * by a call, read from a global variable).
+	 * not part of the memory, so that evaluating it again when the node resumes
+	 * after the call yields the same value (e.g., the function called by a
+	 * call, read from a global variable).
 	 */
 	private boolean unchangedBy(
 			SymbolicExpression e,

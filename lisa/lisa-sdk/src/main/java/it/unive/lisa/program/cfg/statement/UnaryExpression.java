@@ -127,7 +127,8 @@ public abstract class UnaryExpression
 		AnalysisState<A> result = state.bottomExecution();
 		for (SymbolicExpression expr : params[0])
 			// the executions that computed the operand
-			result = result.lub(fwdUnarySemantics(interprocedural, interprocedural.getAnalysis().restrictTo(state, getSubExpression(), expr), expr,
+			result = result.lub(fwdUnarySemantics(interprocedural,
+					interprocedural.getAnalysis().restrictTo(state, getSubExpression(), expr), expr,
 					expressions));
 		return result;
 	}

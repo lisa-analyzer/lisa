@@ -53,10 +53,10 @@ public interface HeapWrites {
 	}
 
 	/**
-	 * Yields the names of the variables that, when accessed on an array,
-	 * denote a property of the array (e.g., its length), that never changes,
-	 * rather than an index (see {@link HeapModel#isArrayProperty(String)}).
-	 * By default, these are {@link HeapModel#DEFAULT_ARRAY_PROPERTIES}.
+	 * Yields the names of the variables that, when accessed on an array, denote
+	 * a property of the array (e.g., its length), that never changes, rather
+	 * than an index (see {@link HeapModel#isArrayProperty(String)}). By
+	 * default, these are {@link HeapModel#DEFAULT_ARRAY_PROPERTIES}.
 	 *
 	 * @return the names
 	 */
