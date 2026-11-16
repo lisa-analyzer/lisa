@@ -739,51 +739,61 @@ public class ReplayInterprocedural<A extends AbstractLattice<A>, D extends Abstr
 
 	/**
 	 * Yields {@code true} if the given expression, evaluated before the given
-	 * call, has the same value after it: it only reads fields of objects (and
-	 * values that are not part of the memory) that the callees cannot write
-	 * (see {@link HeapWrites}), so that evaluating it again when the node
-	 * resumes after the call yields the same value.
+	 * call, has the same value after it: it only reads fields of objects that
+	 * the callees cannot write (see {@link HeapWrites}), global variables that
+	 * the callees cannot write (see {@link GlobalWrites}), and values that are
+	 * not part of the memory, so that evaluating it again when the node
+	 * resumes after the call yields the same value (e.g., the function called
+	 * by a call, read from a global variable).
 	 */
 	private boolean unchangedBy(
 			SymbolicExpression e,
 			CFGCall call,
 			AnalysisState<ReplayState<A>> entryState) {
 		HeapWrites.Written written = cache.heapWrittenBy(call.getTargets(), tool.getCallGraph());
-		if (written == null)
+		Set<String> globals = cache.globalsWrittenBy(call.getTargets(), tool.getCallGraph());
+		if (written == null && globals == null)
 			return false;
 		HeapModel heap = entryState.getExecutionState().getStore().getFactory().getHeapModel();
-		return readsOnlyUnwritten(e, written, heap);
+		return readsOnlyUnwritten(e, written, globals, heap);
 	}
 
+	/**
+	 * Yields {@code true} if the given expression only reads fields that are
+	 * not among the written contents, and global variables that are not among
+	 * the written ones (either can be {@code null}, if unknown).
+	 */
 	private static boolean readsOnlyUnwritten(
 			SymbolicExpression e,
 			HeapWrites.Written written,
+			Set<String> globals,
 			HeapModel heap) {
 		if (e instanceof AccessChild) {
 			AccessChild access = (AccessChild) e;
 			// fields are named by global variables, while other children
 			// are indexes of cells of arrays (or their properties)
-			if (!(access.getChild() instanceof GlobalVariable)
+			if (written == null || !(access.getChild() instanceof GlobalVariable)
 					|| heap.mightWrite(written, ((GlobalVariable) access.getChild()).getName()))
 				return false;
-			return readsOnlyUnwritten(access.getContainer(), written, heap);
+			return readsOnlyUnwritten(access.getContainer(), written, globals, heap);
 		}
-		if (e instanceof HeapLocation || e instanceof GlobalVariable || e instanceof MemoryPointer
-				|| e instanceof MemoryAllocation)
+		if (e instanceof GlobalVariable)
+			return globals != null && !globals.contains(((GlobalVariable) e).getName());
+		if (e instanceof HeapLocation || e instanceof MemoryPointer || e instanceof MemoryAllocation)
 			return false;
 		if (e instanceof HeapReference)
-			return readsOnlyUnwritten(((HeapReference) e).getExpression(), written, heap);
+			return readsOnlyUnwritten(((HeapReference) e).getExpression(), written, globals, heap);
 		if (e instanceof HeapDereference)
-			return readsOnlyUnwritten(((HeapDereference) e).getExpression(), written, heap);
+			return readsOnlyUnwritten(((HeapDereference) e).getExpression(), written, globals, heap);
 		if (e instanceof UnaryExpression)
-			return readsOnlyUnwritten(((UnaryExpression) e).getExpression(), written, heap);
+			return readsOnlyUnwritten(((UnaryExpression) e).getExpression(), written, globals, heap);
 		if (e instanceof BinaryExpression)
-			return readsOnlyUnwritten(((BinaryExpression) e).getLeft(), written, heap)
-					&& readsOnlyUnwritten(((BinaryExpression) e).getRight(), written, heap);
+			return readsOnlyUnwritten(((BinaryExpression) e).getLeft(), written, globals, heap)
+					&& readsOnlyUnwritten(((BinaryExpression) e).getRight(), written, globals, heap);
 		if (e instanceof TernaryExpression)
-			return readsOnlyUnwritten(((TernaryExpression) e).getLeft(), written, heap)
-					&& readsOnlyUnwritten(((TernaryExpression) e).getMiddle(), written, heap)
-					&& readsOnlyUnwritten(((TernaryExpression) e).getRight(), written, heap);
+			return readsOnlyUnwritten(((TernaryExpression) e).getLeft(), written, globals, heap)
+					&& readsOnlyUnwritten(((TernaryExpression) e).getMiddle(), written, globals, heap)
+					&& readsOnlyUnwritten(((TernaryExpression) e).getRight(), written, globals, heap);
 		return true;
 	}
 
