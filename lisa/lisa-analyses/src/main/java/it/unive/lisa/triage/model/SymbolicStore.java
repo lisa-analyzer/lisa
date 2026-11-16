@@ -1,5 +1,11 @@
 package it.unive.lisa.triage.model;
 
+import it.unive.lisa.triage.reachability.Reachability;
+import it.unive.lisa.symbolic.value.Constant;
+import it.unive.lisa.program.cfg.statement.Statement;
+import it.unive.lisa.program.cfg.statement.NaryExpression;
+import it.unive.lisa.program.cfg.statement.Expression;
+import java.util.Arrays;
 import it.unive.lisa.symbolic.heap.HeapDereference;
 import it.unive.lisa.symbolic.heap.HeapReference;
 import it.unive.lisa.symbolic.value.TernaryExpression;
@@ -59,10 +65,12 @@ public final class SymbolicStore {
 	private final int maxCases;
 
 	/**
-	 * The expressions computed by each case, if known: a case that is not a
-	 * key computed unknown expressions.
+	 * The expressions computed by each case, if known: for each statement (or
+	 * program point), the expressions it computed in the case (a case that is
+	 * not a key computed unknown expressions, and a statement that is not a key
+	 * of a case might have computed anything in it).
 	 */
-	private final Map<SymbolicCase, List<SymbolicExpression>> computed;
+	private final Map<SymbolicCase, Map<ProgramPoint, List<SymbolicExpression>>> computed;
 
 	private SymbolicStore(
 			Set<SymbolicCase> cases,
@@ -75,7 +83,7 @@ public final class SymbolicStore {
 			Set<SymbolicCase> cases,
 			FreshValueFactory factory,
 			int maxCases,
-			Map<SymbolicCase, List<SymbolicExpression>> computed) {
+			Map<SymbolicCase, Map<ProgramPoint, List<SymbolicExpression>>> computed) {
 		this.cases = cases;
 		this.factory = factory;
 		this.maxCases = maxCases;
@@ -83,55 +91,77 @@ public final class SymbolicStore {
 	}
 
 	/**
-	 * Yields the store where every case computed the given expression (that
-	 * is, the expression computed by the executions of this store).
+	 * Yields the store where every case computed the given expression at the
+	 * given program point (that is, the expression computed by the executions
+	 * of this store at that point, e.g., by the statement evaluated last): the
+	 * expressions computed before at other points are kept, as they might
+	 * still be used (e.g., the operands of an expression whose other operands
+	 * are computed afterwards), while the cases whose computed expressions are
+	 * unknown stay so.
 	 *
 	 * @param expression the expression
+	 * @param pp         the program point computing it
 	 *
 	 * @return the resulting store
 	 */
 	public SymbolicStore computing(
-			SymbolicExpression expression) {
-		Map<SymbolicCase, List<SymbolicExpression>> tags = new LinkedHashMap<>();
-		for (SymbolicCase c : cases)
-			tags.put(c, Collections.singletonList(expression));
+			SymbolicExpression expression,
+			ProgramPoint point) {
+		if (computed.isEmpty() || point == null)
+			return this;
+		ProgramPoint pp = canonical(point);
+		Map<SymbolicCase, Map<ProgramPoint, List<SymbolicExpression>>> tags = new LinkedHashMap<>();
+		for (Map.Entry<SymbolicCase, Map<ProgramPoint, List<SymbolicExpression>>> e : computed.entrySet()) {
+			Map<ProgramPoint, List<SymbolicExpression>> exprs = new LinkedHashMap<>(e.getValue());
+			List<SymbolicExpression> there = new ArrayList<>(exprs.getOrDefault(pp, Collections.emptyList()));
+			there.add(expression);
+			exprs.put(pp, Collections.unmodifiableList(there));
+			tags.put(e.getKey(), Collections.unmodifiableMap(exprs));
+		}
 		return new SymbolicStore(cases, factory, maxCases, Collections.unmodifiableMap(tags));
 	}
 
 	/**
-	 * Yields the store made of the cases of this one that might have computed
-	 * the given expression, that is, an operation over the expression only
-	 * applies to them: if the expression contains (as itself, or as a
-	 * sub-expression) the very expression computed by some cases, only the
-	 * cases that computed it (or an expression equal to it), and the ones whose
-	 * computed expressions are unknown, are kept. Expressions not computed by
-	 * any case (e.g., new constants) keep all cases.
+	 * Yields the store made of the cases of this one where the given program
+	 * point might have computed the given expression: if some case computed
+	 * the very expression (by identity) at that point, the cases where the
+	 * point computed only other expressions (not equal to it) are dropped,
+	 * while the others (including the ones where the point computed nothing
+	 * known, or whose computed expressions are unknown) are kept. Statements evaluating their semantics over each combination of the
+	 * expressions computed by their operands use this with the operands, so
+	 * that the semantics is evaluated in the executions computing the
+	 * combination.
 	 *
+	 * @param pp         the program point
 	 * @param expression the expression
 	 *
 	 * @return the resulting store
 	 */
 	public SymbolicStore restrictTo(
+			ProgramPoint point,
 			SymbolicExpression expression) {
-		if (computed.isEmpty())
+		if (computed.isEmpty() || point == null)
 			return this;
-		// the computed expressions (by identity) that the expression contains
-		Set<SymbolicExpression> tags = Collections.newSetFromMap(new IdentityHashMap<>());
-		for (List<SymbolicExpression> exprs : computed.values())
-			tags.addAll(exprs);
-		List<SymbolicExpression> relevant = new ArrayList<>();
-		collect(expression, tags, relevant);
-		if (relevant.isEmpty())
+		ProgramPoint pp = canonical(point);
+		boolean computedThere = false;
+		for (Map<ProgramPoint, List<SymbolicExpression>> exprs : computed.values())
+			if (exprs.getOrDefault(pp, Collections.emptyList()).stream().anyMatch(e -> e == expression)) {
+				computedThere = true;
+				break;
+			}
+		if (!computedThere)
 			return this;
 		Set<SymbolicCase> result = new LinkedHashSet<>();
-		Map<SymbolicCase, List<SymbolicExpression>> kept = new LinkedHashMap<>();
+		Map<SymbolicCase, Map<ProgramPoint, List<SymbolicExpression>>> kept = new LinkedHashMap<>();
 		for (SymbolicCase c : cases) {
-			List<SymbolicExpression> exprs = computed.get(c);
-			if (exprs == null)
+			Map<ProgramPoint, List<SymbolicExpression>> exprs = computed.get(c);
+			// a case where the point computed other expressions is dropped (a
+			// case where it computed nothing known is kept, as the expressions
+			// of some executions might be computed without the domain)
+			if (exprs == null || !exprs.containsKey(pp) || exprs.get(pp).contains(expression)) {
 				result.add(c);
-			else if (exprs.stream().anyMatch(relevant::contains)) {
-				result.add(c);
-				kept.put(c, exprs);
+				if (exprs != null)
+					kept.put(c, exprs);
 			}
 		}
 		if (result.size() == cases.size())
@@ -141,8 +171,79 @@ public final class SymbolicStore {
 	}
 
 	/**
+	 * Yields the store made of the cases of this one that might have computed
+	 * the given expression, for operations over the expression whose operands
+	 * are not known to come from specific program points (e.g., assumptions
+	 * and assignments): for each sub-expression of the given one that is (by
+	 * identity) an expression computed at a single program point, the store is
+	 * restricted to the cases where that point might have computed it (see
+	 * {@link #restrictTo(ProgramPoint, SymbolicExpression)}). Expressions
+	 * computed at several points (e.g., a value read and then yielded by
+	 * another expression) are ambiguous, and do not restrict the cases.
+	 *
+	 * @param expression the expression
+	 *
+	 * @return the resulting store
+	 */
+	public SymbolicStore restrictTo(
+			SymbolicExpression expression) {
+		if (computed.isEmpty())
+			return this;
+		// the points where each computed expression (by identity) is computed
+		Map<SymbolicExpression, Set<ProgramPoint>> points = new IdentityHashMap<>();
+		for (Map<ProgramPoint, List<SymbolicExpression>> exprs : computed.values())
+			for (Map.Entry<ProgramPoint, List<SymbolicExpression>> e : exprs.entrySet())
+				for (SymbolicExpression x : e.getValue())
+					points.computeIfAbsent(x, k -> new HashSet<>()).add(e.getKey());
+		Set<SymbolicExpression> tags = Collections.newSetFromMap(new IdentityHashMap<>());
+		tags.addAll(points.keySet());
+		List<SymbolicExpression> relevant = new ArrayList<>();
+		collect(expression, tags, relevant);
+		SymbolicStore result = this;
+		for (SymbolicExpression r : relevant) {
+			Set<ProgramPoint> where = points.get(r);
+			if (where.size() == 1)
+				result = result.restrictTo(where.iterator().next(), r);
+		}
+		return result;
+	}
+
+	/**
+	 * Yields the statement of the program on whose behalf the given program
+	 * point computes expressions: the point itself (or the call of the
+	 * program it has been resolved from, see
+	 * {@link Reachability#sourceOf(Statement)}), or, for expressions that
+	 * the semantics of other expressions evaluate (e.g., calls resolved by a
+	 * frontend, whose parent is the expression performing them, but that are
+	 * not among its operands), the closest expression containing it among
+	 * whose operands it is.
+	 */
+	private static ProgramPoint canonical(
+			ProgramPoint pp) {
+		ProgramPoint current = pp;
+		while (current instanceof Expression) {
+			// calls resolved from calls of the program stand for them
+			if (current instanceof Statement)
+				current = Reachability.sourceOf((Statement) current);
+			if (!(current instanceof Expression))
+				break;
+			Statement parent = ((Expression) current).getParentStatement();
+			if (!(parent instanceof NaryExpression))
+				break;
+			ProgramPoint child = current;
+			if (Arrays.stream(((NaryExpression) parent).getSubExpressions()).anyMatch(sub -> sub == child))
+				break;
+			current = parent;
+		}
+		return current;
+	}
+
+	/**
 	 * Adds to the given list the sub-expressions of the given expression that
-	 * are (by identity) among the given ones.
+	 * are among the given ones: by identity, or, for expressions that are
+	 * neither constants nor identifiers (that might be built again
+	 * independently of their computation, e.g., a literal), by equality (the
+	 * equal expression among the given ones is added).
 	 */
 	private static void collect(
 			SymbolicExpression e,
@@ -154,6 +255,12 @@ public final class SymbolicStore {
 			relevant.add(e);
 			return;
 		}
+		if (!(e instanceof Constant) && !(e instanceof Identifier))
+			for (SymbolicExpression t : tags)
+				if (t.equals(e)) {
+					relevant.add(t);
+					return;
+				}
 		if (e instanceof UnaryExpression)
 			collect(((UnaryExpression) e).getExpression(), tags, relevant);
 		else if (e instanceof BinaryExpression) {
@@ -183,7 +290,9 @@ public final class SymbolicStore {
 	public static SymbolicStore identity(
 			FreshValueFactory factory,
 			int maxCases) {
-		return new SymbolicStore(Collections.singleton(SymbolicCase.IDENTITY), factory, maxCases);
+		// the identity computed no expression yet
+		return new SymbolicStore(Collections.singleton(SymbolicCase.IDENTITY), factory, maxCases,
+				Collections.singletonMap(SymbolicCase.IDENTITY, Collections.emptyMap()));
 	}
 
 	/**
@@ -253,6 +362,20 @@ public final class SymbolicStore {
 	}
 
 	/**
+	 * Yields the store where all values are lost, as {@link #top()}, and so
+	 * are the conditions under which they are: the traces relying on it are
+	 * imprecise (see {@link SymbolicCase#withLostConditions(FreshValueFactory)}).
+	 * The store is still a top one (see {@link #isTop()}).
+	 *
+	 * @return the store
+	 */
+	public SymbolicStore lost() {
+		return new SymbolicStore(
+				Collections.singleton(SymbolicCase.IDENTITY.withHavocAll().withLostConditions(factory)), factory,
+				maxCases);
+	}
+
+	/**
 	 * Yields {@code true} if this store loses all values, under no condition.
 	 *
 	 * @return whether or not this store is the top one
@@ -263,7 +386,7 @@ public final class SymbolicStore {
 
 	private static boolean isTop(
 			SymbolicCase c) {
-		return c.isHavocAll() && c.getPathCondition().isEmpty() && c.getUpdates().isEmpty();
+		return c.isHavocAll() && c.hasLostConditions() && c.getUpdates().isEmpty();
 	}
 
 	private SymbolicStore map(
@@ -271,7 +394,7 @@ public final class SymbolicStore {
 		Set<SymbolicCase> result = new LinkedHashSet<>();
 		// the expressions computed by each case are the ones of the cases it
 		// comes from (unknown if any of them is)
-		Map<SymbolicCase, List<SymbolicExpression>> tags = new LinkedHashMap<>();
+		Map<SymbolicCase, Map<ProgramPoint, List<SymbolicExpression>>> tags = new LinkedHashMap<>();
 		Set<SymbolicCase> unknown = new HashSet<>();
 		for (SymbolicCase c : cases) {
 			SymbolicCase mapped = f.apply(c);
@@ -284,23 +407,30 @@ public final class SymbolicStore {
 	}
 
 	private static void tag(
-			Map<SymbolicCase, List<SymbolicExpression>> tags,
+			Map<SymbolicCase, Map<ProgramPoint, List<SymbolicExpression>>> tags,
 			Set<SymbolicCase> unknown,
 			SymbolicCase c,
-			List<SymbolicExpression> exprs) {
+			Map<ProgramPoint, List<SymbolicExpression>> exprs) {
 		if (exprs == null) {
 			unknown.add(c);
 			return;
 		}
-		List<SymbolicExpression> previous = tags.get(c);
+		Map<ProgramPoint, List<SymbolicExpression>> previous = tags.get(c);
 		if (previous == null)
 			tags.put(c, exprs);
 		else {
-			List<SymbolicExpression> union = new ArrayList<>(previous);
-			for (SymbolicExpression e : exprs)
-				if (!union.contains(e))
-					union.add(e);
-			tags.put(c, Collections.unmodifiableList(union));
+			// the same case coming from different executions: each point
+			// computed the expressions of any of them
+			Map<ProgramPoint, List<SymbolicExpression>> union = new LinkedHashMap<>(previous);
+			for (Map.Entry<ProgramPoint, List<SymbolicExpression>> e : exprs.entrySet()) {
+				List<SymbolicExpression> both = new ArrayList<>(union.getOrDefault(e.getKey(),
+						Collections.emptyList()));
+				for (SymbolicExpression x : e.getValue())
+					if (both.stream().noneMatch(y -> y == x))
+						both.add(x);
+				union.put(e.getKey(), Collections.unmodifiableList(both));
+			}
+			tags.put(c, Collections.unmodifiableMap(union));
 		}
 	}
 
@@ -480,7 +610,7 @@ public final class SymbolicStore {
 			SymbolicStore other) {
 		Set<SymbolicCase> result = new LinkedHashSet<>(cases);
 		result.addAll(other.cases);
-		Map<SymbolicCase, List<SymbolicExpression>> tags = new LinkedHashMap<>();
+		Map<SymbolicCase, Map<ProgramPoint, List<SymbolicExpression>>> tags = new LinkedHashMap<>();
 		Set<SymbolicCase> unknown = new HashSet<>();
 		for (SymbolicCase c : cases)
 			tag(tags, unknown, c, computed.get(c));
@@ -494,11 +624,11 @@ public final class SymbolicStore {
 			result = Collections.singleton(merged);
 			// the merged case computed any of the expressions of the cases
 			// (unknown if some are)
-			Map<SymbolicCase, List<SymbolicExpression>> all = new LinkedHashMap<>();
+			Map<SymbolicCase, Map<ProgramPoint, List<SymbolicExpression>>> all = new LinkedHashMap<>();
 			Set<SymbolicCase> none = new HashSet<>();
 			if (!unknown.isEmpty())
 				none.add(merged);
-			for (List<SymbolicExpression> exprs : tags.values())
+			for (Map<ProgramPoint, List<SymbolicExpression>> exprs : tags.values())
 				tag(all, none, merged, exprs);
 			all.keySet().removeAll(none);
 			tags = all;

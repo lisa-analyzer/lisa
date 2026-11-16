@@ -1,5 +1,6 @@
 package it.unive.lisa.triage.model;
 
+import it.unive.lisa.program.SyntheticLocation;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.program.cfg.CodeLocation;
@@ -1118,6 +1119,35 @@ public final class SymbolicCase {
 	public SymbolicCase withHavocAll() {
 		return new SymbolicCase(pathCondition, Collections.emptyMap(), Collections.emptySet(),
 				Collections.emptyList(), true, Collections.emptySet(), true, Collections.emptyList(), produced);
+	}
+
+	/**
+	 * Yields this case, whose path condition is lost: it is replaced by a
+	 * summary of the lost conditions, that does not constrain the executions,
+	 * but makes the traces relying on the case imprecise (see
+	 * {@link SummaryValue#MERGED_CONDITIONS}).
+	 *
+	 * @param factory the factory of fresh values
+	 *
+	 * @return the resulting case
+	 */
+	public SymbolicCase withLostConditions(
+			FreshValueFactory factory) {
+		List<SymbolicExpression> pc = List.of(factory.summary(Untyped.INSTANCE, SummaryValue.Kind.MERGE,
+				SummaryValue.MERGED_CONDITIONS, SyntheticLocation.INSTANCE));
+		return new SymbolicCase(pc, updates, forgotten, forgottenIf, heapHavoc, preservedHeap, havocAll, scopings,
+				produced);
+	}
+
+	/**
+	 * Yields {@code true} if the path condition of this case is only made of
+	 * summaries of lost conditions (see {@link #withLostConditions}).
+	 *
+	 * @return whether or not the path condition is lost
+	 */
+	public boolean hasLostConditions() {
+		return pathCondition.stream().allMatch(c -> c instanceof SummaryValue
+				&& SummaryValue.MERGED_CONDITIONS.equals(((SummaryValue) c).getReason()));
 	}
 
 	/**

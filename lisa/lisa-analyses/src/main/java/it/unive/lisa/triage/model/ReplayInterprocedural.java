@@ -628,8 +628,20 @@ public class ReplayInterprocedural<A extends AbstractLattice<A>, D extends Abstr
 					scoped.getLeft(), this, expressions, results.get(i).getDescriptor().getFormals(),
 					scoped.getRight());
 			AnalysisState<ReplayState<A>> callee = prepared.getLeft();
-			if (!callee.getExecution().isBottom())
-				entered.merge(frames.get(i), callee.getExecutionState().getStore(), SymbolicStore::lub);
+			if (!callee.getExecution().isBottom()) {
+				SymbolicStore store = callee.getExecutionState().getStore();
+				if (results.size() > 1)
+					// which target is called depends on values that the model
+					// does not tell apart (e.g., the function held by a
+					// variable, or the class of a receiver): each target is
+					// entered under an unknown condition, so that no trace
+					// relies on the choice of the target
+					store = store.assume(new SummaryMarker(call.getProgram().getTypes().getBooleanType(),
+							"call of " + results.get(i).getDescriptor().getFullName() + " among the targets of "
+									+ call.getFullTargetName(),
+							call.getLocation()), call);
+				entered.merge(frames.get(i), store, SymbolicStore::lub);
+			}
 			// in the frame of the call, without the scope of the callee
 			raised = raised.lub(callee.bottomExecution().popScope(new ScopeToken(call), call));
 		}
