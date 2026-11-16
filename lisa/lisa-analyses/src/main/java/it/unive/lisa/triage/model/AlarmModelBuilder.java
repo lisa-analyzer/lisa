@@ -2,11 +2,13 @@ package it.unive.lisa.triage.model;
 
 import it.unive.lisa.analysis.AbstractDomain;
 import it.unive.lisa.analysis.AbstractLattice;
+import it.unive.lisa.analysis.Analysis;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.AnalysisState.Error;
 import it.unive.lisa.analysis.AnalyzedCFG;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.interprocedural.ScopeId;
 import it.unive.lisa.checks.semantic.SemanticTool;
 import it.unive.lisa.checks.verification.ConditionViolation;
 import it.unive.lisa.checks.verification.ErrorViolation;
@@ -14,6 +16,7 @@ import it.unive.lisa.checks.verification.ReachViolation;
 import it.unive.lisa.checks.verification.Violation;
 import it.unive.lisa.lattices.Satisfiability;
 import it.unive.lisa.program.cfg.Parameter;
+import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.program.cfg.statement.Statement;
@@ -32,6 +35,7 @@ import it.unive.lisa.triage.encoding.SortPolicy;
 import it.unive.lisa.triage.inputs.InputSource;
 import it.unive.lisa.triage.inputs.InputSourceResolver;
 import it.unive.lisa.triage.reachability.Reachability;
+import it.unive.lisa.triage.smt.Sort;
 import it.unive.lisa.type.Type;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -636,6 +640,7 @@ public final class AlarmModelBuilder {
 		// each frame exports constraints in its own context
 		Map<Frame, ConstraintExporter<A, D>> exporters = new LinkedHashMap<>();
 		Map<ModelLocation, Set<SymbolicExpression>> seeds = new LinkedHashMap<>();
+		Map<ModelLocation, Set<SymbolicExpression>> candidates = new LinkedHashMap<>();
 		Set<SymbolicExpression> conditions = conditions(all, badCases);
 		Map<SymbolicExpression, Set<Identifier>> conditionIds = new LinkedHashMap<>();
 		for (SymbolicExpression cond : conditions) {
@@ -643,6 +648,9 @@ public final class AlarmModelBuilder {
 			collect(cond, ids);
 			conditionIds.put(cond, ids);
 		}
+		// the sorts of the types, telling apart the ones that frontends
+		// might encode with the same sort (e.g., floats of different sizes)
+		SortPolicy typeSorts = new SortPolicy(Collections.emptyMap(), bad.getProgram().getTypes().getTypes());
 		for (ModelLocation loc : locations) {
 			Statement node = loc.getNode();
 			ConstraintExporter<A, D> exporter = exporters.computeIfAbsent(loc.getFrame(),
@@ -666,21 +674,29 @@ public final class AlarmModelBuilder {
 				// decided by the analysis
 				if (!knowsAll(pre, conditionIds.get(cond)))
 					continue;
-				// tests of runtime types are decided by the analysis as casts
-				// (e.g., any numeric value can be cast to any numeric type),
-				// while the model tests the runtime types of the values
-				if (testsTypes(cond))
-					continue;
 				try {
 					// an analysis without events, as the queries are not part
 					// of the fixpoint computation
-					Satisfiability sat = extractors.get(loc.getFrame()).getAnalysis().satisfies(pre, cond,
-							loc.getFrame().getResult().getId(), node);
-					if (sat == Satisfiability.SATISFIED)
-						cs.add(cond);
-					else if (sat == Satisfiability.NOT_SATISFIED)
-						cs.add(new UnaryExpression(cond.getStaticType(), cond, LogicalNegation.INSTANCE,
-								cond.getCodeLocation()));
+					Analysis<A, D> analysis = extractors.get(loc.getFrame()).getAnalysis();
+					ScopeId<?> context = loc.getFrame().getResult().getId();
+					Satisfiability sat = analysis.satisfies(pre, cond, context, node);
+					SymbolicExpression decided = sat == Satisfiability.SATISFIED ? cond
+							: sat == Satisfiability.NOT_SATISFIED
+									? new UnaryExpression(cond.getStaticType(), cond, LogicalNegation.INSTANCE,
+											cond.getCodeLocation())
+									: null;
+					if (decided == null)
+						continue;
+					// tests of runtime types are decided by the analysis as
+					// casts (e.g., any numeric value can be cast to any
+					// numeric type), while the model tests the runtime types
+					// of the values: where the two might disagree, the
+					// decision is only a candidate invariant, that searches
+					// keep if it is inductive
+					if (decidesTypeTests(analysis, pre, cond, context, node, typeSorts))
+						cs.add(decided);
+					else
+						candidates.computeIfAbsent(loc, l -> new LinkedHashSet<>()).add(decided);
 				} catch (SemanticException e) {
 					// the condition cannot be evaluated in this state
 				}
@@ -749,7 +765,7 @@ public final class AlarmModelBuilder {
 				parameters,
 				confirmable,
 				frames,
-				truncated[0]);
+				truncated[0]).withCandidates(candidates);
 	}
 
 	private static boolean knowsAll(
@@ -1011,21 +1027,53 @@ public final class AlarmModelBuilder {
 	}
 
 	/**
-	 * Yields whether the given expression tests the runtime type of a value
-	 * (see {@link TypeCheck}).
+	 * Yields whether the analysis decides the tests of runtime types in the
+	 * given expression (see {@link TypeCheck}) as the model does: the analysis
+	 * decides whether the tested value can be cast to the type (e.g., any
+	 * numeric value can be cast to any numeric type), while the model tests
+	 * whether the value has that type, through the sort encoding it. The two
+	 * agree when every runtime type of the tested value is encoded with the
+	 * sort of the tested type, as for objects tested against their classes.
 	 */
-	private static boolean testsTypes(
-			SymbolicExpression e) {
+	private static <A extends AbstractLattice<A>, D extends AbstractDomain<A>> boolean decidesTypeTests(
+			Analysis<A, D> analysis,
+			AnalysisState<A> state,
+			SymbolicExpression e,
+			ScopeId<?> context,
+			ProgramPoint pp,
+			SortPolicy sorts) {
 		if (e instanceof UnaryExpression)
-			return testsTypes(((UnaryExpression) e).getExpression());
-		if (e instanceof BinaryExpression)
-			return ((BinaryExpression) e).getOperator() instanceof TypeCheck
-					|| testsTypes(((BinaryExpression) e).getLeft())
-					|| testsTypes(((BinaryExpression) e).getRight());
-		if (e instanceof TernaryExpression)
-			return testsTypes(((TernaryExpression) e).getLeft()) || testsTypes(((TernaryExpression) e).getMiddle())
-					|| testsTypes(((TernaryExpression) e).getRight());
-		return false;
+			return decidesTypeTests(analysis, state, ((UnaryExpression) e).getExpression(), context, pp, sorts);
+		if (e instanceof TernaryExpression) {
+			TernaryExpression t = (TernaryExpression) e;
+			return decidesTypeTests(analysis, state, t.getLeft(), context, pp, sorts)
+					&& decidesTypeTests(analysis, state, t.getMiddle(), context, pp, sorts)
+					&& decidesTypeTests(analysis, state, t.getRight(), context, pp, sorts);
+		}
+		if (!(e instanceof BinaryExpression))
+			return true;
+		BinaryExpression b = (BinaryExpression) e;
+		if (!decidesTypeTests(analysis, state, b.getLeft(), context, pp, sorts)
+				|| !decidesTypeTests(analysis, state, b.getRight(), context, pp, sorts))
+			return false;
+		if (!(b.getOperator() instanceof TypeCheck))
+			return true;
+		Type target = SymbolicCase.singleToken(b.getRight());
+		if (target == null)
+			return false;
+		Set<Type> types;
+		try {
+			types = analysis.getRuntimeTypesOf(state, b.getLeft(), context, pp);
+		} catch (SemanticException ex) {
+			return false;
+		}
+		if (types.isEmpty())
+			return false;
+		Sort sort = sorts.sortOf(target);
+		for (Type t : types)
+			if (t.isUntyped() || !sorts.sortOf(t).equals(sort))
+				return false;
+		return true;
 	}
 
 	private static void collect(
