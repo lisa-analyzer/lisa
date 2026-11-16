@@ -250,6 +250,10 @@ public class Unrolling {
 		this.encoders = encoders;
 		// floating point numbers are encoded only if they might be used, since
 		// the theory of floating point numbers can make queries much slower
+		// the factory of the encoders decides the sorts of the encoding
+		SortPolicy policy = encoders.sorts(model.getSorts());
+		if (policy != model.getSorts())
+			model = model.withSorts(policy);
 		this.model = involvesFloats(model) ? model : model.withSorts(model.getSorts().withoutFloats());
 		this.solver = solver;
 		this.index = new LinkedHashMap<>();
