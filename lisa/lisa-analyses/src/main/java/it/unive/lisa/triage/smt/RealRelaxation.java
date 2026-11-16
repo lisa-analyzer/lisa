@@ -1,6 +1,7 @@
 package it.unive.lisa.triage.smt;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.math.MathContext;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -8,6 +9,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -235,13 +237,30 @@ final class RealRelaxation {
 
 		private final List<Application> applications;
 
+		private final List<String> divisors;
+
 		private Relaxed(
 				List<String> commands,
 				List<Pin> pins,
-				List<Application> applications) {
+				List<Application> applications,
+				List<String> divisors) {
 			this.commands = commands;
 			this.pins = pins;
 			this.applications = applications;
+			this.divisors = divisors;
+		}
+
+		/**
+		 * Yields the relaxed divisors of the floating point divisions occurring
+		 * in the assertions, outside of quantifiers and definitions: the
+		 * divisions by zero of the relaxed problem (that are not infinities as
+		 * in floating point arithmetic) are often not the ones of models of the
+		 * original assertions.
+		 *
+		 * @return the divisors
+		 */
+		List<String> getDivisors() {
+			return divisors;
 		}
 
 		/**
@@ -347,6 +366,8 @@ final class RealRelaxation {
 	 * values, by their text in the original assertions.
 	 */
 	private Map<String, Application> applications;
+
+	private List<String> divisors;
 
 	/**
 	 * Builds an empty relaxation.
@@ -504,6 +525,7 @@ final class RealRelaxation {
 		definitionPins = new HashMap<>();
 		sorts = new IdentityHashMap<>();
 		applications = new LinkedHashMap<>();
+		divisors = new ArrayList<>();
 		try {
 			List<String> asserted = new ArrayList<>();
 			for (List<String> scope : scopes)
@@ -520,7 +542,8 @@ final class RealRelaxation {
 			definitionNames = null;
 			definitionPins = null;
 		}
-		return new Relaxed(commands, new ArrayList<>(pins.values()), new ArrayList<>(applications.values()));
+		return new Relaxed(commands, new ArrayList<>(pins.values()), new ArrayList<>(applications.values()),
+				new ArrayList<>(new LinkedHashSet<>(divisors)));
 	}
 
 	// sorts
@@ -931,8 +954,13 @@ final class RealRelaxation {
 			return apply("-", ch, 2, bound);
 		case "fp.mul":
 			return apply("*", ch, 2, bound);
-		case "fp.div":
-			return apply("/", ch, 2, bound);
+		case "fp.div": {
+			String dividend = relax(ch.get(2), bound);
+			String divisor = relax(ch.get(3), bound);
+			if (bound.isEmpty())
+				divisors.add(divisor);
+			return "(/ " + dividend + " " + divisor + ")";
+		}
 		case "fp.fma":
 			return "(+ (* " + relax(ch.get(2), bound) + " " + relax(ch.get(3), bound) + ") "
 					+ relax(ch.get(4), bound) + ")";
@@ -1041,7 +1069,22 @@ final class RealRelaxation {
 					return relax(arg, bound);
 				if (sameSort(sort, INT))
 					return "(to_real " + relax(arg, bound) + ")";
-				// bit-vectors: the bits of a number, or a signed integer
+				// bit-vectors with a rounding mode: a signed integer
+				// (e.g., the conversion of an int to a double), whose value
+				// is the one of the integer it is built from, if any
+				if (ch.size() == 3 && isBitVector(sort)) {
+					List<SExpression> conversion = arg.isAtom() ? null : arg.getChildren();
+					if (conversion != null && conversion.size() == 2 && !conversion.get(0).isAtom()
+							&& "_".equals(atom(conversion.get(0).getChildren(), 0))
+							&& "int2bv".equals(atom(conversion.get(0).getChildren(), 1))
+							&& sameSort(sortOf(conversion.get(1), bound), INT))
+						return "(to_real " + relax(conversion.get(1), bound) + ")";
+					String bits = relax(arg, bound);
+					int width = width(sort);
+					return "(to_real (ite (bvslt " + bits + " (_ bv0 " + width + ")) (- (bv2int " + bits + ") "
+							+ BigInteger.ONE.shiftLeft(width) + ") (bv2int " + bits + ")))";
+				}
+				// bit-vectors without a rounding mode: the bits of a number
 				return uninterpreted(e, ch, bound);
 			}
 			case "to_fp_unsigned":

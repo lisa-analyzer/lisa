@@ -675,7 +675,8 @@ public class SmtLibProcessSolver
 		if (relaxed == null)
 			return SmtResult.UNKNOWN;
 		List<RealRelaxation.Application> applications = relaxed.getApplications();
-		List<String> fixes = new ArrayList<>();
+		List<RealRelaxation.Pin> pins = relaxed.getPins();
+		long deadline = System.currentTimeMillis() + MAX_RELAXED_MODELS * relaxedTimeout;
 		// the helper is killed if it does not answer within the time of the
 		// relaxed check, and the grace period
 		try (SmtLibProcessSolver helper = new SmtLibProcessSolver(command, initialization, relaxedTimeout)) {
@@ -683,7 +684,7 @@ public class SmtLibProcessSolver
 				helper.command(cmd);
 			// moderate values are preferred, as the cancellations of large
 			// real numbers are usually lost when rounding them
-			for (RealRelaxation.Pin pin : relaxed.getPins())
+			for (RealRelaxation.Pin pin : pins)
 				helper.command("(assert (and (<= " + RealRelaxation.real(-MAX_RELAXED_MAGNITUDE) + " "
 						+ pin.getRelaxed() + ") (<= " + pin.getRelaxed() + " "
 						+ RealRelaxation.real(MAX_RELAXED_MAGNITUDE) + ")))");
@@ -695,54 +696,104 @@ public class SmtLibProcessSolver
 			for (RealRelaxation.Application app : applications)
 				if (app.getRelaxedArguments().size() == 1)
 					samples.computeIfAbsent(app.getFunction(), f -> initialSamples(evaluators.get(f)));
-			long deadline = System.currentTimeMillis() + relaxedTimeout;
-			for (int round = 0;; round++) {
+			// the divisors are first required to be different from zero
+			// (divisions by zero of the relaxed problem are not infinities),
+			// and then not, if no model is found
+			boolean nonZero = !relaxed.getDivisors().isEmpty();
+			if (nonZero) {
 				helper.command("(push 1)");
-				for (RealRelaxation.Application app : applications)
-					if (app.getRelaxedArguments().size() == 1)
-						helper.command("(assert (= " + app.getRelaxed() + " "
-								+ interpolation(samples.get(app.getFunction()), app.getRelaxedArguments().get(0))
-								+ "))");
-				if (helper.check(relaxedCheck) != SmtResult.SAT) {
+				for (String divisor : relaxed.getDivisors())
+					helper.command("(assert (not (= " + divisor + " 0.0)))");
+			}
+			// several models of the relaxed problem are tried, each different
+			// from the previous ones in the values of the constants
+			for (int model = 0; model < MAX_RELAXED_MODELS && System.currentTimeMillis() < deadline; model++) {
+				List<String> values = relaxedModel(helper, applications, pins, samples);
+				if (values == null && nonZero) {
 					helper.command("(pop 1)");
-					break;
+					nonZero = false;
+					values = relaxedModel(helper, applications, pins, samples);
 				}
-				List<RealRelaxation.Pin> pins = relaxed.getPins();
-				List<String> terms = new ArrayList<>();
-				for (RealRelaxation.Pin pin : pins)
-					terms.add(pin.getRelaxed());
-				List<String> values = helper.values(terms);
-				fixes.clear();
+				if (values == null)
+					break;
+				List<String> fixes = new ArrayList<>();
+				List<String> same = new ArrayList<>();
 				for (int i = 0; i < pins.size(); i++) {
 					String fix = pins.get(i).fix(values.get(i));
 					if (fix != null)
 						fixes.add(fix);
+					same.add("(= " + pins.get(i).getRelaxed() + " " + values.get(i) + ")");
 				}
-				List<Mismatch> mismatches;
-				try {
-					mismatches = round >= MAX_RELAXED_REFINEMENTS || System.currentTimeMillis() >= deadline
-							? Collections.emptyList()
-							: relaxedMismatches(helper, applications);
-				} catch (SmtException e) {
-					// the values cannot be read: the last model is used
-					mismatches = Collections.emptyList();
-				}
-				helper.command("(pop 1)");
-				if (mismatches.isEmpty())
+				if (fixes.isEmpty())
 					break;
-				for (Mismatch m : mismatches)
-					if (m.points.size() == 1)
-						samples.get(m.application.getFunction()).put(m.arguments.get(0).doubleValue(), m.actual);
-					else
-						helper.command("(assert (= " + m.application.relaxedAt(m.points) + " "
-								+ RealRelaxation.real(m.actual) + "))");
+				if (fixedCheck(fixes, applications))
+					return SmtResult.SAT;
+				helper.command("(assert (not (and true " + String.join(" ", same) + ")))");
 			}
 		} catch (SmtException e) {
 			// e.g., the relaxation is not understood by the solver
-			return SmtResult.UNKNOWN;
 		}
-		if (fixes.isEmpty())
-			return SmtResult.UNKNOWN;
+		return SmtResult.UNKNOWN;
+	}
+
+	/**
+	 * Yields the values of the given floating point constants in a model of the
+	 * relaxed problem of the given helper, that agrees with the functions that
+	 * can be computed on concrete values (see {@link #relaxedCheck()}), or
+	 * {@code null} if no model is found.
+	 */
+	private List<String> relaxedModel(
+			SmtLibProcessSolver helper,
+			List<RealRelaxation.Application> applications,
+			List<RealRelaxation.Pin> pins,
+			Map<String, TreeMap<Double, Double>> samples) {
+		List<String> values = null;
+		long deadline = System.currentTimeMillis() + relaxedTimeout;
+		for (int round = 0;; round++) {
+			helper.command("(push 1)");
+			for (RealRelaxation.Application app : applications)
+				if (app.getRelaxedArguments().size() == 1)
+					helper.command("(assert (= " + app.getRelaxed() + " "
+							+ interpolation(samples.get(app.getFunction()), app.getRelaxedArguments().get(0))
+							+ "))");
+			if (helper.check(relaxedCheck) != SmtResult.SAT) {
+				helper.command("(pop 1)");
+				return values;
+			}
+			List<String> terms = new ArrayList<>();
+			for (RealRelaxation.Pin pin : pins)
+				terms.add(pin.getRelaxed());
+			values = helper.values(terms);
+			List<Mismatch> mismatches;
+			try {
+				mismatches = round >= MAX_RELAXED_REFINEMENTS || System.currentTimeMillis() >= deadline
+						? Collections.emptyList()
+						: relaxedMismatches(helper, applications);
+			} catch (SmtException e) {
+				// the values cannot be read: the last model is used
+				mismatches = Collections.emptyList();
+			}
+			helper.command("(pop 1)");
+			if (mismatches.isEmpty())
+				return values;
+			for (Mismatch m : mismatches)
+				if (m.points.size() == 1)
+					samples.get(m.application.getFunction()).put(m.arguments.get(0).doubleValue(), m.actual);
+				else
+					helper.command("(assert (= " + m.application.relaxedAt(m.points) + " "
+							+ RealRelaxation.real(m.actual) + "))");
+		}
+	}
+
+	/**
+	 * Checks the original assertions with the floating point constants fixed by
+	 * the given assertions, by another process: if they are satisfiable, that
+	 * process becomes the one the models are read from (see
+	 * {@link #relaxedCheck()}).
+	 */
+	private boolean fixedCheck(
+			List<String> fixes,
+			List<RealRelaxation.Application> applications) {
 		// the query with fixed constants is checked by another process as
 		// well, since z3 might not answer to further commands changing the
 		// scopes right after an undecided check
@@ -781,14 +832,20 @@ public class SmtLibProcessSolver
 				}
 				fixed = checker;
 				relaxations++;
-				return SmtResult.SAT;
+				return true;
 			}
 		} catch (SmtException e) {
 			// the query stays undecided
 		}
 		checker.close();
-		return SmtResult.UNKNOWN;
+		return false;
 	}
+
+	/**
+	 * The maximum number of models of a relaxed query that are tried (see
+	 * {@link #relaxedCheck()}), each within the time of the relaxed check.
+	 */
+	private static final int MAX_RELAXED_MODELS = 3;
 
 	/**
 	 * The maximum number of times the values of the functions that can be
