@@ -15,6 +15,7 @@ import it.unive.lisa.checks.verification.Violation;
 import it.unive.lisa.lattices.Satisfiability;
 import it.unive.lisa.program.cfg.Parameter;
 import it.unive.lisa.program.cfg.statement.Expression;
+import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.call.CFGCall;
 import it.unive.lisa.symbolic.SymbolicExpression;
@@ -791,7 +792,9 @@ public final class AlarmModelBuilder {
 	}
 
 	private static Statement rootOf(
-			Statement st) {
+			Statement thrower) {
+		// calls resolved from calls of the cfg are not part of it
+		Statement st = Reachability.sourceOf(thrower);
 		// expressions synthesized by the semantics of other statements might
 		// have no root in the cfg
 		Statement root = st instanceof Expression ? ((Expression) st).getRootStatement() : st;

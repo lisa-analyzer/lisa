@@ -606,7 +606,9 @@ public class TransitionExtractor<A extends AbstractLattice<A>, D extends Abstrac
 	}
 
 	private static Statement rootOf(
-			Statement st) {
+			Statement thrower) {
+		// calls resolved from calls of the cfg are not part of it
+		Statement st = Reachability.sourceOf(thrower);
 		// expressions synthesized by the semantics of other statements might
 		// have no root in the cfg
 		Statement root = st instanceof Expression ? ((Expression) st).getRootStatement() : st;
