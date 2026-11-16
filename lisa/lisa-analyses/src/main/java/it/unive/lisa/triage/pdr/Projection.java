@@ -189,8 +189,8 @@ public final class Projection {
 	 * the given sort, or {@code null} if there is none: a type of the width of
 	 * the sort, or any floating point type if there is none (e.g., if all
 	 * floating point numbers are encoded as 64-bits ones, see
-	 * {@link SortPolicy#withDoubleFloats()}), since the constant keeps the value
-	 * of the sort.
+	 * {@link SortPolicy#withDoubleFloats()}), since the constant keeps the
+	 * value of the sort.
 	 */
 	private static Type floatType(
 			TypeSystem types,

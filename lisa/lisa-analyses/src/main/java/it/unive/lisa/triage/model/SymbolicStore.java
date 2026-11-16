@@ -1,34 +1,34 @@
 package it.unive.lisa.triage.model;
 
-import it.unive.lisa.triage.reachability.Reachability;
-import it.unive.lisa.symbolic.value.Constant;
-import it.unive.lisa.program.cfg.statement.Statement;
-import it.unive.lisa.program.cfg.statement.NaryExpression;
-import it.unive.lisa.program.cfg.statement.Expression;
-import java.util.Arrays;
-import it.unive.lisa.symbolic.heap.HeapDereference;
-import it.unive.lisa.symbolic.heap.HeapReference;
-import it.unive.lisa.symbolic.value.TernaryExpression;
-import it.unive.lisa.symbolic.value.BinaryExpression;
-import it.unive.lisa.symbolic.value.UnaryExpression;
-import java.util.Map;
-import java.util.List;
-import java.util.LinkedHashMap;
-import java.util.IdentityHashMap;
-import java.util.HashSet;
-import java.util.ArrayList;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.program.SyntheticLocation;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.ProgramPoint;
+import it.unive.lisa.program.cfg.statement.Expression;
+import it.unive.lisa.program.cfg.statement.NaryExpression;
+import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.AccessChild;
+import it.unive.lisa.symbolic.heap.HeapDereference;
+import it.unive.lisa.symbolic.heap.HeapReference;
 import it.unive.lisa.symbolic.heap.MemoryAllocation;
+import it.unive.lisa.symbolic.value.BinaryExpression;
+import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.PushAny;
+import it.unive.lisa.symbolic.value.TernaryExpression;
+import it.unive.lisa.symbolic.value.UnaryExpression;
+import it.unive.lisa.triage.reachability.Reachability;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
@@ -45,9 +45,9 @@ import java.util.function.Predicate;
  * that might compute different expressions (e.g., the alternatives of a
  * dispatch on the types of a value): the store records the expressions that
  * each case computed (see {@link #computing(SymbolicExpression)}), so that the
- * operations over an expression computed by some cases only apply to them
- * (see {@link #restrictTo(SymbolicExpression)}), instead of pairing every case
- * with every expression computed by any of them.
+ * operations over an expression computed by some cases only apply to them (see
+ * {@link #restrictTo(SymbolicExpression)}), instead of pairing every case with
+ * every expression computed by any of them.
  *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
@@ -94,13 +94,13 @@ public final class SymbolicStore {
 	 * Yields the store where every case computed the given expression at the
 	 * given program point (that is, the expression computed by the executions
 	 * of this store at that point, e.g., by the statement evaluated last): the
-	 * expressions computed before at other points are kept, as they might
-	 * still be used (e.g., the operands of an expression whose other operands
-	 * are computed afterwards), while the cases whose computed expressions are
+	 * expressions computed before at other points are kept, as they might still
+	 * be used (e.g., the operands of an expression whose other operands are
+	 * computed afterwards), while the cases whose computed expressions are
 	 * unknown stay so.
 	 *
 	 * @param expression the expression
-	 * @param pp         the program point computing it
+	 * @param point      the program point computing it
 	 *
 	 * @return the resulting store
 	 */
@@ -123,16 +123,16 @@ public final class SymbolicStore {
 
 	/**
 	 * Yields the store made of the cases of this one where the given program
-	 * point might have computed the given expression: if some case computed
-	 * the very expression (by identity) at that point, the cases where the
-	 * point computed only other expressions (not equal to it) are dropped,
-	 * while the others (including the ones where the point computed nothing
-	 * known, or whose computed expressions are unknown) are kept. Statements evaluating their semantics over each combination of the
-	 * expressions computed by their operands use this with the operands, so
-	 * that the semantics is evaluated in the executions computing the
-	 * combination.
+	 * point might have computed the given expression: if some case computed the
+	 * very expression (by identity) at that point, the cases where the point
+	 * computed only other expressions (not equal to it) are dropped, while the
+	 * others (including the ones where the point computed nothing known, or
+	 * whose computed expressions are unknown) are kept. Statements evaluating
+	 * their semantics over each combination of the expressions computed by
+	 * their operands use this with the operands, so that the semantics is
+	 * evaluated in the executions computing the combination.
 	 *
-	 * @param pp         the program point
+	 * @param point      the program point
 	 * @param expression the expression
 	 *
 	 * @return the resulting store
@@ -173,8 +173,8 @@ public final class SymbolicStore {
 	/**
 	 * Yields the store made of the cases of this one that might have computed
 	 * the given expression, for operations over the expression whose operands
-	 * are not known to come from specific program points (e.g., assumptions
-	 * and assignments): for each sub-expression of the given one that is (by
+	 * are not known to come from specific program points (e.g., assumptions and
+	 * assignments): for each sub-expression of the given one that is (by
 	 * identity) an expression computed at a single program point, the store is
 	 * restricted to the cases where that point might have computed it (see
 	 * {@link #restrictTo(ProgramPoint, SymbolicExpression)}). Expressions
@@ -210,13 +210,12 @@ public final class SymbolicStore {
 
 	/**
 	 * Yields the statement of the program on whose behalf the given program
-	 * point computes expressions: the point itself (or the call of the
-	 * program it has been resolved from, see
-	 * {@link Reachability#sourceOf(Statement)}), or, for expressions that
-	 * the semantics of other expressions evaluate (e.g., calls resolved by a
-	 * frontend, whose parent is the expression performing them, but that are
-	 * not among its operands), the closest expression containing it among
-	 * whose operands it is.
+	 * point computes expressions: the point itself (or the call of the program
+	 * it has been resolved from, see {@link Reachability#sourceOf(Statement)}),
+	 * or, for expressions that the semantics of other expressions evaluate
+	 * (e.g., calls resolved by a frontend, whose parent is the expression
+	 * performing them, but that are not among its operands), the closest
+	 * expression containing it among whose operands it is.
 	 */
 	private static ProgramPoint canonical(
 			ProgramPoint pp) {
@@ -362,10 +361,11 @@ public final class SymbolicStore {
 	}
 
 	/**
-	 * Yields the store where all values are lost, as {@link #top()}, and so
-	 * are the conditions under which they are: the traces relying on it are
-	 * imprecise (see {@link SymbolicCase#withLostConditions(FreshValueFactory)}).
-	 * The store is still a top one (see {@link #isTop()}).
+	 * Yields the store where all values are lost, as {@link #top()}, and so are
+	 * the conditions under which they are: the traces relying on it are
+	 * imprecise (see
+	 * {@link SymbolicCase#withLostConditions(FreshValueFactory)}). The store is
+	 * still a top one (see {@link #isTop()}).
 	 *
 	 * @return the store
 	 */

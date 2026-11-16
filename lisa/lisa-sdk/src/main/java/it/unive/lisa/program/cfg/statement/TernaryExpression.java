@@ -272,10 +272,9 @@ public abstract class TernaryExpression
 		return fwdTernarySemantics(interprocedural, state, left, middle, right, expressions);
 	}
 
-
 	/**
-	 * Yields the executions of the given state where the operands computed
-	 * the given expressions (see
+	 * Yields the executions of the given state where the operands computed the
+	 * given expressions (see
 	 * {@link it.unive.lisa.analysis.Analysis#restrictTo(AnalysisState, it.unive.lisa.program.cfg.ProgramPoint, SymbolicExpression)}).
 	 */
 	private <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> restrictTo(
