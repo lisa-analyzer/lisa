@@ -1,6 +1,8 @@
 package it.unive.lisa.triage.model;
 
+import it.unive.lisa.program.Program;
 import it.unive.lisa.program.cfg.CodeMember;
+import java.util.Collections;
 import java.util.Set;
 
 /**
@@ -52,5 +54,23 @@ public interface GlobalWrites {
 	default boolean isInitializer(
 			CodeMember member) {
 		return false;
+	}
+
+	/**
+	 * Yields the names of the global variables of the given program that are
+	 * not declared as globals of its units (e.g., the names of the namespaces
+	 * of the modules of a Python program), as the program names them when
+	 * accessing them: the alarm models know the global variables of a program
+	 * through its declarations and this, and only the global variables they
+	 * know can be kept by the calls they summarize. By default, there is no
+	 * such global variable.
+	 *
+	 * @param program the program
+	 *
+	 * @return the names
+	 */
+	default Set<String> globalsOf(
+			Program program) {
+		return Collections.emptySet();
 	}
 }

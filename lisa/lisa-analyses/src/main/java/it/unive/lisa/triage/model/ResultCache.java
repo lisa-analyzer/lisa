@@ -199,6 +199,16 @@ public class ResultCache<A extends AbstractLattice<A>> {
 	}
 
 	/**
+	 * Yields the global variables written by the code of each member of the
+	 * program, as the frontend knows them.
+	 *
+	 * @return the global writes
+	 */
+	public GlobalWrites getGlobalWrites() {
+		return globalWrites;
+	}
+
+	/**
 	 * Yields the names of the global variables that the given members might
 	 * write, also through the members they call, transitively, as the given
 	 * call graph tells them, or {@code null} if they are not known (see

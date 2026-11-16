@@ -398,7 +398,8 @@ public final class AlarmModelBuilder {
 
 		InputSourceResolver resolver = new InputSourceResolver(tool);
 		FreshValueFactory factory = reuse != null && reuse.factory != null ? reuse.factory
-				: new FreshValueFactory(resolver, new HeapModel(root.getProgram()));
+				: new FreshValueFactory(resolver, new HeapModel(root.getProgram(),
+						HeapModel.DEFAULT_ARRAY_PROPERTIES, cache.getGlobalWrites().globalsOf(root.getProgram())));
 		if (reuse != null)
 			reuse.factory = factory;
 		// the locations are extracted once, in the order they are discovered:
