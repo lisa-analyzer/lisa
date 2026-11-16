@@ -486,7 +486,7 @@ public final class SymbolicCase {
 		if (expression instanceof AccessChild) {
 			AccessChild access = (AccessChild) expression;
 			String field = fieldOf(access, factory, pp);
-			if (field == UNDECIDED)
+			if (field == UNDECIDED || field == SUMMARY)
 				return summary(expression, SummaryValue.Kind.HEAP, "heap expression " + expression, factory);
 			SymbolicExpression ref = substitute(access.getContainer(), factory, pp);
 			CodeLocation loc = access.getCodeLocation();
@@ -565,6 +565,14 @@ public final class SymbolicCase {
 	private static final String UNDECIDED = "?";
 
 	/**
+	 * The result of
+	 * {@link #fieldOf(AccessChild, FreshValueFactory, ProgramPoint)} when the
+	 * access is through a summary of several locations (see
+	 * {@link HeapModel#isSummary(String)}).
+	 */
+	private static final String SUMMARY = "*";
+
+	/**
 	 * Yields the name of the field accessed by the given access, {@code null}
 	 * if the access reads a cell of an array, or {@link #UNDECIDED} if this
 	 * cannot be told. Fields are named by {@link GlobalVariable}s, while the
@@ -578,6 +586,8 @@ public final class SymbolicCase {
 			FreshValueFactory factory,
 			ProgramPoint pp) {
 		SymbolicExpression child = access.getChild();
+		if (child instanceof Identifier && factory.getHeapModel().isSummary(((Identifier) child).getName()))
+			return SUMMARY;
 		if (child instanceof GlobalVariable) {
 			// qualified by the class declaring it, when the static type of
 			// the accessed object tells it
@@ -785,6 +795,10 @@ public final class SymbolicCase {
 			FreshValueFactory factory,
 			ProgramPoint pp) {
 		String field = fieldOf(target, factory, pp);
+		if (field == SUMMARY)
+			// any cell of the object might be written: the cells are no
+			// longer known
+			return forget(List.of(HeapModel.CELLS, HeapModel.WRITTEN_CELLS));
 		if (field == UNDECIDED) {
 			// global variables are not part of the heap
 			Set<Identifier> preserved = new LinkedHashSet<>(factory.getHeapModel().immutableContents());

@@ -149,6 +149,12 @@ public class HeapModel {
 	private final Set<String> arrayProperties;
 
 	/**
+	 * The names of the identifiers that, as children of heap accesses, denote
+	 * any of several locations (see {@link HeapWrites#summaryChildren()}).
+	 */
+	private final Set<String> summaries;
+
+	/**
 	 * For each immutable field name, the units declaring a field with that
 	 * name.
 	 */
@@ -212,6 +218,7 @@ public class HeapModel {
 		this.fieldTypes = Collections.emptyMap();
 		this.types = Collections.emptySet();
 		this.arrayProperties = DEFAULT_ARRAY_PROPERTIES;
+		this.summaries = Collections.emptySet();
 	}
 
 	/**
@@ -240,7 +247,7 @@ public class HeapModel {
 	public HeapModel(
 			Program program,
 			Set<String> arrayProperties) {
-		this(program, arrayProperties, Collections.emptySet());
+		this(program, arrayProperties, Collections.emptySet(), Collections.emptySet());
 	}
 
 	/**
@@ -255,12 +262,17 @@ public class HeapModel {
 	 *                            (e.g., its length) rather than an index
 	 * @param globals         the names of the global variables that are not
 	 *                            declared
+	 * @param summaries       the names of the identifiers that, as children of
+	 *                            heap accesses, denote any of several locations
+	 *                            (see {@link HeapWrites#summaryChildren()})
 	 */
 	public HeapModel(
 			Program program,
 			Set<String> arrayProperties,
-			Collection<String> globals) {
+			Collection<String> globals,
+			Set<String> summaries) {
 		this.arrayProperties = arrayProperties;
+		this.summaries = summaries;
 		Map<String, Set<Unit>> declaring = new LinkedHashMap<>();
 		Set<String> mutable = new LinkedHashSet<>();
 		this.qualified = new LinkedHashMap<>();
@@ -365,6 +377,21 @@ public class HeapModel {
 	public boolean isArrayProperty(
 			String name) {
 		return arrayProperties.contains(name);
+	}
+
+	/**
+	 * Yields whether the identifier with the given name, as the child of a heap
+	 * access, denotes any of several locations of the accessed object (see
+	 * {@link HeapWrites#summaryChildren()}): reads through it yield unknown
+	 * values, and writes through it might write any cell.
+	 *
+	 * @param name the name of the identifier
+	 *
+	 * @return whether the identifier denotes a summary
+	 */
+	public boolean isSummary(
+			String name) {
+		return summaries.contains(name);
 	}
 
 	/**
