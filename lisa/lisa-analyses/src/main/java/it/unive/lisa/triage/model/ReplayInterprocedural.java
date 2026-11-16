@@ -51,6 +51,7 @@ import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.symbolic.value.TernaryExpression;
 import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.type.Type;
+import it.unive.lisa.triage.reachability.Reachability;
 import it.unive.lisa.util.datastructures.graph.GraphVisitor;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
 import java.util.ArrayList;
@@ -426,6 +427,30 @@ public class ReplayInterprocedural<A extends AbstractLattice<A>, D extends Abstr
 	}
 
 	/**
+	 * Yields the state computed by the analysis after the given call: the one
+	 * after the call of the program it has been resolved from (see
+	 * {@link Reachability#sourceOf(Statement)}), or, if the results do not
+	 * have it (e.g., for calls that frontends perform within other
+	 * expressions, whose parent is the expression performing them), the one
+	 * after the closest expression containing it that the results have.
+	 * Yields the state of the call if none is found.
+	 */
+	private AnalysisState<A> stateAfter(
+			Call call) {
+		Statement st = Reachability.sourceOf(call);
+		AnalysisState<A> post = result.getAnalysisStateAfter(st);
+		Statement current = st;
+		while ((post == null || post.getExecution().isBottom()) && current instanceof Expression
+				&& ((Expression) current).getParentStatement() != null) {
+			current = ((Expression) current).getParentStatement();
+			AnalysisState<A> parent = result.getAnalysisStateAfter(current);
+			if (parent != null && !parent.getExecution().isBottom())
+				return parent;
+		}
+		return post;
+	}
+
+	/**
 	 * Summarizes the given call (see the description of this class).
 	 */
 	private AnalysisState<ReplayState<A>> summarize(
@@ -447,6 +472,19 @@ public class ReplayInterprocedural<A extends AbstractLattice<A>, D extends Abstr
 					new SummaryMarker(call.getStaticType(), reason, call.getLocation()),
 					context,
 					call);
+		// the abstract state after the call is the one computed by the
+		// analysis, if known, as for expanded calls (see returned): the
+		// statements evaluated after the call must behave as during the
+		// analysis (e.g., raising the errors the analysis raised because of
+		// the returned value), while only the symbolic store loses the value
+		AnalysisState<A> post = stateAfter(call);
+		if (post != null && !post.getExecution().isBottom() && !callres.getExecution().isBottom()) {
+			ProgramState<ReplayState<A>> exec = callres.getExecution();
+			callres = callres.withExecution(new ProgramState<>(
+					exec.getState().withInner(post.getExecutionState()),
+					exec.getComputedExpressions(),
+					exec.getFixpointInformation()));
+		}
 		// the callees might have written the heap, except for the immutable
 		// fields they cannot write
 		HeapModel heap = entryState.getExecutionState().getStore().getFactory().getHeapModel();
@@ -519,14 +557,12 @@ public class ReplayInterprocedural<A extends AbstractLattice<A>, D extends Abstr
 			throws SemanticException {
 		if (entryState.getExecution().isBottom())
 			return callres;
-		AnalysisState<A> post = result.getAnalysisStateAfter(call.getSource() == null ? call : call.getSource());
+		AnalysisState<A> post = stateAfter(call);
 		SummaryMarker happens = new SummaryMarker(call.getProgram().getTypes().getBooleanType(),
 				"errors raised and halts reached by " + call.getFullTargetName(), call.getLocation());
 		SymbolicStore lost = entryState.getExecutionState().getStore().havocAll().assume(happens, call);
 		// errors raised by calls are attributed to the call in the program
-		Call thrower = call;
-		while (thrower.getSource() != null)
-			thrower = thrower.getSource();
+		Statement thrower = Reachability.sourceOf(call);
 		// the errors raised by a call that is part of a larger expression
 		// (e.g., the constructor call of an object creation) might be added
 		// to the states of the enclosing expressions only: the errors of the
@@ -542,12 +578,17 @@ public class ReplayInterprocedural<A extends AbstractLattice<A>, D extends Abstr
 			GenericMapLattice<Error, ProgramState<A>> errors = state.getErrors();
 			if (!errors.isBottom() && !errors.isTop())
 				for (Error error : errors.getKeys())
-					if (error.getThrower().equals(thrower) && !errors.getState(error).isBottom() && added.add(error))
+					// the throwers of the errors might be the calls resolved
+					// from the one of the program
+					if (Reachability.sourceOf(error.getThrower()).equals(thrower) && !errors.getState(error).isBottom()
+							&& added.add(error))
 						callres = callres.addError(error, lift(errors.getState(error), lost));
 			GenericMapLattice<Type, GenericSetLattice<Statement>> smashed = state.getSmashedErrors();
 			if (!smashed.isBottom() && !smashed.isTop() && !state.getSmashedErrorsState().isBottom())
 				for (Type type : smashed.getKeys())
-					if (smashed.getState(type).contains(thrower) && added.add(new Error(type, thrower)))
+					if (smashed.getState(type).elements().stream()
+							.anyMatch(st -> Reachability.sourceOf(st).equals(thrower))
+							&& added.add(new Error(type, thrower)))
 						callres = callres.addError(new Error(type, thrower),
 								lift(state.getSmashedErrorsState(), lost));
 		}
@@ -573,6 +614,11 @@ public class ReplayInterprocedural<A extends AbstractLattice<A>, D extends Abstr
 		// as done by the analysis: errors and halts are not affected by the
 		// call
 		AnalysisState<ReplayState<A>> initial = entryState.removeAllErrors(true);
+		// the errors raised (and the halts reached) while preparing the
+		// entry states of the callees (e.g., by assigning the actual
+		// parameters to the formal ones) are the ones of the call, raised in
+		// the frame of the call
+		AnalysisState<ReplayState<A>> raised = entryState.bottomExecution();
 		ScopingStrategy scoping = call.getProgram().getFeatures().getScopingStrategy();
 		ParameterAssigningStrategy assigning = call.getProgram().getFeatures().getAssigningStrategy();
 		for (int i = 0; i < results.size(); i++) {
@@ -584,13 +630,15 @@ public class ReplayInterprocedural<A extends AbstractLattice<A>, D extends Abstr
 			AnalysisState<ReplayState<A>> callee = prepared.getLeft();
 			if (!callee.getExecution().isBottom())
 				entered.merge(frames.get(i), callee.getExecutionState().getStore(), SymbolicStore::lub);
+			// in the frame of the call, without the scope of the callee
+			raised = raised.lub(callee.bottomExecution().popScope(new ScopeToken(call), call));
 		}
 
 		// no computed expression is left, as it would make the execution
 		// non-bottom; errors raised inside the callees are propagated from
 		// their frames, and executions halting inside them reach no other
 		// location
-		return entryState.bottomExecution();
+		return raised;
 	}
 
 	/**
@@ -613,7 +661,7 @@ public class ReplayInterprocedural<A extends AbstractLattice<A>, D extends Abstr
 		if (exec.isBottom())
 			return entryState;
 		ScopeId<ReplayState<A>> context = getCurrentContext();
-		AnalysisState<A> post = result.getAnalysisStateAfter(call.getSource() == null ? call : call.getSource());
+		AnalysisState<A> post = stateAfter(call);
 		A inner;
 		if (!post.getExecution().isBottom())
 			inner = post.getExecutionState();

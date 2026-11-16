@@ -413,7 +413,9 @@ public class Reachability<A extends AbstractLattice<A>, D extends AbstractDomain
 	 *             be found
 	 */
 	public static Statement nodeOf(
-			Statement st) {
+			Statement statement) {
+		// calls resolved from calls of the cfg are not part of it
+		Statement st = sourceOf(statement);
 		Statement root = rootOf(st);
 		CFG cfg = st.getCFG();
 		if (cfg.containsNode(root))
@@ -440,6 +442,24 @@ public class Reachability<A extends AbstractLattice<A>, D extends AbstractDomain
 				return node;
 		}
 		return null;
+	}
+
+	/**
+	 * Yields the statement of the program that the given one originates from:
+	 * the call of the cfg a call has been resolved from (following the chain
+	 * of sources of calls, see {@link Call#getSource()}), or the statement
+	 * itself.
+	 *
+	 * @param st the statement
+	 *
+	 * @return the statement it originates from
+	 */
+	public static Statement sourceOf(
+			Statement st) {
+		Statement result = st;
+		while (result instanceof Call && ((Call) result).getSource() != null)
+			result = ((Call) result).getSource();
+		return result;
 	}
 
 	private static void cfgCallsOf(
