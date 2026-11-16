@@ -1,5 +1,16 @@
 package it.unive.lisa.triage.model;
 
+import it.unive.lisa.symbolic.heap.HeapDereference;
+import it.unive.lisa.symbolic.heap.HeapReference;
+import it.unive.lisa.symbolic.value.TernaryExpression;
+import it.unive.lisa.symbolic.value.BinaryExpression;
+import it.unive.lisa.symbolic.value.UnaryExpression;
+import java.util.Map;
+import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.IdentityHashMap;
+import java.util.HashSet;
+import java.util.ArrayList;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.program.SyntheticLocation;
 import it.unive.lisa.program.cfg.CodeLocation;
@@ -22,7 +33,15 @@ import java.util.function.Predicate;
  * number of cases is bounded: when it exceeds the bound, all cases are merged
  * into a single one that over-approximates them (see
  * {@link SymbolicCase#merge(SymbolicCase, SymbolicCase, FreshValueFactory, it.unive.lisa.program.cfg.CodeLocation)}).
- * Instances of this class are immutable.
+ * Instances of this class are immutable.<br>
+ * <br>
+ * The cases of a store are joined from the executions of different branches,
+ * that might compute different expressions (e.g., the alternatives of a
+ * dispatch on the types of a value): the store records the expressions that
+ * each case computed (see {@link #computing(SymbolicExpression)}), so that the
+ * operations over an expression computed by some cases only apply to them
+ * (see {@link #restrictTo(SymbolicExpression)}), instead of pairing every case
+ * with every expression computed by any of them.
  *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
@@ -39,13 +58,118 @@ public final class SymbolicStore {
 
 	private final int maxCases;
 
+	/**
+	 * The expressions computed by each case, if known: a case that is not a
+	 * key computed unknown expressions.
+	 */
+	private final Map<SymbolicCase, List<SymbolicExpression>> computed;
+
 	private SymbolicStore(
 			Set<SymbolicCase> cases,
 			FreshValueFactory factory,
 			int maxCases) {
+		this(cases, factory, maxCases, Collections.emptyMap());
+	}
+
+	private SymbolicStore(
+			Set<SymbolicCase> cases,
+			FreshValueFactory factory,
+			int maxCases,
+			Map<SymbolicCase, List<SymbolicExpression>> computed) {
 		this.cases = cases;
 		this.factory = factory;
 		this.maxCases = maxCases;
+		this.computed = computed;
+	}
+
+	/**
+	 * Yields the store where every case computed the given expression (that
+	 * is, the expression computed by the executions of this store).
+	 *
+	 * @param expression the expression
+	 *
+	 * @return the resulting store
+	 */
+	public SymbolicStore computing(
+			SymbolicExpression expression) {
+		Map<SymbolicCase, List<SymbolicExpression>> tags = new LinkedHashMap<>();
+		for (SymbolicCase c : cases)
+			tags.put(c, Collections.singletonList(expression));
+		return new SymbolicStore(cases, factory, maxCases, Collections.unmodifiableMap(tags));
+	}
+
+	/**
+	 * Yields the store made of the cases of this one that might have computed
+	 * the given expression, that is, an operation over the expression only
+	 * applies to them: if the expression contains (as itself, or as a
+	 * sub-expression) the very expression computed by some cases, only the
+	 * cases that computed it (or an expression equal to it), and the ones whose
+	 * computed expressions are unknown, are kept. Expressions not computed by
+	 * any case (e.g., new constants) keep all cases.
+	 *
+	 * @param expression the expression
+	 *
+	 * @return the resulting store
+	 */
+	public SymbolicStore restrictTo(
+			SymbolicExpression expression) {
+		if (computed.isEmpty())
+			return this;
+		// the computed expressions (by identity) that the expression contains
+		Set<SymbolicExpression> tags = Collections.newSetFromMap(new IdentityHashMap<>());
+		for (List<SymbolicExpression> exprs : computed.values())
+			tags.addAll(exprs);
+		List<SymbolicExpression> relevant = new ArrayList<>();
+		collect(expression, tags, relevant);
+		if (relevant.isEmpty())
+			return this;
+		Set<SymbolicCase> result = new LinkedHashSet<>();
+		Map<SymbolicCase, List<SymbolicExpression>> kept = new LinkedHashMap<>();
+		for (SymbolicCase c : cases) {
+			List<SymbolicExpression> exprs = computed.get(c);
+			if (exprs == null)
+				result.add(c);
+			else if (exprs.stream().anyMatch(relevant::contains)) {
+				result.add(c);
+				kept.put(c, exprs);
+			}
+		}
+		if (result.size() == cases.size())
+			return this;
+		return new SymbolicStore(Collections.unmodifiableSet(result), factory, maxCases,
+				Collections.unmodifiableMap(kept));
+	}
+
+	/**
+	 * Adds to the given list the sub-expressions of the given expression that
+	 * are (by identity) among the given ones.
+	 */
+	private static void collect(
+			SymbolicExpression e,
+			Set<SymbolicExpression> tags,
+			List<SymbolicExpression> relevant) {
+		if (e == null)
+			return;
+		if (tags.contains(e)) {
+			relevant.add(e);
+			return;
+		}
+		if (e instanceof UnaryExpression)
+			collect(((UnaryExpression) e).getExpression(), tags, relevant);
+		else if (e instanceof BinaryExpression) {
+			collect(((BinaryExpression) e).getLeft(), tags, relevant);
+			collect(((BinaryExpression) e).getRight(), tags, relevant);
+		} else if (e instanceof TernaryExpression) {
+			collect(((TernaryExpression) e).getLeft(), tags, relevant);
+			collect(((TernaryExpression) e).getMiddle(), tags, relevant);
+			collect(((TernaryExpression) e).getRight(), tags, relevant);
+		} else if (e instanceof AccessChild) {
+			collect(((AccessChild) e).getContainer(), tags, relevant);
+			collect(((AccessChild) e).getChild(), tags, relevant);
+		} else if (e instanceof HeapReference)
+			collect(((HeapReference) e).getExpression(), tags, relevant);
+		else if (e instanceof HeapDereference)
+			collect(((HeapDereference) e).getExpression(), tags, relevant);
 	}
 
 	/**
@@ -145,9 +269,39 @@ public final class SymbolicStore {
 	private SymbolicStore map(
 			Function<SymbolicCase, SymbolicCase> f) {
 		Set<SymbolicCase> result = new LinkedHashSet<>();
-		for (SymbolicCase c : cases)
-			result.add(f.apply(c));
-		return new SymbolicStore(Collections.unmodifiableSet(result), factory, maxCases);
+		// the expressions computed by each case are the ones of the cases it
+		// comes from (unknown if any of them is)
+		Map<SymbolicCase, List<SymbolicExpression>> tags = new LinkedHashMap<>();
+		Set<SymbolicCase> unknown = new HashSet<>();
+		for (SymbolicCase c : cases) {
+			SymbolicCase mapped = f.apply(c);
+			result.add(mapped);
+			tag(tags, unknown, mapped, computed.get(c));
+		}
+		tags.keySet().removeAll(unknown);
+		return new SymbolicStore(Collections.unmodifiableSet(result), factory, maxCases,
+				Collections.unmodifiableMap(tags));
+	}
+
+	private static void tag(
+			Map<SymbolicCase, List<SymbolicExpression>> tags,
+			Set<SymbolicCase> unknown,
+			SymbolicCase c,
+			List<SymbolicExpression> exprs) {
+		if (exprs == null) {
+			unknown.add(c);
+			return;
+		}
+		List<SymbolicExpression> previous = tags.get(c);
+		if (previous == null)
+			tags.put(c, exprs);
+		else {
+			List<SymbolicExpression> union = new ArrayList<>(previous);
+			for (SymbolicExpression e : exprs)
+				if (!union.contains(e))
+					union.add(e);
+			tags.put(c, Collections.unmodifiableList(union));
+		}
 	}
 
 	/**
@@ -309,7 +463,9 @@ public final class SymbolicStore {
 	public SymbolicStore scope(
 			ScopeToken token,
 			boolean push) {
-		return map(c -> c.scope(token, push));
+		// the computed expressions refer to the identifiers of the scope
+		SymbolicStore scoped = map(c -> c.scope(token, push));
+		return new SymbolicStore(scoped.cases, factory, maxCases);
 	}
 
 	/**
@@ -324,14 +480,33 @@ public final class SymbolicStore {
 			SymbolicStore other) {
 		Set<SymbolicCase> result = new LinkedHashSet<>(cases);
 		result.addAll(other.cases);
+		Map<SymbolicCase, List<SymbolicExpression>> tags = new LinkedHashMap<>();
+		Set<SymbolicCase> unknown = new HashSet<>();
+		for (SymbolicCase c : cases)
+			tag(tags, unknown, c, computed.get(c));
+		for (SymbolicCase c : other.cases)
+			tag(tags, unknown, c, other.computed.get(c));
 		if (result.size() > maxCases) {
 			Iterator<SymbolicCase> it = result.iterator();
 			SymbolicCase merged = it.next();
 			while (it.hasNext())
 				merged = SymbolicCase.merge(merged, it.next(), factory, SyntheticLocation.INSTANCE);
 			result = Collections.singleton(merged);
+			// the merged case computed any of the expressions of the cases
+			// (unknown if some are)
+			Map<SymbolicCase, List<SymbolicExpression>> all = new LinkedHashMap<>();
+			Set<SymbolicCase> none = new HashSet<>();
+			if (!unknown.isEmpty())
+				none.add(merged);
+			for (List<SymbolicExpression> exprs : tags.values())
+				tag(all, none, merged, exprs);
+			all.keySet().removeAll(none);
+			tags = all;
+			unknown = none;
 		}
-		return new SymbolicStore(Collections.unmodifiableSet(result), factory, maxCases);
+		tags.keySet().removeAll(unknown);
+		return new SymbolicStore(Collections.unmodifiableSet(result), factory, maxCases,
+				Collections.unmodifiableMap(tags));
 	}
 
 	/**

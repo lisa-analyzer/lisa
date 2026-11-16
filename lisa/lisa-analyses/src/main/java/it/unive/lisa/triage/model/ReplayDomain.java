@@ -94,7 +94,9 @@ public class ReplayDomain<A extends AbstractLattice<A>, D extends AbstractDomain
 		A inner = domain.assign(state.getInner(), id, expression, context, pp);
 		if (inner.isBottom())
 			return state.withInner(inner);
-		return new ReplayState<>(inner, state.getStore().assign(id, expression, pp));
+		// only the cases that computed the expression assign it (see
+		// SymbolicStore#restrictTo)
+		return new ReplayState<>(inner, state.getStore().restrictTo(expression).assign(id, expression, pp));
 	}
 
 	@Override
@@ -105,14 +107,23 @@ public class ReplayDomain<A extends AbstractLattice<A>, D extends AbstractDomain
 			ProgramPoint pp)
 			throws SemanticException {
 		A inner = domain.smallStepSemantics(state.getInner(), expression, context, pp);
-		if (expression instanceof MemoryAllocation && !inner.isBottom())
+		if (inner.isBottom())
+			return state.withInner(inner);
+		// only the cases that computed the operands of the expression compute
+		// it (see SymbolicStore#restrictTo), and they all compute it (reads
+		// of identifiers are not recorded, as identifiers might be read
+		// again independently of their computation)
+		SymbolicStore store = state.getStore().restrictTo(expression);
+		if (!(expression instanceof Identifier))
+			store = store.computing(expression);
+		if (expression instanceof MemoryAllocation)
 			// the allocation yields a new reference
-			return new ReplayState<>(inner, state.getStore().allocate((MemoryAllocation) expression, pp));
-		if (expression instanceof PushAny && !inner.isBottom())
+			return new ReplayState<>(inner, store.allocate((MemoryAllocation) expression, pp));
+		if (expression instanceof PushAny)
 			// the unknown value is introduced here (e.g., as the result of a
 			// call to code that is not part of the program)
-			return new ReplayState<>(inner, state.getStore().introduce((PushAny) expression, pp));
-		return state.withInner(inner);
+			return new ReplayState<>(inner, store.introduce((PushAny) expression, pp));
+		return new ReplayState<>(inner, store);
 	}
 
 	@Override
@@ -126,7 +137,9 @@ public class ReplayDomain<A extends AbstractLattice<A>, D extends AbstractDomain
 		A inner = domain.assume(state.getInner(), expression, context, src, dest);
 		if (inner.isBottom())
 			return state.withInner(inner);
-		return new ReplayState<>(inner, state.getStore().assume(expression, src));
+		// only the cases that computed the condition assume it (see
+		// SymbolicStore#restrictTo)
+		return new ReplayState<>(inner, state.getStore().restrictTo(expression).assume(expression, src));
 	}
 
 	@Override
