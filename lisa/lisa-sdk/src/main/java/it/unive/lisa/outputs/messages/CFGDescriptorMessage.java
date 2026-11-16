@@ -1,6 +1,8 @@
 package it.unive.lisa.outputs.messages;
 
+import it.unive.lisa.checks.verification.ReproducingInput;
 import it.unive.lisa.program.cfg.CodeMemberDescriptor;
+import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -27,14 +29,35 @@ public class CFGDescriptorMessage
 	public CFGDescriptorMessage(
 			CodeMemberDescriptor descriptor,
 			String message) {
-		super(descriptor.getLocation(), message);
+		this(descriptor, message, false, null);
+	}
+
+	/**
+	 * Builds the message.
+	 * 
+	 * @param descriptor        the descriptor where this message was reported
+	 *                              on
+	 * @param message           the message of this message
+	 * @param definite          whether or not this message is definite, that
+	 *                              is, if the reported behavior happens in at
+	 *                              least one execution of the program
+	 * @param reproducingInputs the inputs reproducing the behavior reported by
+	 *                              this message (can be {@code null} if no
+	 *                              inputs are known)
+	 */
+	public CFGDescriptorMessage(
+			CodeMemberDescriptor descriptor,
+			String message,
+			boolean definite,
+			List<ReproducingInput> reproducingInputs) {
+		super(descriptor.getLocation(), message, definite, reproducingInputs);
 		this.descriptor = descriptor;
 	}
 
 	/**
-	 * Yields the cfg where this message was reported on.
-	 * 
-	 * @return the column, or {@code -1}
+	 * Yields the descriptor where this message was reported on.
+	 *
+	 * @return the descriptor
 	 */
 	public CodeMemberDescriptor getDescriptor() {
 		return descriptor;
@@ -84,6 +107,11 @@ public class CFGDescriptorMessage
 	}
 
 	@Override
+	public String getCFGSignature() {
+		return descriptor.getFullSignatureWithParNames();
+	}
+
+	@Override
 	public String getTag() {
 		return "DESCRIPTOR";
 	}
@@ -92,7 +120,7 @@ public class CFGDescriptorMessage
 	public String toString() {
 		return getLocationWithBrackets()
 				+ " on '"
-				+ descriptor.getFullSignatureWithParNames()
+				+ getCFGSignature()
 				+ "': "
 				+ getTaggedMessage();
 	}

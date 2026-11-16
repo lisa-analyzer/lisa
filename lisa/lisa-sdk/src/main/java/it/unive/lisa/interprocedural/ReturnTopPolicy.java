@@ -13,10 +13,10 @@ import it.unive.lisa.symbolic.value.Skip;
 
 /**
  * An {@link OpenCallPolicy}, where the post state is exactly the entry state,
- * with the only difference of having a the call's meta variable assigned to top
+ * with the only difference of having the call's meta variable assigned to top
  * <i>only</i> if the call returns a value. This variable, that is also stored
- * as computed expression, represent the unknown result of the call, if any.
- * 
+ * as computed expression, represents the unknown result of the call, if any.
+ *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public class ReturnTopPolicy
@@ -36,15 +36,16 @@ public class ReturnTopPolicy
 			OpenCall call,
 			AnalysisState<A> entryState,
 			Analysis<A, D> analysis,
+			ScopeId<?> context,
 			ExpressionSet[] params)
 			throws SemanticException {
 
 		if (call.getStaticType().isVoidType())
-			return analysis.smallStepSemantics(entryState, new Skip(call.getLocation()), call);
+			return analysis.smallStepSemantics(entryState, new Skip(call.getLocation()), context, call);
 		else {
 			PushAny pushany = new PushAny(call.getStaticType(), call.getLocation());
 			Identifier var = call.getMetaVariable();
-			return analysis.assign(entryState, var, pushany, call);
+			return analysis.assign(entryState, var, pushany, context, call);
 		}
 	}
 

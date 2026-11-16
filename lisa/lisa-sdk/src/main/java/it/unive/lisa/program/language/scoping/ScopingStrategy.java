@@ -6,6 +6,7 @@ import it.unive.lisa.analysis.Analysis;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.interprocedural.ScopeId;
 import it.unive.lisa.lattices.ExpressionSet;
 import it.unive.lisa.program.cfg.statement.call.CFGCall;
 import org.apache.commons.lang3.tuple.Pair;
@@ -27,9 +28,9 @@ public interface ScopingStrategy {
 	 * this method corresponds to the given {@code state} modified by (i)
 	 * pushing the scope that is introduced when the call happens (and that can
 	 * be popped with
-	 * {@link #unscope(CFGCall, ScopeToken, AnalysisState, Analysis)}), and (ii)
-	 * generating the expressions for the actual parameters by pushing the same
-	 * scope to the ones of the actual parameters, starting from
+	 * {@link #unscope(CFGCall, ScopeToken, AnalysisState, Analysis, ScopeId)}),
+	 * and (ii) generating the expressions for the actual parameters by pushing
+	 * the same scope to the ones of the actual parameters, starting from
 	 * {@code actuals}.
 	 * 
 	 * @param <A>      the kind of {@link AbstractLattice} produced by the
@@ -40,6 +41,7 @@ public interface ScopingStrategy {
 	 * @param scope    the scope corresponding to the call
 	 * @param state    the exit state of the call's target
 	 * @param analysis the analysis that is being run
+	 * @param context  the interprocedural context of the caller of {@code call}
 	 * @param actuals  the expressions representing the actual parameters at the
 	 *                     program point of the call
 	 * 
@@ -53,6 +55,7 @@ public interface ScopingStrategy {
 			ScopeToken scope,
 			AnalysisState<A> state,
 			Analysis<A, D> analysis,
+			ScopeId<?> context,
 			ExpressionSet[] actuals)
 			throws SemanticException;
 
@@ -61,7 +64,7 @@ public interface ScopingStrategy {
 	 * valid post-state of {@code call}. Specifically, the state returned by
 	 * this method corresponds to the parameter {@code state} modified by (i)
 	 * popping the scope introduced before the call happened (see
-	 * {@link #scope(CFGCall, ScopeToken, AnalysisState, Analysis, ExpressionSet[])}),
+	 * {@link #scope(CFGCall, ScopeToken, AnalysisState, Analysis, ScopeId, ExpressionSet[])}),
 	 * and (ii) storing the returned value on the meta-variable left on the
 	 * stack, if any.
 	 * 
@@ -74,6 +77,7 @@ public interface ScopingStrategy {
 	 * @param scope    the scope corresponding to the call
 	 * @param state    the exit state of the call's target
 	 * @param analysis the analysis that is being run
+	 * @param context  the interprocedural context of the caller of {@code call}
 	 * 
 	 * @return the state that can be returned by the call
 	 * 
@@ -83,7 +87,8 @@ public interface ScopingStrategy {
 			CFGCall call,
 			ScopeToken scope,
 			AnalysisState<A> state,
-			Analysis<A, D> analysis)
+			Analysis<A, D> analysis,
+			ScopeId<?> context)
 			throws SemanticException;
 
 }

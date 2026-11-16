@@ -7,9 +7,11 @@ import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
 
 /**
- * A lattice structure for integer constants, that is, elements of the integer
- * set Z extended with a top and bottom element.
- * 
+ * The lattice structure used by
+ * {@link it.unive.lisa.analysis.numeric.IntegerConstantPropagation}: elements
+ * of the integer set Z, extended with a top (unknown value) and a bottom
+ * (erroneous value) element.
+ *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public class IntegerConstant

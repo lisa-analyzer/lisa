@@ -9,8 +9,15 @@ import it.unive.lisa.util.representation.StructuredRepresentation;
 /**
  * An abstract constant value, that can either represent a specific constant
  * (e.g., an integer or a string) or the unknown constant (i.e., the top
- * element).
- * 
+ * element). This is the lattice used by
+ * {@link it.unive.lisa.analysis.ConstantValuePropagation}: the bottom and top
+ * elements are the usual ones for a flat lattice built over an arbitrary
+ * concrete domain (here, {@link Object}), while
+ * {@link #lessOrEqualAux(ConstantValue)} and {@link #lubAux(ConstantValue)}
+ * always behave as if the two operands were different constants, since equal
+ * constants are already handled by {@link #equals(Object)} before reaching
+ * them.
+ *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public class ConstantValue

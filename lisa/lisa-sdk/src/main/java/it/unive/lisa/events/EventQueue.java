@@ -57,7 +57,8 @@ public final class EventQueue
 		this.asyncQueue = new LinkedBlockingQueue<>();
 
 		this.asyncThread = new Thread(this::asyncLoop, "event-async-dispatcher");
-		this.asyncThread.start();
+		if (this.asyncListeners.length > 0)
+			this.asyncThread.start();
 	}
 
 	/**

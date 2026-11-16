@@ -6,8 +6,10 @@ import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
 
 /**
- * A simple taint lattice with two levels: tainted and clean.
- * 
+ * A simple taint lattice with two levels: tainted and clean. This is the
+ * lattice used by
+ * {@link it.unive.lisa.analysis.informationFlow.TwoLevelsTaint}.
+ *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public class SimpleTaint

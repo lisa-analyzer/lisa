@@ -7,6 +7,8 @@ import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.ProgramState;
 import it.unive.lisa.checks.semantic.SemanticCheck;
 import it.unive.lisa.checks.syntactic.SyntacticCheck;
+import it.unive.lisa.checks.verification.Violation;
+import it.unive.lisa.checks.verification.WarningVerifier;
 import it.unive.lisa.events.EventListener;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.interprocedural.OpenCallPolicy;
@@ -106,6 +108,17 @@ public class LiSAConfiguration
 	 * {@code null}.
 	 */
 	public AbstractDomain<?> analysis;
+
+	/**
+	 * The {@link WarningVerifier} instance used to verify the
+	 * {@link Violation}s reported by the warnings issued by the
+	 * {@link SemanticCheck}s, once all checks have been executed: confirmed
+	 * warnings become definite (with their reproducing inputs), and refuted
+	 * warnings are marked as refuted. If no value is set for this field, no
+	 * verification takes place and all warnings are possible. Defaults to
+	 * {@code null}.
+	 */
+	public WarningVerifier<?, ?> warningVerifier;
 
 	/**
 	 * The collection of {@link LiSAOutput}s to produce at the end of the
@@ -268,23 +281,23 @@ public class LiSAConfiguration
 	@Override
 	public String toString() {
 		StringBuilder res = new StringBuilder();
-		res.append("LiSA configuration:");
 		try {
 			for (Field field : LiSAConfiguration.class.getFields())
 				if (!Modifier.isStatic(field.getModifiers())
 						// we skip the semantic configuration
 						&& !AbstractDomain.class.isAssignableFrom(field.getType())
 						&& !CallGraph.class.isAssignableFrom(field.getType())
-						&& !InterproceduralAnalysis.class.isAssignableFrom(field.getType())) {
+						&& !InterproceduralAnalysis.class.isAssignableFrom(field.getType())
+						&& !WarningVerifier.class.isAssignableFrom(field.getType())) {
 					Object value = field.get(this);
 
-					res.append("\n  ").append(field.getName());
+					res.append("\n").append(field.getName());
 
 					if (Collection.class.isAssignableFrom(field.getType())) {
 						Collection<?> coll = (Collection<?>) value;
 						res.append(" (").append(coll.size()).append(")").append((coll.isEmpty() ? "" : ":"));
 						for (Object element : coll)
-							res.append("\n    ").append(element.getClass().getSimpleName());
+							res.append("\n  ").append(element.getClass().getSimpleName());
 					} else if (WorkingSet.class.isAssignableFrom(field.getType())
 							|| OpenCallPolicy.class.isAssignableFrom(field.getType())
 							|| Fixpoint.class.isAssignableFrom(field.getType()))
@@ -298,13 +311,14 @@ public class LiSAConfiguration
 		} catch (IllegalArgumentException | IllegalAccessException e) {
 			throw new IllegalStateException("Cannot access one of this class' public fields", e);
 		}
-		return res.toString();
+		return res.toString().strip();
 	}
 
 	/**
 	 * Converts this configuration to a property bag, that is, a map from keys
 	 * (fields of this class) to values (their values). {@link #analysis},
-	 * {@link #callGraph}, and {@link #interproceduralAnalysis} are omitted.
+	 * {@link #callGraph}, {@link #interproceduralAnalysis}, and
+	 * {@link #warningVerifier} are omitted.
 	 * 
 	 * @return the property bag
 	 */
@@ -316,7 +330,8 @@ public class LiSAConfiguration
 						// we skip the semantic configuration
 						&& !AbstractDomain.class.isAssignableFrom(field.getType())
 						&& !CallGraph.class.isAssignableFrom(field.getType())
-						&& !InterproceduralAnalysis.class.isAssignableFrom(field.getType())) {
+						&& !InterproceduralAnalysis.class.isAssignableFrom(field.getType())
+						&& !WarningVerifier.class.isAssignableFrom(field.getType())) {
 					Object value = field.get(this);
 
 					String key = field.getName();

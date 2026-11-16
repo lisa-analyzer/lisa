@@ -75,6 +75,16 @@ public class NativeCFG
 	}
 
 	/**
+	 * Yields the class of the construct that this native cfg is rewritten into
+	 * (see {@link #rewrite(Statement, Expression...)}).
+	 * 
+	 * @return the class of the construct
+	 */
+	public Class<? extends NaryExpression> getConstruct() {
+		return construct;
+	}
+
+	/**
 	 * Produces an {@link NaryExpression} providing the semantics of this native
 	 * cfg. Such native call can be used when a call to this native cfg is found
 	 * within the program to analyze.

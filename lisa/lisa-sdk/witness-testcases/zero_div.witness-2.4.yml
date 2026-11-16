@@ -1,0 +1,43 @@
+# This file is part of the SV-Witnesses repository as regression test:
+# https://gitlab.com/sosy-lab/benchmarking/sv-witnesses
+#
+# SPDX-FileCopyrightText: 2026 The SV-Witnesses Community
+#
+# SPDX-License-Identifier: Apache-2.0
+---
+- entry_type: "violation_sequence"
+  metadata:
+    creation_time: "2026-10-15T11:53:26Z"
+    format_version: "2.4"
+    producer:
+      name: "Human"
+      version: "42"
+      configuration: "fall26"
+    task:
+      input_files:
+        - "./zero_div.py"
+      input_file_hashes:
+        "./zero_div.py": "2eb4aa89b423df1459124280dcca59663b45d4406738a4d66ed2a3783a4c49a6"
+      specification: CHECK( init(main()), ! uncaught(ZeroDivisionError))
+      language: "Python"
+    uuid: "be742527-8e82-4418-9ba2-6cbb857e25a7"
+  content:
+    - segment:
+        - waypoint:
+            type: "function_return"
+            action: "follow"
+            constraint:
+              value: "\\result == 0"
+              format: "ext_python_expression"
+            location:
+              file_name: "./zero_div.py"
+              line: 17
+              column: 8
+    - segment:
+        - waypoint:
+            type: "target"
+            action: "follow"
+            location:
+              file_name: "./zero_div.py"
+              line: 20
+              column: 15

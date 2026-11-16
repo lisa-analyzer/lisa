@@ -1,8 +1,10 @@
 package it.unive.lisa.outputs.messages;
 
+import it.unive.lisa.checks.verification.ReproducingInput;
 import it.unive.lisa.program.ClassUnit;
 import it.unive.lisa.program.SyntheticLocation;
 import it.unive.lisa.program.Unit;
+import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -28,7 +30,30 @@ public class UnitMessage
 	public UnitMessage(
 			Unit unit,
 			String message) {
-		super(unit instanceof ClassUnit ? ((ClassUnit) unit).getLocation() : SyntheticLocation.INSTANCE, message);
+		this(unit, message, false, null);
+	}
+
+	/**
+	 * Builds the message.
+	 * 
+	 * @param unit              the unit where this message was reported on
+	 * @param message           the message of this message
+	 * @param definite          whether or not this message is definite, that
+	 *                              is, if the reported behavior happens in at
+	 *                              least one execution of the program
+	 * @param reproducingInputs the inputs reproducing the behavior reported by
+	 *                              this message (can be {@code null} if no
+	 *                              inputs are known)
+	 */
+	public UnitMessage(
+			Unit unit,
+			String message,
+			boolean definite,
+			List<ReproducingInput> reproducingInputs) {
+		super(unit instanceof ClassUnit ? ((ClassUnit) unit).getLocation() : SyntheticLocation.INSTANCE,
+				message,
+				definite,
+				reproducingInputs);
 		this.unit = unit;
 	}
 
@@ -85,13 +110,18 @@ public class UnitMessage
 	}
 
 	@Override
+	public String getTargetText() {
+		return unit.getName();
+	}
+
+	@Override
 	public String getTag() {
 		return "UNIT";
 	}
 
 	@Override
 	public String toString() {
-		return getLocationWithBrackets() + " on '" + unit.getName() + "': " + getTaggedMessage();
+		return getLocationWithBrackets() + " on '" + getTargetText() + "': " + getTaggedMessage();
 	}
 
 }

@@ -4,6 +4,7 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.heap.BaseHeapDomain;
 import it.unive.lisa.analysis.heap.HeapLattice;
+import it.unive.lisa.interprocedural.ScopeId;
 import it.unive.lisa.lattices.ExpressionSet;
 import it.unive.lisa.lattices.FunctionalLattice;
 import it.unive.lisa.lattices.Satisfiability;
@@ -23,6 +24,7 @@ import it.unive.lisa.symbolic.heap.HeapReference;
 import it.unive.lisa.symbolic.heap.MemoryAllocation;
 import it.unive.lisa.symbolic.heap.NullConstant;
 import it.unive.lisa.symbolic.value.BinaryExpression;
+import it.unive.lisa.symbolic.value.GlobalVariable;
 import it.unive.lisa.symbolic.value.HeapLocation;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.MemoryPointer;
@@ -41,6 +43,7 @@ import it.unive.lisa.util.collections.workset.WorkingSet;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -48,18 +51,91 @@ import org.apache.commons.lang3.tuple.Pair;
  * A base class for heap analyses based on the allocation sites of the objects
  * and arrays they track, namely the position of the code where heap locations
  * are generated. All heap locations that are generated at the same allocation
- * sites are abstracted into a single unique heap identifier. Concrete instances
- * have control over their field-sensitivity.
- * 
+ * sites are abstracted into a single unique heap identifier, distinguishing
+ * strong updates (when at most one instance can be associated with an
+ * allocation site) from weak ones (when the site might represent more than one
+ * runtime object, e.g., because it lies inside a loop or a recursive call).
+ * Program identifiers are tracked as points-to relations towards these
+ * allocation sites through the {@code L} lattice, and assignments between
+ * pointers are resolved by aliasing or by shallow-copying the pointed-to site,
+ * depending on whether the right-hand side is itself an allocation. Concrete
+ * subclasses have control over their field-sensitivity: this class follows the
+ * field-insensitive construction of X. Rival and K. Yi, "Introduction to Static
+ * Analysis: An Abstract Interpretation Perspective", Section 8.3.4.<br>
+ * <br>
+ * Instances of this class can optionally be context-sensitive (see
+ * {@link #isContextSensitive()}): in this case, allocation sites are also
+ * qualified by the interprocedural context (see {@link ScopeId}) where the
+ * allocation happens, as provided by {@link SemanticOracle#getContext()}. This
+ * corresponds to heap cloning: objects allocated at the same program point but
+ * in different calling contexts are abstracted by different allocation sites.
+ * This only adds precision if the interprocedural analysis distinguishes
+ * between contexts (e.g., with a context-sensitive one).
+ *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
- * 
+ *
  * @param <L> the type {@link FunctionalLattice} used to track points-to
  *                information for the heap locations
+ *
+ * @see <a href="https://mitpress.mit.edu/books/introduction-static-analysis">
+ *          Xavier Rival, Kwangkeun Yi. Introduction to Static Analysis: An
+ *          Abstract Interpretation Perspective. MIT Press, 2020.</a>
  */
 public abstract class AllocationSiteBasedAnalysis<
 		L extends FunctionalLattice<L, Identifier, AllocationSites> & HeapLattice<L>>
 		implements
 		BaseHeapDomain<L> {
+
+	private final boolean contextSensitive;
+
+	/**
+	 * Builds a context-insensitive instance of this analysis.
+	 */
+	protected AllocationSiteBasedAnalysis() {
+		this(false);
+	}
+
+	/**
+	 * Builds an instance of this analysis.
+	 * 
+	 * @param contextSensitive whether or not allocation sites should be
+	 *                             qualified by the interprocedural context
+	 *                             where the allocation happens
+	 */
+	protected AllocationSiteBasedAnalysis(
+			boolean contextSensitive) {
+		this.contextSensitive = contextSensitive;
+	}
+
+	/**
+	 * Yields whether or not this analysis is context-sensitive, that is, if
+	 * allocation sites are qualified by the interprocedural context where the
+	 * allocation happens.
+	 * 
+	 * @return whether or not this analysis is context-sensitive
+	 */
+	public boolean isContextSensitive() {
+		return contextSensitive;
+	}
+
+	/**
+	 * Yields the interprocedural context that should qualify the allocation
+	 * sites created while evaluating an expression, according to the given
+	 * oracle. This is {@code null} if this analysis is not context-sensitive,
+	 * or if the context is a starting one (see {@link ScopeId#isStartingId()}),
+	 * as these do not qualify allocation sites.
+	 * 
+	 * @param oracle the oracle of the current evaluation
+	 * 
+	 * @return the context to use for new allocation sites (can be {@code null})
+	 */
+	protected ScopeId<?> contextOf(
+			SemanticOracle oracle) {
+		if (!contextSensitive || oracle == null)
+			return null;
+		ScopeId<?> context = oracle.getContext();
+		return context == null || context.isStartingId() ? null : context;
+	}
 
 	@Override
 	public Pair<L, List<HeapReplacement>> assign(
@@ -89,7 +165,7 @@ public abstract class AllocationSiteBasedAnalysis<
 			rhsExps = new ExpressionSet(expression);
 
 		for (SymbolicExpression rhs : rhsExps)
-			result = result.lub(process(id, pp, oracle, sss.getLeft(), replacements, rhs, rhsIsReceiver));
+			result = result.lub(process(sss.getLeft(), id, rhs, pp, oracle, replacements, rhsIsReceiver));
 
 		if (!id.isWeak() && state.knowsIdentifier(id)) {
 			// we might make some location unreachable,
@@ -102,13 +178,30 @@ public abstract class AllocationSiteBasedAnalysis<
 		return Pair.of(result, replacements);
 	}
 
-	private L process(
+	/**
+	 * Processes the assignment of {@code rhs} to {@code id} in the given state,
+	 * updating the list of heap replacements as needed.
+	 *
+	 * @param state         the state before the assignment
+	 * @param id            the identifier being assigned to
+	 * @param rhs           the right-hand side of the assignment
+	 * @param pp            the program point where this assignment is applied
+	 * @param oracle        the semantic oracle
+	 * @param replacements  the list of heap replacements to be updated
+	 * @param rhsIsReceiver whether the right-hand side is an instrumented
+	 *                          receiver
+	 * 
+	 * @return a new state where {@code id} is updated with {@code rhs}
+	 * 
+	 * @throws SemanticException if something goes wrong during the computation
+	 */
+	protected L process(
+			L state,
 			Identifier id,
+			SymbolicExpression rhs,
 			ProgramPoint pp,
 			SemanticOracle oracle,
-			L sss,
 			List<HeapReplacement> replacements,
-			SymbolicExpression rhs,
 			boolean rhsIsReceiver)
 			throws SemanticException {
 		if (rhs instanceof MemoryPointer) {
@@ -120,7 +213,7 @@ public abstract class AllocationSiteBasedAnalysis<
 				// we have x = y, where both are pointers
 				// we perform *x = *y so that x and y become aliases
 				Identifier lhs_ref = ((MemoryPointer) id).getReferencedLocation();
-				return store(sss, lhs_ref, rhs_ref);
+				return store(state, lhs_ref, rhs_ref);
 			} else if (rhs_ref instanceof StackAllocationSite
 					// if we are allocating, we just perform normal aliasing
 					// as there is nothing to copy
@@ -130,16 +223,16 @@ public abstract class AllocationSiteBasedAnalysis<
 					// initialized (eg with a constructor call) so we
 					// perform normal aliasing as there is nothing to copy
 					&& !rhsIsReceiver
-					&& !getAllocatedAt(sss, ((StackAllocationSite) rhs_ref).getLocationName()).isEmpty())
+					&& !getAllocatedAt(state, rhs_ref.getLocationName(), rhs_ref.getContext()).isEmpty())
 				// for stack elements, assignment works as a shallow copy
 				// since there are no pointers to alias
-				return shallowCopy(sss, id, (StackAllocationSite) rhs_ref, replacements);
+				return shallowCopy(state, id, (StackAllocationSite) rhs_ref, contextOf(oracle), replacements);
 			else {
 				// aliasing: id and star_y points to the same object
-				return store(sss, id, rhs_ref);
+				return store(state, id, rhs_ref);
 			}
 		} else
-			return sss;
+			return state;
 	}
 
 	/**
@@ -178,22 +271,27 @@ public abstract class AllocationSiteBasedAnalysis<
 	}
 
 	/**
-	 * Yields an allocation site name {@code id} if it is tracked by this
-	 * domain, {@code null} otherwise.
+	 * Yields the allocation sites tracked by this domain that have been
+	 * allocated at the given location and in the given context.
 	 * 
 	 * @param state    the current state of the analysis
-	 * @param location allocation site's name to be searched
+	 * @param location allocation site's location name to be searched
+	 * @param context  the interprocedural context of the allocation sites to be
+	 *                     searched, as returned by
+	 *                     {@link AllocationSite#getContext()} (can be
+	 *                     {@code null})
 	 * 
-	 * @return an allocation site name {@code id} if it is tracked by this
-	 *             domain, {@code null} otherwise
+	 * @return the allocation sites allocated at the given location and in the
+	 *             given context (possibly empty)
 	 */
 	protected Set<AllocationSite> getAllocatedAt(
 			L state,
-			String location) {
+			String location,
+			ScopeId<?> context) {
 		Set<AllocationSite> sites = new HashSet<>();
 		for (AllocationSites set : state.getValues())
 			for (AllocationSite site : set)
-				if (site.getLocationName().equals(location))
+				if (site.getLocationName().equals(location) && Objects.equals(site.getContext(), context))
 					sites.add(site);
 
 		return sites;
@@ -207,6 +305,9 @@ public abstract class AllocationSiteBasedAnalysis<
 	 * @param state        the current state of the analysis
 	 * @param id           the identifier to be updated
 	 * @param site         the allocation site to be assigned
+	 * @param context      the interprocedural context where the copy happens,
+	 *                         that will qualify the clone of {@code site} (can
+	 *                         be {@code null})
 	 * @param replacements the list of replacements to be updated
 	 * 
 	 * @return the point-based heap instance where {@code id} is updated with
@@ -218,6 +319,7 @@ public abstract class AllocationSiteBasedAnalysis<
 			L state,
 			Identifier id,
 			StackAllocationSite site,
+			ScopeId<?> context,
 			List<HeapReplacement> replacements)
 			throws SemanticException {
 		// no aliasing: star_y must be cloned and the clone must
@@ -225,6 +327,7 @@ public abstract class AllocationSiteBasedAnalysis<
 		StackAllocationSite clone = new StackAllocationSite(
 				site.getStaticType(),
 				id.getCodeLocation().toString(),
+				context,
 				site.isWeak(),
 				id.getCodeLocation());
 
@@ -414,16 +517,20 @@ public abstract class AllocationSiteBasedAnalysis<
 				MemoryPointer pid = (MemoryPointer) rec;
 				AllocationSite site = (AllocationSite) pid.getReferencedLocation();
 				AllocationSite e;
+				// the child belongs to the same object of the receiver, so it
+				// is qualified by the receiver's context
 				if (site instanceof StackAllocationSite)
 					e = new StackAllocationSite(
 							expression.getStaticType(),
 							site.getLocationName(),
+							site.getContext(),
 							true,
 							expression.getCodeLocation());
 				else
 					e = new HeapAllocationSite(
 							expression.getStaticType(),
 							site.getLocationName(),
+							site.getContext(),
 							true,
 							expression.getCodeLocation());
 
@@ -449,16 +556,19 @@ public abstract class AllocationSiteBasedAnalysis<
 			SemanticOracle oracle)
 			throws SemanticException {
 		AllocationSite id;
+		ScopeId<?> context = contextOf(oracle);
 		if (expression.isStackAllocation())
 			id = new StackAllocationSite(
 					expression.getStaticType(),
 					expression.getCodeLocation().getCodeLocation(),
+					context,
 					true,
 					expression.getCodeLocation());
 		else
 			id = new HeapAllocationSite(
 					expression.getStaticType(),
 					expression.getCodeLocation().getCodeLocation(),
+					context,
 					true,
 					expression.getCodeLocation());
 		id.setAllocation(true);
@@ -535,9 +645,9 @@ public abstract class AllocationSiteBasedAnalysis<
 				Identifier id = (Identifier) ref;
 				if (state.getKeys().contains(id))
 					result.addAll(resolveIdentifier(state, id, pp));
-				else if (id instanceof Variable) {
-					// this is a variable from the program that we know
-					// nothing about
+				else if (id instanceof Variable || id instanceof GlobalVariable) {
+					// this is a variable (or a global variable) from the
+					// program that we know nothing about
 					CodeLocation loc = expression.getCodeLocation();
 					AllocationSite site;
 					if (id.getStaticType().isPointerType())
@@ -664,7 +774,7 @@ public abstract class AllocationSiteBasedAnalysis<
 		ExpressionSet targets = rewrite(state, y, pp, oracle);
 
 		while (!ws.isEmpty()) {
-			SymbolicExpression current = ws.peek();
+			SymbolicExpression current = ws.pop();
 			if (targets.elements().contains(current))
 				return Satisfiability.SATISFIED;
 

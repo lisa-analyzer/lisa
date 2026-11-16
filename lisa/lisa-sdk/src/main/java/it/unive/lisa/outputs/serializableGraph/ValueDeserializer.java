@@ -52,7 +52,7 @@ public class ValueDeserializer
 		JsonNode props = node.get(ValueSerializer.LISA_PROPERTIES_FIELD);
 		SortedMap<String, String> properties = new TreeMap<>();
 		if (props != null) {
-			Iterator<Entry<String, JsonNode>> fields = props.fields();
+			Iterator<Entry<String, JsonNode>> fields = props.properties().iterator();
 			while (fields.hasNext()) {
 				Entry<String, JsonNode> field = fields.next();
 				properties.put(field.getKey(), field.getValue().asText());
@@ -73,7 +73,7 @@ public class ValueDeserializer
 				}
 				return new SerializableArray(properties, list);
 			} else if (str == null && arr == null && obj != null) {
-				Iterator<Entry<String, JsonNode>> objFields = obj.fields();
+				Iterator<Entry<String, JsonNode>> objFields = obj.properties().iterator();
 				SortedMap<String, SerializableValue> map = new TreeMap<>();
 				while (objFields.hasNext()) {
 					Entry<String, JsonNode> objField = objFields.next();
@@ -95,7 +95,7 @@ public class ValueDeserializer
 				}
 				return new SerializableArray(properties, list);
 			case OBJECT:
-				Iterator<Entry<String, JsonNode>> objFields = node.fields();
+				Iterator<Entry<String, JsonNode>> objFields = node.properties().iterator();
 				SortedMap<String, SerializableValue> map = new TreeMap<>();
 				while (objFields.hasNext()) {
 					Entry<String, JsonNode> objField = objFields.next();

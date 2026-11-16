@@ -1,8 +1,8 @@
 package it.unive.lisa.interprocedural.context;
 
 import it.unive.lisa.analysis.AbstractLattice;
-import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.interprocedural.ScopeId;
+import it.unive.lisa.program.cfg.fixpoints.CompoundState;
 import it.unive.lisa.program.cfg.statement.call.CFGCall;
 import it.unive.lisa.util.collections.CollectionUtilities;
 import java.util.ArrayList;
@@ -10,12 +10,16 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * A context sensitive token representing the last {@code k} elements of the
- * call chain, with {@code k} being specified in the singleton creation
- * ({@link #create(int)}).
- * 
+ * A call-string-based context sensitivity token (see
+ * {@link ContextBasedAnalysis}), representing the last {@code k} elements of
+ * the call chain that led to the current call, with {@code k} being specified
+ * when the starting token is created ({@link #create(int)}). {@code k = 0}
+ * yields a context-insensitive token (the call chain is never tracked), while
+ * {@code k < 0} keeps the whole call chain, trading precision for the size of
+ * the state space explored by the analysis.
+ *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
- * 
+ *
  * @param <A> the type of {@link AbstractLattice} handled by the analysis
  */
 public class KDepthToken<A extends AbstractLattice<A>>
@@ -26,10 +30,14 @@ public class KDepthToken<A extends AbstractLattice<A>>
 
 	private final int k;
 
+	private final String hash;
+
 	private KDepthToken(
 			int k) {
 		this.k = k;
 		this.calls = Collections.emptyList();
+		// k is ignored by equality, so the hash only depends on the calls
+		this.hash = ScopeId.computeHash(toString());
 	}
 
 	private KDepthToken(
@@ -41,6 +49,7 @@ public class KDepthToken<A extends AbstractLattice<A>>
 		if (k == 0) {
 			// k = 0 -> insensitive
 			this.calls = source.calls;
+			this.hash = source.hash;
 			return;
 		}
 
@@ -56,6 +65,7 @@ public class KDepthToken<A extends AbstractLattice<A>>
 			source.calls.stream().skip(oldlen - k + 1).forEach(this.calls::add);
 			this.calls.add(newToken);
 		}
+		this.hash = ScopeId.computeHash(toString());
 	}
 
 	/**
@@ -112,8 +122,7 @@ public class KDepthToken<A extends AbstractLattice<A>>
 			for (CFGCall call : calls)
 				// we use the hashcode of the location as the hashcode of the
 				// call is based on the ones of its targets, and a CFG hashcode
-				// is not consistent between executions - this is a problem as
-				// this object's hashcode is used as suffix in some filenames
+				// is not consistent between executions
 				result = prime * result + call.getLocation().hashCode();
 		return result;
 	}
@@ -129,9 +138,14 @@ public class KDepthToken<A extends AbstractLattice<A>>
 	}
 
 	@Override
+	public String getHash() {
+		return hash;
+	}
+
+	@Override
 	public KDepthToken<A> push(
 			CFGCall c,
-			AnalysisState<A> state) {
+			CompoundState<A> state) {
 		return new KDepthToken<>(k, this, c);
 	}
 

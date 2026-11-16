@@ -1,9 +1,12 @@
 package it.unive.lisa.analysis;
 
+import it.unive.lisa.analysis.AnalysisState.Error;
 import it.unive.lisa.lattices.Satisfiability;
 import it.unive.lisa.program.cfg.ProgramPoint;
+import it.unive.lisa.program.cfg.protection.ProtectedBlock;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
+import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * A domain able to determine how abstract information evolves thanks to the
@@ -169,5 +172,93 @@ public interface SemanticComponent<L extends DomainLattice<L, T>,
 			ProgramPoint call)
 			throws SemanticException {
 		return callres;
+	}
+
+	/**
+	 * Yields the states of this domain after (part of) the normal execution has
+	 * been moved to an error continuation, that is, when an error is raised.
+	 * The move is <i>total</i> if all executions raise the error, and in this
+	 * case {@code remaining} is bottom. Otherwise, the move is <i>partial</i>:
+	 * some executions raise the error ({@code moved}) while others continue
+	 * normally ({@code remaining}). This also happens when returning from a
+	 * call whose callee raised errors, with {@code pp} being the call. This
+	 * method allows the domain to adjust the information that is stored for
+	 * both the normal execution and the error continuation. By default, this
+	 * method returns the given states unchanged.
+	 * 
+	 * @param remaining the state of the executions that continue normally
+	 *                      (bottom if the move is total)
+	 * @param moved     the state of the executions that raise the error
+	 * @param error     the error continuation that {@code moved} is moved to
+	 * @param pp        the program point where the move happens
+	 * 
+	 * @return the pair containing the updated {@code remaining} (left) and
+	 *             {@code moved} (right) states
+	 * 
+	 * @throws SemanticException if an error occurs during the computation
+	 */
+	default Pair<L, L> onExecutionToError(
+			L remaining,
+			L moved,
+			Error error,
+			ProgramPoint pp)
+			throws SemanticException {
+		return Pair.of(remaining, moved);
+	}
+
+	/**
+	 * Yields the state of this domain after it has been moved from one or more
+	 * error continuations back to the normal execution, that is, when errors
+	 * are caught. The given state is the one resulting from the merge of all
+	 * the caught errors' states, after the caught error has been (possibly)
+	 * assigned to the variable of the handler. This method allows the domain to
+	 * adjust the information that is stored for the normal execution. By
+	 * default, this method returns {@code state} unchanged.
+	 * 
+	 * @param state          the state of the caught error continuations being
+	 *                           moved
+	 * @param protectedBlock the block whose errors are being caught
+	 * @param pp             the program point where the move happens
+	 * 
+	 * @return the state to use for the normal execution
+	 * 
+	 * @throws SemanticException if an error occurs during the computation
+	 */
+	default L onErrorToExecution(
+			L state,
+			ProtectedBlock protectedBlock,
+			ProgramPoint pp)
+			throws SemanticException {
+		return state;
+	}
+
+	/**
+	 * Yields the states of this domain after (part of) the normal execution has
+	 * been moved to the halting continuation, that is, when the program
+	 * terminates its execution. The move is <i>total</i> if all executions
+	 * halt, and in this case {@code remaining} is bottom. Otherwise, the move
+	 * is <i>partial</i>: some executions halt ({@code moved}) while others
+	 * continue normally ({@code remaining}). This also happens when returning
+	 * from a call whose callee halted, with {@code pp} being the call. This
+	 * method allows the domain to adjust the information that is stored for
+	 * both the normal execution and the halting continuation. By default, this
+	 * method returns the given states unchanged.
+	 * 
+	 * @param remaining the state of the executions that continue normally
+	 *                      (bottom if the move is total)
+	 * @param moved     the state of the executions that halt
+	 * @param pp        the program point where the move happens
+	 * 
+	 * @return the pair containing the updated {@code remaining} (left) and
+	 *             {@code moved} (right) states
+	 * 
+	 * @throws SemanticException if an error occurs during the computation
+	 */
+	default Pair<L, L> onExecutionToHalting(
+			L remaining,
+			L moved,
+			ProgramPoint pp)
+			throws SemanticException {
+		return Pair.of(remaining, moved);
 	}
 }

@@ -7,23 +7,26 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.lattices.FunctionalLattice;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.util.datastructures.trie.PatriciaTrieMap;
 import it.unive.lisa.util.representation.MapRepresentation;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.TreeMap;
 import java.util.function.Predicate;
 
 /**
- * A lattice that associates an abstract state to each execution trace. This is
- * implemented as a {@link FunctionalLattice} whose keys are the
- * {@link ExecutionTrace}s, and whose values are the abstract states associated
- * to those traces. All traces can be collapsed into a single abstract state by
- * {@link #collapse()}.
- * 
+ * The lattice structure used by
+ * {@link it.unive.lisa.analysis.traces.TracePartitioning}, associating an
+ * abstract state to each execution trace. This is implemented as a
+ * {@link FunctionalLattice} whose keys are the {@link ExecutionTrace}s, and
+ * whose values are the abstract states associated to those traces. All traces
+ * can be collapsed into a single abstract state by {@link #collapse()}.
+ *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
- * 
+ *
  * @param <A> the type of the abstract states associated to traces
  */
 public class TraceLattice<A extends AbstractLattice<A>>
@@ -51,14 +54,14 @@ public class TraceLattice<A extends AbstractLattice<A>>
 	 */
 	public TraceLattice(
 			A lattice,
-			Map<ExecutionTrace, A> function) {
+			PatriciaTrieMap<ExecutionTrace, A> function) {
 		super(lattice, function);
 	}
 
 	@Override
 	public TraceLattice<A> mk(
 			A lattice,
-			Map<ExecutionTrace, A> function) {
+			PatriciaTrieMap<ExecutionTrace, A> function) {
 		return new TraceLattice<>(lattice, function);
 	}
 
@@ -80,9 +83,9 @@ public class TraceLattice<A extends AbstractLattice<A>>
 		if (isTop() || isBottom() || function == null)
 			return this;
 
-		Map<ExecutionTrace, A> result = mkNewFunction(null, false);
+		PatriciaTrieMap<ExecutionTrace, A> result = mkNewFunction(null, false);
 		for (Entry<ExecutionTrace, A> trace : this)
-			result.put(trace.getKey(), trace.getValue().forgetIdentifier(id, pp));
+			result = result.put(trace.getKey(), trace.getValue().forgetIdentifier(id, pp));
 		return new TraceLattice<>(lattice, result);
 	}
 
@@ -94,9 +97,9 @@ public class TraceLattice<A extends AbstractLattice<A>>
 		if (isTop() || isBottom() || function == null)
 			return this;
 
-		Map<ExecutionTrace, A> result = mkNewFunction(null, false);
+		PatriciaTrieMap<ExecutionTrace, A> result = mkNewFunction(null, false);
 		for (Entry<ExecutionTrace, A> trace : this)
-			result.put(trace.getKey(), trace.getValue().forgetIdentifiers(ids, pp));
+			result = result.put(trace.getKey(), trace.getValue().forgetIdentifiers(ids, pp));
 		return new TraceLattice<>(lattice, result);
 	}
 
@@ -108,9 +111,9 @@ public class TraceLattice<A extends AbstractLattice<A>>
 		if (isTop() || isBottom() || function == null)
 			return this;
 
-		Map<ExecutionTrace, A> result = mkNewFunction(null, false);
+		PatriciaTrieMap<ExecutionTrace, A> result = mkNewFunction(null, false);
 		for (Entry<ExecutionTrace, A> trace : this)
-			result.put(trace.getKey(), trace.getValue().forgetIdentifiersIf(test, pp));
+			result = result.put(trace.getKey(), trace.getValue().forgetIdentifiersIf(test, pp));
 		return new TraceLattice<>(lattice, result);
 	}
 
@@ -122,9 +125,9 @@ public class TraceLattice<A extends AbstractLattice<A>>
 		if (isTop() || isBottom() || function == null)
 			return this;
 
-		Map<ExecutionTrace, A> result = mkNewFunction(null, false);
+		PatriciaTrieMap<ExecutionTrace, A> result = mkNewFunction(null, false);
 		for (Entry<ExecutionTrace, A> trace : this)
-			result.put(trace.getKey(), trace.getValue().pushScope(token, pp));
+			result = result.put(trace.getKey(), trace.getValue().pushScope(token, pp));
 		return new TraceLattice<>(lattice, result);
 	}
 
@@ -136,9 +139,9 @@ public class TraceLattice<A extends AbstractLattice<A>>
 		if (isTop() || isBottom() || function == null)
 			return this;
 
-		Map<ExecutionTrace, A> result = mkNewFunction(null, false);
+		PatriciaTrieMap<ExecutionTrace, A> result = mkNewFunction(null, false);
 		for (Entry<ExecutionTrace, A> trace : this)
-			result.put(trace.getKey(), trace.getValue().popScope(token, pp));
+			result = result.put(trace.getKey(), trace.getValue().popScope(token, pp));
 		return new TraceLattice<>(lattice, result);
 	}
 
@@ -165,9 +168,9 @@ public class TraceLattice<A extends AbstractLattice<A>>
 		if (isTop() || isBottom() || function == null)
 			return this;
 
-		Map<ExecutionTrace, A> result = mkNewFunction(null, false);
+		PatriciaTrieMap<ExecutionTrace, A> result = mkNewFunction(null, false);
 		for (Entry<ExecutionTrace, A> trace : this)
-			result.put(trace.getKey(), trace.getValue().withTopMemory());
+			result = result.put(trace.getKey(), trace.getValue().withTopMemory());
 		return new TraceLattice<>(lattice, result);
 	}
 
@@ -176,9 +179,9 @@ public class TraceLattice<A extends AbstractLattice<A>>
 		if (isTop() || isBottom() || function == null)
 			return this;
 
-		Map<ExecutionTrace, A> result = mkNewFunction(null, false);
+		PatriciaTrieMap<ExecutionTrace, A> result = mkNewFunction(null, false);
 		for (Entry<ExecutionTrace, A> trace : this)
-			result.put(trace.getKey(), trace.getValue().withTopValues());
+			result = result.put(trace.getKey(), trace.getValue().withTopValues());
 		return new TraceLattice<>(lattice, result);
 	}
 
@@ -187,9 +190,9 @@ public class TraceLattice<A extends AbstractLattice<A>>
 		if (isTop() || isBottom() || function == null)
 			return this;
 
-		Map<ExecutionTrace, A> result = mkNewFunction(null, false);
+		PatriciaTrieMap<ExecutionTrace, A> result = mkNewFunction(null, false);
 		for (Entry<ExecutionTrace, A> trace : this)
-			result.put(trace.getKey(), trace.getValue().withTopTypes());
+			result = result.put(trace.getKey(), trace.getValue().withTopTypes());
 		return new TraceLattice<>(lattice, result);
 	}
 
@@ -204,7 +207,10 @@ public class TraceLattice<A extends AbstractLattice<A>>
 		if (function == null)
 			return new StringRepresentation("empty");
 
-		return new MapRepresentation(function, StringRepresentation::new, AbstractLattice::representation);
+		Map<StructuredRepresentation, StructuredRepresentation> map = new TreeMap<>();
+		for (Entry<ExecutionTrace, A> trace : this)
+			map.put(new StringRepresentation(trace.getKey()), trace.getValue().representation());
+		return new MapRepresentation(map);
 	}
 
 	@Override

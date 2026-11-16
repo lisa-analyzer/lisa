@@ -11,6 +11,7 @@ import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.events.EventQueue;
+import it.unive.lisa.interprocedural.ScopeId;
 import it.unive.lisa.lattices.ExpressionSet;
 import it.unive.lisa.lattices.Satisfiability;
 import it.unive.lisa.program.cfg.ProgramPoint;
@@ -954,6 +955,21 @@ public class IntervalTest {
 	}
 
 	@Test
+	public void testConstraintsRoundTrip() throws SemanticException {
+		// constraints exported by the domain are read back to the same
+		// interval, also when only one of the bounds is finite
+		List<IntInterval> intervals = List.of(
+				mk(3, 7),
+				new IntInterval(new MathNumber(3), MathNumber.PLUS_INFINITY),
+				new IntInterval(MathNumber.MINUS_INFINITY, new MathNumber(7)));
+		for (IntInterval i : intervals) {
+			ValueEnvironment<IntInterval> st = new ValueEnvironment<>(IntInterval.TOP).putState(variable, i);
+			Set<BinaryExpression> cs = domain.constraints(null, st, variable, pp, oracle);
+			assertEquals(i, domain.generate(cs, pp, oracle), "Wrong round trip for " + i);
+		}
+	}
+
+	@Test
 	public void testGenerateNonMatchingSkipped() throws SemanticException {
 		// left side is not a Constant Integer → skipped → TOP
 		BinaryExpression nonConst = new BinaryExpression(
@@ -1190,6 +1206,11 @@ public class IntervalTest {
 
 		@Override
 		public EventQueue getEventQueue() {
+			return null;
+		}
+
+		@Override
+		public ScopeId<?> getContext() {
 			return null;
 		}
 

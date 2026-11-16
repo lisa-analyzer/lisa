@@ -215,11 +215,13 @@ public class NativeCall
 		for (NativeCFG nat : targets)
 			try {
 				Pair<AnalysisState<A>, ExpressionSet[]> prepared = strategy
-						.prepare(this, state, interprocedural, expressions, nat.getDescriptor().getFormals(), params);
+						.prepareForNative(this, state, interprocedural, expressions, nat.getDescriptor().getFormals(),
+								params);
 
 				NaryExpression rewritten = nat.rewrite(this, parameters);
 				result = result
-						.lub(rewritten.forwardSemanticsAux(interprocedural, state, prepared.getRight(), expressions));
+						.lub(rewritten.forwardSemanticsAux(interprocedural, prepared.getLeft(), prepared.getRight(),
+								expressions));
 				getMetaVariables().addAll(rewritten.getMetaVariables());
 			} catch (CallResolutionException e) {
 				throw new SemanticException("Unable to resolve call " + this, e);

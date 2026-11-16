@@ -7,6 +7,7 @@ import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
+import it.unive.lisa.interprocedural.ScopeId;
 import it.unive.lisa.program.Program;
 import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.cfg.CFG;
@@ -146,9 +147,10 @@ public class ArrayLength
 				SymbolicExpression expr,
 				StatementStore<A> expressions)
 				throws SemanticException {
+			ScopeId<A> context = interprocedural.getCurrentContext();
 			Set<Type> arraytypes = new HashSet<>();
 			Analysis<A, D> analysis = interprocedural.getAnalysis();
-			Set<Type> types = analysis.getRuntimeTypesOf(state, expr, this);
+			Set<Type> types = analysis.getRuntimeTypesOf(state, expr, context, this);
 			for (Type t : types)
 				if (t.isPointerType() && t.asPointerType().getInnerType().isArrayType())
 					arraytypes.add(t.asPointerType().getInnerType());
@@ -164,7 +166,7 @@ public class ArrayLength
 					new Variable(Untyped.INSTANCE, "len", getLocation()),
 					getLocation());
 
-			return analysis.smallStepSemantics(state, len, this);
+			return analysis.smallStepSemantics(state, len, context, this);
 		}
 
 	}

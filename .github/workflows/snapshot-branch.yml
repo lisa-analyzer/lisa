@@ -25,6 +25,8 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 11
+      - name: "Set up z3"
+        uses: ./.github/actions/setup-z3
       - name: "Grant execute permission for gradlew"
         run: chmod +x lisa/gradlew
       - name: "Gradle: normal build"

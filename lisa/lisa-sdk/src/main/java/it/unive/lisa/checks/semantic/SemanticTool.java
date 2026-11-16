@@ -7,16 +7,26 @@ import it.unive.lisa.analysis.Analysis;
 import it.unive.lisa.analysis.AnalyzedCFG;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
+import it.unive.lisa.checks.verification.ReproducingInput;
+import it.unive.lisa.checks.verification.Violation;
+import it.unive.lisa.checks.verification.WarningVerifier;
 import it.unive.lisa.conf.LiSAConfiguration;
+import it.unive.lisa.interprocedural.ScopeId;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.interprocedural.callgraph.CallResolutionException;
+import it.unive.lisa.outputs.messages.CFGMessage;
+import it.unive.lisa.outputs.messages.ExpressionMessage;
+import it.unive.lisa.outputs.messages.StatementMessage;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeMember;
 import it.unive.lisa.program.cfg.statement.Expression;
+import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
 import it.unive.lisa.util.file.FileManager;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -93,6 +103,16 @@ public class SemanticTool<A extends AbstractLattice<A>, D extends AbstractDomain
 	public Collection<AnalyzedCFG<A>> getResultOf(
 			CFG cfg) {
 		return results.get(cfg);
+	}
+
+	/**
+	 * Yields all the analysis results stored in this tool, grouped by
+	 * {@link CFG}.
+	 * 
+	 * @return an unmodifiable view of the results
+	 */
+	public Map<CFG, Collection<AnalyzedCFG<A>>> getResults() {
+		return Collections.unmodifiableMap(results);
 	}
 
 	/**
@@ -180,10 +200,230 @@ public class SemanticTool<A extends AbstractLattice<A>, D extends AbstractDomain
 			Analysis<A, D> analysis = new Analysis(
 					getConfiguration().analysis,
 					getConfiguration().shouldSmashError);
-			return callgraph.resolve(call, call.parameterTypes(store, analysis), null);
+			return callgraph.resolve(call, call.parameterTypes(store, analysis, result.getId()), null);
 		} catch (CallResolutionException e) {
 			return null;
 		}
+	}
+
+	/**
+	 * Reports a new possible warning, with no reproducing inputs, with the
+	 * given message on the given statement, in the given context (e.g., the one
+	 * of the result that caused the warning).
+	 * 
+	 * @param statement the statement to warn on
+	 * @param context   the context where the warning is reported
+	 * @param message   the message of the warning
+	 */
+	public void warnOn(
+			Statement statement,
+			ScopeId<A> context,
+			String message) {
+		if (statement instanceof Expression)
+			warnOn((Expression) statement, context, message);
+		else
+			addWarning(new StatementMessage(statement, message, context, false, null));
+	}
+
+	/**
+	 * Reports a new possible warning with the given message on the given
+	 * statement, reporting the given violation. After the semantic checks, LiSA
+	 * verifies the violations of all warnings through the
+	 * {@link WarningVerifier} selected in the configuration
+	 * ({@link LiSAConfiguration#warningVerifier}), if any, possibly confirming
+	 * or refuting the warning.
+	 * 
+	 * @param statement the statement to warn on
+	 * @param violation the violation reported by the warning
+	 * @param message   the message of the warning
+	 */
+	public void warnOn(
+			Statement statement,
+			Violation violation,
+			String message) {
+		warnOn(statement, null, violation, message);
+	}
+
+	/**
+	 * Reports a new possible warning with the given message on the given
+	 * statement, in the given context (e.g., the one of the result that caused
+	 * the warning), reporting the given violation. After the semantic checks,
+	 * LiSA verifies the violations of all warnings through the
+	 * {@link WarningVerifier} selected in the configuration
+	 * ({@link LiSAConfiguration#warningVerifier}), if any, possibly confirming
+	 * or refuting the warning: the violation is verified only in the given
+	 * context, or in all the contexts where the statement has been analyzed if
+	 * the context is {@code null}.
+	 * 
+	 * @param statement the statement to warn on
+	 * @param context   the context where the warning is reported (can be
+	 *                      {@code null})
+	 * @param violation the violation reported by the warning
+	 * @param message   the message of the warning
+	 */
+	public void warnOn(
+			Statement statement,
+			ScopeId<A> context,
+			Violation violation,
+			String message) {
+		if (statement instanceof Expression)
+			addWarning(new ExpressionMessage((Expression) statement, message, context, violation));
+		else
+			addWarning(new StatementMessage(statement, message, context, violation));
+	}
+
+	/**
+	 * Reports a new possible warning, with no reproducing inputs, with the
+	 * given message on the given expression, in the given context (e.g., the
+	 * one of the result that caused the warning).
+	 * 
+	 * @param expression the expression to warn on
+	 * @param context    the context where the warning is reported
+	 * @param message    the message of the warning
+	 */
+	public void warnOn(
+			Expression expression,
+			ScopeId<A> context,
+			String message) {
+		addWarning(new ExpressionMessage(expression, message, context, false, null));
+	}
+
+	/**
+	 * Reports a new possible warning, with no reproducing inputs, with the
+	 * given message on the given cfg, in the given context (e.g., the one of
+	 * the result that caused the warning).
+	 * 
+	 * @param cfg     the cfg to warn on
+	 * @param context the context where the warning is reported
+	 * @param message the message of the warning
+	 */
+	public void warnOn(
+			CFG cfg,
+			ScopeId<A> context,
+			String message) {
+		addWarning(new CFGMessage(cfg, message, context, false, null));
+	}
+
+	/**
+	 * Reports a new possible notice, with no reproducing inputs, with the given
+	 * message on the given statement, in the given context (e.g., the one of
+	 * the result that caused the notice).
+	 * 
+	 * @param statement the statement to notice on
+	 * @param context   the context where the notice is reported
+	 * @param message   the message of the notice
+	 */
+	public void noticeOn(
+			Statement statement,
+			ScopeId<A> context,
+			String message) {
+		noticeOn(statement, context, message, false, null);
+	}
+
+	/**
+	 * Reports a new notice with the given message on the given statement, in
+	 * the given context (e.g., the one of the result that caused the notice).
+	 * If {@code statement} is an instance of {@link Expression}, then
+	 * {@link #noticeOn(Expression, ScopeId, String, boolean, List)} is invoked.
+	 * 
+	 * @param statement         the statement to notice on
+	 * @param context           the context where the notice is reported
+	 * @param message           the message of the notice
+	 * @param definite          whether or not the notice is definite, that is,
+	 *                              if the reported behavior happens in at least
+	 *                              one execution of the program
+	 * @param reproducingInputs the inputs reproducing the behavior reported by
+	 *                              the notice (can be {@code null} if no inputs
+	 *                              are known)
+	 */
+	public void noticeOn(
+			Statement statement,
+			ScopeId<A> context,
+			String message,
+			boolean definite,
+			List<ReproducingInput> reproducingInputs) {
+		if (statement instanceof Expression)
+			noticeOn((Expression) statement, context, message, definite, reproducingInputs);
+		else
+			addNotice(new StatementMessage(statement, message, context, definite, reproducingInputs));
+	}
+
+	/**
+	 * Reports a new possible notice, with no reproducing inputs, with the given
+	 * message on the given expression, in the given context (e.g., the one of
+	 * the result that caused the notice).
+	 * 
+	 * @param expression the expression to notice on
+	 * @param context    the context where the notice is reported
+	 * @param message    the message of the notice
+	 */
+	public void noticeOn(
+			Expression expression,
+			ScopeId<A> context,
+			String message) {
+		noticeOn(expression, context, message, false, null);
+	}
+
+	/**
+	 * Reports a new notice with the given message on the given expression, in
+	 * the given context (e.g., the one of the result that caused the notice).
+	 * 
+	 * @param expression        the expression to notice on
+	 * @param context           the context where the notice is reported
+	 * @param message           the message of the notice
+	 * @param definite          whether or not the notice is definite, that is,
+	 *                              if the reported behavior happens in at least
+	 *                              one execution of the program
+	 * @param reproducingInputs the inputs reproducing the behavior reported by
+	 *                              the notice (can be {@code null} if no inputs
+	 *                              are known)
+	 */
+	public void noticeOn(
+			Expression expression,
+			ScopeId<A> context,
+			String message,
+			boolean definite,
+			List<ReproducingInput> reproducingInputs) {
+		addNotice(new ExpressionMessage(expression, message, context, definite, reproducingInputs));
+	}
+
+	/**
+	 * Reports a new possible notice, with no reproducing inputs, with the given
+	 * message on the given cfg, in the given context (e.g., the one of the
+	 * result that caused the notice).
+	 * 
+	 * @param cfg     the cfg to notice on
+	 * @param context the context where the notice is reported
+	 * @param message the message of the notice
+	 */
+	public void noticeOn(
+			CFG cfg,
+			ScopeId<A> context,
+			String message) {
+		noticeOn(cfg, context, message, false, null);
+	}
+
+	/**
+	 * Reports a new notice with the given message on the given cfg, in the
+	 * given context (e.g., the one of the result that caused the notice).
+	 * 
+	 * @param cfg               the cfg to notice on
+	 * @param context           the context where the notice is reported
+	 * @param message           the message of the notice
+	 * @param definite          whether or not the notice is definite, that is,
+	 *                              if the reported behavior happens in at least
+	 *                              one execution of the program
+	 * @param reproducingInputs the inputs reproducing the behavior reported by
+	 *                              the notice (can be {@code null} if no inputs
+	 *                              are known)
+	 */
+	public void noticeOn(
+			CFG cfg,
+			ScopeId<A> context,
+			String message,
+			boolean definite,
+			List<ReproducingInput> reproducingInputs) {
+		addNotice(new CFGMessage(cfg, message, context, definite, reproducingInputs));
 	}
 
 }

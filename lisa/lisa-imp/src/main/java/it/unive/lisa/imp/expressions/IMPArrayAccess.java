@@ -7,6 +7,7 @@ import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
+import it.unive.lisa.interprocedural.ScopeId;
 import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.statement.BinaryExpression;
@@ -66,9 +67,10 @@ public class IMPArrayAccess
 			SymbolicExpression right,
 			StatementStore<A> expressions)
 			throws SemanticException {
+		ScopeId<A> context = interprocedural.getCurrentContext();
 		Set<Type> arraytypes = new HashSet<>();
 		Analysis<A, D> analysis = interprocedural.getAnalysis();
-		for (Type t : analysis.getRuntimeTypesOf(state, left, this))
+		for (Type t : analysis.getRuntimeTypesOf(state, left, context, this))
 			if (t.isPointerType() && t.asPointerType().getInnerType().isArrayType())
 				arraytypes.add(t.asPointerType().getInnerType());
 
@@ -80,7 +82,7 @@ public class IMPArrayAccess
 		HeapDereference container = new HeapDereference(cst, left, getLocation());
 		AccessChild elem = new AccessChild(inner, container, right, getLocation());
 
-		return analysis.smallStepSemantics(state, elem, this);
+		return analysis.smallStepSemantics(state, elem, context, this);
 	}
 
 }

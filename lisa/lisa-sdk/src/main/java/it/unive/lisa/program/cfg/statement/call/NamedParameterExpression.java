@@ -98,7 +98,7 @@ public class NamedParameterExpression
 			SymbolicExpression expr,
 			StatementStore<A> expressions)
 			throws SemanticException {
-		return interprocedural.getAnalysis().smallStepSemantics(state, expr, this);
+		return interprocedural.getAnalysis().smallStepSemantics(state, expr, interprocedural.getCurrentContext(), this);
 	}
 
 }

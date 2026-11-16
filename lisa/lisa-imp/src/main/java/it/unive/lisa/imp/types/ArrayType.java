@@ -7,6 +7,7 @@ import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
+import it.unive.lisa.interprocedural.ScopeId;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.statement.DefaultParamInitialization;
@@ -33,8 +34,10 @@ import org.apache.commons.lang3.tuple.Pair;
  * A type representing an IMP array defined in an IMP program. ArrayTypes are
  * instances of {@link it.unive.lisa.type.ArrayType}, have a {@link Type} and a
  * dimension. To ensure uniqueness of ArrayType objects,
- * {@link #lookup(Type, int)} must be used to retrieve existing instances (or
- * automatically create one if no matching instance exists).
+ * {@link #register(Type, int)} must be used to retrieve existing instances,
+ * automatically creating one if no matching instance exists yet;
+ * {@link #lookup(Type, int)} can be used instead to only retrieve an
+ * already-registered instance, without creating one.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
@@ -133,7 +136,7 @@ public final class ArrayType
 			return Untyped.INSTANCE;
 
 		// TODO not sure about this
-		return getInnerType().commonSupertype(other.asArrayType().getInnerType());
+		return register(getInnerType().commonSupertype(other.asArrayType().getInnerType()), dimensions);
 	}
 
 	@Override
@@ -206,19 +209,20 @@ public final class ArrayType
 					StatementStore<A> expressions)
 					throws SemanticException {
 				Analysis<A, D> analysis = interprocedural.getAnalysis();
+				ScopeId<A> context = interprocedural.getCurrentContext();
 				Type type = getStaticType();
 				ReferenceType reftype = cfg.getProgram().getTypes().getReference(type);
 				MemoryAllocation creation = new MemoryAllocation(type, getLocation(), false);
 				HeapReference ref = new HeapReference(reftype, creation, getLocation());
 
 				// we start by allocating the memory region
-				AnalysisState<A> allocated = analysis.smallStepSemantics(state, creation, this);
+				AnalysisState<A> allocated = analysis.smallStepSemantics(state, creation, context, this);
 
 				// we create the synthetic variable that will hold the reference
 				// to the
 				// newly allocated array until it is assigned to a variable
 				InstrumentedReceiver array = new InstrumentedReceiver(reftype, true, getLocation());
-				AnalysisState<A> tmp = analysis.assign(allocated, array, ref, this);
+				AnalysisState<A> tmp = analysis.assign(allocated, array, ref, context, this);
 
 				// we define the length of the array as a child element
 				AccessChild len = new AccessChild(
@@ -229,7 +233,8 @@ public final class ArrayType
 
 				// TODO fix when we'll support multidimensional arrays
 				AnalysisState<
-						A> lenSt = analysis.assign(tmp, len, new PushAny(Int32Type.INSTANCE, getLocation()), this);
+						A> lenSt = analysis.assign(tmp, len, new PushAny(Int32Type.INSTANCE, getLocation()), context,
+								this);
 
 				// we leave the synthetic array in the program variables
 				// until it is popped from the stack to keep a reference to the
@@ -238,7 +243,7 @@ public final class ArrayType
 
 				// finally, we leave a reference to the newly created array on
 				// the stack
-				return analysis.smallStepSemantics(lenSt, array, this);
+				return analysis.smallStepSemantics(lenSt, array, context, this);
 			}
 
 			@Override

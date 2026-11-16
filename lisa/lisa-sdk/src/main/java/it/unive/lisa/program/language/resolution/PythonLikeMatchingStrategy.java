@@ -152,7 +152,7 @@ public class PythonLikeMatchingStrategy
 		// second phase: keyword arguments
 		for (; pos < actuals.length; pos++) {
 			String name = ((NamedParameterExpression) actuals[pos]).getParameterName();
-			for (int i = pos; i < formals.length; i++)
+			for (int i = 0; i < formals.length; i++)
 				if (formals[i].getName().equals(name)) {
 					if (slots[i] != null)
 						// already filled -> TypeError

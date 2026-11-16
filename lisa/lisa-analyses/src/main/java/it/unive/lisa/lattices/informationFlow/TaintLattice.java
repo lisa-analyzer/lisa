@@ -4,13 +4,15 @@ import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.SemanticException;
 
 /**
- * An interface for lattices used in taint analyses. This interface extends
+ * An interface for lattices used by
+ * {@link it.unive.lisa.analysis.informationFlow.BaseTaint} implementations (see
+ * {@link SimpleTaint} and {@link ThreeTaint}). This interface extends
  * {@link BaseLattice} and provides methods to access the domain elements that
  * represent tainted and clean values, as well as methods to check whether a
  * value is always tainted, possibly tainted, always clean, or possibly clean.
- * 
+ *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
- * 
+ *
  * @param <L> the concrete type of the taint lattice
  */
 public interface TaintLattice<L extends TaintLattice<L>>

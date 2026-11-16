@@ -5,9 +5,12 @@ import it.unive.lisa.analysis.AbstractLattice;
 import it.unive.lisa.analysis.Analysis;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.AnalyzedCFG;
+import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.checks.ChecksExecutor;
 import it.unive.lisa.checks.semantic.SemanticCheck;
 import it.unive.lisa.checks.semantic.SemanticTool;
+import it.unive.lisa.checks.verification.VerificationResult;
+import it.unive.lisa.checks.verification.WarningVerifier;
 import it.unive.lisa.conf.FixpointConfiguration;
 import it.unive.lisa.conf.LiSAConfiguration;
 import it.unive.lisa.events.EventListener;
@@ -17,6 +20,8 @@ import it.unive.lisa.interprocedural.InterproceduralAnalysisException;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.interprocedural.callgraph.CallGraphConstructionException;
 import it.unive.lisa.logging.TimerLogger;
+import it.unive.lisa.outputs.messages.Message;
+import it.unive.lisa.outputs.messages.StatementMessage;
 import it.unive.lisa.program.Application;
 import it.unive.lisa.program.Program;
 import it.unive.lisa.program.ProgramValidationException;
@@ -25,8 +30,11 @@ import it.unive.lisa.type.Type;
 import it.unive.lisa.type.TypeSystem;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
 import it.unive.lisa.util.file.FileManager;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.IdentityHashMap;
+import java.util.List;
 import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -130,10 +138,52 @@ public class LiSARunner<A extends AbstractLattice<A>, D extends AbstractDomain<A
 			else
 				LOG.warn("Skipping semantic checks execution since none have been provided");
 
+			if (conf.warningVerifier != null) {
+				@SuppressWarnings("unchecked")
+				WarningVerifier<A, D> verifier = (WarningVerifier<A, D>) conf.warningVerifier;
+				verifyWarnings(tool2, verifier);
+			}
+
 			tool = tool2;
 		}
 
 		return tool;
+	}
+
+	/**
+	 * Verifies the violations reported by the warnings of the given tool
+	 * through the given verifier, replacing each confirmed or refuted warning
+	 * with its verified version. Warnings are passed to the verifier in a
+	 * deterministic order. If the verifier fails, the error is logged and the
+	 * warnings are left possible.
+	 */
+	private void verifyWarnings(
+			SemanticTool<A, D> tool,
+			WarningVerifier<A, D> verifier) {
+		List<StatementMessage> verifiable = new ArrayList<>();
+		for (Message warning : tool.getWarnings())
+			if (warning instanceof StatementMessage && warning.getViolation() != null)
+				verifiable.add((StatementMessage) warning);
+		if (verifiable.isEmpty()) {
+			LOG.warn("Skipping warning verification since no warning reports a violation");
+			return;
+		}
+		Collections.sort(verifiable);
+
+		TimerLogger.execAction(LOG, "Verifying warnings", () -> {
+			try {
+				Map<StatementMessage, VerificationResult> results = verifier.verify(tool, verifiable);
+				for (Map.Entry<StatementMessage, VerificationResult> result : results.entrySet()) {
+					StatementMessage verified = result.getKey().verified(result.getValue());
+					if (verified != result.getKey())
+						tool.replaceWarning(result.getKey(), verified);
+				}
+			} catch (SemanticException | RuntimeException e) {
+				// a failing verification does not invalidate the analysis: the
+				// warnings that have not been verified stay possible
+				LOG.error("Exception while verifying warnings: unverified warnings are left possible", e);
+			}
+		});
 	}
 
 	private void finalize(
@@ -163,12 +213,16 @@ public class LiSARunner<A extends AbstractLattice<A>, D extends AbstractDomain<A
 			EventQueue events) {
 		analysis.setEventQueue(events);
 
-		try {
-			callGraph.init(app, events);
-		} catch (CallGraphConstructionException e) {
-			LOG.fatal("Exception while building the call graph for the input program", e);
-			throw new AnalysisSetupException("Exception while building the call graph for the input program", e);
-		}
+		// callGraph can be null here: canAnalyze() only requires one to be
+		// present when the interprocedural analysis declares that it needs
+		// one through needsCallGraph()
+		if (callGraph != null)
+			try {
+				callGraph.init(app, events);
+			} catch (CallGraphConstructionException e) {
+				LOG.fatal("Exception while building the call graph for the input program", e);
+				throw new AnalysisSetupException("Exception while building the call graph for the input program", e);
+			}
 
 		try {
 			interproc.init(app, callGraph, conf.openCallPolicy, events, analysis);

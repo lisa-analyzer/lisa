@@ -1,0 +1,42 @@
+{
+  "warnings" : [ ],
+  "notices" : [ ],
+  "files" : [ "report.json", "untyped_fibonacci.fib(fibonacci__this,_untyped_n)_039711c4cbc71e781abf8c2d59549ea0.graph.json", "untyped_fibonacci.fib(fibonacci__this,_untyped_n)_044e468bd42a51843d9c88d5eca84d82.graph.json", "untyped_fibonacci.fib(fibonacci__this,_untyped_n)_0493093819107438d78233f90b63cf61.graph.json", "untyped_fibonacci.fib(fibonacci__this,_untyped_n)_0d4c66f1cc1b4b82d61b0c902de47420.graph.json", "untyped_fibonacci.fib(fibonacci__this,_untyped_n)_0e36e04537e91ff24ca12b812f667f69.graph.json", "untyped_fibonacci.fib(fibonacci__this,_untyped_n)_1385d2cdb4c2c04ed95d08865234d87a.graph.json", "untyped_fibonacci.fib(fibonacci__this,_untyped_n)_166e5b2b84b410ddaf3905ffb74b2adf.graph.json", "untyped_fibonacci.fib(fibonacci__this,_untyped_n)_16875237105144dc3828b9a7101a9898.graph.json", "untyped_fibonacci.fib(fibonacci__this,_untyped_n)_233bd6dee84c6094772d86a94e37cf9d.graph.json", "untyped_fibonacci.fib(fibonacci__this,_untyped_n)_25e13b61c821b822f0b819d7a2744d55.graph.json", "untyped_fibonacci.fib(fibonacci__this,_untyped_n)_2a8080fa13feff087d19d35bbfa30025.graph.json", "untyped_fibonacci.fib(fibonacci__this,_untyped_n)_2dfff10792589d8a82c6da175315a23f.graph.json", "untyped_fibonacci.fib(fibonacci__this,_untyped_n)_2f16f43be110b8b8afd34fe144392f95.graph.json", "untyped_fibonacci.fib(fibonacci__this,_untyped_n)_35c7f0b929a8f69065c1d25fc422561e.graph.json", "untyped_fibonacci.fib(fibonacci__this,_untyped_n)_383f21b77d006bb26578de41568ae495.graph.json", "untyped_fibonacci.fib(fibonacci__this,_untyped_n)_38f5b9a27c415497fe8b565821d18d1b.graph.json", "untyped_fibonacci.fib(fibonacci__this,_untyped_n)_3f4505a6514fa4703a29b83819077a9a.graph.json", "untyped_fibonacci.fib(fibonacci__this,_untyped_n)_42c36fab95ec1239b5afe4f14e771ae1.graph.json", "untyped_fibonacci.fib(fibonacci__this,_untyped_n)_43e33a295b6d16ad2a8cfdb5bf3fea67.graph.json", "untyped_fibonacci.fib(fibonacci__this,_untyped_n)_446739cf9bc29c0dc4958a823046c85c.graph.json", "untyped_fibonacci.fib(fibonacci__this,_untyped_n)_4790ab52212f40453a7184957f826845.graph.json", "untyped_fibonacci.fib(fibonacci__this,_untyped_n)_485cc098aa087bfef3abeabbc3232a33.graph.json", "untyped_fibonacci.fib(fibonacci__this,_untyped_n)_4d6d42a64866ee468744455ae697146e.graph.json", "untyped_fibonacci.fib(fibonacci__this,_untyped_n)_4e4ac67b40137458db0d52afa6f56acb.graph.json", "untyped_fibonacci.fib(fibonacci__this,_untyped_n)_5063d3b07a141773668c2ed22113f35c.graph.json", "untyped_fibonacci.fib(fibonacci__this,_untyped_n)_6850b533add7e251f3fc576194e58ebc.graph.json", "untyped_fibonacci.fib(fibonacci__this,_untyped_n)_71d5a9ae19af9d70816b01d9e5a3f1fe.graph.json", "untyped_fibonacci.fib(fibonacci__this,_untyped_n)_7285325eb49c98419a66d6e847c391bf.graph.json", "untyped_fibonacci.fib(fibonacci__this,_untyped_n)_72f4bef0b1b53a8a9099acbe937223cf.graph.json", "untyped_fibonacci.fib(fibonacci__this,_untyped_n)_74835c09ecb06e6472cde6a37ee04ae6.graph.json", "untyped_fibonacci.fib(fibonacci__this,_untyped_n)_7c1e77167cc7f9897ecc3989f17fc879.graph.json", "untyped_fibonacci.fib(fibonacci__this,_untyped_n)_7c2f99c586266be5a6352bfb030e7993.graph.json", "untyped_fibonacci.fib(fibonacci__this,_untyped_n)_7cf06bb0d7bb66bed9d78fdccf2886a8.graph.json", "untyped_fibonacci.fib(fibonacci__this,_untyped_n)_862e026d07712de076cf2b38e5c08395.graph.json", "untyped_fibonacci.fib(fibonacci__this,_untyped_n)_89c60b55fc4355379cb90558ec624840.graph.json", "untyped_fibonacci.fib(fibonacci__this,_untyped_n)_8e536fe2c86402043240c543c9b91d47.graph.json", "untyped_fibonacci.fib(fibonacci__this,_untyped_n)_90bf379b2a6bef6f0b357b8e767455bb.graph.json", "untyped_fibonacci.fib(fibonacci__this,_untyped_n)_926ec971e1201aec74fc8881bbeaf5b9.graph.json", "untyped_fibonacci.fib(fibonacci__this,_untyped_n)_976e7e7408ee9cbe4639e2ea553210f3.graph.json", "untyped_fibonacci.fib(fibonacci__this,_untyped_n)_99e79e80bec9fc65f1ce971455ef7812.graph.json", "untyped_fibonacci.fib(fibonacci__this,_untyped_n)_a4c2eb2107da5253d8f14ba4c68f1089.graph.json", "untyped_fibonacci.fib(fibonacci__this,_untyped_n)_acd72b60e81e55fb8c26d17689ff3db9.graph.json", "untyped_fibonacci.fib(fibonacci__this,_untyped_n)_b8b9dd5518ad03bc70ef730bd2395e76.graph.json", "untyped_fibonacci.fib(fibonacci__this,_untyped_n)_b967188bd547a826919e323594ef9b82.graph.json", "untyped_fibonacci.fib(fibonacci__this,_untyped_n)_b9a3a7097cde738286d2c1f3946b6071.graph.json", "untyped_fibonacci.fib(fibonacci__this,_untyped_n)_bec5a140961d6ebcb372de0ef8a247fe.graph.json", "untyped_fibonacci.fib(fibonacci__this,_untyped_n)_c2300411ba0b4075f2ceb3d40633cf2d.graph.json", "untyped_fibonacci.fib(fibonacci__this,_untyped_n)_c47096907fe6079acc200ef9e41c948e.graph.json", "untyped_fibonacci.fib(fibonacci__this,_untyped_n)_c96e76e08252c56f0034e4013fb5354f.graph.json", "untyped_fibonacci.fib(fibonacci__this,_untyped_n)_d19a8808ba473c8cab9f06064134d93f.graph.json", "untyped_fibonacci.fib(fibonacci__this,_untyped_n)_d3b6ff50be608e2dff40e06a7a333c67.graph.json", "untyped_fibonacci.fib(fibonacci__this,_untyped_n)_d4a37f5e83a853744738aee2db5ce1d1.graph.json", "untyped_fibonacci.fib(fibonacci__this,_untyped_n)_da8c16798cf94a75197ac6a2fd4e6535.graph.json", "untyped_fibonacci.fib(fibonacci__this,_untyped_n)_dd94f029f5638dc8ea1c764cac7d04e5.graph.json", "untyped_fibonacci.fib(fibonacci__this,_untyped_n)_debdee7904e7d89c94dad82cddb1f740.graph.json", "untyped_fibonacci.fib(fibonacci__this,_untyped_n)_e0b7d07b52cf637bfb735f220f86c0b3.graph.json", "untyped_fibonacci.fib(fibonacci__this,_untyped_n)_e3162da9687a5a29a061bd341d95c0ab.graph.json", "untyped_fibonacci.fib(fibonacci__this,_untyped_n)_e552e26c504251bbd601b16912ff6438.graph.json", "untyped_fibonacci.fib(fibonacci__this,_untyped_n)_e74ea5807c1eec1e298f27563b26cd4d.graph.json", "untyped_fibonacci.fib(fibonacci__this,_untyped_n)_ec2fff4ce38a5dfc12d139230438681d.graph.json", "untyped_fibonacci.fib(fibonacci__this,_untyped_n)_f2445a1e770a6db72981efb916484d49.graph.json", "untyped_fibonacci.fib(fibonacci__this,_untyped_n)_f581317a39ace060c486ded614068d3a.graph.json", "untyped_fibonacci.fib(fibonacci__this,_untyped_n)_fcc7568544b6e2f8c623174525638070.graph.json", "untyped_fibonacci.main(fibonacci__this,_untyped_a).graph.json" ],
+  "info" : {
+    "cfgs" : "2",
+    "duration" : "2s 7ms",
+    "end" : "2026-10-28T19:53:53.294+01:00",
+    "expressions" : "22",
+    "files" : "64",
+    "globals" : "0",
+    "members" : "2",
+    "notices" : "0",
+    "programs" : "1",
+    "start" : "2026-10-28T19:53:51.287+01:00",
+    "statements" : "7",
+    "units" : "1",
+    "version" : "1.0",
+    "warnings" : "0"
+  },
+  "configuration" : {
+    "asynchronousListeners" : "",
+    "backwardDescendingFixpoint" : "unset",
+    "backwardFixpoint" : "BackwardAscendingFixpoint",
+    "dumpForcesUnwinding" : "false",
+    "fixpointWorkingSet" : "OrderBasedWorkingSet",
+    "forwardDescendingFixpoint" : "unset",
+    "forwardFixpoint" : "ForwardAscendingFixpoint",
+    "glbThreshold" : "5",
+    "hotspots" : "unset",
+    "openCallPolicy" : "TopExecutionPolicy",
+    "outputs" : "JSONReportDumper, JSONResults",
+    "recursionWideningThreshold" : "5",
+    "semanticChecks" : "",
+    "shouldSmashError" : "unset",
+    "synchronousListeners" : "",
+    "syntacticChecks" : "",
+    "useWideningPoints" : "true",
+    "wideningThreshold" : "5",
+    "workdir" : "test-outputs/interprocedural/fibonacci/inlined"
+  }
+}

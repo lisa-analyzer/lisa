@@ -507,4 +507,26 @@ public class SignTest {
 				mkConstraint(5, ComparisonGe.INSTANCE));
 		assertEquals(SignLattice.TOP, domain.evalPushAny(push, pp, oracle));
 	}
+
+	@Test
+	public void testConstraintsForm() throws SemanticException {
+		// constraints have the form 'constant OP expr'
+		ValueEnvironment<SignLattice> pos = new ValueEnvironment<>(SignLattice.TOP).putState(variable,
+				SignLattice.POS);
+		Set<BinaryExpression> cs = domain.constraints(null, pos, variable, pp, oracle);
+		assertEquals(1, cs.size());
+		BinaryExpression c = cs.iterator().next();
+		assertEquals(ComparisonLe.INSTANCE, c.getOperator());
+		assertEquals(0, ((Constant) c.getLeft()).getValue());
+		assertEquals(variable, c.getRight());
+
+		ValueEnvironment<SignLattice> neg = new ValueEnvironment<>(SignLattice.TOP).putState(variable,
+				SignLattice.NEG);
+		cs = domain.constraints(null, neg, variable, pp, oracle);
+		assertEquals(1, cs.size());
+		c = cs.iterator().next();
+		assertEquals(ComparisonGe.INSTANCE, c.getOperator());
+		assertEquals(0, ((Constant) c.getLeft()).getValue());
+		assertEquals(variable, c.getRight());
+	}
 }

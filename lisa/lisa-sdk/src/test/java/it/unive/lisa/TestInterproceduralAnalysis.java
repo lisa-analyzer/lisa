@@ -14,6 +14,8 @@ import it.unive.lisa.interprocedural.FixpointResults;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.interprocedural.InterproceduralAnalysisException;
 import it.unive.lisa.interprocedural.OpenCallPolicy;
+import it.unive.lisa.interprocedural.ScopeId;
+import it.unive.lisa.interprocedural.UniqueScope;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.interprocedural.callgraph.CallResolutionException;
 import it.unive.lisa.lattices.ExpressionSet;
@@ -103,6 +105,11 @@ public class TestInterproceduralAnalysis<A extends AbstractLattice<A>,
 	@Override
 	public FixpointResults<A> getFixpointResults() {
 		return null;
+	}
+
+	@Override
+	public ScopeId<A> getCurrentContext() {
+		return new UniqueScope<>();
 	}
 
 }

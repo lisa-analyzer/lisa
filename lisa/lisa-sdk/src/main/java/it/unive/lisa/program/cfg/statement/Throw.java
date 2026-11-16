@@ -8,6 +8,7 @@ import it.unive.lisa.analysis.AnalysisState.Error;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
+import it.unive.lisa.interprocedural.ScopeId;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.symbolic.CFGThrow;
@@ -83,16 +84,17 @@ public class Throw
 			SymbolicExpression expr,
 			StatementStore<A> expressions)
 			throws SemanticException {
+		ScopeId<A> context = interprocedural.getCurrentContext();
 		Analysis<A, D> analysis = interprocedural.getAnalysis();
 		Identifier meta = getMetaVariable();
-		AnalysisState<A> sem = analysis.assign(state, meta, expr, this);
+		AnalysisState<A> sem = analysis.assign(state, meta, expr, context, this);
 		// we forget the meta variables before moving as the operation only
 		// affects the normal execution, and won't be effective after we
 		// move the state to the exception
 		sem = sem.forgetIdentifiers(getSubExpression().getMetaVariables(), this);
 		Type thrown = expr.getStaticType().isReferenceType() ? expr.getStaticType().asReferenceType().getInnerType()
 				: expr.getStaticType();
-		AnalysisState<A> moved = analysis.moveExecutionToError(sem, new Error(thrown, this), this);
+		AnalysisState<A> moved = analysis.moveExecutionToError(sem, new Error(thrown, this), context, this);
 		return moved;
 	}
 

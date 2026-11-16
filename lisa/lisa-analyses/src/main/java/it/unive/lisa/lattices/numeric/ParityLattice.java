@@ -7,9 +7,9 @@ import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
 
 /**
- * A lattice structure for parity values, which can be even, odd, top, or
- * bottom.
- * 
+ * The lattice structure used by {@link it.unive.lisa.analysis.numeric.Parity},
+ * whose elements represent values that are even, odd, top, or bottom.
+ *
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
 public class ParityLattice

@@ -8,6 +8,7 @@ import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
+import it.unive.lisa.interprocedural.ScopeId;
 import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.statement.Expression;
@@ -75,13 +76,14 @@ public class IMPAddOrConcat
 			SymbolicExpression right,
 			StatementStore<A> expressions)
 			throws SemanticException {
+		ScopeId<A> context = interprocedural.getCurrentContext();
 		AnalysisState<A> result = state.bottomExecution();
 		BinaryOperator op;
 		TypeSystem types = getProgram().getTypes();
 		Analysis<A, D> analysis = interprocedural.getAnalysis();
 
-		Set<Type> ltypes = analysis.getRuntimeTypesOf(state, left, this);
-		Set<Type> rtypes = analysis.getRuntimeTypesOf(state, right, this);
+		Set<Type> ltypes = analysis.getRuntimeTypesOf(state, left, context, this);
+		Set<Type> rtypes = analysis.getRuntimeTypesOf(state, right, context, this);
 
 		for (Type tleft : ltypes)
 			for (Type tright : rtypes) {
@@ -113,6 +115,7 @@ public class IMPAddOrConcat
 				Type t = Type.commonSupertype(op.typeInference(types, ltypes, rtypes), Untyped.INSTANCE);
 				result = result.lub(
 						analysis.smallStepSemantics(state, new BinaryExpression(t, left, right, op, getLocation()),
+								context,
 								this));
 			}
 

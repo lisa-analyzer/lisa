@@ -1,6 +1,7 @@
 package it.unive.lisa.analysis;
 
 import it.unive.lisa.lattices.FunctionalLattice;
+import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.util.representation.MapRepresentation;
 import it.unive.lisa.util.representation.StringRepresentation;
 import it.unive.lisa.util.representation.StructuredRepresentation;
@@ -17,13 +18,24 @@ import org.apache.commons.collections4.SetUtils;
  * A generic mapping from string keys to {@link Lattice} instances that can
  * store custom user-defined information inside the {@link AnalysisState}. This
  * class itself is a special case of {@link FunctionalLattice} where values are
- * not required to have the same type.
- * 
+ * not required to have the same type.<br>
+ * <br>
+ * Keys that are missing from the mapping are treated as carrying no
+ * information: the least upper bound of two instances contains the union of
+ * their keys, and an empty mapping is less or equal than any other one. Hence,
+ * an empty mapping is <b>not</b> the top element of this lattice, that is
+ * instead represented by the unique instance {@link #TOP}.<br>
+ * <br>
+ * Values that are also {@link ScopedObject}s are subject to scoping: when a
+ * scope is pushed or popped on this object, the operation is forwarded to each
+ * of them, while the remaining values are left untouched.
+ *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public class FixpointInfo
 		implements
 		BaseLattice<FixpointInfo>,
+		ScopedObject<FixpointInfo>,
 		Iterable<Map.Entry<String, Lattice<?>>> {
 
 	/**
@@ -39,6 +51,23 @@ public class FixpointInfo
 		@Override
 		public boolean isTop() {
 			return false;
+		}
+
+	};
+
+	/**
+	 * The unique top instance of this class.
+	 */
+	public static final FixpointInfo TOP = new FixpointInfo() {
+
+		@Override
+		public boolean isBottom() {
+			return false;
+		}
+
+		@Override
+		public boolean isTop() {
+			return true;
 		}
 
 	};
@@ -133,10 +162,14 @@ public class FixpointInfo
 	 * 
 	 * @param key  the key
 	 * @param info the information to store
-	 * 
+	 *
 	 * @return a new instance with the updated mapping
-	 * 
-	 * @throws SemanticException if something goes wrong during the lub
+	 *
+	 * @throws SemanticException        if something goes wrong during the lub
+	 * @throws IllegalArgumentException if this mapping already associates
+	 *                                      {@code key} to a {@link Lattice}
+	 *                                      instance whose runtime type differs
+	 *                                      from {@code info}'s one
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public FixpointInfo putWeak(
@@ -147,7 +180,7 @@ public class FixpointInfo
 		// need to leave this raw to not have the compiler complaining about the
 		// lub invocation
 		Lattice prev = get(key);
-		if (prev.getClass() != info.getClass())
+		if (prev != null && prev.getClass() != info.getClass())
 			throw new IllegalArgumentException(
 					"The given lattice instance has a different type ("
 							+ info.getClass().getName()
@@ -316,12 +349,12 @@ public class FixpointInfo
 
 	@Override
 	public FixpointInfo top() {
-		return new FixpointInfo();
+		return TOP;
 	}
 
 	@Override
 	public boolean isTop() {
-		return function == null;
+		return false;
 	}
 
 	@Override
@@ -410,7 +443,109 @@ public class FixpointInfo
 	}
 
 	@Override
+	public FixpointInfo pushScope(
+			ScopeToken token,
+			ProgramPoint pp)
+			throws SemanticException {
+		return onScopedValues(v -> (Lattice<?>) v.pushScope(token, pp));
+	}
+
+	@Override
+	public FixpointInfo popScope(
+			ScopeToken token,
+			ProgramPoint pp)
+			throws SemanticException {
+		return onScopedValues(v -> (Lattice<?>) v.popScope(token, pp));
+	}
+
+	private FixpointInfo onScopedValues(
+			ScopingFunction op)
+			throws SemanticException {
+		if (isTop() || isBottom() || function == null)
+			return this;
+
+		Map<String, Lattice<?>> result = null;
+		for (Entry<String, Lattice<?>> entry : function.entrySet())
+			if (entry.getValue() instanceof ScopedObject)
+				try {
+					Lattice<?> scoped = op.apply((ScopedObject<?>) entry.getValue());
+					if (scoped != entry.getValue()) {
+						if (result == null)
+							result = mkNewFunction(function, false);
+						result.put(entry.getKey(), scoped);
+					}
+				} catch (SemanticException e) {
+					throw new SemanticException("Exception while scoping '" + entry.getKey() + "'", e);
+				}
+
+		return result == null ? this : new FixpointInfo(result);
+	}
+
+	/**
+	 * Yields the information after returning from a call, given that this is
+	 * the information at the end of the callee, and the given one is the
+	 * information of the caller before the call. Each value of this mapping
+	 * that is a {@link CallAwareObject} is combined with the value mapped to
+	 * the same key in the caller's information, if it has the same type (see
+	 * {@link CallAwareObject#onCallReturn(Object, ProgramPoint)}), while the
+	 * remaining values are left untouched.
+	 *
+	 * @param caller the information of the caller, before the call
+	 * @param call   the program point of the call
+	 *
+	 * @return the information after the call
+	 *
+	 * @throws SemanticException if an error occurs during the computation
+	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public FixpointInfo onCallReturn(
+			FixpointInfo caller,
+			ProgramPoint call)
+			throws SemanticException {
+		if (isTop() || isBottom() || function == null || caller == null)
+			return this;
+
+		Map<String, Lattice<?>> result = null;
+		for (Entry<String, Lattice<?>> entry : function.entrySet()) {
+			Lattice<?> value = entry.getValue();
+			Lattice<?> before = caller.get(entry.getKey());
+			if (!(value instanceof CallAwareObject) || before == null || before.getClass() != value.getClass())
+				continue;
+			try {
+				// need to leave this raw to not have the compiler complaining
+				// about the invocation
+				Lattice<?> returned = (Lattice<?>) ((CallAwareObject) value).onCallReturn(before, call);
+				if (returned != value) {
+					if (result == null)
+						result = mkNewFunction(function, false);
+					result.put(entry.getKey(), returned);
+				}
+			} catch (SemanticException e) {
+				throw new SemanticException("Exception while returning from a call on '" + entry.getKey() + "'", e);
+			}
+		}
+
+		return result == null ? this : new FixpointInfo(result);
+	}
+
+	/**
+	 * A scoping operation (push or pop) to apply to a scoped value.
+	 */
+	@FunctionalInterface
+	private interface ScopingFunction {
+
+		Lattice<?> apply(
+				ScopedObject<?> value)
+				throws SemanticException;
+
+	}
+
+	@Override
 	public StructuredRepresentation representation() {
+		if (isTop())
+			return Lattice.topRepresentation();
+		if (isBottom())
+			return Lattice.bottomRepresentation();
 		if (function == null)
 			return new StringRepresentation("empty");
 

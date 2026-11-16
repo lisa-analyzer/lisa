@@ -77,7 +77,12 @@ public class TypeTokenType
 	@Override
 	public Type commonSupertype(
 			Type other) {
-		return other == this ? this : Untyped.INSTANCE;
+		// unlike most other Type implementations in this package,
+		// TypeTokenType is not a singleton: distinct instances wrapping the
+		// same set of types are common (e.g., built independently by
+		// TypeSystem#cast/#convert) and must be recognized as the same type
+		// here, consistently with equals()
+		return equals(other) ? this : Untyped.INSTANCE;
 	}
 
 	@Override

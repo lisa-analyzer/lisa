@@ -5,7 +5,7 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.nonrelational.Environment;
 import it.unive.lisa.analysis.value.ValueLattice;
 import it.unive.lisa.symbolic.value.Identifier;
-import java.util.Map;
+import it.unive.lisa.util.datastructures.trie.PatriciaTrieMap;
 
 /**
  * An {@link Environment} that is also a {@link ValueLattice}, tracking abstract
@@ -47,7 +47,7 @@ public class ValueEnvironment<
 	 */
 	public ValueEnvironment(
 			L domain,
-			Map<Identifier, L> function) {
+			PatriciaTrieMap<Identifier, L> function) {
 		super(domain, function);
 	}
 
@@ -64,7 +64,7 @@ public class ValueEnvironment<
 	@Override
 	public ValueEnvironment<L> mk(
 			L lattice,
-			Map<Identifier, L> function) {
+			PatriciaTrieMap<Identifier, L> function) {
 		return new ValueEnvironment<>(lattice, function);
 	}
 

@@ -1,6 +1,10 @@
 package it.unive.lisa.outputs.messages;
 
+import it.unive.lisa.checks.verification.ReproducingInput;
+import it.unive.lisa.checks.verification.Violation;
+import it.unive.lisa.interprocedural.ScopeId;
 import it.unive.lisa.program.cfg.CodeLocation;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -26,7 +30,110 @@ public abstract class MessageWithLocation
 	protected MessageWithLocation(
 			CodeLocation location,
 			String message) {
-		super(message);
+		this(location, message, false, null);
+	}
+
+	/**
+	 * Builds the message.
+	 * 
+	 * @param location          the location in the program where this message
+	 *                              is reported on
+	 * @param message           the message of this message
+	 * @param definite          whether or not this message is definite, that
+	 *                              is, if the reported behavior happens in at
+	 *                              least one execution of the program
+	 * @param reproducingInputs the inputs reproducing the behavior reported by
+	 *                              this message (can be {@code null} if no
+	 *                              inputs are known)
+	 */
+	protected MessageWithLocation(
+			CodeLocation location,
+			String message,
+			boolean definite,
+			List<ReproducingInput> reproducingInputs) {
+		this(location, message, null, definite, reproducingInputs);
+	}
+
+	/**
+	 * Builds the message.
+	 *
+	 * @param location          the location in the program where this message
+	 *                              is reported on
+	 * @param message           the message of this message
+	 * @param context           the context where this message was reported on
+	 *                              (can be {@code null})
+	 * @param definite          whether or not this message is definite, that
+	 *                              is, if the reported behavior happens in at
+	 *                              least one execution of the program
+	 * @param reproducingInputs the inputs reproducing the behavior reported by
+	 *                              this message (can be {@code null} if no
+	 *                              inputs are known)
+	 */
+	protected MessageWithLocation(
+			CodeLocation location,
+			String message,
+			ScopeId<?> context,
+			boolean definite,
+			List<ReproducingInput> reproducingInputs) {
+		this(location, message, context, definite, false, reproducingInputs, null);
+	}
+
+	/**
+	 * Builds the message.
+	 *
+	 * @param location          the location in the program where this message
+	 *                              is reported on
+	 * @param message           the message of this message
+	 * @param context           the context where this message was reported on
+	 *                              (can be {@code null})
+	 * @param definite          whether or not this message is definite
+	 * @param refuted           whether or not this message is refuted
+	 * @param reproducingInputs the inputs reproducing the behavior reported by
+	 *                              this message (can be {@code null} if no
+	 *                              inputs are known)
+	 * @param violation         the violation reported by this message (can be
+	 *                              {@code null} if unknown)
+	 */
+	protected MessageWithLocation(
+			CodeLocation location,
+			String message,
+			ScopeId<?> context,
+			boolean definite,
+			boolean refuted,
+			List<ReproducingInput> reproducingInputs,
+			Violation violation) {
+		this(location, message, context, definite, refuted, reproducingInputs, violation, null);
+	}
+
+	/**
+	 * Builds the message.
+	 *
+	 * @param location          the location in the program where this message
+	 *                              is reported on
+	 * @param message           the message of this message
+	 * @param context           the context where this message was reported on
+	 *                              (can be {@code null})
+	 * @param definite          whether or not this message is definite
+	 * @param refuted           whether or not this message is refuted
+	 * @param reproducingInputs the inputs reproducing the behavior reported by
+	 *                              this message (can be {@code null} if no
+	 *                              inputs are known)
+	 * @param violation         the violation reported by this message (can be
+	 *                              {@code null} if unknown)
+	 * @param explanation       the explanation of the outcome of the
+	 *                              verification of the violation (can be
+	 *                              {@code null} if there is none)
+	 */
+	protected MessageWithLocation(
+			CodeLocation location,
+			String message,
+			ScopeId<?> context,
+			boolean definite,
+			boolean refuted,
+			List<ReproducingInput> reproducingInputs,
+			Violation violation,
+			String explanation) {
+		super(message, context, definite, refuted, reproducingInputs, violation, explanation);
 		Objects.requireNonNull(location, "The location of a message with location cannot be null");
 		this.location = location;
 	}

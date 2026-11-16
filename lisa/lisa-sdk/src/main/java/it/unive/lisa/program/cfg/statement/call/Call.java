@@ -6,6 +6,7 @@ import it.unive.lisa.analysis.Analysis;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
+import it.unive.lisa.interprocedural.ScopeId;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
@@ -295,6 +296,8 @@ public abstract class Call
 	 * @param expressions the store containing the computed states for the
 	 *                        parameters
 	 * @param analysis    the {@link Analysis} that is being executed
+	 * @param context     the interprocedural context where the types are
+	 *                        computed
 	 * 
 	 * @return the array of parameter types
 	 * 
@@ -304,7 +307,8 @@ public abstract class Call
 	@SuppressWarnings("unchecked")
 	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> Set<Type>[] parameterTypes(
 			StatementStore<A> expressions,
-			Analysis<A, D> analysis)
+			Analysis<A, D> analysis,
+			ScopeId<?> context)
 			throws SemanticException {
 		Expression[] actuals = getParameters();
 		Set<Type>[] types = new Set[actuals.length];
@@ -312,7 +316,7 @@ public abstract class Call
 			AnalysisState<A> state = expressions.getState(actuals[i]);
 			Set<Type> t = new HashSet<>();
 			for (SymbolicExpression e : state.getExecutionExpressions())
-				t.addAll(analysis.getRuntimeTypesOf(state, e, this));
+				t.addAll(analysis.getRuntimeTypesOf(state, e, context, this));
 			types[i] = t;
 		}
 		return types;

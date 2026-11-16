@@ -20,8 +20,8 @@ public abstract class ValueExpression
 		SymbolicExpression {
 
 	/**
-	 * Builds the heap expression.
-	 * 
+	 * Builds the value expression.
+	 *
 	 * @param staticType the static type of this expression
 	 * @param location   the code location of the statement that has generated
 	 *                       this value expression
@@ -41,6 +41,18 @@ public abstract class ValueExpression
 	 */
 	public ValueExpression removeNegations() {
 		return this;
+	}
+
+	/**
+	 * Yields the value expression corresponding to the logical negation of this
+	 * expression. Subclasses can override this to simplify the negation (e.g.,
+	 * by flipping a comparison or a logical operator) instead of wrapping this
+	 * expression in a {@link LogicalNegation}.
+	 *
+	 * @return the logical negation of this expression
+	 */
+	public ValueExpression negate() {
+		return new UnaryExpression(getStaticType(), this, LogicalNegation.INSTANCE, getCodeLocation());
 	}
 
 }

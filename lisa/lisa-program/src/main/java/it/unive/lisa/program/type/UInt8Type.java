@@ -12,12 +12,13 @@ import java.util.Set;
  * of this class can be retrieved trough field {@link #INSTANCE}.<br>
  * <br>
  * Instances of this class are equal to all other classes that implement the
- * {@link NumericType} interface, and for which {@link #isIntegral()} and
- * {@link #is8Bits()} yield {@code true}. An instance of Int8 is assumed to be
+ * {@link NumericType} interface, and for which {@link #isIntegral()} yields
+ * {@code true}, {@link #isUnsigned()} yields {@code true}, and
+ * {@link #is8Bits()} yields {@code true}. An instance of UInt8 is assumed to be
  * assignable to any {@link NumericType}, with possible loss of information.
  * <br>
  * <br>
- * The common supertype between an Int8 instance {@code t1} and another type
+ * The common supertype between a UInt8 instance {@code t1} and another type
  * instance {@code t2} is {@link Untyped} if {@code t2} is not a
  * {@link NumericType}. Otherwise, the supertype is chosen according to
  * {@link NumericType#supertype(NumericType)}. <br>
@@ -76,7 +77,7 @@ public class UInt8Type
 
 	@Override
 	public String toString() {
-		return "int8";
+		return "uint8";
 	}
 
 	@Override

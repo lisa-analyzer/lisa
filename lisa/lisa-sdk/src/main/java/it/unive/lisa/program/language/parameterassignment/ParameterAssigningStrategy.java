@@ -65,4 +65,44 @@ public interface ParameterAssigningStrategy {
 			ExpressionSet[] actuals)
 			throws SemanticException;
 
+	/**
+	 * Prepares the state for executing the native targets of the given
+	 * {@link Call}, behaving as
+	 * {@link #prepare(Call, AnalysisState, InterproceduralAnalysis, StatementStore, Parameter[], ExpressionSet[])}
+	 * except that actual parameters are not assigned to formal ones, since
+	 * native targets do not have their own scope. This method should be invoked
+	 * only by native calls.
+	 * 
+	 * @param <A>             the kind of {@link AbstractLattice} produced by
+	 *                            the domain {@code D}
+	 * @param <D>             the kind of {@link AbstractDomain} to run during
+	 *                            the analysis
+	 * @param call            the call to be prepared
+	 * @param callState       the analysis state where the call is to be
+	 *                            executed
+	 * @param interprocedural the interprocedural analysis of the program to
+	 *                            analyze
+	 * @param expressions     the cache where analysis states of intermediate
+	 *                            expressions must be stored
+	 * @param formals         the expressions representing the formal parameters
+	 *                            of the call
+	 * @param actuals         the expressions representing the actual parameters
+	 *                            of the call
+	 * 
+	 * @return the prepared state, ready to be used as entry-state for the
+	 *             targets, and the expressions to use as parameters of the call
+	 * 
+	 * @throws SemanticException if something goes wrong while preparing the
+	 *                               entry-state
+	 */
+	<A extends AbstractLattice<A>,
+			D extends AbstractDomain<A>> Pair<AnalysisState<A>, ExpressionSet[]> prepareForNative(
+					Call call,
+					AnalysisState<A> callState,
+					InterproceduralAnalysis<A, D> interprocedural,
+					StatementStore<A> expressions,
+					Parameter[] formals,
+					ExpressionSet[] actuals)
+					throws SemanticException;
+
 }

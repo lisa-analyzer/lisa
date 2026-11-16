@@ -2,7 +2,7 @@ package it.unive.lisa.analysis;
 
 import it.unive.lisa.lattices.FunctionalLattice;
 import it.unive.lisa.program.cfg.statement.Statement;
-import java.util.Map;
+import it.unive.lisa.util.datastructures.trie.PatriciaTrieMap;
 
 /**
  * A functional lattice that stores instances of {@link AnalysisState} computed
@@ -30,7 +30,7 @@ public class StatementStore<
 
 	private StatementStore(
 			AnalysisState<A> state,
-			Map<Statement, AnalysisState<A>> function) {
+			PatriciaTrieMap<Statement, AnalysisState<A>> function) {
 		super(state, function);
 	}
 
@@ -49,7 +49,9 @@ public class StatementStore<
 			AnalysisState<A> state) {
 		if (function == null)
 			function = mkNewFunction(null, false);
-		return function.put(st, state);
+		AnalysisState<A> prev = function.get(st);
+		function = function.put(st, state);
+		return prev;
 	}
 
 	/**
@@ -61,7 +63,7 @@ public class StatementStore<
 			Statement st) {
 		if (function == null)
 			return;
-		function.remove(st);
+		function = function.remove(st);
 		if (function.isEmpty())
 			function = null;
 	}
@@ -79,7 +81,7 @@ public class StatementStore<
 	@Override
 	public StatementStore<A> mk(
 			AnalysisState<A> lattice,
-			Map<Statement, AnalysisState<A>> function) {
+			PatriciaTrieMap<Statement, AnalysisState<A>> function) {
 		return new StatementStore<>(lattice, function);
 	}
 

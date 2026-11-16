@@ -177,12 +177,12 @@ public class AnalyzedCFG<A extends AbstractLattice<A>>
 			return results.getState(pred);
 
 		// last chance: there is no predecessor, so it might be an entry point
-		// of the analysis
+		// of the analysis, or its predecessors have to be used instead
 		Statement root = ((Expression) st).getRootStatement();
 		if (getEntrypoints().contains(root))
 			return entryStates.getState(root);
 
-		return entryStates.lattice.bottom();
+		return lub(predecessorsOf(root), false);
 	}
 
 	/**

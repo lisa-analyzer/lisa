@@ -33,6 +33,7 @@ import it.unive.lisa.symbolic.value.operator.binary.StringEqualsIgnoreCase;
 import it.unive.lisa.symbolic.value.operator.binary.StringIndexOf;
 import it.unive.lisa.symbolic.value.operator.binary.StringIndexOfChar;
 import it.unive.lisa.symbolic.value.operator.binary.StringIsPrefixOf;
+import it.unive.lisa.symbolic.value.operator.binary.StringIsSubstringOf;
 import it.unive.lisa.symbolic.value.operator.binary.StringIsSuffixOf;
 import it.unive.lisa.symbolic.value.operator.binary.StringLastIndexOf;
 import it.unive.lisa.symbolic.value.operator.binary.StringLastIndexOfChar;
@@ -71,10 +72,24 @@ import java.util.SortedSet;
 import org.apache.commons.lang3.tuple.Pair;
 
 /**
- * A class that represent the Tarsis domain for strings, exploiting a
- * {@link RegexAutomaton}.
+ * A class that represents the Tarsis domain for strings, exploiting a
+ * {@link RegexAutomaton} to approximate string values through finite state
+ * automata whose transitions are labeled with entire substrings (the alphabet
+ * is the set of all strings) instead of single characters.
  *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ *
+ * @see <a href="https://doi.org/10.1002/smr.2647">Luca Negrini, Vincenzo
+ *          Arceri, Pietro Ferrara, Agostino Cortesi. Tarsis: An effective
+ *          automata-based abstract domain for string analysis. Journal of
+ *          Software: Evolution and Process, 36(8), 2024.</a>
+ * @see <a href=
+ *          "https://link.springer.com/chapter/10.1007/978-3-030-67067-2_13">
+ *          Luca Negrini, Vincenzo Arceri, Pietro Ferrara, Agostino Cortesi.
+ *          Twinning Automata and Regular Expressions for String Static
+ *          Analysis. In Verification, Model Checking, and Abstract
+ *          Interpretation (VMCAI 2021), LNCS vol. 12597, pages 267-290,
+ *          Springer, 2021.</a>
  */
 public class Tarsis
 		implements
@@ -326,6 +341,17 @@ public class Tarsis
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
+		if (expression.getOperator() == StringIsSubstringOf.INSTANCE)
+			// the left string is a substring of the right one iff the right
+			// one contains the left one
+			return satisfiesBinaryExpression(
+					new BinaryExpression(expression.getStaticType(), expression.getRight(), expression.getLeft(),
+							StringContains.INSTANCE, expression.getCodeLocation()),
+					right,
+					left,
+					pp,
+					oracle);
+
 		if (left.isTop() || right.isTop())
 			return Satisfiability.UNKNOWN;
 
@@ -802,7 +828,8 @@ public class Tarsis
 					|| operator == StringMatches.INSTANCE
 					|| operator == StringStartsWith.INSTANCE
 					|| operator == StringIsPrefixOf.INSTANCE
-					|| operator == StringIsSuffixOf.INSTANCE) {
+					|| operator == StringIsSuffixOf.INSTANCE
+					|| operator == StringIsSubstringOf.INSTANCE) {
 				Satisfiability sat = satisfies(state, e, pp, oracle);
 				if (sat == Satisfiability.SATISFIED)
 					return ValueDomain.makeEqConstraint(pp.getProgram().getTypes().getBooleanType(), true, e, pp);

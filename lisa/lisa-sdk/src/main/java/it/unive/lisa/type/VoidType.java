@@ -52,7 +52,9 @@ public class VoidType
 	@Override
 	public Type commonSupertype(
 			Type other) {
-		return other == this ? this : Untyped.INSTANCE;
+		// consistent with equals(): any VoidType instance, not just this
+		// exact one, is considered the same type
+		return other instanceof VoidType ? this : Untyped.INSTANCE;
 	}
 
 	@Override

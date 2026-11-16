@@ -1,0 +1,42 @@
+{
+  "warnings" : [ ],
+  "notices" : [ ],
+  "files" : [ "report.json", "untyped_tests.init(tests__this,_untyped_x)_831b3b0dd5a49082d9e10319b00d3452.graph.json", "untyped_tests.main(tests__this,_untyped_x).graph.json", "untyped_tests.rec(tests__this,_untyped_n)_316541fa3dd89b74d1aabf3d0c65b98c.graph.json", "untyped_tests.rec(tests__this,_untyped_n)_76588120c9dd75ff2a165090d64dc78e.graph.json", "untyped_tests.rec(tests__this,_untyped_n)_778d2006e758d066de267f04873c911f.graph.json", "untyped_tests.rec(tests__this,_untyped_n)_7c4b1a4ad2771898046267d3463802b2.graph.json", "untyped_tests.rec(tests__this,_untyped_n)_e930527fefab575d98148428a7601143.graph.json" ],
+  "info" : {
+    "cfgs" : "3",
+    "duration" : "37ms",
+    "end" : "2026-10-28T19:53:58.233+01:00",
+    "expressions" : "22",
+    "files" : "7",
+    "globals" : "0",
+    "members" : "3",
+    "notices" : "0",
+    "programs" : "1",
+    "start" : "2026-10-28T19:53:58.196+01:00",
+    "statements" : "9",
+    "units" : "1",
+    "version" : "1.0",
+    "warnings" : "0"
+  },
+  "configuration" : {
+    "asynchronousListeners" : "",
+    "backwardDescendingFixpoint" : "unset",
+    "backwardFixpoint" : "BackwardAscendingFixpoint",
+    "dumpForcesUnwinding" : "false",
+    "fixpointWorkingSet" : "OrderBasedWorkingSet",
+    "forwardDescendingFixpoint" : "unset",
+    "forwardFixpoint" : "ForwardAscendingFixpoint",
+    "glbThreshold" : "5",
+    "hotspots" : "unset",
+    "openCallPolicy" : "TopExecutionPolicy",
+    "outputs" : "JSONReportDumper, JSONResults",
+    "recursionWideningThreshold" : "5",
+    "semanticChecks" : "",
+    "shouldSmashError" : "unset",
+    "synchronousListeners" : "",
+    "syntacticChecks" : "",
+    "useWideningPoints" : "true",
+    "wideningThreshold" : "5",
+    "workdir" : "test-outputs/interprocedural/unreachableBaseCase/inlined"
+  }
+}

@@ -69,9 +69,9 @@ public class FileManager {
 	 * Creates a UTF-8 encoded file with the given name, appending the
 	 * {@code dot} extension. The name will be stripped of any characters that
 	 * might cause problems in the file name. The given name will be joined with
-	 * the workdir used to initialize this file manager, thus raising an
-	 * exception if {@code name} is absolute. {@code filler} will then be used
-	 * to write to the writer.
+	 * the workdir used to initialize this file manager; {@code name} is treated
+	 * as relative to that workdir even if it looks like an absolute path.
+	 * {@code filler} will then be used to write to the writer.
 	 * 
 	 * @param name   the name of the file to create
 	 * @param filler the callback to write to the file
@@ -89,9 +89,9 @@ public class FileManager {
 	 * Creates a UTF-8 encoded file with the given name, appending the
 	 * {@code json} extension. The name will be stripped of any characters that
 	 * might cause problems in the file name. The given name will be joined with
-	 * the workdir used to initialize this file manager, thus raising an
-	 * exception if {@code name} is absolute. {@code filler} will then be used
-	 * to write to the writer.
+	 * the workdir used to initialize this file manager; {@code name} is treated
+	 * as relative to that workdir even if it looks like an absolute path.
+	 * {@code filler} will then be used to write to the writer.
 	 * 
 	 * @param name   the name of the file to create
 	 * @param filler the callback to write to the file
@@ -110,9 +110,9 @@ public class FileManager {
 	 * Creates a UTF-8 encoded file with the given name, appending the
 	 * {@code graphml} extension. The name will be stripped of any characters
 	 * that might cause problems in the file name. The given name will be joined
-	 * with the workdir used to initialize this file manager, thus raising an
-	 * exception if {@code name} is absolute. {@code filler} will then be used
-	 * to write to the writer.
+	 * with the workdir used to initialize this file manager; {@code name} is
+	 * treated as relative to that workdir even if it looks like an absolute
+	 * path. {@code filler} will then be used to write to the writer.
 	 * 
 	 * @param name   the name of the file to create
 	 * @param filler the callback to write to the file
@@ -131,9 +131,9 @@ public class FileManager {
 	 * Creates a UTF-8 encoded file with the given name, appending the
 	 * {@code html} extension. The name will be stripped of any characters that
 	 * might cause problems in the file name. The given name will be joined with
-	 * the workdir used to initialize this file manager, thus raising an
-	 * exception if {@code name} is absolute. {@code filler} will then be used
-	 * to write to the writer.
+	 * the workdir used to initialize this file manager; {@code name} is treated
+	 * as relative to that workdir even if it looks like an absolute path.
+	 * {@code filler} will then be used to write to the writer.
 	 * 
 	 * @param name   the name of the file to create
 	 * @param filler the callback to write to the file
@@ -247,9 +247,10 @@ public class FileManager {
 	/**
 	 * Creates a UTF-8 encoded file with the given name. If name is a path, all
 	 * missing directories will be created as well. The given name will be
-	 * joined with the workdir used to initialize this file manager, thus
-	 * raising an exception if {@code name} is absolute. {@code filler} will
-	 * then be used to write to the writer.
+	 * joined with the workdir used to initialize this file manager;
+	 * {@code name} is treated as relative to that workdir even if it looks like
+	 * an absolute path. {@code filler} will then be used to write to the
+	 * writer.
 	 * 
 	 * @param name   the name of the file to create
 	 * @param filler the callback to write to the file
@@ -266,9 +267,10 @@ public class FileManager {
 	/**
 	 * Creates a UTF-8 encoded file with the given name. If name is a path, all
 	 * missing directories will be created as well. The given name will be
-	 * joined with the workdir used to initialize this file manager, thus
-	 * raising an exception if {@code name} is absolute. {@code filler} will
-	 * then be used to write to the writer.
+	 * joined with the workdir used to initialize this file manager;
+	 * {@code name} is treated as relative to that workdir even if it looks like
+	 * an absolute path. {@code filler} will then be used to write to the
+	 * writer.
 	 * 
 	 * @param path   the sub-path, relative to the workdir, where the file
 	 *                   should be created
@@ -288,9 +290,10 @@ public class FileManager {
 	/**
 	 * Creates a UTF-8 encoded file with the given name. If name is a path, all
 	 * missing directories will be created as well. The given name will be
-	 * joined with the workdir used to initialize this file manager, thus
-	 * raising an exception if {@code name} is absolute. {@code filler} will
-	 * then be used to write to the writer.
+	 * joined with the workdir used to initialize this file manager;
+	 * {@code name} is treated as relative to that workdir even if it looks like
+	 * an absolute path. {@code filler} will then be used to write to the
+	 * writer.
 	 * 
 	 * @param name   the name of the file to create
 	 * @param bom    if {@code true}, the bom marker {@code \ufeff} will be
@@ -311,9 +314,10 @@ public class FileManager {
 	/**
 	 * Creates a UTF-8 encoded file with the given name. If name is a path, all
 	 * missing directories will be created as well. The given name will be
-	 * joined with the workdir used to initialize this file manager, thus
-	 * raising an exception if {@code name} is absolute. {@code filler} will
-	 * then be used to write to the writer.
+	 * joined with the workdir used to initialize this file manager;
+	 * {@code name} is treated as relative to that workdir even if it looks like
+	 * an absolute path. {@code filler} will then be used to write to the
+	 * writer.
 	 * 
 	 * @param path   the sub-path, relative to the workdir, where the file
 	 *                   should be created
@@ -343,8 +347,9 @@ public class FileManager {
 	 * Creates a {@link BufferedWriter} pointing to an UTF-8 encoded file with
 	 * the given name. If name is a path, all missing directories will be
 	 * created as well. The given name will be joined with the workdir used to
-	 * initialize this file manager, thus raising an exception if {@code name}
-	 * is absolute. If the file already exists, it will be truncated.
+	 * initialize this file manager, with {@code name} treated as relative to
+	 * the workdir even if it looks like an absolute path. If the file already
+	 * exists, it will be truncated.
 	 * 
 	 * @param name the name of the file to create
 	 * 
@@ -362,8 +367,9 @@ public class FileManager {
 	 * Creates a {@link BufferedWriter} pointing to an UTF-8 encoded file with
 	 * the given name. If name is a path, all missing directories will be
 	 * created as well. The given name will be joined with the workdir used to
-	 * initialize this file manager, thus raising an exception if {@code name}
-	 * is absolute. If the file already exists, it will be truncated.
+	 * initialize this file manager, with {@code name} treated as relative to
+	 * the workdir even if it looks like an absolute path. If the file already
+	 * exists, it will be truncated.
 	 * 
 	 * @param path the sub-path, relative to the workdir, where the file should
 	 *                 be created
@@ -384,8 +390,9 @@ public class FileManager {
 	 * Creates a {@link BufferedWriter} pointing to an UTF-8 encoded file with
 	 * the given name. If name is a path, all missing directories will be
 	 * created as well. The given name will be joined with the workdir used to
-	 * initialize this file manager, thus raising an exception if {@code name}
-	 * is absolute. If the file already exists, it will be truncated.
+	 * initialize this file manager, with {@code name} treated as relative to
+	 * the workdir even if it looks like an absolute path. If the file already
+	 * exists, it will be truncated.
 	 * 
 	 * @param name the name of the file to create
 	 * @param bom  if {@code true}, the bom marker {@code \ufeff} will be
@@ -407,8 +414,9 @@ public class FileManager {
 	 * Creates a {@link BufferedWriter} pointing to an UTF-8 encoded file with
 	 * the given name. If name is a path, all missing directories will be
 	 * created as well. The given name will be joined with the workdir used to
-	 * initialize this file manager, thus raising an exception if {@code name}
-	 * is absolute. If the file already exists, it will be truncated.
+	 * initialize this file manager, with {@code name} treated as relative to
+	 * the workdir even if it looks like an absolute path. If the file already
+	 * exists, it will be truncated.
 	 * 
 	 * @param path the sub-path, relative to the workdir, where the file should
 	 *                 be created

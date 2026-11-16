@@ -1,0 +1,17 @@
+digraph "untyped A::getPositive(A* this, untyped i)" {
+edge ["dir"="forward"]
+graph ["label"="untyped A::getPositive(A* this, untyped i)","labelloc"="t"]
+"node0" ["label"=<&lt;=(i, 0)<br/><br/>{ expressions: [i &lt;= 0],<br/>state: { heap: monolith,<br/>type: { ['imp-testcases/visualization/visualization.imp':30:18]:call_ret_value@'imp-testcases/visualization/visualization.imp':30:32: [int32],<br/>i: [int32],<br/>this: #TOP# },<br/>value: { ['imp-testcases/visualization/visualization.imp':30:18]:call_ret_value@'imp-testcases/visualization/visualization.imp':30:32: [1, 1],<br/>i: [1, 1],<br/>this: [-Inf, +Inf] }<br/> }<br/> }<br/>>,"shape"="rect","id"="node0","style"="dashed"]
+"node3" ["label"=<i = 1<br/><br/>{ expressions: [i],<br/>state: _|_ }<br/>>,"shape"="rect","id"="node3","color"="gray"]
+"node6" ["label"=<i = 10<br/><br/>{ expressions: [i],<br/>state: { heap: monolith,<br/>type: { ['imp-testcases/visualization/visualization.imp':30:18]:call_ret_value@'imp-testcases/visualization/visualization.imp':30:32: [int32],<br/>i: [int32],<br/>this: #TOP# },<br/>value: { ['imp-testcases/visualization/visualization.imp':30:18]:call_ret_value@'imp-testcases/visualization/visualization.imp':30:32: [1, 1],<br/>i: [10, 10],<br/>this: [-Inf, +Inf] }<br/> }<br/> }<br/>>,"shape"="rect","id"="node6","color"="gray"]
+"node9" ["label"=<return i<br/><br/>{ expressions: [ret_value@getPositive],<br/>state: { heap: monolith,<br/>type: { ['imp-testcases/visualization/visualization.imp':30:18]:call_ret_value@'imp-testcases/visualization/visualization.imp':30:32: [int32],<br/>i: [int32],<br/>ret_value@getPositive: [int32],<br/>this: #TOP# },<br/>value: { ['imp-testcases/visualization/visualization.imp':30:18]:call_ret_value@'imp-testcases/visualization/visualization.imp':30:32: [1, 1],<br/>i: [10, 10],<br/>ret_value@getPositive: [10, 10],<br/>this: [-Inf, +Inf] }<br/> }<br/> }<br/>>,"shape"="rect","id"="node9"]
+subgraph "cluster_legend" {
+edge ["dir"="none"]
+graph ["label"=<Legend>,"style"="dotted"]
+"legend" ["label"=<<table border="0" cellpadding="2" cellspacing="0" cellborder="0"><tr><td align="right">node border&nbsp;</td><td align="left"><font color="gray">gray</font>, single</td></tr><tr><td align="right">entrypoint border&nbsp;</td><td align="left"><font color="black">black</font>, dashed</td></tr><tr><td align="right">exitpoint border&nbsp;</td><td align="left"><font color="black">black</font>, solid</td></tr><tr><td align="right">sequential edge&nbsp;</td><td align="left"><font color="black">black</font>, solid</td></tr><tr><td align="right">true edge&nbsp;</td><td align="left"><font color="blue">blue</font>, dashed</td></tr><tr><td align="right">false edge&nbsp;</td><td align="left"><font color="red">red</font>, dashed</td></tr><tr><td align="right">error edge&nbsp;</td><td align="left"><font color="orange">orange</font>, dashed</td></tr></table>>,"shape"="none"]
+}
+"node0" -> "node6" ["style"="dashed","color"="red"]
+"node0" -> "node3" ["style"="dashed","color"="blue"]
+"node3" -> "node9"
+"node6" -> "node9"
+}
