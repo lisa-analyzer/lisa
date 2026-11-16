@@ -222,6 +222,38 @@ public class Analysis<
 		return res;
 	}
 
+	/**
+	 * Yields the executions of the given state where the given program point
+	 * computed the given expression, as the domain of this analysis tells them
+	 * (see
+	 * {@link AbstractDomain#restrictTo(AbstractLattice, ProgramPoint, SymbolicExpression)}):
+	 * the state itself for domains that do not know them.
+	 *
+	 * @param state    the state
+	 * @param pp       the program point (e.g., the operand of a statement)
+	 * @param computed the expression computed by the program point
+	 *
+	 * @return the executions of the state where the program point computed
+	 *             the expression
+	 *
+	 * @throws SemanticException if an error occurs during the computation
+	 */
+	public AnalysisState<A> restrictTo(
+			AnalysisState<A> state,
+			ProgramPoint pp,
+			SymbolicExpression computed)
+			throws SemanticException {
+		if (state.getExecution().isBottom())
+			return state;
+		A restricted = domain.restrictTo(state.getExecutionState(), pp, computed);
+		if (restricted == state.getExecutionState())
+			return state;
+		return state.withExecution(new ProgramState<>(
+				restricted,
+				state.getExecutionExpressions(),
+				state.getExecutionInformation()));
+	}
+
 	@Override
 	public AnalysisState<A> assume(
 			AnalysisState<A> state,

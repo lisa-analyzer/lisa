@@ -190,14 +190,15 @@ public class ReplayState<A extends AbstractLattice<A>>
 	 * semantics (e.g., the comprehensions of some frontends): stores never
 	 * stabilize under joins, as each iteration introduces fresh values, so a
 	 * store that does not include the other one is widened to the store losing
-	 * all values (see {@link SymbolicStore#top()}), that includes every store,
-	 * so that the fixpoint converges.
+	 * all values, and the conditions under which they are lost (see
+	 * {@link SymbolicStore#lost()}), that includes every store, so that the
+	 * fixpoint converges, while the traces relying on it are imprecise.
 	 */
 	@Override
 	public ReplayState<A> wideningAux(
 			ReplayState<A> other)
 			throws SemanticException {
-		SymbolicStore widened = other.store.lessOrEqual(store) ? store : store.top();
+		SymbolicStore widened = other.store.lessOrEqual(store) ? store : store.lost();
 		return new ReplayState<>(inner.widening(other.inner), widened);
 	}
 

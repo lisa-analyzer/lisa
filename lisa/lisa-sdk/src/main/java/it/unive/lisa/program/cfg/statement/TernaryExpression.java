@@ -162,7 +162,10 @@ public abstract class TernaryExpression
 		for (SymbolicExpression left : params[0])
 			for (SymbolicExpression middle : params[1])
 				for (SymbolicExpression right : params[2])
-					result = result.lub(fwdTernarySemantics(interprocedural, state, left, middle, right, expressions));
+					// the executions that computed the operands
+					result = result.lub(fwdTernarySemantics(interprocedural,
+							restrictTo(interprocedural, state, left, middle, right), left, middle, right,
+							expressions));
 
 		return result;
 	}
@@ -269,4 +272,21 @@ public abstract class TernaryExpression
 		return fwdTernarySemantics(interprocedural, state, left, middle, right, expressions);
 	}
 
+
+	/**
+	 * Yields the executions of the given state where the operands computed
+	 * the given expressions (see
+	 * {@link it.unive.lisa.analysis.Analysis#restrictTo(AnalysisState, it.unive.lisa.program.cfg.ProgramPoint, SymbolicExpression)}).
+	 */
+	private <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> restrictTo(
+			InterproceduralAnalysis<A, D> interprocedural,
+			AnalysisState<A> state,
+			SymbolicExpression left,
+			SymbolicExpression middle,
+			SymbolicExpression right)
+			throws SemanticException {
+		AnalysisState<A> result = interprocedural.getAnalysis().restrictTo(state, getLeft(), left);
+		result = interprocedural.getAnalysis().restrictTo(result, getMiddle(), middle);
+		return interprocedural.getAnalysis().restrictTo(result, getRight(), right);
+	}
 }

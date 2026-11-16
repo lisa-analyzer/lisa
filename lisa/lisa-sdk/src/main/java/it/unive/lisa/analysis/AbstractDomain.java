@@ -1,6 +1,7 @@
 package it.unive.lisa.analysis;
 
 import it.unive.lisa.interprocedural.ScopeId;
+import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import java.util.ArrayList;
@@ -34,6 +35,34 @@ public interface AbstractDomain<
 	SemanticOracle makeOracle(
 			L state,
 			ScopeId<?> context);
+
+	/**
+	 * Yields the part of the given state made of the executions where the
+	 * given program point computed the given expression, for domains that know
+	 * which executions computed which expressions (e.g., the ones replaying the
+	 * semantics of statements symbolically, where the executions joined from
+	 * different branches might have computed different expressions).
+	 * Statements evaluating their semantics over each combination of the
+	 * expressions computed by their operands use this to evaluate it in the
+	 * executions computing that combination. The default implementation, for
+	 * domains that do not know it, yields the given state.
+	 *
+	 * @param state    the state
+	 * @param pp       the program point (e.g., the operand of a statement)
+	 * @param computed the expression computed by the program point
+	 *
+	 * @return the executions of the state where the program point computed
+	 *             the expression
+	 *
+	 * @throws SemanticException if an error occurs during the computation
+	 */
+	default L restrictTo(
+			L state,
+			ProgramPoint pp,
+			SymbolicExpression computed)
+			throws SemanticException {
+		return state;
+	}
 
 	/**
 	 * Yields all the instances of a specific domain, of class {@code domain},

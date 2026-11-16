@@ -93,7 +93,10 @@ public abstract class BinaryStatement
 		AnalysisState<A> result = state.bottomExecution();
 		for (SymbolicExpression left : params[0])
 			for (SymbolicExpression right : params[1])
-				result = result.lub(fwdBinarySemantics(interprocedural, state, left, right, expressions));
+				// the executions that computed the operands
+				result = result.lub(fwdBinarySemantics(interprocedural,
+						restrictTo(interprocedural, state, left, right), left, right,
+						expressions));
 
 		return result;
 	}
@@ -191,4 +194,19 @@ public abstract class BinaryStatement
 		return fwdBinarySemantics(interprocedural, state, left, right, expressions);
 	}
 
+
+	/**
+	 * Yields the executions of the given state where the operands computed
+	 * the given expressions (see
+	 * {@link it.unive.lisa.analysis.Analysis#restrictTo(AnalysisState, it.unive.lisa.program.cfg.ProgramPoint, SymbolicExpression)}).
+	 */
+	private <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> restrictTo(
+			InterproceduralAnalysis<A, D> interprocedural,
+			AnalysisState<A> state,
+			SymbolicExpression left,
+			SymbolicExpression right)
+			throws SemanticException {
+		AnalysisState<A> result = interprocedural.getAnalysis().restrictTo(state, getLeft(), left);
+		return interprocedural.getAnalysis().restrictTo(result, getRight(), right);
+	}
 }

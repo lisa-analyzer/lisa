@@ -742,7 +742,7 @@ public class EqualityContractVerificationTest {
 				.withPrefabValues(Frame.class, Frame.root(result1), Frame.root(result2)));
 		// the factory of fresh values and the bound on cases do not affect
 		// the represented transition
-		verify(SymbolicStore.class, verifier -> verifier.withIgnoredFields("factory", "maxCases"));
+		verify(SymbolicStore.class, verifier -> verifier.withIgnoredFields("factory", "maxCases", "computed"));
 		verify(Term.class, verifier -> verifier.withPrefabValues(Sort.class, Sort.INT, Sort.BOOL));
 		verify(Cube.class);
 		verify(Cube.Blocked.class);

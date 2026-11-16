@@ -26,6 +26,7 @@ import it.unive.lisa.symbolic.value.PushAny;
 import it.unive.lisa.symbolic.value.TernaryExpression;
 import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.symbolic.value.operator.binary.LogicalAnd;
+import it.unive.lisa.symbolic.value.operator.binary.TypeCheck;
 import it.unive.lisa.symbolic.value.operator.unary.LogicalNegation;
 import it.unive.lisa.triage.encoding.SortPolicy;
 import it.unive.lisa.triage.inputs.InputSource;
@@ -665,6 +666,11 @@ public final class AlarmModelBuilder {
 				// decided by the analysis
 				if (!knowsAll(pre, conditionIds.get(cond)))
 					continue;
+				// tests of runtime types are decided by the analysis as casts
+				// (e.g., any numeric value can be cast to any numeric type),
+				// while the model tests the runtime types of the values
+				if (testsTypes(cond))
+					continue;
 				try {
 					// an analysis without events, as the queries are not part
 					// of the fixpoint computation
@@ -1002,6 +1008,24 @@ public final class AlarmModelBuilder {
 			stores.add(tr.getExit());
 		stores.addAll(tr.getErrors().values());
 		return stores;
+	}
+
+	/**
+	 * Yields whether the given expression tests the runtime type of a value
+	 * (see {@link TypeCheck}).
+	 */
+	private static boolean testsTypes(
+			SymbolicExpression e) {
+		if (e instanceof UnaryExpression)
+			return testsTypes(((UnaryExpression) e).getExpression());
+		if (e instanceof BinaryExpression)
+			return ((BinaryExpression) e).getOperator() instanceof TypeCheck
+					|| testsTypes(((BinaryExpression) e).getLeft())
+					|| testsTypes(((BinaryExpression) e).getRight());
+		if (e instanceof TernaryExpression)
+			return testsTypes(((TernaryExpression) e).getLeft()) || testsTypes(((TernaryExpression) e).getMiddle())
+					|| testsTypes(((TernaryExpression) e).getRight());
+		return false;
 	}
 
 	private static void collect(

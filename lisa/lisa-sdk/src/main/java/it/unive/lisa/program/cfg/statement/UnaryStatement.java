@@ -79,7 +79,9 @@ public abstract class UnaryStatement
 			throws SemanticException {
 		AnalysisState<A> result = state.bottomExecution();
 		for (SymbolicExpression expr : params[0])
-			result = result.lub(fwdUnarySemantics(interprocedural, state, expr, expressions));
+			// the executions that computed the operand
+			result = result.lub(fwdUnarySemantics(interprocedural, interprocedural.getAnalysis().restrictTo(state, getSubExpression(), expr), expr,
+					expressions));
 		return result;
 	}
 

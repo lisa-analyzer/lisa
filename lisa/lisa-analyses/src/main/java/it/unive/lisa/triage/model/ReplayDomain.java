@@ -96,7 +96,9 @@ public class ReplayDomain<A extends AbstractLattice<A>, D extends AbstractDomain
 			return state.withInner(inner);
 		// only the cases that computed the expression assign it (see
 		// SymbolicStore#restrictTo)
-		return new ReplayState<>(inner, state.getStore().restrictTo(expression).assign(id, expression, pp));
+		// and the point computed the identifier
+		return new ReplayState<>(inner,
+				state.getStore().restrictTo(expression).assign(id, expression, pp).computing(id, pp));
 	}
 
 	@Override
@@ -110,12 +112,11 @@ public class ReplayDomain<A extends AbstractLattice<A>, D extends AbstractDomain
 		if (inner.isBottom())
 			return state.withInner(inner);
 		// only the cases that computed the operands of the expression compute
-		// it (see SymbolicStore#restrictTo), and they all compute it (reads
-		// of identifiers are not recorded, as identifiers might be read
-		// again independently of their computation)
-		SymbolicStore store = state.getStore().restrictTo(expression);
-		if (!(expression instanceof Identifier))
-			store = store.computing(expression);
+		// it (see SymbolicStore#restrictTo), and they all compute it (also
+		// reads of identifiers: as the computed expressions are recognized by
+		// identity, another read of the same identifier is not mistaken for
+		// this one)
+		SymbolicStore store = state.getStore().restrictTo(expression).computing(expression, pp);
 		if (expression instanceof MemoryAllocation)
 			// the allocation yields a new reference
 			return new ReplayState<>(inner, store.allocate((MemoryAllocation) expression, pp));
@@ -140,6 +141,17 @@ public class ReplayDomain<A extends AbstractLattice<A>, D extends AbstractDomain
 		// only the cases that computed the condition assume it (see
 		// SymbolicStore#restrictTo)
 		return new ReplayState<>(inner, state.getStore().restrictTo(expression).assume(expression, src));
+	}
+
+	@Override
+	public ReplayState<A> restrictTo(
+			ReplayState<A> state,
+			ProgramPoint pp,
+			SymbolicExpression computed) {
+		// only the cases where the point computed the expression (see
+		// SymbolicStore#restrictTo)
+		SymbolicStore store = state.getStore().restrictTo(pp, computed);
+		return store == state.getStore() ? state : new ReplayState<>(state.getInner(), store);
 	}
 
 	@Override
