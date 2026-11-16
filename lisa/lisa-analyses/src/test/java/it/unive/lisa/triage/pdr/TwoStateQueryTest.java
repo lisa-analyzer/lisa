@@ -38,6 +38,10 @@ import it.unive.lisa.triage.smt.SmtResult;
 import it.unive.lisa.triage.smt.SmtSolver;
 import it.unive.lisa.triage.smt.Term;
 import it.unive.lisa.type.Untyped;
+import java.util.ArrayList;
+import it.unive.lisa.symbolic.SymbolicExpression;
+import it.unive.lisa.symbolic.value.UnaryExpression;
+import it.unive.lisa.symbolic.value.operator.unary.LogicalNegation;
 import java.nio.file.Files;
 import java.util.List;
 import org.junit.jupiter.api.BeforeAll;
@@ -133,8 +137,13 @@ public class TwoStateQueryTest {
 			Cube cube)
 			throws SemanticException {
 		ModelLocation src = edge.getSource();
-		List<Term> query = List.of(u.at(0, src), u.seeds(src, 0),
-				lemma == null ? Term.TRUE : lemma.at(u, 0), u.transition(0, edge), cube.at(u, 1, "#cube"));
+		List<Term> query = new ArrayList<>(List.of(u.at(0, src), u.seeds(src, 0),
+				lemma == null ? Term.TRUE : lemma.at(u, 0), u.transition(0, edge), cube.at(u, 1, "#cube")));
+		// the candidate invariants of the model (here, that x is an int, as
+		// tested before the guard) are inductive: searches keep them
+		for (SymbolicExpression cand : u.getModel().getCandidates(src))
+			query.add(new Cube(List.of(new UnaryExpression(BoolType.INSTANCE, cand, LogicalNegation.INSTANCE,
+					SyntheticLocation.INSTANCE))).negate().at(u, 0));
 		s.push();
 		for (Term t : query)
 			s.assertTerm(t);

@@ -69,6 +69,8 @@ public class AlarmModel {
 
 	private final Map<ModelLocation, Set<SymbolicExpression>> seeds;
 
+	private final Map<ModelLocation, Set<SymbolicExpression>> candidates;
+
 	private final Set<Identifier> vocabulary;
 
 	private final SortPolicy sorts;
@@ -176,6 +178,7 @@ public class AlarmModel {
 		this.initialConstraints = Collections.unmodifiableSet(initialConstraints);
 		this.badCases = Collections.unmodifiableList(badCases);
 		this.seeds = Collections.unmodifiableMap(seeds);
+		this.candidates = Collections.emptyMap();
 		this.vocabulary = Collections.unmodifiableSet(vocabulary);
 		this.sorts = sorts;
 		this.freshValues = Collections.unmodifiableMap(freshValues);
@@ -196,7 +199,62 @@ public class AlarmModel {
 	public AlarmModel withSorts(
 			SortPolicy sorts) {
 		return new AlarmModel(root, badLocation, locations, initial, transitions, initialConstraints, badCases,
-				seeds, vocabulary, sorts, freshValues, parameters, confirmable, frames, truncated);
+				seeds, vocabulary, sorts, freshValues, parameters, confirmable, frames, truncated)
+				.withCandidates(candidates);
+	}
+
+	/**
+	 * Yields a copy of this model with the given candidate invariants: unlike
+	 * the seeds ({@link #getSeeds(ModelLocation)}), they are not known to hold,
+	 * and searches keep them only if they are inductive (e.g., conditions that
+	 * the analysis decides with a meaning different from the one of the
+	 * model).
+	 *
+	 * @param candidates the candidate invariants of each location
+	 *
+	 * @return the copy
+	 */
+	public AlarmModel withCandidates(
+			Map<ModelLocation, Set<SymbolicExpression>> candidates) {
+		if (candidates.isEmpty() && this.candidates.isEmpty())
+			return this;
+		return new AlarmModel(this, candidates);
+	}
+
+	private AlarmModel(
+			AlarmModel other,
+			Map<ModelLocation, Set<SymbolicExpression>> candidates) {
+		this.root = other.root;
+		this.badLocation = other.badLocation;
+		this.locations = other.locations;
+		this.initial = other.initial;
+		this.transitions = other.transitions;
+		this.initialConstraints = other.initialConstraints;
+		this.badCases = other.badCases;
+		this.seeds = other.seeds;
+		Map<ModelLocation, Set<SymbolicExpression>> kept = new LinkedHashMap<>(candidates);
+		kept.keySet().retainAll(other.locations);
+		this.candidates = Collections.unmodifiableMap(kept);
+		this.vocabulary = other.vocabulary;
+		this.sorts = other.sorts;
+		this.freshValues = other.freshValues;
+		this.parameters = other.parameters;
+		this.confirmable = other.confirmable;
+		this.frames = other.frames;
+		this.truncated = other.truncated;
+	}
+
+	/**
+	 * Yields the candidate invariants of the given location (see
+	 * {@link #withCandidates(Map)}).
+	 *
+	 * @param location the location
+	 *
+	 * @return the candidates (possibly empty)
+	 */
+	public Set<SymbolicExpression> getCandidates(
+			ModelLocation location) {
+		return candidates.getOrDefault(location, Collections.emptySet());
 	}
 
 	/**
@@ -294,7 +352,7 @@ public class AlarmModel {
 		for (FreshValueFactory factory : factories)
 			fresh.putAll(factory.getValues());
 		return new AlarmModel(root, badLocation, kept, initial, trs, initialConstraints, badCases, sds, vocabulary,
-				sorts, fresh, parameters, confirmable, frames, truncated);
+				sorts, fresh, parameters, confirmable, frames, truncated).withCandidates(candidates);
 	}
 
 	/**
@@ -650,6 +708,8 @@ public class AlarmModel {
 			sb.append("\n");
 			Set<SymbolicExpression> inv = seeds.get(loc);
 			sb.append("  invariant: ").append(inv == null ? "unreachable" : inv).append("\n");
+			if (candidates.containsKey(loc))
+				sb.append("  candidates: ").append(candidates.get(loc)).append("\n");
 			for (EdgeTransition edge : getTransitions(loc)) {
 				sb.append("  -> ").append(edge.getDestination()).append(" (")
 						.append(edge.getEdge() == null ? "synthetic" : edge.getEdge().getClass().getSimpleName())

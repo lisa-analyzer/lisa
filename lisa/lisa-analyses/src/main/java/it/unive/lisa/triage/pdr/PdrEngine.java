@@ -705,7 +705,8 @@ public class PdrEngine {
 	 * Checks candidate invariants, in the style of Houdini: at each location,
 	 * the candidates are the equalities and inequalities between the integer
 	 * variables relevant at the location, and between them and the integer
-	 * constants of the model. Candidates that do not hold in the initial
+	 * constants of the model, together with the candidates of the model at the
+	 * location (see {@link AlarmModel#getCandidates(ModelLocation)}). Candidates that do not hold in the initial
 	 * states, or that are not preserved by the transitions reaching their
 	 * location (assuming all the remaining candidates at the sources, together
 	 * with the invariants computed by the analysis), are dropped until the
@@ -864,6 +865,15 @@ public class PdrEngine {
 				if (relevant.contains(id) && vars.size() < MAX_CANDIDATE_VARIABLES)
 					vars.add(id);
 			Map<Lemma, Term> cands = new LinkedHashMap<>();
+			// the candidates of the model (e.g., conditions decided by the
+			// analysis with a different meaning, see
+			// AlarmModel#withCandidates)
+			for (SymbolicExpression cand : model.getCandidates(loc))
+				if (cands.size() < MAX_CANDIDATES) {
+					SymbolicExpression negated = new UnaryExpression(types.getBooleanType(), cand,
+							LogicalNegation.INSTANCE, SyntheticLocation.INSTANCE);
+					cands.put(new Cube(List.of(negated)).negate(), null);
+				}
 			for (int i = 0; i < vars.size(); i++) {
 				for (int j = i + 1; j < vars.size(); j++) {
 					candidate(cands, vars.get(i), vars.get(j), ComparisonEq.INSTANCE);

@@ -633,7 +633,7 @@ public final class SymbolicCase {
 	 * Yields the type denoted by the given type token, if it is a constant
 	 * denoting a single type, or {@code null}.
 	 */
-	private static Type singleToken(
+	static Type singleToken(
 			SymbolicExpression token) {
 		if (!(token instanceof Constant))
 			return null;
