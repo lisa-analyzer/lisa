@@ -378,6 +378,31 @@ public final class AlarmModelBuilder {
 			ResultCache<A> cache,
 			Reuse reuse)
 			throws SemanticException {
+		return build(tool, result, st, violation, maxCases, expanded, maxLocations, chain, deadline, cache, reuse,
+				violation instanceof ConditionViolation);
+	}
+
+	/**
+	 * Builds the model as
+	 * {@link #build(SemanticTool, AnalyzedCFG, Statement, Violation, int, Set, int, List, long, ResultCache, Reuse)}
+	 * does: if {@code conditionCalls}, the calls evaluated by the node of a
+	 * {@link ConditionViolation} before its condition can be expanded, and the
+	 * condition is checked where the node resumes after them.
+	 */
+	private static <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AlarmModel build(
+			SemanticTool<A, D> tool,
+			AnalyzedCFG<A> result,
+			Statement st,
+			Violation violation,
+			int maxCases,
+			Set<Frame> expanded,
+			int maxLocations,
+			List<Triple<AnalyzedCFG<A>, Statement, CFGCall>> chain,
+			long deadline,
+			ResultCache<A> cache,
+			Reuse reuse,
+			boolean conditionCalls)
+			throws SemanticException {
 		Statement bad = violation instanceof ConditionViolation
 				? rootOf(((ConditionViolation) violation).getWhere())
 				: rootOf(st);
@@ -430,12 +455,13 @@ public final class AlarmModelBuilder {
 			TransitionExtractor<A, D> extractor = extractors.get(loc.getFrame());
 			// calls in the bad node are not expanded, so that the property is
 			// checked at a single location, unless the violation is about the
-			// errors they raise
+			// errors they raise, or the calls are evaluated before the
+			// condition, that is checked where the node resumes after them
 			NodeTransitions tr = reuse == null ? null : reuse.transitions.get(loc);
 			if (tr == null) {
 				tr = extractor.extract(loc,
 						!(loc.getFrame().equals(target) && loc.getNode().equals(bad))
-								|| violation instanceof ErrorViolation);
+								|| violation instanceof ErrorViolation || conditionCalls);
 				if (reuse != null)
 					reuse.transitions.put(loc, tr);
 			}
@@ -487,6 +513,30 @@ public final class AlarmModelBuilder {
 			badLocation = raised;
 			// reaching the location is the violation
 			badCases = List.of(new BadCase(List.of(), null));
+		}
+
+		if (conditionCalls && entersCallees(transitions, target, bad)) {
+			// the condition must be evaluated at a single location of the bad
+			// node, where it resumes after the expanded calls: otherwise
+			// (e.g., when it is evaluated both before and after a call, or
+			// never), the model is built again without expanding them
+			ConditionViolation cond = (ConditionViolation) violation;
+			ModelLocation checked = null;
+			int found = 0;
+			for (Map.Entry<ModelLocation, NodeTransitions> e : transitions.entrySet())
+				if (e.getKey().getFrame().equals(target) && e.getKey().getNode().equals(bad)
+						&& e.getValue().getPartial(cond.getWhere()) != null) {
+					checked = e.getKey();
+					found++;
+				}
+			if (found != 1 || checked.getResumed() == null) {
+				if (reuse != null)
+					reuse.transitions.keySet()
+							.removeIf(l -> l.getFrame().equals(target) && l.getNode().equals(bad));
+				return build(tool, result, st, violation, maxCases, expanded, maxLocations, chain, deadline, cache,
+						reuse, false);
+			}
+			badLocation = checked;
 		}
 
 		if (expansion) {
