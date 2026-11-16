@@ -260,7 +260,7 @@ public class HeapModel {
 	 * @param arrayProperties the names of the variables that, when accessed on
 	 *                            an array, denote a property of the array
 	 *                            (e.g., its length) rather than an index
-	 * @param globals         the names of the global variables that are not
+	 * @param undeclared      the names of the global variables that are not
 	 *                            declared
 	 * @param summaries       the names of the identifiers that, as children of
 	 *                            heap accesses, denote any of several locations
@@ -269,7 +269,7 @@ public class HeapModel {
 	public HeapModel(
 			Program program,
 			Set<String> arrayProperties,
-			Collection<String> globals,
+			Collection<String> undeclared,
 			Set<String> summaries) {
 		this.arrayProperties = arrayProperties;
 		this.summaries = summaries;
@@ -289,7 +289,7 @@ public class HeapModel {
 				if (g.isFinal())
 					finalGlobals.put(name, unit);
 			}
-		this.globals.addAll(globals);
+		this.globals.addAll(undeclared);
 		for (Unit unit : program.getUnits())
 			if (unit instanceof CompilationUnit)
 				for (Global g : ((CompilationUnit) unit).getInstanceGlobals(false)) {
