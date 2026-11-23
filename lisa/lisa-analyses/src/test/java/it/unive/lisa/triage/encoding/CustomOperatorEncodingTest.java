@@ -61,6 +61,7 @@ import it.unive.lisa.type.Type;
 import it.unive.lisa.type.TypeSystem;
 import it.unive.lisa.type.Untyped;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -156,6 +157,16 @@ public class CustomOperatorEncodingTest {
 						Term.app("<=", Sort.BOOL, c, Term.integer('9')));
 				return guarded(ascii, digit, List.of(c), expression);
 			}
+			if (expression.getOperator() instanceof TestCharTest) {
+				// encoded only over ASCII characters
+				Term c = coerce(arg, Sort.INT, expression);
+				Term ascii = Term.and(Term.app(">=", Sort.BOOL, c, Term.integer(0)),
+						Term.app("<", Sort.BOOL, c, Term.integer(128)));
+				TestCharTest op = (TestCharTest) expression.getOperator();
+				Term in = Term.and(Term.app(">=", Sort.BOOL, c, Term.integer(op.from)),
+						Term.app("<=", Sort.BOOL, c, Term.integer(op.to)));
+				return guarded(ascii, in, List.of(c), expression);
+			}
 			return super.encodeUnary(expression, arg);
 		}
 	}
@@ -179,6 +190,54 @@ public class CustomOperatorEncodingTest {
 		@Override
 		public String toString() {
 			return "testisdigit";
+		}
+
+		@Override
+		public Set<Type> typeInference(
+				TypeSystem types,
+				Set<Type> argument) {
+			return Set.of(BoolType.INSTANCE);
+		}
+	}
+
+	/**
+	 * An operator class standing for several functions that LiSA does not
+	 * know, testing whether a character is in a range (as, e.g.,
+	 * {@code Character.isUpperCase} and {@code Character.isLowerCase} in
+	 * Java): its instances are different operations.
+	 */
+	public static class TestCharTest
+			implements
+			UnaryOperator {
+
+		/**
+		 * Tests whether a character is an uppercase letter.
+		 */
+		public static final TestCharTest UPPER = new TestCharTest("isupper", 'A', 'Z');
+
+		/**
+		 * Tests whether a character is a lowercase letter.
+		 */
+		public static final TestCharTest LOWER = new TestCharTest("islower", 'a', 'z');
+
+		private final String name;
+
+		private final int from;
+
+		private final int to;
+
+		private TestCharTest(
+				String name,
+				int from,
+				int to) {
+			this.name = name;
+			this.from = from;
+			this.to = to;
+		}
+
+		@Override
+		public String toString() {
+			return name;
 		}
 
 		@Override
@@ -222,7 +281,26 @@ public class CustomOperatorEncodingTest {
 				SymbolicExpression origin) {
 			return solver.declare("fresh" + (fresh++), sort);
 		}
+
+		@Override
+		public Term apply(
+				String function,
+				Sort result,
+				List<Term> arguments,
+				SymbolicExpression origin,
+				Term guard) {
+			// one function per name and sorts, as in the encodings of the
+			// verifiers
+			List<Sort> sorts = new ArrayList<>();
+			for (Term arg : arguments)
+				sorts.add(arg.getSort());
+			String symbol = functions.computeIfAbsent(function + sorts + result,
+					k -> solver.declareFunction("f" + functions.size(), sorts, result));
+			return Term.app(symbol, result, arguments.toArray(Term[]::new));
+		}
 	}
+
+	private final Map<String, String> functions = new HashMap<>();
 
 	private ExpressionEncoder encoder(
 			ExpressionEncoderFactory factory) {
@@ -303,6 +381,25 @@ public class CustomOperatorEncodingTest {
 		// unknown elsewhere
 		assertEquals(SmtResult.SAT, check(encoder.encodeCondition(isDigit(integer(200)))));
 		assertEquals(SmtResult.SAT, check(Term.not(encoder.encodeCondition(isDigit(integer(200))))));
+	}
+
+	@Test
+	public void differentOperatorsOfTheSameClassAreDifferentFunctions() throws SemanticException {
+		ExpressionEncoder encoder = encoder(TestEncoder::new);
+		Term upper = encoder.encodeCondition(charTest(TestCharTest.UPPER, integer(200)));
+		Term lower = encoder.encodeCondition(charTest(TestCharTest.LOWER, integer(200)));
+		// both unknown outside ASCII, but not forced to be equal
+		assertEquals(SmtResult.SAT, check(Term.and(upper, Term.not(lower))));
+		// the same operation over the same operands still yields the same
+		// value
+		Term again = encoder.encodeCondition(charTest(TestCharTest.UPPER, integer(200)));
+		assertEquals(SmtResult.UNSAT, check(Term.and(upper, Term.not(again))));
+	}
+
+	private static UnaryExpression charTest(
+			TestCharTest op,
+			SymbolicExpression arg) {
+		return new UnaryExpression(BoolType.INSTANCE, arg, op, LOC);
 	}
 
 	private static UnaryExpression isDigit(

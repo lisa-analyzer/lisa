@@ -402,15 +402,9 @@ public class ExpressionEncoder
 	protected Term unsupported(
 			ValueExpression expression,
 			Term... operands) {
-		Object op = expression instanceof UnaryExpression ? ((UnaryExpression) expression).getOperator()
-				: expression instanceof BinaryExpression ? ((BinaryExpression) expression).getOperator()
-						: expression instanceof TernaryExpression ? ((TernaryExpression) expression).getOperator()
-								: null;
-		if (op == null)
+		if (operatorOf(expression) == null)
 			return havoc(expression);
-		// operators that are not equal must denote different functions
-		String function = "$" + op.getClass().getSimpleName() + ":" + op + "#" + Integer.toHexString(op.hashCode());
-		return symbols.unknown(function, ValueSort.SORT, List.of(operands), expression);
+		return symbols.unknown(functionOf(expression), ValueSort.SORT, List.of(operands), expression);
 	}
 
 	/**
@@ -622,8 +616,9 @@ public class ExpressionEncoder
 	 * Yields the encoding of an expression that is precise only when the given
 	 * guard holds (e.g., an operation encoded only over some of the values of
 	 * its operands): the result is the given term if the guard holds, and an
-	 * unknown, but deterministic, function of the given arguments otherwise
-	 * (never precise, see
+	 * unknown, but deterministic, function of the given arguments otherwise,
+	 * specific to the operator of the expression as for
+	 * {@link #unsupported(ValueExpression, Term...)} (never precise, see
 	 * {@link SymbolTable#apply(String, Sort, List, SymbolicExpression, Term)}).
 	 * Encodings that are not valid for all the values of the operands must use
 	 * this (or an equivalent construction) for soundness, rather than yielding
@@ -644,7 +639,7 @@ public class ExpressionEncoder
 			List<Term> arguments,
 			ValueExpression expression) {
 		return Term.ite(guard, term,
-				symbols.apply("$" + operatorOf(expression), term.getSort(), arguments, expression, guard));
+				symbols.apply(functionOf(expression), term.getSort(), arguments, expression, guard));
 	}
 
 	@Override
@@ -1388,15 +1383,39 @@ public class ExpressionEncoder
 		return symbols.apply("$is " + target, Sort.BOOL, List.of(term), origin, Term.FALSE);
 	}
 
-	private static String operatorOf(
+	/**
+	 * Yields the operator of the given expression, or {@code null} if it has
+	 * none.
+	 */
+	private static Object operatorOf(
 			ValueExpression expression) {
 		if (expression instanceof UnaryExpression)
-			return ((UnaryExpression) expression).getOperator().getClass().getSimpleName();
+			return ((UnaryExpression) expression).getOperator();
 		if (expression instanceof BinaryExpression)
-			return ((BinaryExpression) expression).getOperator().getClass().getSimpleName();
+			return ((BinaryExpression) expression).getOperator();
 		if (expression instanceof TernaryExpression)
-			return ((TernaryExpression) expression).getOperator().getClass().getSimpleName();
-		return expression.getClass().getSimpleName();
+			return ((TernaryExpression) expression).getOperator();
+		return null;
+	}
+
+	/**
+	 * Yields the name of the unknown function standing for the operation of
+	 * the given expression (see
+	 * {@link SymbolTable#apply(String, Sort, List, SymbolicExpression, Term)}).
+	 * Unknown functions are identified by their name and the sorts of their
+	 * arguments and result, so operations that are different must yield
+	 * different names, even when their operators are instances of the same
+	 * class (e.g., an operator class standing for several library functions):
+	 * the name is built from the operator itself, and operators that are not
+	 * equal (as by {@link Object#equals(Object)}) are assumed to denote
+	 * different operations. Expressions without an operator are named after
+	 * the expression itself.
+	 */
+	private static String functionOf(
+			ValueExpression expression) {
+		Object op = operatorOf(expression);
+		Object key = op == null ? expression : op;
+		return "$" + key.getClass().getSimpleName() + ":" + key + "#" + Integer.toHexString(key.hashCode());
 	}
 
 	/**
@@ -1475,7 +1494,7 @@ public class ExpressionEncoder
 		for (Term t : operands)
 			wrapped.add(ValueSort.wrap(t));
 		return Term.ite(guard, ValueSort.wrap(result),
-				symbols.apply("$" + operatorOf(expression), ValueSort.SORT, wrapped, expression, guard));
+				symbols.apply(functionOf(expression), ValueSort.SORT, wrapped, expression, guard));
 	}
 
 	/**
