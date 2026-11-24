@@ -731,10 +731,17 @@ public class PdrEngine {
 					Map<Lemma, Term> current = entry.getValue();
 					if (current.isEmpty())
 						continue;
-					if (model.getInitialLocations().contains(loc) && !holdInitially(loc, current, start)) {
-						changed = true;
-						if (current.isEmpty())
-							continue;
+					if (model.getInitialLocations().contains(loc)) {
+						boolean held = holdInitially(loc, current, start);
+						if (queries - start >= MAX_INVARIANT_QUERIES)
+							// some candidates might not have been checked on
+							// the initial states: none is kept
+							return;
+						if (!held) {
+							changed = true;
+							if (current.isEmpty())
+								continue;
+						}
 					}
 					List<Term> steps = new ArrayList<>();
 					for (EdgeTransition e : incoming.getOrDefault(loc, Collections.emptyList())) {
@@ -799,7 +806,9 @@ public class PdrEngine {
 
 	/**
 	 * Drops the given candidates of the given initial location that do not hold
-	 * in its initial states, yielding whether all of them hold.
+	 * in its initial states, yielding whether all of them hold. The check stops
+	 * when the budget of queries is exhausted, possibly leaving candidates that
+	 * have not been checked: the caller must then keep none.
 	 *
 	 * @throws Stop if the budget is exhausted or the solver cannot decide
 	 */

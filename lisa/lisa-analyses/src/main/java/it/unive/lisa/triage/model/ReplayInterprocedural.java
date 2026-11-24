@@ -432,8 +432,10 @@ public class ReplayInterprocedural<A extends AbstractLattice<A>, D extends Abstr
 	 * {@link Reachability#sourceOf(Statement)}), or, if the results do not have
 	 * it (e.g., for calls that frontends perform within other expressions,
 	 * whose parent is the expression performing them), the one after the
-	 * closest expression containing it that the results have. Yields the state
-	 * of the call if none is found.
+	 * closest expression containing it that the results have. If none is
+	 * found, yields the state after the call of the program, that is
+	 * {@code null} if the results do not have it, or might have a bottom
+	 * execution: callers must check both.
 	 */
 	private AnalysisState<A> stateAfter(
 			Call call) {
@@ -675,7 +677,7 @@ public class ReplayInterprocedural<A extends AbstractLattice<A>, D extends Abstr
 		ScopeId<ReplayState<A>> context = getCurrentContext();
 		AnalysisState<A> post = stateAfter(call);
 		A inner;
-		if (!post.getExecution().isBottom())
+		if (post != null && !post.getExecution().isBottom())
 			inner = post.getExecutionState();
 		else {
 			// the state after the call is not part of the results (e.g., the

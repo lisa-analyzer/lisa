@@ -96,8 +96,15 @@ public final class SymbolicStore {
 	 * of this store at that point, e.g., by the statement evaluated last): the
 	 * expressions computed before at other points are kept, as they might still
 	 * be used (e.g., the operands of an expression whose other operands are
-	 * computed afterwards), while the cases whose computed expressions are
-	 * unknown stay so.
+	 * computed afterwards). The cases whose computed expressions are unknown
+	 * stay so, unless all of them are (e.g., after a change of scope, or after
+	 * all values are lost): then, the expressions are tracked again from here,
+	 * as from the identity (see {@link #identity(FreshValueFactory, int)}),
+	 * so that the operations following them are still restricted to the cases
+	 * computing their operands (see
+	 * {@link #restrictTo(ProgramPoint, SymbolicExpression)}). The cases that
+	 * are unknown among known ones stay unknown, as the known ones might have
+	 * computed, at the same point, expressions that the others computed too.
 	 *
 	 * @param expression the expression
 	 * @param point      the program point computing it
@@ -107,16 +114,22 @@ public final class SymbolicStore {
 	public SymbolicStore computing(
 			SymbolicExpression expression,
 			ProgramPoint point) {
-		if (computed.isEmpty() || point == null)
+		if (point == null)
 			return this;
 		ProgramPoint pp = canonical(point);
 		Map<SymbolicCase, Map<ProgramPoint, List<SymbolicExpression>>> tags = new LinkedHashMap<>();
-		for (Map.Entry<SymbolicCase, Map<ProgramPoint, List<SymbolicExpression>>> e : computed.entrySet()) {
-			Map<ProgramPoint, List<SymbolicExpression>> exprs = new LinkedHashMap<>(e.getValue());
+		// if all cases computed unknown expressions, they are tracked again
+		boolean restart = computed.isEmpty();
+		for (SymbolicCase c : cases) {
+			Map<ProgramPoint, List<SymbolicExpression>> known = computed.get(c);
+			if (known == null && !restart)
+				continue;
+			Map<ProgramPoint, List<SymbolicExpression>> exprs = known == null ? new LinkedHashMap<>()
+					: new LinkedHashMap<>(known);
 			List<SymbolicExpression> there = new ArrayList<>(exprs.getOrDefault(pp, Collections.emptyList()));
 			there.add(expression);
 			exprs.put(pp, Collections.unmodifiableList(there));
-			tags.put(e.getKey(), Collections.unmodifiableMap(exprs));
+			tags.put(c, Collections.unmodifiableMap(exprs));
 		}
 		return new SymbolicStore(cases, factory, maxCases, Collections.unmodifiableMap(tags));
 	}
