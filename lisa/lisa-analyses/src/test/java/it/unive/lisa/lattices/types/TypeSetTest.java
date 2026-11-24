@@ -653,7 +653,8 @@ public class TypeSetTest {
 		satisfies(ComparisonEq.INSTANCE, left, left, Satisfiability.SATISFIED);
 		satisfies(ComparisonNe.INSTANCE, left, left, Satisfiability.NOT_SATISFIED);
 		satisfies(TypeCheck.INSTANCE, integer, left, Satisfiability.SATISFIED);
-		satisfies(TypeCheck.INSTANCE, floating, left, Satisfiability.SATISFIED);
+		// a float is not an instance of int, even though it can be cast to it
+		satisfies(TypeCheck.INSTANCE, floating, left, Satisfiability.NOT_SATISFIED);
 		satisfies(TypeCheck.INSTANCE, string, left, Satisfiability.NOT_SATISFIED);
 		satisfies(TypeCheck.INSTANCE, bool, left, Satisfiability.NOT_SATISFIED);
 		satisfies(TypeCheck.INSTANCE, bool_or_string, left, Satisfiability.NOT_SATISFIED);
@@ -670,9 +671,9 @@ public class TypeSetTest {
 		right = new TypeSet(types, new TypeTokenType(Set.of(Int32Type.INSTANCE, StringType.INSTANCE)));
 		satisfies(ComparisonEq.INSTANCE, left, right, Satisfiability.UNKNOWN);
 		satisfies(ComparisonNe.INSTANCE, left, right, Satisfiability.UNKNOWN);
-		satisfies(TypeCheck.INSTANCE, integer, right, Satisfiability.UNKNOWN);
-		satisfies(TypeCheck.INSTANCE, floating, right, Satisfiability.UNKNOWN);
-		satisfies(TypeCheck.INSTANCE, string, right, Satisfiability.UNKNOWN);
+		satisfies(TypeCheck.INSTANCE, integer, right, Satisfiability.SATISFIED);
+		satisfies(TypeCheck.INSTANCE, floating, right, Satisfiability.NOT_SATISFIED);
+		satisfies(TypeCheck.INSTANCE, string, right, Satisfiability.SATISFIED);
 		satisfies(TypeCheck.INSTANCE, bool, right, Satisfiability.NOT_SATISFIED);
 		satisfies(TypeCheck.INSTANCE, bool_or_string, right, Satisfiability.UNKNOWN);
 
@@ -683,9 +684,9 @@ public class TypeSetTest {
 						new TypeTokenType(Collections.singleton(StringType.INSTANCE))));
 		satisfies(ComparisonEq.INSTANCE, left, right, Satisfiability.UNKNOWN);
 		satisfies(ComparisonNe.INSTANCE, left, right, Satisfiability.UNKNOWN);
-		satisfies(TypeCheck.INSTANCE, integer, right, Satisfiability.UNKNOWN);
-		satisfies(TypeCheck.INSTANCE, floating, right, Satisfiability.UNKNOWN);
-		satisfies(TypeCheck.INSTANCE, string, right, Satisfiability.UNKNOWN);
+		satisfies(TypeCheck.INSTANCE, integer, right, Satisfiability.SATISFIED);
+		satisfies(TypeCheck.INSTANCE, floating, right, Satisfiability.NOT_SATISFIED);
+		satisfies(TypeCheck.INSTANCE, string, right, Satisfiability.SATISFIED);
 		satisfies(TypeCheck.INSTANCE, bool, right, Satisfiability.NOT_SATISFIED);
 		satisfies(TypeCheck.INSTANCE, bool_or_string, right, Satisfiability.UNKNOWN);
 	}
@@ -693,6 +694,23 @@ public class TypeSetTest {
 	private final Variable variable = new Variable(Int32Type.INSTANCE, "x", fake.getLocation());
 
 	private final TypeEnvironment<TypeSet> env = new TypeEnvironment<>(string).putState(variable, bool_or_string);
+
+	/**
+	 * Assuming that a value is not an instance of a type keeps its other
+	 * runtime types.
+	 */
+	@Test
+	public void testAssumeNegatedTypeCheck()
+			throws SemanticException {
+		BinaryExpression isBool = new BinaryExpression(BoolType.INSTANCE, variable,
+				new Constant(new TypeTokenType(Collections.singleton(BoolType.INSTANCE)), BoolType.INSTANCE,
+						fake.getLocation()),
+				TypeCheck.INSTANCE, fake.getLocation());
+		TypeEnvironment<TypeSet> act = domain.assumeUnaryExpression(env,
+				new UnaryExpression(BoolType.INSTANCE, isBool, LogicalNegation.INSTANCE, fake.getLocation()), fake,
+				fake, oracle);
+		assertEquals(string, act.getState(variable), "Assume(!(x is bool)) returned wrong result");
+	}
 
 	private void assume(
 			BinaryOperator op,

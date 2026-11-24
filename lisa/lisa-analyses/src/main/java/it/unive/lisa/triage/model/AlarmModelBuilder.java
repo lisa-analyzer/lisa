@@ -686,10 +686,9 @@ public final class AlarmModelBuilder {
 									: null;
 					if (decided == null)
 						continue;
-					// tests of runtime types are decided by the analysis as
-					// casts (e.g., any numeric value can be cast to any
-					// numeric type), while the model tests the runtime types
-					// of the values: where the two might disagree, the
+					// tests of runtime types are decided by the analysis on
+					// the types it infers, while the model tests the sorts
+					// encoding the values: where the two might disagree, the
 					// decision is only a candidate invariant, that searches
 					// keep if it is inductive
 					if (decidesTypeTests(analysis, pre, cond, context, node, typeSorts))
@@ -1028,11 +1027,12 @@ public final class AlarmModelBuilder {
 	/**
 	 * Yields whether the analysis decides the tests of runtime types in the
 	 * given expression (see {@link TypeCheck}) as the model does: the analysis
-	 * decides whether the tested value can be cast to the type (e.g., any
-	 * numeric value can be cast to any numeric type), while the model tests
-	 * whether the value has that type, through the sort encoding it. The two
-	 * agree when every runtime type of the tested value is encoded with the
-	 * sort of the tested type, as for objects tested against their classes.
+	 * decides whether the runtime types it infers for the tested value are
+	 * subtypes of the type, while the model tests whether the value has that
+	 * type through the sort encoding it, and different types might share a
+	 * sort (or a type might be encoded with several). The two agree when every
+	 * runtime type of the tested value is encoded with the sort of the tested
+	 * type, as for objects tested against their classes.
 	 */
 	private static <A extends AbstractLattice<A>, D extends AbstractDomain<A>> boolean decidesTypeTests(
 			Analysis<A, D> analysis,

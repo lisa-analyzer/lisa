@@ -32,7 +32,6 @@ import it.unive.lisa.type.Type;
 import it.unive.lisa.type.TypeSystem;
 import it.unive.lisa.type.TypeTokenType;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 /**
@@ -199,18 +198,27 @@ public class InferredTypes
 					return Satisfiability.UNKNOWN;
 			}
 		} else if (operator == TypeCheck.INSTANCE) {
-			if (evalBinaryExpression(expression.withOperator(TypeCast.INSTANCE), left, right, pp, oracle).isBottom())
-				// no common types, the check will always fail
-				return Satisfiability.NOT_SATISFIED;
-			AtomicBoolean mightFail = new AtomicBoolean();
-			Set<Type> set = types.cast(lelems, relems, mightFail);
-			if (lelems.equals(set) && !mightFail.get())
-				// if all the types stayed in 'set' then the there is no
-				// execution that reach the expression with a type that cannot
-				// be casted, and thus this is a tautology
+			// the check holds if the runtime type of the value is a subtype of
+			// the type of a token (unlike a cast, see TypeCast: e.g., an int is
+			// not an instance of a float, but it can be cast to it)
+			Set<Type> instances = instancesOf(relems, types);
+			if (instances.isEmpty() || lelems.isEmpty())
+				// no type token: this is not a type condition
+				return Satisfiability.UNKNOWN;
+			boolean some = false, all = true;
+			for (Type t : lelems)
+				if (t.isUntyped()) {
+					// an unknown type might be an instance or not
+					some = true;
+					all = false;
+				} else if (instances.contains(t))
+					some = true;
+				else
+					all = false;
+			if (all)
 				return Satisfiability.SATISFIED;
-
-			// sometimes yes, sometimes no
+			if (!some)
+				return Satisfiability.NOT_SATISFIED;
 			return Satisfiability.UNKNOWN;
 		}
 
@@ -252,27 +260,22 @@ public class InferredTypes
 
 		TypeSystem types = src.getProgram().getTypes();
 		Set<Type> elems = eval.isTop() ? types.getTypes() : eval.elements;
-		if (elems.stream().anyMatch(Type::isTypeTokenType))
+		if (elems.stream().noneMatch(Type::isTypeTokenType))
 			// if there is no type token in the evaluation,
 			// this is not a type condition and we cannot
 			// assume anything
 			return environment;
 
-		// these are all types compatible with the type tokens
-		Set<Type> okTypes = elems.stream()
-				.filter(Type::isTypeTokenType)
-				.map(Type::asTypeTokenType)
-				.map(TypeTokenType::getTypes)
-				.flatMap(Set::stream)
-				.flatMap(t -> t.allInstances(types).stream())
-				.collect(Collectors.toSet());
+		// these are all the instances of the types of the tokens
+		Set<Type> okTypes = instancesOf(elems, types);
 
 		TypeSet starting = environment.getState(id);
 		if (eval.isBottom() || starting.isBottom())
 			return environment.bottom();
 		// the top type set has no elements: it stands for all types
 		Set<Type> current = starting.isTop() ? types.getTypes() : starting.elements;
-		// we keep only the ones that can be casted
+		// we keep only the ones that are not instances (an unknown type
+		// might not be one)
 		Set<Type> update = difference(current, okTypes);
 		if (update.isEmpty())
 			return environment.bottom();
@@ -335,9 +338,13 @@ public class InferredTypes
 		else if (operator == ComparisonNe.INSTANCE)
 			// we keep only the types that are not allowed by the type tokens
 			update = difference(current, exactTypes);
-		else if (operator == TypeCheck.INSTANCE)
-			// we keep only the ones that can be casted
-			update = types.cast(current, tokens);
+		else if (operator == TypeCheck.INSTANCE) {
+			// we keep only the instances of the types of the tokens (an
+			// unknown type might be one)
+			Set<Type> instances = instancesOf(tokens, types);
+			update = current.stream().filter(t -> t.isUntyped() || instances.contains(t))
+					.collect(Collectors.toSet());
+		}
 
 		if (update == null)
 			return environment;
@@ -345,6 +352,29 @@ public class InferredTypes
 			return environment.bottom();
 		else
 			return environment.putState(id, new TypeSet(types, update));
+	}
+
+	/**
+	 * Yields the types whose values are instances of the types represented by
+	 * the given type tokens, that is, their subtypes (see
+	 * {@link Type#allInstances(TypeSystem)}). The types that are not
+	 * {@link TypeTokenType}s are ignored.
+	 *
+	 * @param tokens the type tokens
+	 * @param types  the type system
+	 *
+	 * @return the instances of the types of the tokens
+	 */
+	private static Set<Type> instancesOf(
+			Set<Type> tokens,
+			TypeSystem types) {
+		return tokens.stream()
+				.filter(Type::isTypeTokenType)
+				.map(Type::asTypeTokenType)
+				.map(TypeTokenType::getTypes)
+				.flatMap(Set::stream)
+				.flatMap(t -> t.allInstances(types).stream())
+				.collect(Collectors.toSet());
 	}
 
 	/**

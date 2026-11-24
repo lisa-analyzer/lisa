@@ -164,7 +164,7 @@ public class StaticTypes
 
 		TypeSystem types = src.getProgram().getTypes();
 		Set<Type> elems = eval.type.allInstances(types);
-		if (elems.stream().anyMatch(Type::isTypeTokenType))
+		if (elems.stream().noneMatch(Type::isTypeTokenType))
 			// if there is no type token in the evaluation,
 			// this is not a type condition and we cannot
 			// assume anything
