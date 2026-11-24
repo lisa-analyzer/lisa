@@ -145,9 +145,12 @@ public class RecursionSolver<A extends AbstractLattice<A>,
 				ScopeToken scope = new ScopeToken(call);
 				AnalysisState<A> entry = prepareEntryState(call, entryState, parameters, expressions, scope, target)
 						.getLeft();
-				// we are interested in lub/widen only the call parameters
-				recursiveEntry = recursiveEntry.lub(
-						entry.forgetIdentifiersIf(i -> !(i instanceof Variable), call));
+				// we are interested in lub/widen only the call parameters: the
+				// errors and the halting state of the caller are not part of
+				// the entry of the recursion head, and they would otherwise be
+				// injected again at each iteration, one scope deeper
+				AnalysisState<A> params = entry.forgetIdentifiersIf(i -> !(i instanceof Variable), call);
+				recursiveEntry = recursiveEntry.lub(params.bottom().withExecution(params.getExecution()));
 			}
 
 			AnalysisState<A> approx = null;
