@@ -95,7 +95,8 @@ public abstract class BinaryStatement
 			for (SymbolicExpression right : params[1])
 				// the executions that computed the operands
 				result = result.lub(fwdBinarySemantics(interprocedural,
-						restrictTo(interprocedural, state, left, right), left, right,
+						singleValues(params) ? state
+							: restrictTo(interprocedural, state, left, right), left, right,
 						expressions));
 
 		return result;

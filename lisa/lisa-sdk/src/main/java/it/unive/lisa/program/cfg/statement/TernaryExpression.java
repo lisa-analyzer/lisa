@@ -164,7 +164,8 @@ public abstract class TernaryExpression
 				for (SymbolicExpression right : params[2])
 					// the executions that computed the operands
 					result = result.lub(fwdTernarySemantics(interprocedural,
-							restrictTo(interprocedural, state, left, middle, right), left, middle, right,
+							singleValues(params) ? state
+							: restrictTo(interprocedural, state, left, middle, right), left, middle, right,
 							expressions));
 
 		return result;

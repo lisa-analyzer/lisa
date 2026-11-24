@@ -997,12 +997,7 @@ public class AnalysisState<A extends AbstractLattice<A>>
 				Type type,
 				Statement thrower) {
 			this.type = type;
-			if (thrower instanceof Call) {
-				Call original = (Call) thrower;
-				while (original.getSource() != null)
-					original = original.getSource();
-				thrower = original;
-			}
+			thrower = Call.originalOf(thrower);
 			this.thrower = thrower;
 		}
 

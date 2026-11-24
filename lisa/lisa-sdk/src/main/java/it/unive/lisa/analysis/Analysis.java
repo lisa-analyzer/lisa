@@ -797,12 +797,7 @@ public class Analysis<
 		if (state.isBottom() || state.isTop())
 			return state;
 
-		if (target instanceof Call) {
-			Call original = (Call) target;
-			while (original.getSource() != null)
-				original = original.getSource();
-			target = original;
-		}
+		target = Call.originalOf(target);
 
 		if (events != null)
 			events.post(new AnalysisTransferThrowersStart<>(state, target, origin));

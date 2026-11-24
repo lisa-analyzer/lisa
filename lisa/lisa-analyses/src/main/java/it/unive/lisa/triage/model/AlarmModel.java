@@ -170,6 +170,29 @@ public class AlarmModel {
 			boolean confirmable,
 			Set<Frame> frames,
 			boolean truncated) {
+		this(root, badLocation, locations, initial, transitions, initialConstraints, badCases, seeds, vocabulary,
+				sorts, freshValues, parameters, confirmable, frames, truncated, Collections.emptyMap());
+	}
+
+	// the model with the given candidate invariants of each location (see
+	// withCandidates), built at once
+	private AlarmModel(
+			Frame root,
+			ModelLocation badLocation,
+			Set<ModelLocation> locations,
+			Set<ModelLocation> initial,
+			Map<ModelLocation, NodeTransitions> transitions,
+			Set<SymbolicExpression> initialConstraints,
+			List<BadCase> badCases,
+			Map<ModelLocation, Set<SymbolicExpression>> seeds,
+			Set<Identifier> vocabulary,
+			SortPolicy sorts,
+			Map<String, FreshValue> freshValues,
+			Map<Identifier, InputSource> parameters,
+			boolean confirmable,
+			Set<Frame> frames,
+			boolean truncated,
+			Map<ModelLocation, Set<SymbolicExpression>> candidates) {
 		this.root = root;
 		this.badLocation = badLocation;
 		this.locations = Collections.unmodifiableSet(locations);
@@ -178,7 +201,13 @@ public class AlarmModel {
 		this.initialConstraints = Collections.unmodifiableSet(initialConstraints);
 		this.badCases = Collections.unmodifiableList(badCases);
 		this.seeds = Collections.unmodifiableMap(seeds);
-		this.candidates = Collections.emptyMap();
+		if (candidates.isEmpty())
+			this.candidates = Collections.emptyMap();
+		else {
+			Map<ModelLocation, Set<SymbolicExpression>> kept = new LinkedHashMap<>(candidates);
+			kept.keySet().retainAll(locations);
+			this.candidates = Collections.unmodifiableMap(kept);
+		}
 		this.vocabulary = Collections.unmodifiableSet(vocabulary);
 		this.sorts = sorts;
 		this.freshValues = Collections.unmodifiableMap(freshValues);
@@ -199,8 +228,7 @@ public class AlarmModel {
 	public AlarmModel withSorts(
 			SortPolicy sorts) {
 		return new AlarmModel(root, badLocation, locations, initial, transitions, initialConstraints, badCases,
-				seeds, vocabulary, sorts, freshValues, parameters, confirmable, frames, truncated)
-						.withCandidates(candidates);
+				seeds, vocabulary, sorts, freshValues, parameters, confirmable, frames, truncated, candidates);
 	}
 
 	/**
@@ -351,7 +379,7 @@ public class AlarmModel {
 		for (FreshValueFactory factory : factories)
 			fresh.putAll(factory.getValues());
 		return new AlarmModel(root, badLocation, kept, initial, trs, initialConstraints, badCases, sds, vocabulary,
-				sorts, fresh, parameters, confirmable, frames, truncated).withCandidates(candidates);
+				sorts, fresh, parameters, confirmable, frames, truncated, candidates);
 	}
 
 	/**

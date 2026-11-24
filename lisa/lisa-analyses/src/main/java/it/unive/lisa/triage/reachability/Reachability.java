@@ -455,10 +455,7 @@ public class Reachability<A extends AbstractLattice<A>, D extends AbstractDomain
 	 */
 	public static Statement sourceOf(
 			Statement st) {
-		Statement result = st;
-		while (result instanceof Call && ((Call) result).getSource() != null)
-			result = ((Call) result).getSource();
-		return result;
+		return Call.originalOf(st);
 	}
 
 	private static void cfgCallsOf(

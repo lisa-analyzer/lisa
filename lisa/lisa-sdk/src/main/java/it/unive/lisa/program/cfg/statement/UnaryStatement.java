@@ -81,7 +81,8 @@ public abstract class UnaryStatement
 		for (SymbolicExpression expr : params[0])
 			// the executions that computed the operand
 			result = result.lub(fwdUnarySemantics(interprocedural,
-					restrictTo(interprocedural, state, expr), expr,
+					singleValues(params) ? state
+							: restrictTo(interprocedural, state, expr), expr,
 					expressions));
 		return result;
 	}

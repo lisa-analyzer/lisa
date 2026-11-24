@@ -22,6 +22,7 @@ import it.unive.lisa.triage.reachability.Reachability;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
@@ -120,17 +121,27 @@ public final class SymbolicStore {
 		Map<SymbolicCase, Map<ProgramPoint, List<SymbolicExpression>>> tags = new LinkedHashMap<>();
 		// if all cases computed unknown expressions, they are tracked again
 		boolean restart = computed.isEmpty();
+		boolean changed = false;
 		for (SymbolicCase c : cases) {
 			Map<ProgramPoint, List<SymbolicExpression>> known = computed.get(c);
 			if (known == null && !restart)
 				continue;
+			List<SymbolicExpression> previous = known == null ? null : known.get(pp);
+			if (previous != null && previous.stream().anyMatch(e -> e == expression)) {
+				// already recorded
+				tags.put(c, known);
+				continue;
+			}
+			changed = true;
 			Map<ProgramPoint, List<SymbolicExpression>> exprs = known == null ? new LinkedHashMap<>()
 					: new LinkedHashMap<>(known);
-			List<SymbolicExpression> there = new ArrayList<>(exprs.getOrDefault(pp, Collections.emptyList()));
+			List<SymbolicExpression> there = previous == null ? new ArrayList<>() : new ArrayList<>(previous);
 			there.add(expression);
 			exprs.put(pp, Collections.unmodifiableList(there));
 			tags.put(c, Collections.unmodifiableMap(exprs));
 		}
+		if (!changed)
+			return this;
 		return new SymbolicStore(cases, factory, maxCases, Collections.unmodifiableMap(tags));
 	}
 
@@ -153,7 +164,9 @@ public final class SymbolicStore {
 	public SymbolicStore restrictTo(
 			ProgramPoint point,
 			SymbolicExpression expression) {
-		if (computed.isEmpty() || point == null)
+		if (computed.isEmpty() || point == null || cases.size() < 2)
+			// with a single case, nothing is dropped: if the point computed
+			// the expression in some case, it computed it in that one
 			return this;
 		ProgramPoint pp = canonical(point);
 		boolean computedThere = false;
@@ -200,18 +213,22 @@ public final class SymbolicStore {
 	 */
 	public SymbolicStore restrictTo(
 			SymbolicExpression expression) {
-		if (computed.isEmpty())
+		if (computed.isEmpty() || cases.size() < 2)
+			// with a single case, nothing is dropped (see
+			// restrictTo(ProgramPoint, SymbolicExpression))
 			return this;
-		// the points where each computed expression (by identity) is computed
+		// the points where each computed expression (by identity) is
+		// computed, and the computed expressions by equality
 		Map<SymbolicExpression, Set<ProgramPoint>> points = new IdentityHashMap<>();
+		Map<SymbolicExpression, SymbolicExpression> equal = new HashMap<>();
 		for (Map<ProgramPoint, List<SymbolicExpression>> exprs : computed.values())
 			for (Map.Entry<ProgramPoint, List<SymbolicExpression>> e : exprs.entrySet())
-				for (SymbolicExpression x : e.getValue())
+				for (SymbolicExpression x : e.getValue()) {
 					points.computeIfAbsent(x, k -> new HashSet<>()).add(e.getKey());
-		Set<SymbolicExpression> tags = Collections.newSetFromMap(new IdentityHashMap<>());
-		tags.addAll(points.keySet());
+					equal.putIfAbsent(x, x);
+				}
 		List<SymbolicExpression> relevant = new ArrayList<>();
-		collect(expression, tags, relevant);
+		collect(expression, points.keySet(), equal, relevant);
 		SymbolicStore result = this;
 		for (SymbolicExpression r : relevant) {
 			Set<ProgramPoint> where = points.get(r);
@@ -260,6 +277,7 @@ public final class SymbolicStore {
 	private static void collect(
 			SymbolicExpression e,
 			Set<SymbolicExpression> tags,
+			Map<SymbolicExpression, SymbolicExpression> equal,
 			List<SymbolicExpression> relevant) {
 		if (e == null)
 			return;
@@ -267,28 +285,29 @@ public final class SymbolicStore {
 			relevant.add(e);
 			return;
 		}
-		if (!(e instanceof Constant) && !(e instanceof Identifier))
-			for (SymbolicExpression t : tags)
-				if (t.equals(e)) {
-					relevant.add(t);
-					return;
-				}
+		if (!(e instanceof Constant) && !(e instanceof Identifier)) {
+			SymbolicExpression t = equal.get(e);
+			if (t != null) {
+				relevant.add(t);
+				return;
+			}
+		}
 		if (e instanceof UnaryExpression)
-			collect(((UnaryExpression) e).getExpression(), tags, relevant);
+			collect(((UnaryExpression) e).getExpression(), tags, equal, relevant);
 		else if (e instanceof BinaryExpression) {
-			collect(((BinaryExpression) e).getLeft(), tags, relevant);
-			collect(((BinaryExpression) e).getRight(), tags, relevant);
+			collect(((BinaryExpression) e).getLeft(), tags, equal, relevant);
+			collect(((BinaryExpression) e).getRight(), tags, equal, relevant);
 		} else if (e instanceof TernaryExpression) {
-			collect(((TernaryExpression) e).getLeft(), tags, relevant);
-			collect(((TernaryExpression) e).getMiddle(), tags, relevant);
-			collect(((TernaryExpression) e).getRight(), tags, relevant);
+			collect(((TernaryExpression) e).getLeft(), tags, equal, relevant);
+			collect(((TernaryExpression) e).getMiddle(), tags, equal, relevant);
+			collect(((TernaryExpression) e).getRight(), tags, equal, relevant);
 		} else if (e instanceof AccessChild) {
-			collect(((AccessChild) e).getContainer(), tags, relevant);
-			collect(((AccessChild) e).getChild(), tags, relevant);
+			collect(((AccessChild) e).getContainer(), tags, equal, relevant);
+			collect(((AccessChild) e).getChild(), tags, equal, relevant);
 		} else if (e instanceof HeapReference)
-			collect(((HeapReference) e).getExpression(), tags, relevant);
+			collect(((HeapReference) e).getExpression(), tags, equal, relevant);
 		else if (e instanceof HeapDereference)
-			collect(((HeapDereference) e).getExpression(), tags, relevant);
+			collect(((HeapDereference) e).getExpression(), tags, equal, relevant);
 	}
 
 	/**

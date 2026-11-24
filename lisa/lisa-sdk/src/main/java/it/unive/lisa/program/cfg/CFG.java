@@ -877,13 +877,7 @@ public class CFG
 			return Collections.emptyList();
 
 		Statement st = (Statement) pp;
-		if (st instanceof Call) {
-			Call original = (Call) st;
-			while (original.getSource() != null)
-				original = original.getSource();
-			if (original != st)
-				st = original;
-		}
+		st = Call.originalOf(st);
 		if (st instanceof Expression)
 			st = ((Expression) st).getRootStatement();
 

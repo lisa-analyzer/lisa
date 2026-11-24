@@ -157,12 +157,7 @@ public class AnalyzedCFG<A extends AbstractLattice<A>>
 	public AnalysisState<A> getAnalysisStateBefore(
 			Statement st)
 			throws SemanticException {
-		if (st instanceof Call) {
-			Call original = (Call) st;
-			while (original.getSource() != null)
-				original = original.getSource();
-			st = original;
-		}
+		st = Call.originalOf(st);
 
 		if (!(st instanceof Expression) || ((Expression) st).getParentStatement() == null)
 			if (getEntrypoints().contains(st))
@@ -194,12 +189,7 @@ public class AnalyzedCFG<A extends AbstractLattice<A>>
 	 */
 	public AnalysisState<A> getAnalysisStateAfter(
 			Statement st) {
-		if (st instanceof Call) {
-			Call original = (Call) st;
-			while (original.getSource() != null)
-				original = original.getSource();
-			st = original;
-		}
+		st = Call.originalOf(st);
 
 		return results.getState(st);
 	}

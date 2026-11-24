@@ -156,9 +156,7 @@ public abstract class Expression
 	 */
 	public final Statement getParentStatement() {
 		if (this instanceof Call) {
-			Call original = (Call) this;
-			while (original.getSource() != null)
-				original = original.getSource();
+			Call original = ((Call) this).getOriginal();
 			if (original != this)
 				return original.getParentStatement();
 		}
@@ -178,9 +176,7 @@ public abstract class Expression
 	 */
 	public final Statement getRootStatement() {
 		if (this instanceof Call) {
-			Call original = (Call) this;
-			while (original.getSource() != null)
-				original = original.getSource();
+			Call original = ((Call) this).getOriginal();
 			if (original != this)
 				return original.getRootStatement();
 		}
@@ -198,9 +194,7 @@ public abstract class Expression
 	public Statement getStatementEvaluatedBefore(
 			Statement other) {
 		if (this instanceof Call) {
-			Call original = (Call) this;
-			while (original.getSource() != null)
-				original = original.getSource();
+			Call original = ((Call) this).getOriginal();
 			if (original != this)
 				return original.getStatementEvaluatedBefore(other);
 		}
@@ -215,9 +209,7 @@ public abstract class Expression
 	public Statement getStatementEvaluatedAfter(
 			Statement other) {
 		if (this instanceof Call) {
-			Call original = (Call) this;
-			while (original.getSource() != null)
-				original = original.getSource();
+			Call original = ((Call) this).getOriginal();
 			if (original != this)
 				return original.getStatementEvaluatedAfter(other);
 		}

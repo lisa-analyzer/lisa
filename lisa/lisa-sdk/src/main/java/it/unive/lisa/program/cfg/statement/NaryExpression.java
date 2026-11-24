@@ -313,6 +313,25 @@ public abstract class NaryExpression
 	}
 
 	/**
+	 * Yields whether each sub-expression computed a single expression. Then,
+	 * there is a single combination of them, computed by all the executions
+	 * that record what they computed, and restricting a state to it (see
+	 * {@link #restrictTo(InterproceduralAnalysis, AnalysisState, SymbolicExpression...)})
+	 * keeps all its executions: subclasses can skip it.
+	 * 
+	 * @param params the expressions computed by the sub-expressions
+	 * 
+	 * @return whether each sub-expression computed a single expression
+	 */
+	protected static boolean singleValues(
+			ExpressionSet[] params) {
+		for (ExpressionSet param : params)
+			if (param.size() != 1)
+				return false;
+		return true;
+	}
+
+	/**
 	 * Yields the executions of the given state where the sub-expressions of
 	 * this expression computed the given expressions, the {@code i}-th
 	 * sub-expression computing the {@code i}-th expression (see

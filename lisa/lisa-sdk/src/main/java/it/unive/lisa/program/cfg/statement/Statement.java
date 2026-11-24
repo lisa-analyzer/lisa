@@ -236,9 +236,7 @@ public abstract class Statement
 	 */
 	public final Statement getEvaluationPredecessor() {
 		if (this instanceof Call) {
-			Call original = (Call) this;
-			while (original.getSource() != null)
-				original = original.getSource();
+			Call original = ((Call) this).getOriginal();
 			if (original != this)
 				return getStatementEvaluatedBefore(original);
 		}
@@ -272,9 +270,7 @@ public abstract class Statement
 	 */
 	public final Statement getEvaluationSuccessor() {
 		if (this instanceof Call) {
-			Call original = (Call) this;
-			while (original.getSource() != null)
-				original = original.getSource();
+			Call original = ((Call) this).getOriginal();
 			if (original != this)
 				return getStatementEvaluatedAfter(original);
 		}

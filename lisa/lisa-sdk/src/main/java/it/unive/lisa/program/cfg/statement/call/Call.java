@@ -141,6 +141,34 @@ public abstract class Call
 	}
 
 	/**
+	 * Yields the call of the program this one has been resolved from,
+	 * following the chain of sources (see {@link #getSource()}): this call
+	 * itself if it has no source.
+	 * 
+	 * @return the original call
+	 */
+	public final Call getOriginal() {
+		Call original = this;
+		while (original.getSource() != null)
+			original = original.getSource();
+		return original;
+	}
+
+	/**
+	 * Yields the statement of the program the given one stands for: the
+	 * original call (see {@link #getOriginal()}) if it is a call, the
+	 * statement itself otherwise.
+	 * 
+	 * @param st the statement
+	 * 
+	 * @return the statement of the program
+	 */
+	public static Statement originalOf(
+			Statement st) {
+		return st instanceof Call ? ((Call) st).getOriginal() : st;
+	}
+
+	/**
 	 * Yields the full name of the target of the call. The full name of the
 	 * target of a call follows the following structure:
 	 * {@code qualifier::targetName}, where {@code qualifier} is optional and,

@@ -155,12 +155,7 @@ public class BackwardAnalyzedCFG<
 	 */
 	public AnalysisState<A> getAnalysisStateBefore(
 			Statement st) {
-		if (st instanceof Call) {
-			Call original = (Call) st;
-			while (original.getSource() != null)
-				original = original.getSource();
-			st = original;
-		}
+		st = Call.originalOf(st);
 
 		return results.getState(st);
 	}
@@ -177,12 +172,7 @@ public class BackwardAnalyzedCFG<
 	public AnalysisState<A> getAnalysisStateAfter(
 			Statement st)
 			throws SemanticException {
-		if (st instanceof Call) {
-			Call original = (Call) st;
-			while (original.getSource() != null)
-				original = original.getSource();
-			st = original;
-		}
+		st = Call.originalOf(st);
 
 		if (!(st instanceof Expression) || ((Expression) st).getParentStatement() == null)
 			if (getAllExitpoints().contains(st))
