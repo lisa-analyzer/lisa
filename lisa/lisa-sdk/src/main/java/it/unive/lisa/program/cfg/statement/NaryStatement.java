@@ -12,6 +12,7 @@ import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.statement.evaluation.EvaluationOrder;
 import it.unive.lisa.program.cfg.statement.evaluation.LeftToRightEvaluation;
+import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.util.datastructures.graph.GraphVisitor;
 import java.util.Arrays;
 import java.util.Objects;
@@ -254,6 +255,50 @@ public abstract class NaryStatement
 			// we forget the meta variables now as the values are popped from
 			// the stack here
 			result = result.forgetIdentifiers(sub.getMetaVariables(), this);
+		return result;
+	}
+
+	/**
+	 * Yields the executions of the given state where the sub-expressions of
+	 * this statement computed the given expressions, the {@code i}-th
+	 * sub-expression computing the {@code i}-th expression (see
+	 * {@link it.unive.lisa.analysis.Analysis#restrictTo(AnalysisState, it.unive.lisa.program.cfg.ProgramPoint, SymbolicExpression)}).
+	 * Subclasses evaluating their semantics on each combination of the
+	 * expressions computed by their sub-expressions (as the unary, binary and
+	 * ternary ones do) evaluate each combination in the state restricted by
+	 * this, so that the semantics of a combination happens only in the
+	 * executions computing it (e.g., the replay of the verification of the
+	 * warnings does not pair the value of a branch of a conditional
+	 * expression with the executions of the other one). Expressions beyond
+	 * the sub-expressions (e.g., default values of missing arguments), and
+	 * {@code null} ones, do not restrict the state.
+	 * 
+	 * @param <A>             the kind of {@link AbstractLattice} produced by
+	 *                            the domain {@code D}
+	 * @param <D>             the kind of {@link AbstractDomain} to run during
+	 *                            the analysis
+	 * @param interprocedural the interprocedural analysis of the program to
+	 *                            analyze
+	 * @param state           the state
+	 * @param computed        the expressions computed by the sub-expressions,
+	 *                            in order
+	 * 
+	 * @return the executions of the state where the sub-expressions computed
+	 *             the given expressions
+	 * 
+	 * @throws SemanticException if something goes wrong during the
+	 *                               computation
+	 */
+	protected <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> restrictTo(
+			InterproceduralAnalysis<A, D> interprocedural,
+			AnalysisState<A> state,
+			SymbolicExpression... computed)
+			throws SemanticException {
+		Expression[] subs = getSubExpressions();
+		AnalysisState<A> result = state;
+		for (int i = 0; i < computed.length && i < subs.length; i++)
+			if (computed[i] != null)
+				result = interprocedural.getAnalysis().restrictTo(result, subs[i], computed[i]);
 		return result;
 	}
 
