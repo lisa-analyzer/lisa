@@ -191,6 +191,16 @@ public class FirstViolationVerifier<A extends AbstractLattice<A>, D extends Abst
 	}
 
 	/**
+	 * Yields the time by which every verification of a set of warnings must
+	 * end (see {@link #withDeadline(long)}).
+	 *
+	 * @return the time, or {@code 0} if there is none
+	 */
+	public long getDeadline() {
+		return end;
+	}
+
+	/**
 	 * Sets whether or not the warnings are first verified with the cheap
 	 * verifier (default: {@code true}). Without it, all warnings are verified
 	 * by the expensive one only: note that the expensive verifier built by
