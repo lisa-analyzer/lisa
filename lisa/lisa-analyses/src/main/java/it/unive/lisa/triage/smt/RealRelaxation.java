@@ -1081,14 +1081,14 @@ final class RealRelaxation {
 						return "(to_real " + relax(conversion.get(1), bound) + ")";
 					String bits = relax(arg, bound);
 					int width = width(sort);
-					return "(to_real (ite (bvslt " + bits + " (_ bv0 " + width + ")) (- (bv2int " + bits + ") "
-							+ BigInteger.ONE.shiftLeft(width) + ") (bv2int " + bits + ")))";
+					return "(to_real (ite (bvslt " + bits + " (_ bv0 " + width + ")) (- (bv2nat " + bits + ") "
+							+ BigInteger.ONE.shiftLeft(width) + ") (bv2nat " + bits + ")))";
 				}
 				// bit-vectors without a rounding mode: the bits of a number
 				return uninterpreted(e, ch, bound);
 			}
 			case "to_fp_unsigned":
-				return "(to_real (bv2int " + relax(ch.get(2), bound) + "))";
+				return "(to_real (bv2nat " + relax(ch.get(2), bound) + "))";
 			case "fp.to_sbv":
 			case "fp.to_ubv":
 				return "((_ int2bv " + idx.get(2) + ") (to_int " + relax(ch.get(2), bound) + "))";

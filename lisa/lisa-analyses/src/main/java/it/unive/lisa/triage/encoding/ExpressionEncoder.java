@@ -594,7 +594,7 @@ public class ExpressionEncoder
 		// to decide conversions through real numbers
 		Sort bvSort = Sort.bitVector(bits);
 		Term bv = Term.app("(_ fp.to_sbv " + bits + ")", bvSort, Term.value("RTZ", Sort.ROUNDING_MODE), term);
-		Term unsigned = Term.app("bv2int", Sort.INT, bv);
+		Term unsigned = Term.app("bv2nat", Sort.INT, bv);
 		Term truncated = Term.ite(Term.app("bvslt", Sort.BOOL, bv, Term.value("(_ bv0 " + bits + ")", bvSort)),
 				Term.app("-", Sort.INT, unsigned, Term.integer(BigInteger.ONE.shiftLeft(bits))), unsigned);
 		// numbers beyond the bounds (including infinities) are saturated:
@@ -1539,7 +1539,7 @@ public class ExpressionEncoder
 							: op instanceof BitwiseXor ? "bvxor"
 									: op instanceof BitwiseShiftLeft ? "bvshl"
 											: op instanceof BitwiseShiftRight ? "bvashr" : "bvlshr";
-			Term unsigned = Term.app("bv2int", Sort.INT, Term.app(function, bv, l, r));
+			Term unsigned = Term.app("bv2nat", Sort.INT, Term.app(function, bv, l, r));
 			// the bits are read in two's complement
 			BigInteger half = BigInteger.ONE.shiftLeft(width - 1);
 			return Term.ite(Term.app(">=", Sort.BOOL, unsigned, Term.integer(half)),
