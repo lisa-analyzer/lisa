@@ -224,10 +224,11 @@ public class Analysis<
 
 	/**
 	 * Yields the executions of the given state where the given program point
-	 * computed the given expression, as the domain of this analysis tells them
-	 * (see
+	 * computed the given expression. The domain of this analysis decides which
+	 * executions these are (see
 	 * {@link AbstractDomain#restrictTo(AbstractLattice, ProgramPoint, SymbolicExpression)}):
-	 * the state itself for domains that do not know them.
+	 * domains that do not record what each execution computed yield the state
+	 * itself.
 	 *
 	 * @param state    the state
 	 * @param pp       the program point (e.g., the operand of a statement)

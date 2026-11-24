@@ -107,7 +107,6 @@ public abstract class TernaryStatement
 		for (SymbolicExpression left : params[0])
 			for (SymbolicExpression middle : params[1])
 				for (SymbolicExpression right : params[2])
-					// the executions that computed the operands
 					result = result.lub(fwdTernarySemantics(interprocedural,
 							singleValues(params) ? state
 							: restrictTo(interprocedural, state, left, middle, right), left, middle, right,

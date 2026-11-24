@@ -1,5 +1,8 @@
 package it.unive.lisa.triage.model;
 
+import it.unive.lisa.symbolic.value.operator.binary.TypeCheck;
+import it.unive.lisa.symbolic.value.operator.unary.LogicalNegation;
+import it.unive.lisa.symbolic.value.UnaryExpression;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -68,6 +71,16 @@ public class AlarmModelBuilderTest {
 			+ "    if (x > 0)\n"
 			+ "      throw new A();\n"
 			+ "    return x;\n"
+			+ "  }\n"
+			+ "  typed(n) {\n"
+			+ "    def x = 5;\n"
+			+ "    def t = true;\n"
+			+ "    def w = 0;\n"
+			+ "    if (x is int)\n"
+			+ "      w = 1;\n"
+			+ "    if (t is int)\n"
+			+ "      w = 2;\n"
+			+ "    return w;\n"
 			+ "  }\n"
 			+ "}";
 
@@ -207,6 +220,49 @@ public class AlarmModelBuilderTest {
 			String name) {
 		return model.getVocabulary().stream().filter(i -> i.getName().equals(name)).findFirst()
 				.orElseThrow(() -> new AssertionError("No identifier " + name + " in " + model.getVocabulary()));
+	}
+
+	// whether the given condition is a type test of the identifier with the
+	// given name, possibly negated
+	private static boolean typeTest(
+			SymbolicExpression cond,
+			String name,
+			boolean negated) {
+		if (negated) {
+			if (!(cond instanceof UnaryExpression)
+					|| ((UnaryExpression) cond).getOperator() != LogicalNegation.INSTANCE)
+				return false;
+			cond = ((UnaryExpression) cond).getExpression();
+		}
+		return cond instanceof BinaryExpression && ((BinaryExpression) cond).getOperator() instanceof TypeCheck
+				&& ((BinaryExpression) cond).getLeft() instanceof Identifier
+				&& ((Identifier) ((BinaryExpression) cond).getLeft()).getName().equals(name);
+	}
+
+	/**
+	 * The type tests decided by the analysis are invariants when the model
+	 * encodes the tested values with the sort of the tested type (x is an int,
+	 * tested against int), and only candidate invariants otherwise (t is a
+	 * boolean, encoded with another sort than the one of int).
+	 */
+	@Test
+	public void typeTestsDecidedByTheAnalysis() throws SemanticException {
+		CFG typed = cfg("typed");
+		Statement ret = node(typed, "return");
+		Variable w = new Variable(Untyped.INSTANCE, "w", SyntheticLocation.INSTANCE);
+		BinaryExpression positive = new BinaryExpression(BoolType.INSTANCE, w,
+				new Constant(Int32Type.INSTANCE, 0, SyntheticLocation.INSTANCE), ComparisonGt.INSTANCE,
+				SyntheticLocation.INSTANCE);
+		AlarmModel model = build(typed, ret, Violation.condition(ret, positive));
+
+		Set<SymbolicExpression> seeds = model.getSeeds(at(model, ret));
+		assertNotNull(seeds);
+		Set<SymbolicExpression> candidates = model.getCandidates(at(model, ret));
+		assertTrue(seeds.stream().anyMatch(c -> typeTest(c, "x", false)), "Missing x is int in " + seeds);
+		assertTrue(seeds.stream().noneMatch(c -> typeTest(c, "t", true) || typeTest(c, "t", false)),
+				"Unexpected type test of t in " + seeds);
+		assertTrue(candidates.stream().anyMatch(c -> typeTest(c, "t", true)),
+				"Missing !(t is int) in " + candidates);
 	}
 
 	@Test

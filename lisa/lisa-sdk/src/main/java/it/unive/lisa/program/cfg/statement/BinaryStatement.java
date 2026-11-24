@@ -93,7 +93,6 @@ public abstract class BinaryStatement
 		AnalysisState<A> result = state.bottomExecution();
 		for (SymbolicExpression left : params[0])
 			for (SymbolicExpression right : params[1])
-				// the executions that computed the operands
 				result = result.lub(fwdBinarySemantics(interprocedural,
 						singleValues(params) ? state
 							: restrictTo(interprocedural, state, left, right), left, right,

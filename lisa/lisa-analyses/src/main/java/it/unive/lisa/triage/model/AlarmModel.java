@@ -245,30 +245,8 @@ public class AlarmModel {
 			Map<ModelLocation, Set<SymbolicExpression>> candidates) {
 		if (candidates.isEmpty() && this.candidates.isEmpty())
 			return this;
-		return new AlarmModel(this, candidates);
-	}
-
-	private AlarmModel(
-			AlarmModel other,
-			Map<ModelLocation, Set<SymbolicExpression>> candidates) {
-		this.root = other.root;
-		this.badLocation = other.badLocation;
-		this.locations = other.locations;
-		this.initial = other.initial;
-		this.transitions = other.transitions;
-		this.initialConstraints = other.initialConstraints;
-		this.badCases = other.badCases;
-		this.seeds = other.seeds;
-		Map<ModelLocation, Set<SymbolicExpression>> kept = new LinkedHashMap<>(candidates);
-		kept.keySet().retainAll(other.locations);
-		this.candidates = Collections.unmodifiableMap(kept);
-		this.vocabulary = other.vocabulary;
-		this.sorts = other.sorts;
-		this.freshValues = other.freshValues;
-		this.parameters = other.parameters;
-		this.confirmable = other.confirmable;
-		this.frames = other.frames;
-		this.truncated = other.truncated;
+		return new AlarmModel(root, badLocation, locations, initial, transitions, initialConstraints, badCases,
+				seeds, vocabulary, sorts, freshValues, parameters, confirmable, frames, truncated, candidates);
 	}
 
 	/**

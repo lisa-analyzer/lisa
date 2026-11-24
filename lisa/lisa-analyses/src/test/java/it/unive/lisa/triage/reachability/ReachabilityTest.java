@@ -4,6 +4,7 @@ import static it.unive.lisa.triage.reachability.ReachabilityStatus.POSSIBLY_REAC
 import static it.unive.lisa.triage.reachability.ReachabilityStatus.REACHABLE;
 import static it.unive.lisa.triage.reachability.ReachabilityStatus.UNREACHABLE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
 import it.unive.lisa.TestCallGraph;
 import it.unive.lisa.TestLanguageFeatures;
@@ -48,6 +49,8 @@ import it.unive.lisa.program.cfg.statement.Return;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.VariableRef;
 import it.unive.lisa.program.cfg.statement.call.CFGCall;
+import it.unive.lisa.program.cfg.statement.call.Call;
+import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
 import it.unive.lisa.program.cfg.statement.call.Call.CallType;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
@@ -1157,5 +1160,30 @@ public class ReachabilityTest {
 		assertEquals(VerificationResult.POSSIBLE, verifier.verify(res2, s, Violation.error(B)));
 		assertEquals(VerificationResult.REFUTED, verifier.verify(res2, s, Violation.error(C)));
 		assertEquals(VerificationResult.REFUTED, verifier.verify(res3, n, Violation.error()));
+	}
+
+	/**
+	 * A call resolved from another one stands for the call of the program it
+	 * comes from, following the whole chain of sources; other statements
+	 * stand for themselves.
+	 */
+	@Test
+	public void sourcesOfStatements() {
+		CFG main = cfg("main", true);
+		CFG callee = cfg("callee", false);
+		Statement n = node(main, true);
+		UnresolvedCall original = new UnresolvedCall(main, nextLocation(), CallType.STATIC, "test", "callee");
+		UnresolvedCall intermediate = new UnresolvedCall(main, nextLocation(), CallType.STATIC, "test", "callee");
+		intermediate.setSource(original);
+		CFGCall resolved = new CFGCall(main, nextLocation(), CallType.STATIC, "test", "callee", List.of(callee));
+		resolved.setSource(intermediate);
+
+		assertEquals(n, Reachability.sourceOf(n));
+		assertEquals(original, Reachability.sourceOf(original));
+		assertSame(original, Reachability.sourceOf(resolved));
+		assertSame(original, resolved.getOriginal());
+		assertSame(original, intermediate.getOriginal());
+		assertSame(original, Call.originalOf(resolved));
+		assertSame(n, Call.originalOf(n));
 	}
 }

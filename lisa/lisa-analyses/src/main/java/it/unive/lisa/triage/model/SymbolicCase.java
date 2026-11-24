@@ -445,13 +445,12 @@ public final class SymbolicCase {
 						? HeapModel.definedRead(value, substitute(b.getRight(), factory, pp))
 						: value;
 			}
-			if (b.getOperator() instanceof TypeCheck
-					&& (isReferenceTyped(b.getLeft()) || isReferenceTyped(b.getRight(), singleToken(b.getRight())))) {
+			Type target = b.getOperator() instanceof TypeCheck ? singleToken(b.getRight()) : null;
+			if (b.getOperator() instanceof TypeCheck && (isReferenceTyped(b.getLeft()) || isReference(target))) {
 				// tests of the runtime types of objects (also of values that
 				// are not typed, e.g. in dynamically typed languages, tested
 				// against the type of objects) read the runtime types recorded
 				// by the model
-				Type target = singleToken(b.getRight());
 				Set<Type> instances = target == null ? null : factory.getHeapModel().instancesOf(target);
 				if (instances != null)
 					return new BinaryExpression(b.getStaticType(), substitute(HeapModel.TYPES, factory, pp),
@@ -632,9 +631,11 @@ public final class SymbolicCase {
 		return type.isReferenceType() || type.isPointerType();
 	}
 
-	// whether the given type token denotes the type of references to objects
-	private static boolean isReferenceTyped(
-			SymbolicExpression token,
+	/**
+	 * Yields whether the given type (e.g., the one denoted by a type token) is
+	 * the type of references (or pointers) to objects.
+	 */
+	private static boolean isReference(
 			Type type) {
 		return type != null && (type.isReferenceType() || type.isPointerType());
 	}
@@ -1155,7 +1156,10 @@ public final class SymbolicCase {
 
 	/**
 	 * Yields {@code true} if the path condition of this case is only made of
-	 * summaries of lost conditions (see {@link #withLostConditions}).
+	 * summaries of lost conditions (see {@link #withLostConditions}). This
+	 * holds also for an empty path condition (a case that happens under no
+	 * condition): this is what makes {@link SymbolicStore#top()}, whose case
+	 * has no condition, a top store (see {@link SymbolicStore#isTop()}).
 	 *
 	 * @return whether or not the path condition is lost
 	 */

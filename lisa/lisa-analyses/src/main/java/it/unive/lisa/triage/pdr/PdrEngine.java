@@ -15,7 +15,6 @@ import it.unive.lisa.symbolic.value.operator.binary.ComparisonGe;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonLe;
 import it.unive.lisa.symbolic.value.operator.binary.LogicalAnd;
 import it.unive.lisa.symbolic.value.operator.binary.LogicalOr;
-import it.unive.lisa.symbolic.value.operator.unary.LogicalNegation;
 import it.unive.lisa.triage.bmc.EvaluatedFunctions;
 import it.unive.lisa.triage.bmc.Unrolling;
 import it.unive.lisa.triage.encoding.ExpressionEncoderFactory;
@@ -879,11 +878,8 @@ public class PdrEngine {
 			// analysis with a different meaning, see
 			// AlarmModel#withCandidates)
 			for (SymbolicExpression cand : model.getCandidates(loc))
-				if (cands.size() < MAX_CANDIDATES) {
-					SymbolicExpression negated = new UnaryExpression(types.getBooleanType(), cand,
-							LogicalNegation.INSTANCE, SyntheticLocation.INSTANCE);
-					cands.put(new Cube(List.of(negated)).negate(), null);
-				}
+				if (cands.size() < MAX_CANDIDATES)
+					cands.put(Cube.holding(cand, types.getBooleanType()), null);
 			for (int i = 0; i < vars.size(); i++) {
 				for (int j = i + 1; j < vars.size(); j++) {
 					candidate(cands, vars.get(i), vars.get(j), ComparisonEq.INSTANCE);
@@ -914,10 +910,7 @@ public class PdrEngine {
 			return;
 		SymbolicExpression relation = new BinaryExpression(types.getBooleanType(), left, right, op,
 				SyntheticLocation.INSTANCE);
-		// the lemma blocking the states where the relation does not hold
-		SymbolicExpression negated = new UnaryExpression(types.getBooleanType(), relation,
-				LogicalNegation.INSTANCE, SyntheticLocation.INSTANCE);
-		candidates.put(new Cube(List.of(negated)).negate(), null);
+		candidates.put(Cube.holding(relation, types.getBooleanType()), null);
 	}
 
 	/**

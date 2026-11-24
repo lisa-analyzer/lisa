@@ -187,11 +187,11 @@ public class ReplayState<A extends AbstractLattice<A>>
 	 * {@inheritDoc}<br>
 	 * <br>
 	 * Widenings happen when statements compute fixpoints within their own
-	 * semantics (e.g., the comprehensions of some frontends): stores never
-	 * stabilize under joins, as each iteration introduces fresh values, so a
-	 * store that does not include the other one is widened to the store losing
-	 * all values, and the conditions under which they are lost (see
-	 * {@link SymbolicStore#lost()}), that includes every store, so that the
+	 * semantics (e.g., the comprehensions of some frontends). Stores never
+	 * stabilize under joins, as each iteration introduces fresh values: if
+	 * this store does not include the other one, the result is the store
+	 * losing all the values and the conditions under which they hold (see
+	 * {@link SymbolicStore#lost()}). That store includes any other one, so the
 	 * fixpoint converges, while the traces relying on it are imprecise.
 	 */
 	@Override

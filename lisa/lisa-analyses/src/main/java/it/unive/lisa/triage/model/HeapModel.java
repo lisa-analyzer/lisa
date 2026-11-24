@@ -269,7 +269,7 @@ public class HeapModel {
 	public HeapModel(
 			Program program,
 			Set<String> arrayProperties,
-			Collection<String> undeclared,
+			Set<String> undeclared,
 			Set<String> summaries) {
 		this.arrayProperties = arrayProperties;
 		this.summaries = summaries;

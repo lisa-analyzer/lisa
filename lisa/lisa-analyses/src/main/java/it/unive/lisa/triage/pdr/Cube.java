@@ -1,5 +1,9 @@
 package it.unive.lisa.triage.pdr;
 
+import java.util.List;
+import it.unive.lisa.type.Type;
+import it.unive.lisa.symbolic.value.operator.unary.LogicalNegation;
+import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.program.SyntheticLocation;
 import it.unive.lisa.symbolic.SymbolicExpression;
@@ -116,6 +120,23 @@ public final class Cube {
 			String tag)
 			throws SemanticException {
 		return unrolling.condition(toExpression(), step, tag);
+	}
+
+	/**
+	 * Yields the lemma stating that the given condition holds, that is, the
+	 * one excluding the states where it does not hold (the cube made of its
+	 * negation).
+	 *
+	 * @param condition   the condition
+	 * @param booleanType the type of booleans
+	 *
+	 * @return the lemma
+	 */
+	public static Lemma holding(
+			SymbolicExpression condition,
+			Type booleanType) {
+		return new Cube(List.of(new UnaryExpression(booleanType, condition, LogicalNegation.INSTANCE,
+				SyntheticLocation.INSTANCE))).negate();
 	}
 
 	/**

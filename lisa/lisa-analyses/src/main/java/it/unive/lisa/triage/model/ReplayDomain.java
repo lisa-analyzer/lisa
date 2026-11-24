@@ -95,8 +95,7 @@ public class ReplayDomain<A extends AbstractLattice<A>, D extends AbstractDomain
 		if (inner.isBottom())
 			return state.withInner(inner);
 		// only the cases that computed the expression assign it (see
-		// SymbolicStore#restrictTo)
-		// and the point computed the identifier
+		// SymbolicStore#restrictTo), and the point computed the identifier
 		return new ReplayState<>(inner,
 				state.getStore().restrictTo(expression).assign(id, expression, pp).computing(id, pp));
 	}

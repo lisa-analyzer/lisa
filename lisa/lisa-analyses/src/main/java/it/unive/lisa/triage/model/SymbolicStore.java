@@ -184,6 +184,9 @@ public final class SymbolicStore {
 			// a case where the point computed other expressions is dropped (a
 			// case where it computed nothing known is kept, as the expressions
 			// of some executions might be computed without the domain)
+			// (whether to restrict is decided by identity above, while the
+			// cases are kept by equality: an equal expression computed at
+			// the point stands for the same value)
 			if (exprs == null || !exprs.containsKey(pp) || exprs.get(pp).contains(expression)) {
 				result.add(c);
 				if (exprs != null)
