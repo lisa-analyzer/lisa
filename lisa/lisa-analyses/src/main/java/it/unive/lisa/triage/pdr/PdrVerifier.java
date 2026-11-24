@@ -76,6 +76,52 @@ import org.apache.commons.lang3.tuple.Triple;
  * reached along it are expanded (see {@link AlarmModelBuilder}), and the search
  * is repeated on the new model. This happens for at most a given number of
  * rounds, and until the model reaches its maximum number of locations.
+ * <p>
+ * Each feature of the verification can be disabled, e.g., to measure its
+ * impact. All of them are enabled by default, except the ones marked as off:
+ * <ul>
+ * <li>the check of the violation against the results of the analysis before
+ * building its model ({@link #withFixpointCheck(boolean)});</li>
+ * <li>the seeds of the frames: the invariants computed by the analysis
+ * ({@link #withSeeding(boolean)}), and the conditions of the models that the
+ * analysis decides ({@link #withDecidedConditions(boolean)});</li>
+ * <li>the candidate invariants checked before the search
+ * ({@link #withInvariants(boolean)});</li>
+ * <li>the generalization of blocked cubes
+ * ({@link #withGeneralization(PdrEngine.Generalization)}, with the domain of
+ * the analysis proposing generalizations by default), and the blocking of the
+ * counterexamples to generalization ({@link #withCtgs(boolean)}, off by
+ * default);</li>
+ * <li>the summaries of recursive members
+ * ({@link #withRecursionSummaries(boolean)});</li>
+ * <li>the global variables and the contents of the heap that the summarized
+ * calls cannot write ({@link #withGlobalWrites(GlobalWrites)} and
+ * {@link #withHeapWrites(HeapWrites)}, unknown by default: frontends provide
+ * them);</li>
+ * <li>the expansion of the calls along imprecise counterexamples
+ * ({@link #withMaxRounds(int)}, {@code 1} disabling it), and the growth of the
+ * bound on cases when counterexamples rely on merged values
+ * ({@link #withCaseGrowth(boolean)});</li>
+ * <li>the models starting from the callers of a violation in a callee
+ * ({@link #withMaxChains(int)}, {@code 0} disabling them);</li>
+ * <li>the simplifications of the models: large blocks
+ * ({@link #withLargeBlocks(boolean)}) and liveness
+ * ({@link #withLiveness(boolean)});</li>
+ * <li>the encoding of the models: the encoders of the frontend
+ * ({@link #withEncoder(ExpressionEncoderFactory)}, LiSA's operators only by
+ * default), and the sorts of the declared types of fields
+ * ({@link #withTypedFields(boolean)});</li>
+ * <li>the restriction of each operation of the replay to the cases computing
+ * its operands ({@link #withCaseRestriction(boolean)});</li>
+ * <li>the searches complementing the main one: the strict search for a precise
+ * counterexample ({@link #withStrictSearch(boolean)}), the search that first
+ * leaves floating point numbers opaque ({@link #withFloatFreeSearch(boolean)}),
+ * the searches repeated with the values of functions computed on the values
+ * of counterexamples ({@link #withFunctionEvaluation(boolean)}), and the order
+ * of the bad cases from the one with the fewest literals when a warning is
+ * verified again with the time left by the others
+ * ({@link #withFewestLiteralsRetry(boolean)}).</li>
+ * </ul>
  *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  *
@@ -147,6 +193,24 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 	public static final int MAX_EVALUATION_ROUNDS = 10;
 
 	private boolean fixpointCheck = true;
+
+	private boolean strictSearch = true;
+
+	private boolean floatFreeSearch = true;
+
+	private boolean caseGrowth = true;
+
+	private boolean functionEvaluation = true;
+
+	private boolean decidedConditions = true;
+
+	private boolean liveness = true;
+
+	private boolean typedFields = true;
+
+	private boolean caseRestriction = true;
+
+	private boolean fewestLiteralsRetry = true;
 
 	private ExpressionEncoderFactory encoders = ExpressionEncoderFactory.DEFAULT;
 
@@ -525,6 +589,155 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 	}
 
 	/**
+	 * Sets whether or not to search, when a counterexample is imprecise and the
+	 * model cannot be refined further, a counterexample where all values are
+	 * computed precisely, with a share of the time left (default:
+	 * {@code true}).
+	 *
+	 * @param strictSearch whether or not to search precise counterexamples
+	 *
+	 * @return this verifier
+	 */
+	public PdrVerifier<A, D> withStrictSearch(
+			boolean strictSearch) {
+		this.strictSearch = strictSearch;
+		return this;
+	}
+
+	/**
+	 * Sets whether or not models involving floating point numbers are first
+	 * searched with them as opaque values, and searched again with them only
+	 * if that search is not conclusive (default: {@code true}). Without it,
+	 * they are searched once, with floating point numbers.
+	 *
+	 * @param floatFreeSearch whether or not to search first without floating
+	 *                            point numbers
+	 *
+	 * @return this verifier
+	 */
+	public PdrVerifier<A, D> withFloatFreeSearch(
+			boolean floatFreeSearch) {
+		this.floatFreeSearch = floatFreeSearch;
+		return this;
+	}
+
+	/**
+	 * Sets whether or not the bound on the cases of the transitions is doubled
+	 * (at most twice) when a counterexample relies on values merged at the
+	 * bound (default: {@code true}).
+	 *
+	 * @param caseGrowth whether or not to grow the bound on cases
+	 *
+	 * @return this verifier
+	 */
+	public PdrVerifier<A, D> withCaseGrowth(
+			boolean caseGrowth) {
+		this.caseGrowth = caseGrowth;
+		return this;
+	}
+
+	/**
+	 * Sets whether or not the searches whose counterexamples rely on wrong
+	 * values of functions computed on concrete values (see
+	 * {@link EvaluatedFunctions}) learn the right values and are repeated (at
+	 * most {@link #MAX_EVALUATION_ROUNDS} times, default: {@code true}).
+	 * Without it, each search is run once, and learns nothing.
+	 *
+	 * @param functionEvaluation whether or not to learn the values of
+	 *                               functions
+	 *
+	 * @return this verifier
+	 */
+	public PdrVerifier<A, D> withFunctionEvaluation(
+			boolean functionEvaluation) {
+		this.functionEvaluation = functionEvaluation;
+		return this;
+	}
+
+	/**
+	 * Sets whether or not the conditions of the models that the analysis
+	 * decides at a location become seeds there (or candidate invariants, for
+	 * type tests decided with a meaning different from the one of the model,
+	 * default: {@code true}, see {@link ResultCache#decidesConditions()}).
+	 *
+	 * @param decidedConditions whether or not to use the conditions decided by
+	 *                              the analysis
+	 *
+	 * @return this verifier
+	 */
+	public PdrVerifier<A, D> withDecidedConditions(
+			boolean decidedConditions) {
+		this.decidedConditions = decidedConditions;
+		return this;
+	}
+
+	/**
+	 * Sets whether or not the transitions of the models constrain only the
+	 * identifiers that are live at their destinations (default: {@code true},
+	 * see {@link AlarmModel#withLiveness(boolean)}).
+	 *
+	 * @param liveness whether or not to use liveness
+	 *
+	 * @return this verifier
+	 */
+	public PdrVerifier<A, D> withLiveness(
+			boolean liveness) {
+		this.liveness = liveness;
+		return this;
+	}
+
+	/**
+	 * Sets whether or not the contents of the fields qualified by their class
+	 * are encoded with the sort of their declared types (default:
+	 * {@code true}, see {@link ResultCache#typedFields()}).
+	 *
+	 * @param typedFields whether or not to encode fields with their declared
+	 *                        types
+	 *
+	 * @return this verifier
+	 */
+	public PdrVerifier<A, D> withTypedFields(
+			boolean typedFields) {
+		this.typedFields = typedFields;
+		return this;
+	}
+
+	/**
+	 * Sets whether or not the replay restricts each operation to the cases of
+	 * the symbolic store computing its operands (default: {@code true}, see
+	 * {@link ResultCache#restrictsCases()}). Without it, after a join of
+	 * executions computing different expressions, every case is paired with
+	 * every expression, so that confirmations might combine the condition of
+	 * a branch with the value of another one.
+	 *
+	 * @param caseRestriction whether or not to restrict the cases
+	 *
+	 * @return this verifier
+	 */
+	public PdrVerifier<A, D> withCaseRestriction(
+			boolean caseRestriction) {
+		this.caseRestriction = caseRestriction;
+		return this;
+	}
+
+	/**
+	 * Sets whether or not the warnings verified again with the time left by
+	 * the other ones (see {@link #setExtendedTimeLimit(long)}) are searched
+	 * checking the bad cases from the one with the fewest literals, instead of
+	 * in the order of the model (default: {@code true}).
+	 *
+	 * @param fewestLiteralsRetry whether or not to change the order of the bad
+	 *                                cases when verifying again
+	 *
+	 * @return this verifier
+	 */
+	public PdrVerifier<A, D> withFewestLiteralsRetry(
+			boolean fewestLiteralsRetry) {
+		this.fewestLiteralsRetry = fewestLiteralsRetry;
+		return this;
+	}
+
+	/**
 	 * Sets whether or not to check the candidate violation against the results
 	 * of the analysis through a {@link ReachabilityVerifier} before building
 	 * its model (default: {@code true}).
@@ -549,6 +762,10 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 		this.cache = new ResultCache<>();
 		this.cache.setGlobalWrites(globalWrites);
 		this.cache.setHeapWrites(heapWrites);
+		this.cache.setDecidesConditions(decidedConditions);
+		this.cache.setLiveness(liveness);
+		this.cache.setTypedFields(typedFields);
+		this.cache.setRestrictsCases(caseRestriction);
 		this.analysis = newAnalysis(tool);
 	}
 
@@ -810,11 +1027,11 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 			// the next round, if any, expands the calls the counterexample
 			// relies on, and keeps more cases if it relies on merged values
 			Set<Frame> more = trace == null ? Collections.emptySet() : model.getExpandableFrames(trace, expanded);
-			boolean grow = merged && cases < maxCases << MAX_CASE_DOUBLINGS;
+			boolean grow = caseGrowth && merged && cases < maxCases << MAX_CASE_DOUBLINGS;
 			boolean refinable = res.getOutcome() == VerificationOutcome.POSSIBLE && round < maxRounds
 					&& !model.isTruncated() && (!more.isEmpty() || grow);
 			VerificationResult strict = null;
-			if (inexact && model.isConfirmable() && !refinable) {
+			if (strictSearch && inexact && model.isConfirmable() && !refinable) {
 				// look for a counterexample where all values are computed
 				// precisely: since the strict encoding under-approximates the
 				// executions, only its counterexamples are meaningful (and
@@ -863,7 +1080,7 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 			AlarmModel model,
 			boolean strict)
 			throws SemanticException {
-		if (!Unrolling.involvesFloats(model) || !model.getSorts().encodesFloats())
+		if (!floatFreeSearch || !Unrolling.involvesFloats(model) || !model.getSorts().encodesFloats())
 			return searchOnce(model, strict);
 
 		// queries over floating point numbers are often hard to decide, and
@@ -914,7 +1131,8 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 			int known = evaluated.size();
 			VerificationResult res = searchEngine(model, strict);
 			if (res.getOutcome() != VerificationOutcome.POSSIBLE || evaluated.size() == known
-					|| round >= MAX_EVALUATION_ROUNDS || System.currentTimeMillis() >= deadline)
+					|| round >= (functionEvaluation ? MAX_EVALUATION_ROUNDS : 1)
+					|| System.currentTimeMillis() >= deadline)
 				return res;
 		}
 	}
@@ -938,7 +1156,7 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 			// setExtendedTimeLimit(long)), after exhausting their own budget
 			// in the order of the model, are verified from the case with the
 			// fewest literals
-			PdrEngine engine = engine(model, s, strict, extended && timeLimit > 0);
+			PdrEngine engine = engine(model, s, strict, fewestLiteralsRetry && extended && timeLimit > 0);
 			// at least one millisecond, as 0 means no limit
 			PdrEngine.Status status = engine.run(maxLevel, maxQueries,
 					Math.max(1, deadline - System.currentTimeMillis()));
@@ -969,7 +1187,9 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 		engine.setSeeding(seeding);
 		engine.setCtgs(ctgs);
 		engine.setInvariants(invariants);
-		engine.setEvaluatedFunctions(evaluated);
+		// without learning, the values of functions are not kept across
+		// searches
+		engine.setEvaluatedFunctions(functionEvaluation ? evaluated : new EvaluatedFunctions());
 		engine.setAbstraction(new DomainAbstraction<>(analysis, cache));
 		engine.setFewestLiteralsFirst(fewestLiteralsFirst);
 		return engine;

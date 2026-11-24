@@ -39,8 +39,11 @@ public class ReplayDomain<A extends AbstractLattice<A>, D extends AbstractDomain
 
 	private final int maxCases;
 
+	private final boolean restricts;
+
 	/**
-	 * Builds the domain.
+	 * Builds the domain, restricting each operation to the cases computing its
+	 * operands.
 	 *
 	 * @param domain   the wrapped domain
 	 * @param factory  the factory of fresh values used by the stores
@@ -50,9 +53,48 @@ public class ReplayDomain<A extends AbstractLattice<A>, D extends AbstractDomain
 			D domain,
 			FreshValueFactory factory,
 			int maxCases) {
+		this(domain, factory, maxCases, true);
+	}
+
+	/**
+	 * Builds the domain.
+	 *
+	 * @param domain    the wrapped domain
+	 * @param factory   the factory of fresh values used by the stores
+	 * @param maxCases  the maximum number of cases of each store
+	 * @param restricts whether each operation is restricted to the cases of
+	 *                      the store computing its operands (see
+	 *                      {@link SymbolicStore#restrictTo(SymbolicExpression)}):
+	 *                      without it, the stores do not record the
+	 *                      expressions computed by their cases, and every case
+	 *                      is paired with every computed expression
+	 */
+	public ReplayDomain(
+			D domain,
+			FreshValueFactory factory,
+			int maxCases,
+			boolean restricts) {
 		this.domain = domain;
 		this.factory = factory;
 		this.maxCases = maxCases;
+		this.restricts = restricts;
+	}
+
+	// the cases of the store that might have computed the given expression
+	// (all of them, if the replay does not restrict them)
+	private SymbolicStore restricted(
+			SymbolicStore store,
+			SymbolicExpression expression) {
+		return restricts ? store.restrictTo(expression) : store;
+	}
+
+	// the store where the given point computed the given expression (that is
+	// not recorded, if the replay does not restrict the cases)
+	private SymbolicStore computing(
+			SymbolicStore store,
+			SymbolicExpression expression,
+			ProgramPoint pp) {
+		return restricts ? store.computing(expression, pp) : store;
 	}
 
 	/**
@@ -97,7 +139,7 @@ public class ReplayDomain<A extends AbstractLattice<A>, D extends AbstractDomain
 		// only the cases that computed the expression assign it (see
 		// SymbolicStore#restrictTo), and the point computed the identifier
 		return new ReplayState<>(inner,
-				state.getStore().restrictTo(expression).assign(id, expression, pp).computing(id, pp));
+				computing(restricted(state.getStore(), expression).assign(id, expression, pp), id, pp));
 	}
 
 	@Override
@@ -115,7 +157,7 @@ public class ReplayDomain<A extends AbstractLattice<A>, D extends AbstractDomain
 		// reads of identifiers: as the computed expressions are recognized by
 		// identity, another read of the same identifier is not mistaken for
 		// this one)
-		SymbolicStore store = state.getStore().restrictTo(expression).computing(expression, pp);
+		SymbolicStore store = computing(restricted(state.getStore(), expression), expression, pp);
 		if (expression instanceof MemoryAllocation)
 			// the allocation yields a new reference
 			return new ReplayState<>(inner, store.allocate((MemoryAllocation) expression, pp));
@@ -139,7 +181,7 @@ public class ReplayDomain<A extends AbstractLattice<A>, D extends AbstractDomain
 			return state.withInner(inner);
 		// only the cases that computed the condition assume it (see
 		// SymbolicStore#restrictTo)
-		return new ReplayState<>(inner, state.getStore().restrictTo(expression).assume(expression, src));
+		return new ReplayState<>(inner, restricted(state.getStore(), expression).assume(expression, src));
 	}
 
 	@Override
@@ -149,7 +191,7 @@ public class ReplayDomain<A extends AbstractLattice<A>, D extends AbstractDomain
 			SymbolicExpression computed) {
 		// only the cases where the point computed the expression (see
 		// SymbolicStore#restrictTo)
-		SymbolicStore store = state.getStore().restrictTo(pp, computed);
+		SymbolicStore store = restricts ? state.getStore().restrictTo(pp, computed) : state.getStore();
 		return store == state.getStore() ? state : new ReplayState<>(state.getInner(), store);
 	}
 

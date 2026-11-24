@@ -86,6 +86,12 @@ public class AlarmModel {
 	private final boolean truncated;
 
 	/**
+	 * Whether the transitions constrain only the identifiers that are live at
+	 * their destinations (see {@link #getLive(ModelLocation)}).
+	 */
+	private final boolean liveness;
+
+	/**
 	 * The identifiers of the vocabulary that are live at each location,
 	 * computed when first needed.
 	 */
@@ -171,11 +177,12 @@ public class AlarmModel {
 			Set<Frame> frames,
 			boolean truncated) {
 		this(root, badLocation, locations, initial, transitions, initialConstraints, badCases, seeds, vocabulary,
-				sorts, freshValues, parameters, confirmable, frames, truncated, Collections.emptyMap());
+				sorts, freshValues, parameters, confirmable, frames, truncated, Collections.emptyMap(), true);
 	}
 
 	// the model with the given candidate invariants of each location (see
-	// withCandidates), built at once
+	// withCandidates) and the given use of liveness (see withLiveness), built
+	// at once
 	private AlarmModel(
 			Frame root,
 			ModelLocation badLocation,
@@ -192,8 +199,10 @@ public class AlarmModel {
 			boolean confirmable,
 			Set<Frame> frames,
 			boolean truncated,
-			Map<ModelLocation, Set<SymbolicExpression>> candidates) {
+			Map<ModelLocation, Set<SymbolicExpression>> candidates,
+			boolean liveness) {
 		this.root = root;
+		this.liveness = liveness;
 		this.badLocation = badLocation;
 		this.locations = Collections.unmodifiableSet(locations);
 		this.initial = Collections.unmodifiableSet(initial);
@@ -228,7 +237,7 @@ public class AlarmModel {
 	public AlarmModel withSorts(
 			SortPolicy sorts) {
 		return new AlarmModel(root, badLocation, locations, initial, transitions, initialConstraints, badCases,
-				seeds, vocabulary, sorts, freshValues, parameters, confirmable, frames, truncated, candidates);
+				seeds, vocabulary, sorts, freshValues, parameters, confirmable, frames, truncated, candidates, liveness);
 	}
 
 	/**
@@ -246,7 +255,7 @@ public class AlarmModel {
 		if (candidates.isEmpty() && this.candidates.isEmpty())
 			return this;
 		return new AlarmModel(root, badLocation, locations, initial, transitions, initialConstraints, badCases,
-				seeds, vocabulary, sorts, freshValues, parameters, confirmable, frames, truncated, candidates);
+				seeds, vocabulary, sorts, freshValues, parameters, confirmable, frames, truncated, candidates, liveness);
 	}
 
 	/**
@@ -357,7 +366,26 @@ public class AlarmModel {
 		for (FreshValueFactory factory : factories)
 			fresh.putAll(factory.getValues());
 		return new AlarmModel(root, badLocation, kept, initial, trs, initialConstraints, badCases, sds, vocabulary,
-				sorts, fresh, parameters, confirmable, frames, truncated, candidates);
+				sorts, fresh, parameters, confirmable, frames, truncated, candidates, liveness);
+	}
+
+	/**
+	 * Yields a copy of this model that uses liveness, or not (models use it by
+	 * default): without it, every identifier of the vocabulary is live at
+	 * every location (see {@link #getLive(ModelLocation)}), so that the
+	 * transitions constrain all of them.
+	 *
+	 * @param liveness whether or not to use liveness
+	 *
+	 * @return the copy
+	 */
+	public AlarmModel withLiveness(
+			boolean liveness) {
+		if (liveness == this.liveness)
+			return this;
+		return new AlarmModel(root, badLocation, locations, initial, transitions, initialConstraints, badCases,
+				seeds, vocabulary, sorts, freshValues, parameters, confirmable, frames, truncated, candidates,
+				liveness);
 	}
 
 	/**
@@ -370,11 +398,17 @@ public class AlarmModel {
 	 *
 	 * @param location the location
 	 *
+	 * Without liveness (see {@link #withLiveness(boolean)}), all the
+	 * identifiers of the vocabulary are live.
+	 *
 	 * @return the live identifiers (empty if the location is not part of the
 	 *             model)
 	 */
 	public synchronized Set<Identifier> getLive(
 			ModelLocation location) {
+		if (!liveness)
+			// all the identifiers are considered live
+			return locations.contains(location) ? vocabulary : Collections.emptySet();
 		if (live == null)
 			live = computeLive();
 		return live.getOrDefault(location, Collections.emptySet());

@@ -758,12 +758,13 @@ public final class AlarmModelBuilder {
 				badCases,
 				seeds,
 				vocabulary,
-				new SortPolicy(types, bad.getProgram().getTypes().getTypes(), factory.getHeapModel().fieldTypes()),
+				new SortPolicy(types, bad.getProgram().getTypes().getTypes(),
+						cache.typedFields() ? factory.getHeapModel().fieldTypes() : Collections.emptyMap()),
 				factory.getValues(),
 				parameters,
 				confirmable,
 				frames,
-				truncated[0]).withCandidates(candidates);
+				truncated[0]).withCandidates(candidates).withLiveness(cache.liveness());
 	}
 
 	private static boolean knowsAll(

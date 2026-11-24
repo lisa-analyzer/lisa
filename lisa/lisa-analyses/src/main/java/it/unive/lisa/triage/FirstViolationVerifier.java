@@ -46,7 +46,11 @@ import org.apache.commons.lang3.tuple.Pair;
  * by it, sharing the time left (see
  * {@link TimeLimited#setExtendedTimeLimit(long)}): the budget of the verifier
  * keeps a hard warning from taking the time of the other ones, but the time
- * that the other ones did not use goes to it.
+ * that the other ones did not use goes to it.<br>
+ * <br>
+ * Both the first phase ({@link #withCheapPhase(boolean)}) and the verification
+ * with the time left ({@link #withReverification(boolean)}) are enabled by
+ * default, and can be disabled, e.g., to measure their impact.
  *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  *
@@ -100,6 +104,10 @@ public class FirstViolationVerifier<A extends AbstractLattice<A>, D extends Abst
 	 * {@link #withDeadline(long)}), or {@code 0} if there is none.
 	 */
 	private long end;
+
+	private boolean cheapPhase = true;
+
+	private boolean reverification = true;
 
 	/**
 	 * Builds the verifier, first using a {@link ReachabilityVerifier} and then
@@ -182,6 +190,58 @@ public class FirstViolationVerifier<A extends AbstractLattice<A>, D extends Abst
 		return this;
 	}
 
+	/**
+	 * Sets whether or not the warnings are first verified with the cheap
+	 * verifier (default: {@code true}). Without it, all warnings are verified
+	 * by the expensive one only: note that the expensive verifier built by
+	 * default does not check them against the results of the analysis (see
+	 * {@link PdrVerifier#withFixpointCheck(boolean)}), as the cheap one does.
+	 *
+	 * @param cheapPhase whether or not to verify with the cheap verifier
+	 *                       first
+	 *
+	 * @return this verifier
+	 */
+	public FirstViolationVerifier<A, D> withCheapPhase(
+			boolean cheapPhase) {
+		this.cheapPhase = cheapPhase;
+		return this;
+	}
+
+	/**
+	 * Sets whether or not the warnings whose verification exhausted the own
+	 * budget of the expensive verifier are verified again with the time left,
+	 * if any (default: {@code true}, see {@link #EXHAUSTED}).
+	 *
+	 * @param reverification whether or not to verify warnings again with the
+	 *                           time left
+	 *
+	 * @return this verifier
+	 */
+	public FirstViolationVerifier<A, D> withReverification(
+			boolean reverification) {
+		this.reverification = reverification;
+		return this;
+	}
+
+	/**
+	 * Yields the verifier used in the first phase.
+	 *
+	 * @return the cheap verifier
+	 */
+	public IndividualWarningVerifier<A, D> getCheap() {
+		return cheap;
+	}
+
+	/**
+	 * Yields the verifier used in the second phase (e.g., to configure it).
+	 *
+	 * @return the expensive verifier
+	 */
+	public IndividualWarningVerifier<A, D> getExpensive() {
+		return expensive;
+	}
+
 	@Override
 	public Map<StatementMessage, VerificationResult> verify(
 			SemanticTool<A, D> tool,
@@ -193,11 +253,11 @@ public class FirstViolationVerifier<A extends AbstractLattice<A>, D extends Abst
 		List<StatementMessage> ordered = byStatement(warnings);
 		Map<StatementMessage, VerificationResult> results = new LinkedHashMap<>();
 		try {
-			if (phase(cheap, tool, ordered, results, deadline))
+			if (cheapPhase && phase(cheap, tool, ordered, results, deadline))
 				return results;
 			if (phase(expensive, tool, ordered, results, deadline))
 				return results;
-			if (deadline != Long.MAX_VALUE && expensive instanceof TimeLimited)
+			if (reverification && deadline != Long.MAX_VALUE && expensive instanceof TimeLimited)
 				again(expensive, tool, ordered, results, deadline);
 			return results;
 		} finally {

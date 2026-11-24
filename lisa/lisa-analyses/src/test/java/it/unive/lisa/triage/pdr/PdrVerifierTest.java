@@ -1,6 +1,7 @@
 package it.unive.lisa.triage.pdr;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
@@ -324,5 +325,54 @@ public class PdrVerifierTest {
 	public void loopCounterexample() throws SemanticException {
 		VerificationResult result = verify("loop", "w = 1", Violation.reach());
 		assertEquals(VerificationOutcome.CONFIRMED, result.getOutcome(), result.toString());
+	}
+
+	@SuppressWarnings("unchecked")
+	private static VerificationResult check(
+			PdrVerifier<?, ?> pdr,
+			String cfg,
+			String statement,
+			Violation violation)
+			throws SemanticException {
+		PdrVerifier raw = pdr;
+		raw.init(tool);
+		return raw.verify(tool, new StatementMessage(node(cfg(cfg), statement), "alarm", null, violation));
+	}
+
+	/**
+	 * Every feature of the verifier can be disabled: the verification still
+	 * works, with no wrong verdict, although it is less effective.
+	 */
+	@Test
+	public void everyFeatureCanBeDisabled() throws SemanticException {
+		PdrVerifier<?, ?> bare = new PdrVerifier<>()
+				.withGeneralization(PdrEngine.Generalization.NONE)
+				.withSeeding(false)
+				.withDecidedConditions(false)
+				.withInvariants(false)
+				.withCtgs(false)
+				.withRecursionSummaries(false)
+				.withMaxRounds(1)
+				.withCaseGrowth(false)
+				.withMaxChains(0)
+				.withLargeBlocks(false)
+				.withLiveness(false)
+				.withTypedFields(false)
+				.withCaseRestriction(false)
+				.withStrictSearch(false)
+				.withFloatFreeSearch(false)
+				.withFunctionEvaluation(false)
+				.withFewestLiteralsRetry(false);
+		Statement ret = node(cfg("shallow"), "return");
+		VerificationResult shallow = check(bare, "shallow", "return", Violation.condition(ret, is("y", 1)));
+		assertEquals(VerificationOutcome.CONFIRMED, shallow.getOutcome(), shallow.toString());
+		// the analysis still rules out unreachable statements
+		VerificationResult dead = check(bare, "dead", "w = 1", Violation.reach());
+		assertEquals(VerificationOutcome.REFUTED, dead.getOutcome(), dead.toString());
+		// safe statements are never confirmed
+		for (String safe : List.of("relational", "widening", "integers")) {
+			VerificationResult result = check(bare, safe, "w = 1", Violation.reach());
+			assertNotEquals(VerificationOutcome.CONFIRMED, result.getOutcome(), safe + ": " + result);
+		}
 	}
 }

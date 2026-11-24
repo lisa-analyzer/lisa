@@ -171,6 +171,92 @@ public class ResultCache<A extends AbstractLattice<A>> {
 	}
 
 	/**
+	 * Whether the replay restricts each operation to the cases computing its
+	 * operands.
+	 */
+	private boolean restrictsCases = true;
+
+	/**
+	 * Whether the contents of fields qualified by their class are encoded with
+	 * the sort of their declared types.
+	 */
+	private boolean typedFields = true;
+
+	/**
+	 * Whether the models built with this cache use liveness.
+	 */
+	private boolean liveness = true;
+
+	/**
+	 * Yields whether the models built with this cache use liveness (default:
+	 * {@code true}, see {@link AlarmModel#withLiveness(boolean)}).
+	 *
+	 * @return whether the models use liveness
+	 */
+	public boolean liveness() {
+		return liveness;
+	}
+
+	/**
+	 * Sets whether the models built with this cache use liveness (see
+	 * {@link #liveness()}).
+	 *
+	 * @param liveness whether the models use liveness
+	 */
+	public void setLiveness(
+			boolean liveness) {
+		this.liveness = liveness;
+	}
+
+	/**
+	 * Yields whether the replay of the statements of the models built with
+	 * this cache restricts each operation to the cases of the symbolic store
+	 * that computed its operands (default: {@code true}, see
+	 * {@link SymbolicStore#restrictTo(SymbolicExpression)}). Without it, after
+	 * a join of executions computing different expressions, every case is
+	 * paired with every expression.
+	 *
+	 * @return whether the replay restricts the cases
+	 */
+	public boolean restrictsCases() {
+		return restrictsCases;
+	}
+
+	/**
+	 * Sets whether the replay restricts each operation to the cases computing
+	 * its operands (see {@link #restrictsCases()}).
+	 *
+	 * @param restrictsCases whether the replay restricts the cases
+	 */
+	public void setRestrictsCases(
+			boolean restrictsCases) {
+		this.restrictsCases = restrictsCases;
+	}
+
+	/**
+	 * Yields whether the contents of the fields qualified by their class are
+	 * encoded, in the models built with this cache, with the sort of the
+	 * declared types of the fields (default: {@code true}, see
+	 * {@link HeapModel#fieldTypes()}), instead of the sort of all values.
+	 *
+	 * @return whether fields are encoded with their declared types
+	 */
+	public boolean typedFields() {
+		return typedFields;
+	}
+
+	/**
+	 * Sets whether the contents of the fields are encoded with the sort of
+	 * their declared types (see {@link #typedFields()}).
+	 *
+	 * @param typedFields whether fields are encoded with their declared types
+	 */
+	public void setTypedFields(
+			boolean typedFields) {
+		this.typedFields = typedFields;
+	}
+
+	/**
 	 * Yields whether the summaries of the members have been computed.
 	 *
 	 * @return whether the summaries have been computed

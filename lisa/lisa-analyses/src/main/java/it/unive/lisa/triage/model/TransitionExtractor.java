@@ -183,7 +183,7 @@ public class TransitionExtractor<A extends AbstractLattice<A>, D extends Abstrac
 		// the fixpoint computation
 		this.analysis = new Analysis(tool.getConfiguration().analysis, tool.getConfiguration().shouldSmashError);
 		this.factory = factory;
-		this.domain = new ReplayDomain<>(analysis.domain, factory, maxCases);
+		this.domain = new ReplayDomain<>(analysis.domain, factory, maxCases, cache.restrictsCases());
 		this.replay = new ReplayInterprocedural<>(tool, frame, domain, expanded, budget, cache);
 		this.resumeNode = resumeNode;
 	}

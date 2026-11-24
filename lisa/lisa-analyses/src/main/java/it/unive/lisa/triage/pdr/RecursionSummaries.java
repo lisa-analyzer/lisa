@@ -125,13 +125,14 @@ public final class RecursionSummaries {
 		// the conditions of the models of the members relate their returned
 		// values to their parameters, and might be expensive for the analysis
 		// to decide: they are not used as seeds
+		boolean decides = cache.decidesConditions();
 		cache.setDecidesConditions(false);
 		try (SmtSolver solver = solvers.get()) {
 			decided = houdini(tool, cache, candidates, maxCases, solver, encoders, deadline);
 		} catch (SmtException e) {
 			decided = false;
 		} finally {
-			cache.setDecidesConditions(true);
+			cache.setDecidesConditions(decides);
 		}
 		for (Map.Entry<CFG, List<SymbolicExpression>> entry : candidates.entrySet())
 			cache.setSummary(entry.getKey(), decided ? entry.getValue() : Collections.emptyList());
