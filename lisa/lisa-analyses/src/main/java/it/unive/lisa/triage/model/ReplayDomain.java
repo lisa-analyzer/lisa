@@ -196,6 +196,15 @@ public class ReplayDomain<A extends AbstractLattice<A>, D extends AbstractDomain
 	}
 
 	@Override
+	public boolean restrictsExactly(
+			ReplayState<A> state,
+			ProgramPoint pp,
+			SymbolicExpression computed) {
+		// without restricting, the cases are all kept
+		return restricts && state.getStore().restrictsExactly(pp, computed);
+	}
+
+	@Override
 	public Satisfiability satisfies(
 			ReplayState<A> state,
 			SymbolicExpression expression,

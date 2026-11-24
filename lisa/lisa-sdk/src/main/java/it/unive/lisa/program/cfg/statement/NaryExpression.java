@@ -376,6 +376,86 @@ public abstract class NaryExpression
 	}
 
 	/**
+	 * Yields whether
+	 * {@link #restrictTo(InterproceduralAnalysis, AnalysisState, SymbolicExpression...)}
+	 * yields exactly the executions of the given state where the
+	 * sub-expressions of this expression computed the given expressions (see
+	 * {@link it.unive.lisa.analysis.Analysis#restrictsExactly}): only then,
+	 * what happens in all the executions of the restricted state (e.g., an
+	 * error raised in all of them) happens in all the ones computing the
+	 * expressions.
+	 * 
+	 * @param <A>             the kind of {@link AbstractLattice} produced by
+	 *                            the domain {@code D}
+	 * @param <D>             the kind of {@link AbstractDomain} to run during
+	 *                            the analysis
+	 * @param interprocedural the interprocedural analysis of the program to
+	 *                            analyze
+	 * @param state           the state
+	 * @param computed        the expressions computed by the sub-expressions,
+	 *                            in order
+	 * 
+	 * @return whether the restriction is exact
+	 * 
+	 * @throws SemanticException if something goes wrong during the
+	 *                               computation
+	 */
+	protected <A extends AbstractLattice<A>, D extends AbstractDomain<A>> boolean restrictsExactly(
+			InterproceduralAnalysis<A, D> interprocedural,
+			AnalysisState<A> state,
+			SymbolicExpression... computed)
+			throws SemanticException {
+		Expression[] subs = getSubExpressions();
+		AnalysisState<A> current = state;
+		for (int i = 0; i < computed.length && i < subs.length; i++)
+			if (computed[i] != null) {
+				if (!interprocedural.getAnalysis().restrictsExactly(current, subs[i], computed[i]))
+					return false;
+				current = interprocedural.getAnalysis().restrictTo(current, subs[i], computed[i]);
+			}
+		return true;
+	}
+
+	/**
+	 * Evaluates the given semantics of this statement on the combination of
+	 * the given expressions computed by its sub-expressions, in the executions
+	 * of the given state computing them (see
+	 * {@link #restrictTo(InterproceduralAnalysis, AnalysisState, SymbolicExpression...)}):
+	 * if these are not known exactly, the errors raised by the semantics are
+	 * raised under an unknown condition (see
+	 * {@link it.unive.lisa.analysis.Analysis#ofCombination}). Subclasses
+	 * evaluating their semantics on each combination of the expressions
+	 * computed by their sub-expressions use this when there are several
+	 * combinations (with a single one, all the executions compute it, see
+	 * {@link #singleValues(ExpressionSet[])}).
+	 * 
+	 * @param <A>             the kind of {@link AbstractLattice} produced by
+	 *                            the domain {@code D}
+	 * @param <D>             the kind of {@link AbstractDomain} to run during
+	 *                            the analysis
+	 * @param interprocedural the interprocedural analysis of the program to
+	 *                            analyze
+	 * @param state           the state
+	 * @param semantics       the semantics on the combination
+	 * @param computed        the expressions computed by the sub-expressions,
+	 *                            in order
+	 * 
+	 * @return the state after the semantics
+	 * 
+	 * @throws SemanticException if something goes wrong during the
+	 *                               computation
+	 */
+	protected <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> ofCombination(
+			InterproceduralAnalysis<A, D> interprocedural,
+			AnalysisState<A> state,
+			CombinationSemantics<A> semantics,
+			SymbolicExpression... computed)
+			throws SemanticException {
+		return interprocedural.getAnalysis().ofCombination(state, interprocedural.getCurrentContext(), this,
+				getSubExpressions(), computed, semantics);
+	}
+
+	/**
 	 * Computes the forward semantics of the expression, after the semantics of
 	 * all sub-expressions have been computed. Meta variables from the
 	 * sub-expressions will be forgotten after this call returns.

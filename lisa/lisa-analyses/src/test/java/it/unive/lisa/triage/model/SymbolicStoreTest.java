@@ -1,6 +1,7 @@
 package it.unive.lisa.triage.model;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
@@ -218,5 +219,41 @@ public class SymbolicStoreTest {
 		// the unknown case might have computed one
 		assertEquals(2, store.restrictTo(pp, one).getCases().size());
 		assertEquals(2, store.restrictTo(pp, two).getCases().size());
+	}
+
+	/**
+	 * A restriction is exact when, in each case it keeps, the point computed
+	 * only the given expression.
+	 */
+	@Test
+	public void restrictionsOfBranchesAreExact() {
+		Constant one = integer(1);
+		Constant two = integer(2);
+		SymbolicStore store = branches(identity(), one, two);
+		assertTrue(store.restrictsExactly(pp, one));
+		assertTrue(store.restrictsExactly(pp, two));
+	}
+
+	/**
+	 * A restriction is not exact if a case it keeps computed also other
+	 * expressions at the point, or nothing known.
+	 */
+	@Test
+	public void restrictionsKeepingOtherCasesAreNotExact() {
+		Constant one = integer(1);
+		Constant two = integer(2);
+		// a single case computing both expressions
+		SymbolicStore both = identity().computing(one, pp).computing(two, pp);
+		assertFalse(both.restrictsExactly(pp, one));
+		assertFalse(both.restrictsExactly(pp, two));
+		// a case where the point computed nothing known
+		SymbolicStore known = identity()
+				.assume(new BinaryExpression(BoolType.INSTANCE, X, ZERO, ComparisonGt.INSTANCE, LOC), pp)
+				.computing(one, pp);
+		SymbolicStore other = identity()
+				.assume(new BinaryExpression(BoolType.INSTANCE, X, ZERO, ComparisonLe.INSTANCE, LOC), pp);
+		assertFalse(known.lub(other).restrictsExactly(pp, one));
+		// a store without tracked expressions
+		assertFalse(branches(identity(), one, two).restrictsExactly(null, one));
 	}
 }

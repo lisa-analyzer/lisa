@@ -142,10 +142,10 @@ public abstract class BinaryExpression
 		AnalysisState<A> result = state.bottomExecution();
 		for (SymbolicExpression left : params[0])
 			for (SymbolicExpression right : params[1])
-				result = result.lub(fwdBinarySemantics(interprocedural,
-						singleValues(params) ? state
-							: restrictTo(interprocedural, state, left, right), left, right,
-						expressions));
+				result = result.lub(singleValues(params)
+						? fwdBinarySemantics(interprocedural, state, left, right, expressions)
+						: ofCombination(interprocedural, state,
+								s -> fwdBinarySemantics(interprocedural, s, left, right, expressions), left, right));
 
 		return result;
 	}

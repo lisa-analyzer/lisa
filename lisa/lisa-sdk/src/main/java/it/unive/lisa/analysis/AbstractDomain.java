@@ -65,6 +65,34 @@ public interface AbstractDomain<
 	}
 
 	/**
+	 * Yields whether
+	 * {@link #restrictTo(AbstractLattice, ProgramPoint, SymbolicExpression)}
+	 * yields exactly the executions of the given state where the given program
+	 * point computed the given expression, or it might also keep other ones
+	 * (e.g., the ones where the domain does not know what the point computed).
+	 * Only in the former case, what happens in all the executions of the
+	 * restricted state (e.g., an error raised in all of them) happens in all
+	 * the executions computing the expression, and not in other ones. The
+	 * default implementation, for domains that do not know it, yields
+	 * {@code false}.
+	 *
+	 * @param state    the state
+	 * @param pp       the program point (e.g., the operand of a statement)
+	 * @param computed the expression computed by the program point
+	 *
+	 * @return whether the restriction is exact
+	 *
+	 * @throws SemanticException if an error occurs during the computation
+	 */
+	default boolean restrictsExactly(
+			L state,
+			ProgramPoint pp,
+			SymbolicExpression computed)
+			throws SemanticException {
+		return false;
+	}
+
+	/**
 	 * Yields all the instances of a specific domain, of class {@code domain},
 	 * contained inside this domain, also recursively querying inner domains
 	 * (enabling retrieval through combinations of domains, or through domains

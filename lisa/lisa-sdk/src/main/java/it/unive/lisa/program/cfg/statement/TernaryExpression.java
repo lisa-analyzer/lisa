@@ -162,10 +162,11 @@ public abstract class TernaryExpression
 		for (SymbolicExpression left : params[0])
 			for (SymbolicExpression middle : params[1])
 				for (SymbolicExpression right : params[2])
-					result = result.lub(fwdTernarySemantics(interprocedural,
-							singleValues(params) ? state
-							: restrictTo(interprocedural, state, left, middle, right), left, middle, right,
-							expressions));
+					result = result.lub(singleValues(params)
+							? fwdTernarySemantics(interprocedural, state, left, middle, right, expressions)
+							: ofCombination(interprocedural, state,
+									s -> fwdTernarySemantics(interprocedural, s, left, middle, right, expressions),
+									left, middle, right));
 
 		return result;
 	}

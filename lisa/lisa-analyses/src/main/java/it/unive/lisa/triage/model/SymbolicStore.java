@@ -200,6 +200,36 @@ public final class SymbolicStore {
 	}
 
 	/**
+	 * Yields whether {@link #restrictTo(ProgramPoint, SymbolicExpression)}
+	 * yields exactly the cases where the given program point computed the
+	 * given expression: it does if, in each case it keeps, the point computed
+	 * only expressions equal to it (while it keeps also the cases where the
+	 * point computed nothing known, or several expressions).
+	 *
+	 * @param point      the program point
+	 * @param expression the expression
+	 *
+	 * @return whether the restriction is exact
+	 */
+	public boolean restrictsExactly(
+			ProgramPoint point,
+			SymbolicExpression expression) {
+		SymbolicStore restricted = restrictTo(point, expression);
+		if (restricted.cases.isEmpty())
+			return true;
+		if (point == null)
+			return false;
+		ProgramPoint pp = canonical(point);
+		for (SymbolicCase c : restricted.cases) {
+			Map<ProgramPoint, List<SymbolicExpression>> exprs = restricted.computed.get(c);
+			List<SymbolicExpression> there = exprs == null ? null : exprs.get(pp);
+			if (there == null || there.stream().anyMatch(e -> !e.equals(expression)))
+				return false;
+		}
+		return true;
+	}
+
+	/**
 	 * Yields the store made of the cases of this one that might have computed
 	 * the given expression, for operations over the expression whose operands
 	 * are not known to come from specific program points (e.g., assumptions and
