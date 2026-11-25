@@ -22,11 +22,13 @@ import it.unive.lisa.program.type.Int32Type;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
+import it.unive.lisa.symbolic.value.PushAny;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonGt;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonLe;
 import it.unive.lisa.triage.inputs.InputSourceResolver;
 import java.util.List;
+import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -34,7 +36,8 @@ import org.junit.jupiter.api.Test;
  * Tests for the records of the expressions computed by the cases of a
  * {@link SymbolicStore} (see
  * {@link SymbolicStore#computing(SymbolicExpression, ProgramPoint)} and
- * {@link SymbolicStore#restrictTo(ProgramPoint, SymbolicExpression)}).
+ * {@link SymbolicStore#restrictTo(ProgramPoint, SymbolicExpression)} and
+ * {@link SymbolicStore#restrictTo(SymbolicExpression, ProgramPoint)}).
  */
 public class SymbolicStoreTest {
 
@@ -110,7 +113,7 @@ public class SymbolicStoreTest {
 		Constant one = integer(1);
 		SymbolicStore store = identity().computing(one, pp);
 		assertSame(store, store.restrictTo(pp, integer(2)));
-		assertSame(store, store.restrictTo(plus(one, X)));
+		assertSame(store, store.restrictTo(plus(one, X), Set.of(pp)));
 	}
 
 	/**
@@ -124,15 +127,15 @@ public class SymbolicStoreTest {
 		Constant two = integer(2);
 		SymbolicStore store = branches(identity(), one, two);
 		// by identity, within a larger expression
-		assertEquals(1, store.restrictTo(plus(one, X)).getCases().size());
+		assertEquals(1, store.restrictTo(plus(one, X), Set.of(pp)).getCases().size());
 		// an equal constant is not the computed one
-		assertEquals(2, store.restrictTo(plus(integer(1), X)).getCases().size());
+		assertEquals(2, store.restrictTo(plus(integer(1), X), Set.of(pp)).getCases().size());
 
 		BinaryExpression first = plus(X, one), second = plus(X, two);
 		store = branches(identity(), first, second);
 		// an expression equal to a computed one, not an identifier or a
 		// constant, stands for it
-		assertEquals(1, store.restrictTo(plus(X, integer(1))).getCases().size());
+		assertEquals(1, store.restrictTo(plus(X, integer(1)), Set.of(pp)).getCases().size());
 	}
 
 	/**
@@ -148,6 +151,38 @@ public class SymbolicStoreTest {
 		Constant one = integer(1);
 		SymbolicStore store = branches(lost, one, integer(2));
 		assertEquals(1, store.restrictTo(pp, one).getCases().size());
+	}
+
+	/**
+	 * An expression equal to a computed one stands for it only if it is
+	 * evaluated by the point computing it or by one of its operands: an equal
+	 * expression evaluated elsewhere is another computation (e.g., the second
+	 * {@code a + 1} of {@code ((a if c else b) + 1) * (a + 1)}), and
+	 * restricting to the cases of the first one would drop executions.
+	 * Unknown values are recognized only by identity.
+	 */
+	@Test
+	public void equalExpressionsComputedElsewhereDoNotRestrict() {
+		Program program = new Program(new TestLanguageFeatures(), new TestTypeSystem());
+		CFG cfg = new CFG(new CodeMemberDescriptor(LOC, program, false, "m"));
+		UnresolvedCall inner = new UnresolvedCall(cfg, new SourceCodeLocation("test", 2, 1), CallType.STATIC, "t",
+				"g");
+		UnresolvedCall outer = new UnresolvedCall(cfg, new SourceCodeLocation("test", 3, 1), CallType.STATIC, "t",
+				"f", inner);
+		UnresolvedCall other = new UnresolvedCall(cfg, new SourceCodeLocation("test", 4, 1), CallType.STATIC, "t",
+				"h");
+		SymbolicStore store = branches(identity(), plus(X, integer(1)), plus(X, integer(2)), inner);
+		// evaluated by the point using the operand that computed it
+		assertEquals(1, store.restrictTo(plus(X, integer(1)), outer).getCases().size());
+		// evaluated elsewhere, or by an unknown point
+		assertEquals(2, store.restrictTo(plus(X, integer(1)), other).getCases().size());
+		assertEquals(2, store.restrictTo(plus(X, integer(1)), (ProgramPoint) null).getCases().size());
+
+		PushAny unknown = new PushAny(Int32Type.INSTANCE, LOC);
+		store = branches(identity(), unknown, integer(2), inner);
+		// another unknown value of the same type is equal, but not the same
+		assertEquals(2, store.restrictTo(new PushAny(Int32Type.INSTANCE, LOC), outer).getCases().size());
+		assertEquals(1, store.restrictTo(unknown, other).getCases().size());
 	}
 
 	/**

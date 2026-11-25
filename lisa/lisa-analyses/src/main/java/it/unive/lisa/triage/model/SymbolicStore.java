@@ -6,6 +6,7 @@ import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.NaryExpression;
+import it.unive.lisa.program.cfg.statement.NaryStatement;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.AccessChild;
@@ -16,6 +17,7 @@ import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.PushAny;
+import it.unive.lisa.symbolic.value.PushInv;
 import it.unive.lisa.symbolic.value.TernaryExpression;
 import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.triage.reachability.Reachability;
@@ -47,7 +49,7 @@ import java.util.function.Predicate;
  * dispatch on the types of a value): the store records the expressions that
  * each case computed (see {@link #computing(SymbolicExpression)}), so that the
  * operations over an expression computed by some cases only apply to them (see
- * {@link #restrictTo(SymbolicExpression)}), instead of pairing every case with
+ * {@link #restrictTo(SymbolicExpression, ProgramPoint)}), instead of pairing every case with
  * every expression computed by any of them.
  *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
@@ -231,34 +233,59 @@ public final class SymbolicStore {
 
 	/**
 	 * Yields the store made of the cases of this one that might have computed
-	 * the given expression, for operations over the expression whose operands
-	 * are not known to come from specific program points (e.g., assumptions and
-	 * assignments): for each sub-expression of the given one that is (by
-	 * identity) an expression computed at a single program point, the store is
-	 * restricted to the cases where that point might have computed it (see
-	 * {@link #restrictTo(ProgramPoint, SymbolicExpression)}). Expressions
-	 * computed at several points (e.g., a value read and then yielded by
-	 * another expression) are ambiguous, and do not restrict the cases.
+	 * the given expression, evaluated at the given program point, for
+	 * operations over the expression whose operands are not known to come from
+	 * specific program points (e.g., assumptions and assignments): for each
+	 * sub-expression of the given one that is an expression computed at a
+	 * single program point, the store is restricted to the cases where that
+	 * point might have computed it (see
+	 * {@link #restrictTo(ProgramPoint, SymbolicExpression)}). A sub-expression
+	 * is recognized by identity, or, if it is a compound expression (that the
+	 * semantics might build again), by equality with an expression computed by
+	 * the given point or by one of its (transitive) operands: an equal
+	 * expression computed elsewhere is another computation (e.g., the two
+	 * {@code a + 1} of {@code (a if c else b) + 1) * (a + 1)}), and restricting
+	 * the store to the cases where that one computed it would drop executions
+	 * where it computed something else. Expressions computed at several points
+	 * (e.g., a value read and then yielded by another expression) are
+	 * ambiguous, and do not restrict the cases.
 	 *
 	 * @param expression the expression
+	 * @param pp         the program point evaluating the expression, or
+	 *                       {@code null} if not known (no expression is then
+	 *                       recognized by equality)
 	 *
 	 * @return the resulting store
 	 */
 	public SymbolicStore restrictTo(
-			SymbolicExpression expression) {
+			SymbolicExpression expression,
+			ProgramPoint pp) {
 		if (computed.isEmpty() || cases.size() < 2)
 			// with a single case, nothing is dropped (see
 			// restrictTo(ProgramPoint, SymbolicExpression))
 			return this;
+		return restrictTo(expression, operandsOf(pp));
+	}
+
+	/**
+	 * As {@link #restrictTo(SymbolicExpression, ProgramPoint)}, recognizing by
+	 * equality the expressions computed at the given (canonical) points.
+	 */
+	SymbolicStore restrictTo(
+			SymbolicExpression expression,
+			Set<ProgramPoint> operands) {
+		if (computed.isEmpty() || cases.size() < 2)
+			return this;
 		// the points where each computed expression (by identity) is
-		// computed, and the computed expressions by equality
+		// computed, and the expressions computed by the operands by equality
 		Map<SymbolicExpression, Set<ProgramPoint>> points = new IdentityHashMap<>();
 		Map<SymbolicExpression, SymbolicExpression> equal = new HashMap<>();
 		for (Map<ProgramPoint, List<SymbolicExpression>> exprs : computed.values())
 			for (Map.Entry<ProgramPoint, List<SymbolicExpression>> e : exprs.entrySet())
 				for (SymbolicExpression x : e.getValue()) {
 					points.computeIfAbsent(x, k -> new HashSet<>()).add(e.getKey());
-					equal.putIfAbsent(x, x);
+					if (operands.contains(e.getKey()))
+						equal.putIfAbsent(x, x);
 				}
 		List<SymbolicExpression> relevant = new ArrayList<>();
 		collect(expression, points.keySet(), equal, relevant);
@@ -267,6 +294,32 @@ public final class SymbolicStore {
 			Set<ProgramPoint> where = points.get(r);
 			if (where.size() == 1)
 				result = result.restrictTo(where.iterator().next(), r);
+		}
+		return result;
+	}
+
+	/**
+	 * Yields the canonical points (see {@link #canonical(ProgramPoint)}) of the
+	 * given program point and of its (transitive) operands, that is, the
+	 * points whose computations the given one might use.
+	 */
+	private static Set<ProgramPoint> operandsOf(
+			ProgramPoint pp) {
+		Set<ProgramPoint> result = Collections.newSetFromMap(new IdentityHashMap<>());
+		if (pp == null)
+			return result;
+		List<ProgramPoint> work = new ArrayList<>(List.of(pp, canonical(pp)));
+		while (!work.isEmpty()) {
+			ProgramPoint current = work.remove(work.size() - 1);
+			if (!result.add(current))
+				continue;
+			Expression[] subs = current instanceof NaryExpression ? ((NaryExpression) current).getSubExpressions()
+					: current instanceof NaryStatement ? ((NaryStatement) current).getSubExpressions() : null;
+			if (subs != null)
+				for (Expression sub : subs) {
+					work.add(sub);
+					work.add(canonical(sub));
+				}
 		}
 		return result;
 	}
@@ -302,10 +355,9 @@ public final class SymbolicStore {
 
 	/**
 	 * Adds to the given list the sub-expressions of the given expression that
-	 * are among the given ones: by identity, or, for expressions that are
-	 * neither constants nor identifiers (that might be built again
-	 * independently of their computation, e.g., a literal), by equality (the
-	 * equal expression among the given ones is added).
+	 * are among the given ones: by identity, or, for compound expressions, by
+	 * equality with the ones in {@code equal} (the equal expression is
+	 * added).
 	 */
 	private static void collect(
 			SymbolicExpression e,
@@ -318,7 +370,12 @@ public final class SymbolicStore {
 			relevant.add(e);
 			return;
 		}
-		if (!(e instanceof Constant) && !(e instanceof Identifier)) {
+		// constants and identifiers might be built again independently of
+		// their computation (e.g., a literal), and unknown values and
+		// allocations are equal to any other of the same type: they are
+		// recognized only by identity
+		if (!(e instanceof Constant) && !(e instanceof Identifier) && !(e instanceof PushAny)
+				&& !(e instanceof PushInv) && !(e instanceof MemoryAllocation)) {
 			SymbolicExpression t = equal.get(e);
 			if (t != null) {
 				relevant.add(t);

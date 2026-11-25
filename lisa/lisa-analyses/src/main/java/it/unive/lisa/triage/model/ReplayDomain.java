@@ -64,7 +64,7 @@ public class ReplayDomain<A extends AbstractLattice<A>, D extends AbstractDomain
 	 * @param maxCases  the maximum number of cases of each store
 	 * @param restricts whether each operation is restricted to the cases of
 	 *                      the store computing its operands (see
-	 *                      {@link SymbolicStore#restrictTo(SymbolicExpression)}):
+	 *                      {@link SymbolicStore#restrictTo(SymbolicExpression, ProgramPoint)}):
 	 *                      without it, the stores do not record the
 	 *                      expressions computed by their cases, and every case
 	 *                      is paired with every computed expression
@@ -84,8 +84,9 @@ public class ReplayDomain<A extends AbstractLattice<A>, D extends AbstractDomain
 	// (all of them, if the replay does not restrict them)
 	private SymbolicStore restricted(
 			SymbolicStore store,
-			SymbolicExpression expression) {
-		return restricts ? store.restrictTo(expression) : store;
+			SymbolicExpression expression,
+			ProgramPoint pp) {
+		return restricts ? store.restrictTo(expression, pp) : store;
 	}
 
 	// the store where the given point computed the given expression (that is
@@ -139,7 +140,7 @@ public class ReplayDomain<A extends AbstractLattice<A>, D extends AbstractDomain
 		// only the cases that computed the expression assign it (see
 		// SymbolicStore#restrictTo), and the point computed the identifier
 		return new ReplayState<>(inner,
-				computing(restricted(state.getStore(), expression).assign(id, expression, pp), id, pp));
+				computing(restricted(state.getStore(), expression, pp).assign(id, expression, pp), id, pp));
 	}
 
 	@Override
@@ -157,7 +158,7 @@ public class ReplayDomain<A extends AbstractLattice<A>, D extends AbstractDomain
 		// reads of identifiers: as the computed expressions are recognized by
 		// identity, another read of the same identifier is not mistaken for
 		// this one)
-		SymbolicStore store = computing(restricted(state.getStore(), expression), expression, pp);
+		SymbolicStore store = computing(restricted(state.getStore(), expression, pp), expression, pp);
 		if (expression instanceof MemoryAllocation)
 			// the allocation yields a new reference
 			return new ReplayState<>(inner, store.allocate((MemoryAllocation) expression, pp));
@@ -181,7 +182,7 @@ public class ReplayDomain<A extends AbstractLattice<A>, D extends AbstractDomain
 			return state.withInner(inner);
 		// only the cases that computed the condition assume it (see
 		// SymbolicStore#restrictTo)
-		return new ReplayState<>(inner, restricted(state.getStore(), expression).assume(expression, src));
+		return new ReplayState<>(inner, restricted(state.getStore(), expression, src).assume(expression, src));
 	}
 
 	@Override
