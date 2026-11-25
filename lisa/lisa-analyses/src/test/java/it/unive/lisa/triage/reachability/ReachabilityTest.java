@@ -50,8 +50,8 @@ import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.VariableRef;
 import it.unive.lisa.program.cfg.statement.call.CFGCall;
 import it.unive.lisa.program.cfg.statement.call.Call;
-import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
 import it.unive.lisa.program.cfg.statement.call.Call.CallType;
+import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.Variable;
@@ -1164,8 +1164,8 @@ public class ReachabilityTest {
 
 	/**
 	 * A call resolved from another one stands for the call of the program it
-	 * comes from, following the whole chain of sources; other statements
-	 * stand for themselves.
+	 * comes from, following the whole chain of sources; other statements stand
+	 * for themselves.
 	 */
 	@Test
 	public void sourcesOfStatements() {

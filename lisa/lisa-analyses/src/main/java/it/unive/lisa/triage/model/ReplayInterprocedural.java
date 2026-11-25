@@ -108,11 +108,11 @@ import org.apache.commons.lang3.tuple.Pair;
  * part of the node evaluated before the call are already part of the transition
  * entering the callees. The operands evaluated before the call that are still
  * to be used are then evaluated at the location where the node resumes: this
- * requires them to yield the same values there. If that part of the node has
- * no effect, and its conditions only read constants and local variables, its
- * cases are kept instead, as the conditions hold where the node resumes
- * exactly when they held before the call: the rest of the node is then still
- * restricted to the cases that computed its operands.<br>
+ * requires them to yield the same values there. If that part of the node has no
+ * effect, and its conditions only read constants and local variables, its cases
+ * are kept instead, as the conditions hold where the node resumes exactly when
+ * they held before the call: the rest of the node is then still restricted to
+ * the cases that computed its operands.<br>
  * <br>
  * A call is <b>expandable</b> if:
  * <ul>
@@ -437,10 +437,10 @@ public class ReplayInterprocedural<A extends AbstractLattice<A>, D extends Abstr
 	 * {@link Reachability#sourceOf(Statement)}), or, if the results do not have
 	 * it (e.g., for calls that frontends perform within other expressions,
 	 * whose parent is the expression performing them), the one after the
-	 * closest expression containing it that the results have. If none is
-	 * found, yields the state after the call of the program, that is
-	 * {@code null} if the results do not have it, or might have a bottom
-	 * execution: callers must check both.
+	 * closest expression containing it that the results have. If none is found,
+	 * yields the state after the call of the program, that is {@code null} if
+	 * the results do not have it, or might have a bottom execution: callers
+	 * must check both.
 	 */
 	private AnalysisState<A> stateAfter(
 			Call call) {
@@ -867,10 +867,6 @@ public class ReplayInterprocedural<A extends AbstractLattice<A>, D extends Abstr
 		return true;
 	}
 
-	/**
-	 * Yields {@code true} if evaluating the given expression reads the heap or
-	 * global variables.
-	 */
 	/**
 	 * Yields {@code true} if the given store, obtained by evaluating again the
 	 * part of a node before the given call it resumes after, can be kept

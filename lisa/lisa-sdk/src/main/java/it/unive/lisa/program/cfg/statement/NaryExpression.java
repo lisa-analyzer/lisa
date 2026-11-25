@@ -338,9 +338,9 @@ public abstract class NaryExpression
 	 * ternary ones do) evaluate each combination in the state restricted by
 	 * this, so that the semantics of a combination happens only in the
 	 * executions computing it (e.g., the replay of the verification of the
-	 * warnings does not pair the value of a branch of a conditional
-	 * expression with the executions of the other one). Expressions beyond
-	 * the sub-expressions (e.g., default values of missing arguments), and
+	 * warnings does not pair the value of a branch of a conditional expression
+	 * with the executions of the other one). Expressions beyond the
+	 * sub-expressions (e.g., default values of missing arguments), and
 	 * {@code null} ones, do not restrict the state.
 	 * 
 	 * @param <A>             the kind of {@link AbstractLattice} produced by
@@ -356,8 +356,7 @@ public abstract class NaryExpression
 	 * @return the executions of the state where the sub-expressions computed
 	 *             the given expressions
 	 * 
-	 * @throws SemanticException if something goes wrong during the
-	 *                               computation
+	 * @throws SemanticException if something goes wrong during the computation
 	 */
 	protected <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> restrictTo(
 			InterproceduralAnalysis<A, D> interprocedural,
@@ -389,8 +388,7 @@ public abstract class NaryExpression
 	 * 
 	 * @return whether the restriction is exact
 	 * 
-	 * @throws SemanticException if something goes wrong during the
-	 *                               computation
+	 * @throws SemanticException if something goes wrong during the computation
 	 */
 	protected <A extends AbstractLattice<A>, D extends AbstractDomain<A>> boolean restrictsExactly(
 			InterproceduralAnalysis<A, D> interprocedural,
@@ -401,9 +399,9 @@ public abstract class NaryExpression
 	}
 
 	/**
-	 * Evaluates the given semantics of this statement on the combination of
-	 * the given expressions computed by its sub-expressions, in the executions
-	 * of the given state computing them (see
+	 * Evaluates the given semantics of this statement on the combination of the
+	 * given expressions computed by its sub-expressions, in the executions of
+	 * the given state computing them (see
 	 * {@link #restrictTo(InterproceduralAnalysis, AnalysisState, SymbolicExpression...)}):
 	 * if these are not known exactly, the errors raised by the semantics are
 	 * raised under an unknown condition (see
@@ -426,8 +424,7 @@ public abstract class NaryExpression
 	 * 
 	 * @return the state after the semantics
 	 * 
-	 * @throws SemanticException if something goes wrong during the
-	 *                               computation
+	 * @throws SemanticException if something goes wrong during the computation
 	 */
 	protected <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> ofCombination(
 			InterproceduralAnalysis<A, D> interprocedural,

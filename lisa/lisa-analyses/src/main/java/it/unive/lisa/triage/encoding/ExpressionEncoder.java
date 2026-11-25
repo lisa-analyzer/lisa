@@ -1411,8 +1411,8 @@ public class ExpressionEncoder
 	}
 
 	/**
-	 * Yields the name of the unknown function standing for the operation of
-	 * the given expression (see
+	 * Yields the name of the unknown function standing for the operation of the
+	 * given expression (see
 	 * {@link SymbolTable#apply(String, Sort, List, SymbolicExpression, Term)}).
 	 * Unknown functions are identified by their name and the sorts of their
 	 * arguments and result, so operations that are different must yield

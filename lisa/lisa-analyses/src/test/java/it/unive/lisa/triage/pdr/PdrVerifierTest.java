@@ -351,7 +351,8 @@ public class PdrVerifierTest {
 	@Test
 	public void eachFeatureCanBeDisabled() throws SemanticException {
 		Map<String, Supplier<PdrVerifier<?, ?>>> configurations = new LinkedHashMap<>();
-		configurations.put("generalization", () -> new PdrVerifier<>().withGeneralization(PdrEngine.Generalization.NONE));
+		configurations.put("generalization",
+				() -> new PdrVerifier<>().withGeneralization(PdrEngine.Generalization.NONE));
 		configurations.put("seeding", () -> new PdrVerifier<>().withSeeding(false));
 		configurations.put("decided conditions", () -> new PdrVerifier<>().withDecidedConditions(false));
 		configurations.put("invariants", () -> new PdrVerifier<>().withInvariants(false));

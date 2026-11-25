@@ -2,21 +2,20 @@ package it.unive.lisa.triage.model;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import it.unive.lisa.symbolic.value.operator.binary.NumericNonOverflowingAdd;
-import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
-import it.unive.lisa.program.cfg.statement.call.Call.CallType;
-import it.unive.lisa.program.cfg.statement.call.CFGCall;
-import it.unive.lisa.program.cfg.CodeMemberDescriptor;
-import it.unive.lisa.program.cfg.CFG;
-import it.unive.lisa.program.Program;
-import it.unive.lisa.TestTypeSystem;
 import it.unive.lisa.TestLanguageFeatures;
 import it.unive.lisa.TestParameterProvider;
+import it.unive.lisa.TestTypeSystem;
+import it.unive.lisa.program.Program;
 import it.unive.lisa.program.SourceCodeLocation;
+import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.CodeMemberDescriptor;
 import it.unive.lisa.program.cfg.ProgramPoint;
+import it.unive.lisa.program.cfg.statement.call.CFGCall;
+import it.unive.lisa.program.cfg.statement.call.Call.CallType;
+import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
 import it.unive.lisa.program.type.BoolType;
 import it.unive.lisa.program.type.Int32Type;
 import it.unive.lisa.symbolic.SymbolicExpression;
@@ -26,6 +25,7 @@ import it.unive.lisa.symbolic.value.PushAny;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonGt;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonLe;
+import it.unive.lisa.symbolic.value.operator.binary.NumericNonOverflowingAdd;
 import it.unive.lisa.triage.inputs.InputSourceResolver;
 import java.util.List;
 import java.util.Set;
@@ -102,9 +102,9 @@ public class SymbolicStoreTest {
 	}
 
 	/**
-	 * A join keeps the expressions computed by the cases of both stores: a
-	 * case where a point computed nothing known is kept by the restrictions
-	 * to that point, which are then not exact.
+	 * A join keeps the expressions computed by the cases of both stores: a case
+	 * where a point computed nothing known is kept by the restrictions to that
+	 * point, which are then not exact.
 	 */
 	@Test
 	public void joinsKeepTheExpressionsOfBothSides() {
@@ -122,9 +122,9 @@ public class SymbolicStoreTest {
 	}
 
 	/**
-	 * When a join exceeds the maximum number of cases, the merged case
-	 * computed any of the expressions of the cases: restrictions keep it, and
-	 * are not exact.
+	 * When a join exceeds the maximum number of cases, the merged case computed
+	 * any of the expressions of the cases: restrictions keep it, and are not
+	 * exact.
 	 */
 	@Test
 	public void mergedCasesComputedAnyExpression() {
@@ -185,8 +185,8 @@ public class SymbolicStoreTest {
 	}
 
 	/**
-	 * The stores losing all values are top stores, and their cases are
-	 * tracked again from the following computations.
+	 * The stores losing all values are top stores, and their cases are tracked
+	 * again from the following computations.
 	 */
 	@Test
 	public void lostStoresAreTopAndTrackedAgain() {
@@ -204,8 +204,8 @@ public class SymbolicStoreTest {
 	 * evaluated by the point computing it or by one of its operands: an equal
 	 * expression evaluated elsewhere is another computation (e.g., the second
 	 * {@code a + 1} of {@code ((a if c else b) + 1) * (a + 1)}), and
-	 * restricting to the cases of the first one would drop executions.
-	 * Unknown values are recognized only by identity.
+	 * restricting to the cases of the first one would drop executions. Unknown
+	 * values are recognized only by identity.
 	 */
 	@Test
 	public void equalExpressionsComputedElsewhereDoNotRestrict() {
@@ -284,9 +284,9 @@ public class SymbolicStoreTest {
 	}
 
 	/**
-	 * A case whose computed expressions are unknown, among cases whose ones
-	 * are known, stays unknown: it might have computed any expression, and it
-	 * is never dropped.
+	 * A case whose computed expressions are unknown, among cases whose ones are
+	 * known, stays unknown: it might have computed any expression, and it is
+	 * never dropped.
 	 */
 	@Test
 	public void unknownCasesAmongKnownOnesAreKept() {

@@ -196,8 +196,8 @@ public class FirstViolationVerifier<A extends AbstractLattice<A>, D extends Abst
 	}
 
 	/**
-	 * Yields the time by which every verification of a set of warnings must
-	 * end (see {@link #withDeadline(long)}).
+	 * Yields the time by which every verification of a set of warnings must end
+	 * (see {@link #withDeadline(long)}).
 	 *
 	 * @return the time, or {@code 0} if there is none
 	 */
@@ -212,8 +212,7 @@ public class FirstViolationVerifier<A extends AbstractLattice<A>, D extends Abst
 	 * default does not check them against the results of the analysis (see
 	 * {@link PdrVerifier#withFixpointCheck(boolean)}), as the cheap one does.
 	 *
-	 * @param cheapPhase whether or not to verify with the cheap verifier
-	 *                       first
+	 * @param cheapPhase whether or not to verify with the cheap verifier first
 	 *
 	 * @return this verifier
 	 */

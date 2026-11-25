@@ -14,8 +14,10 @@ import java.util.Set;
  * instance of any of them, as for the tuple of classes of Python's
  * {@code isinstance}), while several tokens are alternatives: each execution
  * evaluates the expression to one of them. A value is thus surely an instance
- * only if it is an instance under every token ({@link #ofEach}), and surely
- * not one only if it is not an instance under any of them ({@link #ofAny}).
+ * only if it is an instance under every token ({@link #ofEach}), and surely not
+ * one only if it is not an instance under any of them ({@link #ofAny}).
+ * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 final class TypeTokens {
 

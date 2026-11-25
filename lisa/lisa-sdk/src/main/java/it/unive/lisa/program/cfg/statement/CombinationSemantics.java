@@ -10,6 +10,8 @@ import it.unive.lisa.analysis.SemanticException;
  * combination (see
  * {@link it.unive.lisa.analysis.Analysis#ofCombination(AnalysisState, it.unive.lisa.interprocedural.ScopeId, it.unive.lisa.program.cfg.ProgramPoint, it.unive.lisa.program.cfg.ProgramPoint[], it.unive.lisa.symbolic.SymbolicExpression[], CombinationSemantics)}).
  *
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ * 
  * @param <A> the kind of {@link AbstractLattice} of the states
  */
 @FunctionalInterface

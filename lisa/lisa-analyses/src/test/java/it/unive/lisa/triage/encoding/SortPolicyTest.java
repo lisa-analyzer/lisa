@@ -52,8 +52,8 @@ public class SortPolicyTest {
 	}
 
 	/**
-	 * Without floats, floating point numbers are not encoded as such, also
-	 * with double floats, and dropping the floats keeps the double floats.
+	 * Without floats, floating point numbers are not encoded as such, also with
+	 * double floats, and dropping the floats keeps the double floats.
 	 */
 	@Test
 	public void doubleFloatsWithoutFloats() {

@@ -201,10 +201,10 @@ public class CustomOperatorEncodingTest {
 	}
 
 	/**
-	 * An operator class standing for several functions that LiSA does not
-	 * know, testing whether a character is in a range (as, e.g.,
-	 * {@code Character.isUpperCase} and {@code Character.isLowerCase} in
-	 * Java): its instances are different operations.
+	 * An operator class standing for several functions that LiSA does not know,
+	 * testing whether a character is in a range (as, e.g.,
+	 * {@code Character.isUpperCase} and {@code Character.isLowerCase} in Java):
+	 * its instances are different operations.
 	 */
 	public static class TestCharTest
 			implements

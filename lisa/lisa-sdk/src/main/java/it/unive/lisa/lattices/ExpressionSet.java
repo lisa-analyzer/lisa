@@ -28,8 +28,8 @@ public class ExpressionSet
 
 	/**
 	 * Yields whether each of the given sets contains a single expression (e.g.,
-	 * the expressions computed by the operands of a statement: then, there is
-	 * a single combination of them).
+	 * the expressions computed by the operands of a statement: then, there is a
+	 * single combination of them).
 	 *
 	 * @param sets the sets
 	 *

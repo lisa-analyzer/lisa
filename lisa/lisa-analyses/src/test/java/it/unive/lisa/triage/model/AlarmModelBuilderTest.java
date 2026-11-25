@@ -1,8 +1,5 @@
 package it.unive.lisa.triage.model;
 
-import it.unive.lisa.symbolic.value.operator.binary.TypeCheck;
-import it.unive.lisa.symbolic.value.operator.unary.LogicalNegation;
-import it.unive.lisa.symbolic.value.UnaryExpression;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -33,15 +30,18 @@ import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonGt;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonLe;
+import it.unive.lisa.symbolic.value.operator.binary.TypeCheck;
+import it.unive.lisa.symbolic.value.operator.unary.LogicalNegation;
 import it.unive.lisa.triage.inputs.InputSource;
 import it.unive.lisa.triage.smt.Sort;
 import it.unive.lisa.type.Untyped;
 import java.nio.file.Files;
-import java.util.List;
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;

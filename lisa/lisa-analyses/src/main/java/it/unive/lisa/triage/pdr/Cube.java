@@ -123,8 +123,8 @@ public final class Cube {
 	}
 
 	/**
-	 * Yields the lemma stating that the given condition holds, that is, the
-	 * one excluding the states where it does not hold (the cube made of its
+	 * Yields the lemma stating that the given condition holds, that is, the one
+	 * excluding the states where it does not hold (the cube made of its
 	 * negation).
 	 *
 	 * @param condition   the condition

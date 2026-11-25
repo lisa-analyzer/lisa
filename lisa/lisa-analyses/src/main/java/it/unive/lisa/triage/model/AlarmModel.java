@@ -182,9 +182,36 @@ public class AlarmModel {
 				sorts, freshValues, parameters, confirmable, frames, truncated, Collections.emptyMap(), true);
 	}
 
-	// the model with the given candidate invariants of each location (see
-	// withCandidates) and the given use of liveness (see withLiveness), built
-	// at once (also by AlarmModelBuilder)
+	/**
+	 * Builds the model.
+	 *
+	 * @param root               the root frame of the model, whose result is
+	 *                               the one the model is built from
+	 * @param badLocation        the bad location
+	 * @param locations          the locations
+	 * @param initial            the initial locations
+	 * @param transitions        the transitions of each location
+	 * @param initialConstraints the constraints that hold in the initial states
+	 * @param badCases           the ways of violating the property at the bad
+	 *                               location
+	 * @param seeds              the invariants of each reachable location
+	 *                               (unreachable locations are not in the map)
+	 * @param vocabulary         the identifiers used in the model
+	 * @param sorts              the policy deciding the sorts of identifiers
+	 * @param freshValues        the fresh values used in the model, by name
+	 * @param parameters         the sources of the parameters of the cfg
+	 * @param confirmable        whether or not the model is confirmable
+	 * @param frames             the frames of the expanded callees that have
+	 *                               locations in the model
+	 * @param truncated          whether or not some calls have not been
+	 *                               expanded because the model reached its
+	 *                               maximum number of locations
+	 * @param candidates         the candidate invariants of each location
+	 * @param liveness           whether or not the transitions constrain only
+	 *                               the identifiers that are live at their
+	 *                               destinations (see
+	 *                               {@link #getLive(ModelLocation)})
+	 */
 	AlarmModel(
 			Frame root,
 			ModelLocation badLocation,
@@ -239,7 +266,8 @@ public class AlarmModel {
 	public AlarmModel withSorts(
 			SortPolicy sorts) {
 		return new AlarmModel(root, badLocation, locations, initial, transitions, initialConstraints, badCases,
-				seeds, vocabulary, sorts, freshValues, parameters, confirmable, frames, truncated, candidates, liveness);
+				seeds, vocabulary, sorts, freshValues, parameters, confirmable, frames, truncated, candidates,
+				liveness);
 	}
 
 	/**
@@ -257,7 +285,8 @@ public class AlarmModel {
 		if (candidates.isEmpty() && this.candidates.isEmpty())
 			return this;
 		return new AlarmModel(root, badLocation, locations, initial, transitions, initialConstraints, badCases,
-				seeds, vocabulary, sorts, freshValues, parameters, confirmable, frames, truncated, candidates, liveness);
+				seeds, vocabulary, sorts, freshValues, parameters, confirmable, frames, truncated, candidates,
+				liveness);
 	}
 
 	/**
@@ -373,9 +402,9 @@ public class AlarmModel {
 
 	/**
 	 * Yields a copy of this model that uses liveness, or not (models use it by
-	 * default): without it, every identifier of the vocabulary is live at
-	 * every location (see {@link #getLive(ModelLocation)}), so that the
-	 * transitions constrain all of them.
+	 * default): without it, every identifier of the vocabulary is live at every
+	 * location (see {@link #getLive(ModelLocation)}), so that the transitions
+	 * constrain all of them.
 	 *
 	 * @param liveness whether or not to use liveness
 	 *

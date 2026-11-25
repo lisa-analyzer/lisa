@@ -251,8 +251,8 @@ public class PdrEngine {
 	public static final int MAX_CANDIDATE_CONSTANTS = 6;
 
 	/**
-	 * The default maximum number of queries spent checking candidate
-	 * invariants (see {@link #setMaxInvariantQueries(int)}).
+	 * The default maximum number of queries spent checking candidate invariants
+	 * (see {@link #setMaxInvariantQueries(int)}).
 	 */
 	public static final int MAX_INVARIANT_QUERIES = 200;
 

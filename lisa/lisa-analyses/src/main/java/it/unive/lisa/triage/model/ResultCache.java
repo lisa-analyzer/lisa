@@ -217,13 +217,13 @@ public class ResultCache<A extends AbstractLattice<A>> {
 	}
 
 	/**
-	 * Yields whether the replay of the statements of the models built with
-	 * this cache restricts each operation to the cases of the symbolic store
-	 * that computed its operands (default: {@code true}, see
-	 * {@link SymbolicStore#restrictTo(SymbolicExpression, it.unive.lisa.program.cfg.ProgramPoint)}). Without it, after
-	 * a join of executions computing different expressions, every case is
-	 * paired with every expression, and the models built are not confirmable
-	 * (see {@link AlarmModel#isConfirmable()}).
+	 * Yields whether the replay of the statements of the models built with this
+	 * cache restricts each operation to the cases of the symbolic store that
+	 * computed its operands (default: {@code true}, see
+	 * {@link SymbolicStore#restrictTo(SymbolicExpression, it.unive.lisa.program.cfg.ProgramPoint)}).
+	 * Without it, after a join of executions computing different expressions,
+	 * every case is paired with every expression, and the models built are not
+	 * confirmable (see {@link AlarmModel#isConfirmable()}).
 	 *
 	 * @return whether the replay restricts the cases
 	 */

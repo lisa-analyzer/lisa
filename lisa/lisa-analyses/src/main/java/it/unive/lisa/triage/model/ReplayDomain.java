@@ -62,12 +62,12 @@ public class ReplayDomain<A extends AbstractLattice<A>, D extends AbstractDomain
 	 * @param domain    the wrapped domain
 	 * @param factory   the factory of fresh values used by the stores
 	 * @param maxCases  the maximum number of cases of each store
-	 * @param restricts whether each operation is restricted to the cases of
-	 *                      the store computing its operands (see
+	 * @param restricts whether each operation is restricted to the cases of the
+	 *                      store computing its operands (see
 	 *                      {@link SymbolicStore#restrictTo(SymbolicExpression, ProgramPoint)}):
-	 *                      without it, the stores do not record the
-	 *                      expressions computed by their cases, and every case
-	 *                      is paired with every computed expression
+	 *                      without it, the stores do not record the expressions
+	 *                      computed by their cases, and every case is paired
+	 *                      with every computed expression
 	 */
 	public ReplayDomain(
 			D domain,

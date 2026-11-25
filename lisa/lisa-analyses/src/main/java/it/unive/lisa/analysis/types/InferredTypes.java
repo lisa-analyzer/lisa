@@ -25,7 +25,6 @@ import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonEq;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonNe;
-import it.unive.lisa.symbolic.value.operator.binary.TypeCast;
 import it.unive.lisa.symbolic.value.operator.binary.TypeCheck;
 import it.unive.lisa.symbolic.value.operator.unary.LogicalNegation;
 import it.unive.lisa.type.Type;

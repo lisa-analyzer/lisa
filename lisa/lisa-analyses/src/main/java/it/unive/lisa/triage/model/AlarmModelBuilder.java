@@ -1036,8 +1036,8 @@ public final class AlarmModelBuilder {
 	 * given expression (see {@link TypeCheck}) as the model does: the analysis
 	 * decides whether the runtime types it infers for the tested value are
 	 * subtypes of the type, while the model tests whether the value has that
-	 * type through the sort encoding it, and different types might share a
-	 * sort (or a type might be encoded with several). The two agree when every
+	 * type through the sort encoding it, and different types might share a sort
+	 * (or a type might be encoded with several). The two agree when every
 	 * runtime type of the tested value is encoded with the sort of the tested
 	 * type, as for objects tested against their classes.
 	 */

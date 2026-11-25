@@ -95,10 +95,10 @@ public interface AbstractDomain<
 	/**
 	 * Assumes the given condition in the executions of {@code after} that are
 	 * not executions of {@code before}, keeping the other ones as they are.
-	 * This is used to make what a semantics adds to a state (e.g., to the
-	 * state of an error) happen under a condition, without weakening what the
-	 * state held before the semantics. The default implementation, for domains
-	 * that cannot tell the executions apart, assumes the condition in all the
+	 * This is used to make what a semantics adds to a state (e.g., to the state
+	 * of an error) happen under a condition, without weakening what the state
+	 * held before the semantics. The default implementation, for domains that
+	 * cannot tell the executions apart, assumes the condition in all the
 	 * executions of {@code after}.
 	 *
 	 * @param before    the state before the semantics

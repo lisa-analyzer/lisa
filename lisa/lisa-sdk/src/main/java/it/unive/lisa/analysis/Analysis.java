@@ -32,8 +32,8 @@ import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.edge.ErrorEdge;
-import it.unive.lisa.program.cfg.statement.CombinationSemantics;
 import it.unive.lisa.program.cfg.protection.ProtectedBlock;
+import it.unive.lisa.program.cfg.statement.CombinationSemantics;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.VariableRef;
@@ -286,8 +286,8 @@ public class Analysis<
 	 * expressions computed by its operands (e.g., on one of the pairs of the
 	 * expressions computed by the operands of a binary expression), in the
 	 * executions of the given state computing that combination (see
-	 * {@link #restrictTo(AnalysisState, ProgramPoint, SymbolicExpression)}).
-	 * If these executions are not known exactly (see
+	 * {@link #restrictTo(AnalysisState, ProgramPoint, SymbolicExpression)}). If
+	 * these executions are not known exactly (see
 	 * {@link #restrictsExactly(AnalysisState, ProgramPoint, SymbolicExpression)}),
 	 * the errors raised by the semantics might be raised only in some of them
 	 * (e.g., an error raised in all of them might not be raised in the
@@ -353,8 +353,8 @@ public class Analysis<
 	/**
 	 * Yields whether
 	 * {@link #restrictTo(AnalysisState, ProgramPoint[], SymbolicExpression[])}
-	 * yields exactly the executions of the given state where the given
-	 * operands computed the given expressions (see
+	 * yields exactly the executions of the given state where the given operands
+	 * computed the given expressions (see
 	 * {@link #restrictsExactly(AnalysisState, ProgramPoint, SymbolicExpression)}):
 	 * only then, what happens in all the executions of the restricted state
 	 * (e.g., an error raised in all of them) happens in all the ones computing

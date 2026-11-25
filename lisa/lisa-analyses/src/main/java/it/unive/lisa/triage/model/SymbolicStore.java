@@ -49,8 +49,8 @@ import java.util.function.Predicate;
  * dispatch on the types of a value): the store records the expressions that
  * each case computed (see {@link #computing(SymbolicExpression)}), so that the
  * operations over an expression computed by some cases only apply to them (see
- * {@link #restrictTo(SymbolicExpression, ProgramPoint)}), instead of pairing every case with
- * every expression computed by any of them.
+ * {@link #restrictTo(SymbolicExpression, ProgramPoint)}), instead of pairing
+ * every case with every expression computed by any of them.
  *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
@@ -116,8 +116,8 @@ public final class SymbolicStore {
 	 * computed afterwards). The cases whose computed expressions are unknown
 	 * stay so, unless all of them are (e.g., after a change of scope, or after
 	 * all values are lost): then, the expressions are tracked again from here,
-	 * as from the identity (see {@link #identity(FreshValueFactory, int)}),
-	 * so that the operations following them are still restricted to the cases
+	 * as from the identity (see {@link #identity(FreshValueFactory, int)}), so
+	 * that the operations following them are still restricted to the cases
 	 * computing their operands (see
 	 * {@link #restrictTo(ProgramPoint, SymbolicExpression)}). The cases that
 	 * are unknown among known ones stay unknown, as the known ones might have
@@ -280,10 +280,10 @@ public final class SymbolicStore {
 
 	/**
 	 * Yields whether {@link #restrictTo(ProgramPoint, SymbolicExpression)}
-	 * yields exactly the cases where the given program point computed the
-	 * given expression: it does if, in each case it keeps, the point computed
-	 * only expressions equal to it (while it keeps also the cases where the
-	 * point computed nothing known, or several expressions).
+	 * yields exactly the cases where the given program point computed the given
+	 * expression: it does if, in each case it keeps, the point computed only
+	 * expressions equal to it (while it keeps also the cases where the point
+	 * computed nothing known, or several expressions).
 	 *
 	 * @param point      the program point
 	 * @param expression the expression
@@ -347,6 +347,12 @@ public final class SymbolicStore {
 	/**
 	 * As {@link #restrictTo(SymbolicExpression, ProgramPoint)}, recognizing by
 	 * equality the expressions computed at the given (canonical) points.
+	 *
+	 * @param expression the expression
+	 * @param operands   the program points whose computed expressions are
+	 *                       recognized by equality
+	 * 
+	 * @return the resulting store
 	 */
 	SymbolicStore restrictTo(
 			SymbolicExpression expression,
@@ -375,8 +381,8 @@ public final class SymbolicStore {
 
 	/**
 	 * Yields the canonical points (see {@link #canonical(ProgramPoint)}) of the
-	 * given program point and of its (transitive) operands, that is, the
-	 * points whose computations the given one might use.
+	 * given program point and of its (transitive) operands, that is, the points
+	 * whose computations the given one might use.
 	 */
 	private static Set<ProgramPoint> operandsOf(
 			ProgramPoint pp) {
@@ -431,8 +437,7 @@ public final class SymbolicStore {
 	/**
 	 * Adds to the given list the sub-expressions of the given expression that
 	 * are among the given ones: by identity, or, for compound expressions, by
-	 * equality with the ones in {@code equal} (the equal expression is
-	 * added).
+	 * equality with the ones in {@code equal} (the equal expression is added).
 	 */
 	private static void collect(
 			SymbolicExpression e,

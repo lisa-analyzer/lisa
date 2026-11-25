@@ -116,9 +116,9 @@ import org.apache.commons.lang3.tuple.Triple;
  * <li>the searches complementing the main one: the strict search for a precise
  * counterexample ({@link #withStrictSearch(boolean)}), the search that first
  * leaves floating point numbers opaque ({@link #withFloatFreeSearch(boolean)}),
- * the searches repeated with the values of functions computed on the values
- * of counterexamples ({@link #withFunctionEvaluation(boolean)}), and the order
- * of the bad cases from the one with the fewest literals when a warning is
+ * the searches repeated with the values of functions computed on the values of
+ * counterexamples ({@link #withFunctionEvaluation(boolean)}), and the order of
+ * the bad cases from the one with the fewest literals when a warning is
  * verified again with the time left by the others
  * ({@link #withFewestLiteralsRetry(boolean)}).</li>
  * </ul>
@@ -423,9 +423,8 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 	 * program, as the frontend knows them (default:
 	 * {@link GlobalWrites#UNKNOWN}): the calls that the models summarize then
 	 * leave unchanged the global variables that their callees cannot write,
-	 * instead of making all of them unknown.
-	 *
-	 * This takes effect at the next {@link #init(SemanticTool)}.
+	 * instead of making all of them unknown. This takes effect at the next
+	 * {@link #init(SemanticTool)}.
 	 *
 	 * @param globalWrites the global writes
 	 *
@@ -442,9 +441,8 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 	 * program, as the frontend knows them (default:
 	 * {@link HeapWrites#UNKNOWN}): the calls that the models summarize then
 	 * leave unchanged the contents of the heap that their callees cannot write,
-	 * instead of making all of them unknown.
-	 *
-	 * This takes effect at the next {@link #init(SemanticTool)}.
+	 * instead of making all of them unknown. This takes effect at the next
+	 * {@link #init(SemanticTool)}.
 	 *
 	 * @param heapWrites the heap writes
 	 *
@@ -628,9 +626,9 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 
 	/**
 	 * Sets whether or not models involving floating point numbers are first
-	 * searched with them as opaque values, and searched again with them only
-	 * if that search is not conclusive (default: {@code true}). Without it,
-	 * they are searched once, with floating point numbers.
+	 * searched with them as opaque values, and searched again with them only if
+	 * that search is not conclusive (default: {@code true}). Without it, they
+	 * are searched once, with floating point numbers.
 	 *
 	 * @param floatFreeSearch whether or not to search first without floating
 	 *                            point numbers
@@ -662,16 +660,15 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 	 * Sets whether or not the searches whose counterexamples rely on wrong
 	 * values of functions computed on concrete values (see
 	 * {@link EvaluatedFunctions}) learn the right values and are repeated (at
-	 * most {@link #MAX_EVALUATION_ROUNDS} times, default: {@code true}).
-	 * The values learned are shared by the searches of the same model and of
-	 * the models of the following rounds of call expansion for the same chain
-	 * of calls (see {@link #withMaxRounds(int)}). Without it, each search is run
+	 * most {@link #MAX_EVALUATION_ROUNDS} times, default: {@code true}). The
+	 * values learned are shared by the searches of the same model and of the
+	 * models of the following rounds of call expansion for the same chain of
+	 * calls (see {@link #withMaxRounds(int)}). Without it, each search is run
 	 * once, and gets values of its own that are not shared with any other
 	 * search (e.g., the ones of other rounds, or the float-free and the
 	 * complete searches, see {@link #withFloatFreeSearch(boolean)}).
 	 *
-	 * @param functionEvaluation whether or not to learn the values of
-	 *                               functions
+	 * @param functionEvaluation whether or not to learn the values of functions
 	 *
 	 * @return this verifier
 	 */
@@ -685,9 +682,8 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 	 * Sets whether or not the conditions of the models that the analysis
 	 * decides at a location become seeds there (or candidate invariants, for
 	 * type tests decided with a meaning different from the one of the model,
-	 * default: {@code true}, see {@link ResultCache#decidesConditions()}).
-	 *
-	 * This takes effect at the next {@link #init(SemanticTool)}.
+	 * default: {@code true}, see {@link ResultCache#decidesConditions()}). This
+	 * takes effect at the next {@link #init(SemanticTool)}.
 	 *
 	 * @param decidedConditions whether or not to use the conditions decided by
 	 *                              the analysis
@@ -703,9 +699,8 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 	/**
 	 * Sets whether or not the transitions of the models constrain only the
 	 * identifiers that are live at their destinations (default: {@code true},
-	 * see {@link AlarmModel#withLiveness(boolean)}).
-	 *
-	 * This takes effect at the next {@link #init(SemanticTool)}.
+	 * see {@link AlarmModel#withLiveness(boolean)}). This takes effect at the
+	 * next {@link #init(SemanticTool)}.
 	 *
 	 * @param liveness whether or not to use liveness
 	 *
@@ -719,10 +714,9 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 
 	/**
 	 * Sets whether or not the contents of the fields qualified by their class
-	 * are encoded with the sort of their declared types (default:
-	 * {@code true}, see {@link ResultCache#typedFields()}).
-	 *
-	 * This takes effect at the next {@link #init(SemanticTool)}.
+	 * are encoded with the sort of their declared types (default: {@code true},
+	 * see {@link ResultCache#typedFields()}). This takes effect at the next
+	 * {@link #init(SemanticTool)}.
 	 *
 	 * @param typedFields whether or not to encode fields with their declared
 	 *                        types
@@ -741,11 +735,10 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 	 * {@link ResultCache#restrictsCases()}). Without it, after a join of
 	 * executions computing different expressions, every case is paired with
 	 * every expression, so that an execution of the model might combine the
-	 * condition of a branch with the value of another one: the models are
-	 * then not confirmable (see {@link AlarmModel#isConfirmable()}), and
-	 * violations can only be refuted.
-	 *
-	 * This takes effect at the next {@link #init(SemanticTool)}.
+	 * condition of a branch with the value of another one: the models are then
+	 * not confirmable (see {@link AlarmModel#isConfirmable()}), and violations
+	 * can only be refuted. This takes effect at the next
+	 * {@link #init(SemanticTool)}.
 	 *
 	 * @param caseRestriction whether or not to restrict the cases
 	 *
@@ -758,8 +751,8 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 	}
 
 	/**
-	 * Sets whether or not the warnings verified again with the time left by
-	 * the other ones (see {@link #setExtendedTimeLimit(long)}) are searched
+	 * Sets whether or not the warnings verified again with the time left by the
+	 * other ones (see {@link #setExtendedTimeLimit(long)}) are searched
 	 * checking the bad cases from the one with the fewest literals, instead of
 	 * in the order of the model (default: {@code true}).
 	 *

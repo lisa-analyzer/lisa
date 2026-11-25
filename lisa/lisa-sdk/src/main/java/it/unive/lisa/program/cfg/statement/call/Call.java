@@ -141,9 +141,9 @@ public abstract class Call
 	}
 
 	/**
-	 * Yields the call of the program this one has been resolved from,
-	 * following the chain of sources (see {@link #getSource()}): this call
-	 * itself if it has no source.
+	 * Yields the call of the program this one has been resolved from, following
+	 * the chain of sources (see {@link #getSource()}): this call itself if it
+	 * has no source.
 	 * 
 	 * @return the original call
 	 */
@@ -156,8 +156,8 @@ public abstract class Call
 
 	/**
 	 * Yields the statement of the program the given one stands for: the
-	 * original call (see {@link #getOriginal()}) if it is a call, the
-	 * statement itself otherwise.
+	 * original call (see {@link #getOriginal()}) if it is a call, the statement
+	 * itself otherwise.
 	 * 
 	 * @param st the statement
 	 * 

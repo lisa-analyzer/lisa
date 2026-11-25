@@ -8,7 +8,6 @@ import it.unive.lisa.interprocedural.ScopeId;
 import it.unive.lisa.lattices.ExpressionSet;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.program.cfg.statement.call.CFGCall;
-import it.unive.lisa.program.cfg.statement.call.Call;
 
 /**
  * An event signaling that the analysis computed the given result for a given

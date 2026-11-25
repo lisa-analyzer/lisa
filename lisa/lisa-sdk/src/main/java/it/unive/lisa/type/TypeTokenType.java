@@ -9,8 +9,8 @@ import java.util.TreeSet;
  * represents a set of types, and a value is an instance of the token if it is
  * an instance of any of them (see
  * {@link it.unive.lisa.symbolic.value.operator.binary.TypeCheck}). Distinct
- * tokens among the runtime types of an expression are instead alternatives,
- * one per execution.
+ * tokens among the runtime types of an expression are instead alternatives, one
+ * per execution.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
