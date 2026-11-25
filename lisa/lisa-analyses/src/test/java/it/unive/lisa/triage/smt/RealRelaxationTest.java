@@ -127,6 +127,28 @@ public class RealRelaxationTest {
 	}
 
 	@Test
+	public void conversionsToIntegersRoundTowardZero() {
+		assumeTrue(SmtLibProcessSolver.isZ3Available(), "z3 is not available");
+		try (SmtLibProcessSolver s = SmtLibProcessSolver.z3()) {
+			Term x = s.declare("x", Sort.FLOAT64);
+			Term sq = Term.app("fp.mul", Sort.FLOAT64, RNE, x, x);
+			Term cast = Term.app("(_ fp.to_sbv 32)", Sort.bitVector(32), Term.value("RTZ", Sort.ROUNDING_MODE), x);
+			s.push();
+			// the multiplication makes the query relaxed; (int) x for x in
+			// (-2, -1) is -1 (and not the floor, -2)
+			s.assertTerm(Term.app("fp.gt", Sort.BOOL, sq, FloatingPoints.literal(1.0)));
+			s.assertTerm(Term.app("fp.lt", Sort.BOOL, x, FloatingPoints.literal(-1.0)));
+			s.assertTerm(Term.app("fp.gt", Sort.BOOL, x, FloatingPoints.literal(-2.0)));
+			s.assertTerm(Term.app("=", Sort.BOOL, cast, Term.bitVector(-1, 32)));
+			assertEquals(SmtResult.SAT, s.relaxedCheck());
+			assertEquals(1, s.getRelaxations());
+			double vx = FloatingPoints.parse(s.getValues(List.of(x)).get(x), Sort.FLOAT64).doubleValue();
+			assertTrue(vx < -1 && vx > -2, Double.toString(vx));
+			s.pop();
+		}
+	}
+
+	@Test
 	public void relaxedModelsAreCheckedOnTheOriginalQuery() {
 		assumeTrue(SmtLibProcessSolver.isZ3Available(), "z3 is not available");
 		try (SmtLibProcessSolver s = SmtLibProcessSolver.z3()) {

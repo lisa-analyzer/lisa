@@ -1091,7 +1091,10 @@ final class RealRelaxation {
 				return "(to_real (bv2nat " + relax(ch.get(2), bound) + "))";
 			case "fp.to_sbv":
 			case "fp.to_ubv":
-				return "((_ int2bv " + idx.get(2) + ") (to_int " + relax(ch.get(2), bound) + "))";
+				// rounded with the mode of the conversion (to_int alone is
+				// the floor, while casts round toward zero)
+				return "((_ int2bv " + idx.get(2) + ") (to_int " + round(ch.get(1).toString(), relax(ch.get(2), bound))
+						+ "))";
 			default:
 				break;
 			}
