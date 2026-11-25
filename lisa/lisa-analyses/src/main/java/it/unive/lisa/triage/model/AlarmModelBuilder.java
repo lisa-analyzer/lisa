@@ -764,7 +764,9 @@ public final class AlarmModelBuilder {
 				parameters,
 				confirmable,
 				frames,
-				truncated[0]).withCandidates(candidates).withLiveness(cache.liveness());
+				truncated[0],
+				candidates,
+				cache.liveness());
 	}
 
 	private static boolean knowsAll(

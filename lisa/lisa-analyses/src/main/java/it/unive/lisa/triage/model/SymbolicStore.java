@@ -75,6 +75,20 @@ public final class SymbolicStore {
 	 */
 	private final Map<SymbolicCase, Map<ProgramPoint, List<SymbolicExpression>>> computed;
 
+	/**
+	 * The last restriction computed on this store (see
+	 * {@link #restrictTo(ProgramPoint, SymbolicExpression)}), not part of its
+	 * value.
+	 */
+	private volatile Restriction last;
+
+	/**
+	 * The index of {@link #computed}, built on first use (see
+	 * {@link #restrictTo(SymbolicExpression, ProgramPoint)}), not part of the
+	 * value of this store.
+	 */
+	private volatile TagIndex tagIndex;
+
 	private SymbolicStore(
 			Set<SymbolicCase> cases,
 			FreshValueFactory factory,
@@ -170,6 +184,69 @@ public final class SymbolicStore {
 			// with a single case, nothing is dropped: if the point computed
 			// the expression in some case, it computed it in that one
 			return this;
+		// the same restriction is usually asked twice in a row (whether it is
+		// exact, and then the restriction itself)
+		Restriction memo = last;
+		if (memo != null && memo.point == point && memo.expression == expression)
+			return memo.result;
+		SymbolicStore result = restrict(point, expression);
+		last = new Restriction(point, expression, result);
+		return result;
+	}
+
+	// the last restriction computed on a store (see restrictTo(ProgramPoint,
+	// SymbolicExpression)), with the point and the expression compared by
+	// identity
+	private static final class Restriction {
+
+		private final ProgramPoint point;
+
+		private final SymbolicExpression expression;
+
+		private final SymbolicStore result;
+
+		private Restriction(
+				ProgramPoint point,
+				SymbolicExpression expression,
+				SymbolicStore result) {
+			this.point = point;
+			this.expression = expression;
+			this.result = result;
+		}
+	}
+
+	// the index of the computed expressions of a store, built once (see
+	// restrictTo(SymbolicExpression, Set)): every (point, expression) pair in
+	// the order of the cases, and the points where each expression (by
+	// identity) is computed
+	private static final class TagIndex {
+
+		private final List<ProgramPoint> pointOf = new ArrayList<>();
+
+		private final List<SymbolicExpression> expressions = new ArrayList<>();
+
+		private final Map<SymbolicExpression, Set<ProgramPoint>> points = new IdentityHashMap<>();
+	}
+
+	private TagIndex index() {
+		TagIndex index = tagIndex;
+		if (index == null) {
+			index = new TagIndex();
+			for (Map<ProgramPoint, List<SymbolicExpression>> exprs : computed.values())
+				for (Map.Entry<ProgramPoint, List<SymbolicExpression>> e : exprs.entrySet())
+					for (SymbolicExpression x : e.getValue()) {
+						index.pointOf.add(e.getKey());
+						index.expressions.add(x);
+						index.points.computeIfAbsent(x, k -> new HashSet<>()).add(e.getKey());
+					}
+			tagIndex = index;
+		}
+		return index;
+	}
+
+	private SymbolicStore restrict(
+			ProgramPoint point,
+			SymbolicExpression expression) {
 		ProgramPoint pp = canonical(point);
 		boolean computedThere = false;
 		for (Map<ProgramPoint, List<SymbolicExpression>> exprs : computed.values())
@@ -278,15 +355,13 @@ public final class SymbolicStore {
 			return this;
 		// the points where each computed expression (by identity) is
 		// computed, and the expressions computed by the operands by equality
-		Map<SymbolicExpression, Set<ProgramPoint>> points = new IdentityHashMap<>();
+		TagIndex index = index();
+		Map<SymbolicExpression, Set<ProgramPoint>> points = index.points;
 		Map<SymbolicExpression, SymbolicExpression> equal = new HashMap<>();
-		for (Map<ProgramPoint, List<SymbolicExpression>> exprs : computed.values())
-			for (Map.Entry<ProgramPoint, List<SymbolicExpression>> e : exprs.entrySet())
-				for (SymbolicExpression x : e.getValue()) {
-					points.computeIfAbsent(x, k -> new HashSet<>()).add(e.getKey());
-					if (operands.contains(e.getKey()))
-						equal.putIfAbsent(x, x);
-				}
+		// (in the order of the cases, as the first equal expression is kept)
+		for (int i = 0; i < index.pointOf.size(); i++)
+			if (operands.contains(index.pointOf.get(i)))
+				equal.putIfAbsent(index.expressions.get(i), index.expressions.get(i));
 		List<SymbolicExpression> relevant = new ArrayList<>();
 		collect(expression, points.keySet(), equal, relevant);
 		SymbolicStore result = this;

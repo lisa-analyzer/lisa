@@ -182,8 +182,8 @@ public class AlarmModel {
 
 	// the model with the given candidate invariants of each location (see
 	// withCandidates) and the given use of liveness (see withLiveness), built
-	// at once
-	private AlarmModel(
+	// at once (also by AlarmModelBuilder)
+	AlarmModel(
 			Frame root,
 			ModelLocation badLocation,
 			Set<ModelLocation> locations,
