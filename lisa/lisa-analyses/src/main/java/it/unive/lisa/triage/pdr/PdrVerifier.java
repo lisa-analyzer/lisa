@@ -122,6 +122,15 @@ import org.apache.commons.lang3.tuple.Triple;
  * verified again with the time left by the others
  * ({@link #withFewestLiteralsRetry(boolean)}).</li>
  * </ul>
+ * The switches whose choices are kept by the information computed from the
+ * results of the analysis ({@link #withDecidedConditions(boolean)},
+ * {@link #withLiveness(boolean)}, {@link #withTypedFields(boolean)},
+ * {@link #withCaseRestriction(boolean)},
+ * {@link #withGlobalWrites(GlobalWrites)} and
+ * {@link #withHeapWrites(HeapWrites)}, see {@link ResultCache}) take effect at
+ * the next {@link #init(SemanticTool)}, so that this information is never
+ * computed with different choices; the others take effect from the next
+ * verification.
  *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  *
@@ -301,6 +310,15 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 	private long throwerDeadline;
 
 	/**
+	 * The time by which the verification of the current warning must end
+	 * because of the bound set from outside (see {@link #setTimeLimit(long)}),
+	 * if a warning is being verified and the bound is set, or {@code 0}: unlike
+	 * {@link #warningDeadline}, this is never extended (e.g., after computing
+	 * the summaries of recursive members).
+	 */
+	private long limitEnd;
+
+	/**
 	 * The verifier checking violations against the results of the analysis, and
 	 * finding the chains of calls reaching a result.
 	 */
@@ -407,6 +425,8 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 	 * leave unchanged the global variables that their callees cannot write,
 	 * instead of making all of them unknown.
 	 *
+	 * This takes effect at the next {@link #init(SemanticTool)}.
+	 *
 	 * @param globalWrites the global writes
 	 *
 	 * @return this verifier
@@ -423,6 +443,8 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 	 * {@link HeapWrites#UNKNOWN}): the calls that the models summarize then
 	 * leave unchanged the contents of the heap that their callees cannot write,
 	 * instead of making all of them unknown.
+	 *
+	 * This takes effect at the next {@link #init(SemanticTool)}.
 	 *
 	 * @param heapWrites the heap writes
 	 *
@@ -641,7 +663,12 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 	 * values of functions computed on concrete values (see
 	 * {@link EvaluatedFunctions}) learn the right values and are repeated (at
 	 * most {@link #MAX_EVALUATION_ROUNDS} times, default: {@code true}).
-	 * Without it, each search is run once, and learns nothing.
+	 * The values learned are shared by the searches of the same model and of
+	 * the models of the following rounds of call expansion for the same chain
+	 * of calls (see {@link #withMaxRounds(int)}). Without it, each search is run
+	 * once, and gets values of its own that are not shared with any other
+	 * search (e.g., the ones of other rounds, or the float-free and the
+	 * complete searches, see {@link #withFloatFreeSearch(boolean)}).
 	 *
 	 * @param functionEvaluation whether or not to learn the values of
 	 *                               functions
@@ -660,6 +687,8 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 	 * type tests decided with a meaning different from the one of the model,
 	 * default: {@code true}, see {@link ResultCache#decidesConditions()}).
 	 *
+	 * This takes effect at the next {@link #init(SemanticTool)}.
+	 *
 	 * @param decidedConditions whether or not to use the conditions decided by
 	 *                              the analysis
 	 *
@@ -676,6 +705,8 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 	 * identifiers that are live at their destinations (default: {@code true},
 	 * see {@link AlarmModel#withLiveness(boolean)}).
 	 *
+	 * This takes effect at the next {@link #init(SemanticTool)}.
+	 *
 	 * @param liveness whether or not to use liveness
 	 *
 	 * @return this verifier
@@ -690,6 +721,8 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 	 * Sets whether or not the contents of the fields qualified by their class
 	 * are encoded with the sort of their declared types (default:
 	 * {@code true}, see {@link ResultCache#typedFields()}).
+	 *
+	 * This takes effect at the next {@link #init(SemanticTool)}.
 	 *
 	 * @param typedFields whether or not to encode fields with their declared
 	 *                        types
@@ -711,6 +744,8 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 	 * condition of a branch with the value of another one: the models are
 	 * then not confirmable (see {@link AlarmModel#isConfirmable()}), and
 	 * violations can only be refuted.
+	 *
+	 * This takes effect at the next {@link #init(SemanticTool)}.
 	 *
 	 * @param caseRestriction whether or not to restrict the cases
 	 *
@@ -792,11 +827,13 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 			StatementMessage warning)
 			throws SemanticException {
 		warningDeadline = deadlineFromNow();
+		limitEnd = timeLimit > 0 ? System.currentTimeMillis() + timeLimit : 0;
 		try {
 			return super.verify(tool, warning);
 		} finally {
 			warningDeadline = 0;
 			throwerDeadline = 0;
+			limitEnd = 0;
 			release();
 		}
 	}
@@ -864,6 +901,10 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 			Violation violation)
 			throws SemanticException {
 		statistics = Map.of();
+		// the bound set from outside, that is never exceeded (callers, e.g.,
+		// FirstViolationVerifier, rely on it to end by a deadline of theirs)
+		long end = limitEnd != 0 ? limitEnd
+				: timeLimit > 0 ? System.currentTimeMillis() + timeLimit : Long.MAX_VALUE;
 		if (fixpointCheck) {
 			VerificationResult res = reachability.verify(result, st, violation);
 			if (res.getOutcome() == VerificationOutcome.REFUTED)
@@ -880,11 +921,14 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 			// the summaries of recursive members are computed once, before the
 			// first violation is verified, and are used by all the models: they
 			// have a budget of their own, of at most half of the time available
-			// to the verifier, and the violation still has its own budget
+			// to the verifier, and the violation still has its own budget,
+			// unless this exceeds the bound set from outside
 			long budget = timeLimit > 0 ? Math.min(MAX_SUMMARIES_MILLIS, timeLimit / 2) : MAX_SUMMARIES_MILLIS;
-			RecursionSummaries.compute(tool, cache, maxCases, solvers, encoders, System.currentTimeMillis() + budget);
+			RecursionSummaries.compute(tool, cache, maxCases, solvers, encoders,
+					Math.min(System.currentTimeMillis() + budget, end));
 			deadline = throwerDeadline != 0 || warningDeadline != 0 ? Math.max(deadline, deadlineFromNow())
 					: deadlineFromNow();
+			deadline = Math.min(deadline, end);
 		}
 		// when the model cannot start from the beginning of the program, half
 		// of the time is left to the models starting from the callers, that

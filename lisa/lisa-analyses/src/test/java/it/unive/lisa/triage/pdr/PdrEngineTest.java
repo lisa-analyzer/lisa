@@ -272,6 +272,21 @@ public class PdrEngineTest {
 	}
 
 	@Test
+	public void candidateInvariantsWithinTheirBudget() throws SemanticException {
+		// when the candidates cannot be decided within the budget of queries,
+		// none is kept, while they are found with the default budget (see
+		// candidateInvariants)
+		AlarmModel model = model("twovars", "w = 1").withLargeBlocks();
+		try (SmtSolver s = SmtLibProcessSolver.z3()) {
+			PdrEngine engine = new PdrEngine(model, s);
+			engine.setGeneralization(PdrEngine.Generalization.NONE);
+			engine.setMaxInvariantQueries(0);
+			assertTrue(engine.run(20, 300, 10_000) != PdrEngine.Status.SAFE);
+			assertEquals(0, engine.getInvariantsFound());
+		}
+	}
+
+	@Test
 	public void undecidedQueries() throws SemanticException {
 		// a solver that cannot decide any unsatisfiable query: counterexamples
 		// are still found, while violations are never refuted

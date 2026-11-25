@@ -101,6 +101,7 @@ import it.unive.lisa.type.Type;
 import it.unive.lisa.type.TypeTokenType;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
@@ -178,6 +179,17 @@ public class ExpressionEncoder
 	private final SortPolicy sorts;
 
 	private final SymbolTable symbols;
+
+	/**
+	 * The names of the unknown functions standing for the operations met so
+	 * far, by their operators (see {@link #functionOf(ValueExpression)}).
+	 */
+	private static final Map<Object, String> FUNCTIONS = new HashMap<>();
+
+	/**
+	 * The number of operators of each class in {@link #FUNCTIONS}.
+	 */
+	private static final Map<Class<?>, Integer> FUNCTION_INDEXES = new HashMap<>();
 
 	/**
 	 * Builds the encoder.
@@ -1406,16 +1418,29 @@ public class ExpressionEncoder
 	 * arguments and result, so operations that are different must yield
 	 * different names, even when their operators are instances of the same
 	 * class (e.g., an operator class standing for several library functions):
-	 * the name is built from the operator itself, and operators that are not
-	 * equal (as by {@link Object#equals(Object)}) are assumed to denote
-	 * different operations. Expressions without an operator are named after
-	 * the expression itself.
+	 * operators are interned by {@link Object#equals(Object)} (see
+	 * {@link #FUNCTIONS}), so that operators that are equal denote the same
+	 * operation, and operators that are not equal denote different ones. Each
+	 * is named after its fully qualified class and the number of the operators
+	 * of the same class interned before it, so that names do not depend on
+	 * identity hashes (and are the same in every run that encodes the same
+	 * operators in the same order). Expressions without an operator are
+	 * interned themselves.
 	 */
 	private static String functionOf(
 			ValueExpression expression) {
 		Object op = operatorOf(expression);
 		Object key = op == null ? expression : op;
-		return "$" + key.getClass().getSimpleName() + ":" + key + "#" + Integer.toHexString(key.hashCode());
+		synchronized (FUNCTIONS) {
+			String name = FUNCTIONS.get(key);
+			if (name == null) {
+				String prefix = "$" + key.getClass().getName() + "#";
+				int index = FUNCTION_INDEXES.merge(key.getClass(), 1, Integer::sum) - 1;
+				name = prefix + index;
+				FUNCTIONS.put(key, name);
+			}
+			return name;
+		}
 	}
 
 	/**

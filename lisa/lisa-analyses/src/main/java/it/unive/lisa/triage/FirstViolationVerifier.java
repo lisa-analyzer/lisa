@@ -178,7 +178,12 @@ public class FirstViolationVerifier<A extends AbstractLattice<A>, D extends Abst
 	 * left until then is shared among the warnings, as the time budget of
 	 * {@link #withTimeBudget(long)} is (if both are set, the verification ends
 	 * when the first of them is reached). This bounds the verification when the
-	 * whole run of the tool must end by a given time.
+	 * whole run of the tool must end by a given time. The deadline is read at
+	 * each call to {@link #verify(SemanticTool, Collection)}, so callers might
+	 * change it temporarily (e.g., to leave time to a later step, restoring it
+	 * afterwards). Note that this verifier is stateful (as are the verifiers it
+	 * uses): {@link #verify(SemanticTool, Collection)} must not be called
+	 * concurrently.
 	 *
 	 * @param time the time, or {@code 0} for none
 	 *

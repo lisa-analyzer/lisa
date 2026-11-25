@@ -53,6 +53,7 @@ import it.unive.lisa.symbolic.value.operator.unary.BitwiseNegation;
 import it.unive.lisa.symbolic.value.operator.unary.LogicalNegation;
 import it.unive.lisa.symbolic.value.operator.unary.StringLength;
 import it.unive.lisa.symbolic.value.operator.unary.StringToUpperCase;
+import it.unive.lisa.triage.smt.FloatingPoints;
 import it.unive.lisa.triage.smt.SmtLibProcessSolver;
 import it.unive.lisa.triage.smt.SmtResult;
 import it.unive.lisa.triage.smt.SmtSolver;
@@ -61,6 +62,7 @@ import it.unive.lisa.triage.smt.Term;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.TypeTokenType;
 import it.unive.lisa.type.Untyped;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -443,6 +445,35 @@ public class ExpressionEncoderTest {
 		assertSatisfiable(eq(any, integer(-1)));
 		// two unknown values are independent
 		assertSatisfiable(new UnaryExpression(BoolType.INSTANCE, eq(any, any), LogicalNegation.INSTANCE, LOC));
+	}
+
+	@Test
+	public void conversionsToIntegralTypes() {
+		// as Java's narrowing conversions: rounding toward zero, NaN to zero,
+		// saturation to the range of int (or long), then wrapping to narrower
+		// types
+		Object[][] cases = {
+				{ 1.9, Int32Type.INSTANCE, 1L },
+				{ -1.9, Int32Type.INSTANCE, -1L },
+				{ -0.5, Int32Type.INSTANCE, 0L },
+				{ Double.NaN, Int32Type.INSTANCE, 0L },
+				{ 1e10, Int32Type.INSTANCE, (long) Integer.MAX_VALUE },
+				{ -1e10, Int32Type.INSTANCE, (long) Integer.MIN_VALUE },
+				{ Double.POSITIVE_INFINITY, Int32Type.INSTANCE, (long) Integer.MAX_VALUE },
+				{ Double.NEGATIVE_INFINITY, Int32Type.INSTANCE, (long) Integer.MIN_VALUE },
+				{ 1e19, Int64Type.INSTANCE, Long.MAX_VALUE },
+				{ -123456789012.7, Int64Type.INSTANCE, -123456789012L },
+				{ 300.7, Int8Type.INSTANCE, (long) (byte) 300.7 },
+				{ 70000.7, Int16Type.INSTANCE, (long) (short) 70000.7 },
+				{ -1.5, UInt16Type.INSTANCE, (long) (char) -1.5 } };
+		for (Object[] c : cases) {
+			double value = (double) c[0];
+			Term converted = encoder.toIntegral(FloatingPoints.literal(value), (Type) c[1]);
+			solver.push();
+			solver.assertTerm(Term.not(Term.eq(converted, Term.integer(BigInteger.valueOf((long) c[2])))));
+			assertEquals(SmtResult.UNSAT, solver.check(), value + " to " + c[1]);
+			solver.pop();
+		}
 	}
 
 	private static SymbolicExpression implies(

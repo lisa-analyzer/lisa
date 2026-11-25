@@ -36,7 +36,10 @@ import it.unive.lisa.triage.model.SummaryValue;
 import it.unive.lisa.triage.smt.SmtLibProcessSolver;
 import it.unive.lisa.type.Untyped;
 import java.nio.file.Files;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Supplier;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -340,6 +343,56 @@ public class PdrVerifierTest {
 	}
 
 	/**
+	 * Each feature of the verifier can be disabled alone: counterexamples of
+	 * real violations are still confirmed (except without case restriction,
+	 * where the models are not confirmable), and safe statements are never
+	 * confirmed.
+	 */
+	@Test
+	public void eachFeatureCanBeDisabled() throws SemanticException {
+		Map<String, Supplier<PdrVerifier<?, ?>>> configurations = new LinkedHashMap<>();
+		configurations.put("generalization", () -> new PdrVerifier<>().withGeneralization(PdrEngine.Generalization.NONE));
+		configurations.put("seeding", () -> new PdrVerifier<>().withSeeding(false));
+		configurations.put("decided conditions", () -> new PdrVerifier<>().withDecidedConditions(false));
+		configurations.put("invariants", () -> new PdrVerifier<>().withInvariants(false));
+		configurations.put("ctgs", () -> new PdrVerifier<>().withCtgs(true));
+		configurations.put("recursion summaries", () -> new PdrVerifier<>().withRecursionSummaries(false));
+		configurations.put("rounds", () -> new PdrVerifier<>().withMaxRounds(1));
+		configurations.put("case growth", () -> new PdrVerifier<>().withCaseGrowth(false));
+		configurations.put("chains", () -> new PdrVerifier<>().withMaxChains(0));
+		configurations.put("large blocks", () -> new PdrVerifier<>().withLargeBlocks(false));
+		configurations.put("liveness", () -> new PdrVerifier<>().withLiveness(false));
+		configurations.put("typed fields", () -> new PdrVerifier<>().withTypedFields(false));
+		configurations.put("case restriction", () -> new PdrVerifier<>().withCaseRestriction(false));
+		configurations.put("strict search", () -> new PdrVerifier<>().withStrictSearch(false));
+		configurations.put("float-free search", () -> new PdrVerifier<>().withFloatFreeSearch(false));
+		configurations.put("function evaluation", () -> new PdrVerifier<>().withFunctionEvaluation(false));
+		configurations.put("fewest literals retry", () -> new PdrVerifier<>().withFewestLiteralsRetry(false));
+		configurations.put("fixpoint check", () -> new PdrVerifier<>().withFixpointCheck(false));
+		Statement ret = node(cfg("shallow"), "return");
+		for (Map.Entry<String, Supplier<PdrVerifier<?, ?>>> conf : configurations.entrySet()) {
+			String name = conf.getKey();
+			// the safe statements that are not refuted would exhaust the
+			// whole budget of the verifier
+			Supplier<PdrVerifier<?, ?>> verifier = () -> {
+				PdrVerifier<?, ?> v = conf.getValue().get();
+				v.setTimeLimit(5_000);
+				return v;
+			};
+			VerificationResult shallow = check(verifier.get(), "shallow", "return",
+					Violation.condition(ret, is("y", 1)));
+			assertEquals(name.equals("case restriction") ? VerificationOutcome.POSSIBLE : VerificationOutcome.CONFIRMED,
+					shallow.getOutcome(), name + ": " + shallow);
+			VerificationResult dead = check(verifier.get(), "dead", "w = 1", Violation.reach());
+			assertEquals(VerificationOutcome.REFUTED, dead.getOutcome(), name + ": " + dead);
+			for (String safe : List.of("relational", "widening", "integers")) {
+				VerificationResult result = check(verifier.get(), safe, "w = 1", Violation.reach());
+				assertNotEquals(VerificationOutcome.CONFIRMED, result.getOutcome(), name + ", " + safe + ": " + result);
+			}
+		}
+	}
+
+	/**
 	 * Every feature of the verifier can be disabled: the verification still
 	 * works, with no wrong verdict, although it is less effective.
 	 */
@@ -363,6 +416,9 @@ public class PdrVerifierTest {
 				.withFloatFreeSearch(false)
 				.withFunctionEvaluation(false)
 				.withFewestLiteralsRetry(false);
+		// the safe statements that are not refuted would exhaust the whole
+		// budget of the verifier
+		bare.setTimeLimit(5_000);
 		Statement ret = node(cfg("shallow"), "return");
 		VerificationResult shallow = check(bare, "shallow", "return", Violation.condition(ret, is("y", 1)));
 		// without case restriction, the models are not confirmable

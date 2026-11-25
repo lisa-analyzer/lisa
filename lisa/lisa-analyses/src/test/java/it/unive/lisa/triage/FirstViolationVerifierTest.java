@@ -167,13 +167,22 @@ public class FirstViolationVerifierTest {
 
 		private final long millis;
 
+		private final String explanation;
+
 		private final List<Long> limits = new ArrayList<>();
 
 		private long limit;
 
 		private Slow(
 				long millis) {
+			this(millis, "slow");
+		}
+
+		private Slow(
+				long millis,
+				String explanation) {
 			this.millis = millis;
+			this.explanation = explanation;
 		}
 
 		@Override
@@ -191,7 +200,7 @@ public class FirstViolationVerifierTest {
 			} catch (InterruptedException e) {
 				Thread.currentThread().interrupt();
 			}
-			return new VerificationResult(VerificationOutcome.POSSIBLE, "slow");
+			return new VerificationResult(VerificationOutcome.POSSIBLE, explanation);
 		}
 
 		@Override
@@ -232,6 +241,72 @@ public class FirstViolationVerifierTest {
 				warnings.toString());
 		// the bound is removed after the verification
 		assertEquals(0, expensive.limit);
+	}
+
+	private static final String THREE = "class test {\n"
+			+ "  a() { def w = 0; w = 1; return w; }\n"
+			+ "  b() { def w = 0; w = 1; return w; }\n"
+			+ "  c() { def w = 0; w = 1; return w; }\n"
+			+ "}";
+
+	@Test
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public void theCheapPhaseCanBeSkipped() throws Exception {
+		Slow<?, ?> cheap = new Slow<>(0);
+		Slow<?, ?> expensive = new Slow<>(0);
+		analyze(THREE, new WarnOnAssignments<>(), false, new FirstViolationVerifier(cheap, expensive));
+		assertEquals(3, cheap.limits.size(), cheap.limits.toString());
+		assertEquals(3, expensive.limits.size(), expensive.limits.toString());
+
+		cheap = new Slow<>(0);
+		expensive = new Slow<>(0);
+		analyze(THREE, new WarnOnAssignments<>(), false,
+				new FirstViolationVerifier(cheap, expensive).withCheapPhase(false));
+		assertTrue(cheap.limits.isEmpty(), cheap.limits.toString());
+		assertEquals(3, expensive.limits.size(), expensive.limits.toString());
+	}
+
+	@Test
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public void exhaustedWarningsAreVerifiedAgainUnlessDisabled() throws Exception {
+		// every warning exhausts the own budget of the expensive verifier: with
+		// time left, each is verified again
+		Slow<?, ?> expensive = new Slow<>(0, FirstViolationVerifier.EXHAUSTED);
+		analyze(THREE, new WarnOnAssignments<>(), false,
+				new FirstViolationVerifier(new Slow<>(0), expensive).withTimeBudget(60_000));
+		assertEquals(6, expensive.limits.size(), expensive.limits.toString());
+
+		expensive = new Slow<>(0, FirstViolationVerifier.EXHAUSTED);
+		analyze(THREE, new WarnOnAssignments<>(), false,
+				new FirstViolationVerifier(new Slow<>(0), expensive).withTimeBudget(60_000).withReverification(false));
+		assertEquals(3, expensive.limits.size(), expensive.limits.toString());
+	}
+
+	@Test
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public void deadlinesBoundTheVerification() throws Exception {
+		FirstViolationVerifier<?, ?> verifier = new FirstViolationVerifier(new Slow<>(0), new Slow<>(0));
+		assertEquals(0, verifier.getDeadline());
+		long end = System.currentTimeMillis() + 60_000;
+		assertEquals(end, verifier.withDeadline(end).getDeadline());
+
+		// a deadline already passed leaves every warning unverified
+		Slow<?, ?> expensive = new Slow<>(0);
+		Map<String, Message> warnings = analyze(THREE, new WarnOnAssignments<>(), false,
+				new FirstViolationVerifier(new Slow<>(0), expensive).withDeadline(1));
+		assertTrue(expensive.limits.isEmpty(), expensive.limits.toString());
+		assertEquals(3, warnings.values().stream()
+				.filter(w -> FirstViolationVerifier.NOT_VERIFIED_IN_TIME.equals(w.getExplanation())).count(),
+				warnings.toString());
+
+		// the time left until the deadline bounds each warning
+		expensive = new Slow<>(0);
+		analyze(THREE, new WarnOnAssignments<>(), false,
+				new FirstViolationVerifier(new Slow<>(0), expensive)
+						.withDeadline(System.currentTimeMillis() + 60_000));
+		assertEquals(3, expensive.limits.size(), expensive.limits.toString());
+		for (long limit : expensive.limits)
+			assertTrue(limit > 0 && limit <= 60_000, expensive.limits.toString());
 	}
 
 	@Test

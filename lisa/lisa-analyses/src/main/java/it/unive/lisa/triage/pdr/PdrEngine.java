@@ -206,6 +206,12 @@ public class PdrEngine {
 	private int invariantsFound = 0;
 
 	/**
+	 * The maximum number of queries spent checking candidate invariants (see
+	 * {@link #setMaxInvariantQueries(int)}).
+	 */
+	private int maxInvariantQueries = MAX_INVARIANT_QUERIES;
+
+	/**
 	 * The number of queries that the solver could not decide, after which the
 	 * search went on assuming that the states they asked about are not
 	 * reachable (see {@link #assumeUnreachable(Stop)}).
@@ -245,7 +251,8 @@ public class PdrEngine {
 	public static final int MAX_CANDIDATE_CONSTANTS = 6;
 
 	/**
-	 * The maximum number of queries spent checking candidate invariants.
+	 * The default maximum number of queries spent checking candidate
+	 * invariants (see {@link #setMaxInvariantQueries(int)}).
 	 */
 	public static final int MAX_INVARIANT_QUERIES = 200;
 
@@ -451,6 +458,18 @@ public class PdrEngine {
 	public void setInvariants(
 			boolean invariants) {
 		this.invariants = invariants;
+	}
+
+	/**
+	 * Sets the maximum number of queries spent checking candidate invariants
+	 * (default: {@link #MAX_INVARIANT_QUERIES}): if they cannot be decided
+	 * within it, none is kept (see {@link #setInvariants(boolean)}).
+	 *
+	 * @param maxInvariantQueries the maximum number of queries
+	 */
+	public void setMaxInvariantQueries(
+			int maxInvariantQueries) {
+		this.maxInvariantQueries = maxInvariantQueries;
 	}
 
 	/**
@@ -712,7 +731,9 @@ public class PdrEngine {
 	 * computed by the analysis), are dropped until the remaining ones are
 	 * inductive: they hold in every reachable state, and are added as lemmas of
 	 * every level. If the candidates cannot be decided within
-	 * {@link #MAX_INVARIANT_QUERIES} queries, none is kept.
+	 * {@link #setMaxInvariantQueries(int) the maximum number of queries}, none
+	 * is kept. Since candidates are only dropped, the ones of each initial
+	 * location are checked on its initial states only once.
 	 */
 	private void invariants()
 			throws SemanticException,
@@ -721,6 +742,8 @@ public class PdrEngine {
 		if (candidates.isEmpty())
 			return;
 		int start = queries;
+		// the initial locations whose remaining candidates hold initially
+		Set<ModelLocation> checkedInitially = new HashSet<>();
 		try {
 			boolean changed = true;
 			while (changed) {
@@ -730,9 +753,9 @@ public class PdrEngine {
 					Map<Lemma, Term> current = entry.getValue();
 					if (current.isEmpty())
 						continue;
-					if (model.getInitialLocations().contains(loc)) {
+					if (model.getInitialLocations().contains(loc) && checkedInitially.add(loc)) {
 						boolean held = holdInitially(loc, current, start);
-						if (queries - start >= MAX_INVARIANT_QUERIES)
+						if (queries - start >= maxInvariantQueries)
 							// some candidates might not have been checked on
 							// the initial states: none is kept
 							return;
@@ -763,7 +786,7 @@ public class PdrEngine {
 					for (Lemma l : current.keySet())
 						post.put(l, define(List.of(l, 1), () -> l.at(unrolling, 1)));
 					while (!current.isEmpty()) {
-						if (queries - start >= MAX_INVARIANT_QUERIES)
+						if (queries - start >= maxInvariantQueries)
 							return;
 						List<Term> violated = new ArrayList<>();
 						for (Lemma l : current.keySet())
@@ -821,7 +844,7 @@ public class PdrEngine {
 		Map<Lemma, Term> initial = new LinkedHashMap<>();
 		for (Lemma l : current.keySet())
 			initial.put(l, define(List.of(l, 0), () -> l.at(unrolling, 0)));
-		while (!current.isEmpty() && queries - start < MAX_INVARIANT_QUERIES) {
+		while (!current.isEmpty() && queries - start < maxInvariantQueries) {
 			List<Term> violated = new ArrayList<>();
 			for (Lemma l : current.keySet())
 				violated.add(Term.not(initial.get(l)));
