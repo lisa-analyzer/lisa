@@ -329,7 +329,8 @@ public class Analysis<
 	/**
 	 * Yields the given result of a semantics evaluated on the given entry
 	 * state, where the errors it raised (the ones that are not in the entry
-	 * state) are raised under an unknown condition, that is, by assuming an
+	 * state) and the halting it caused (if the halting state differs from the
+	 * entry one) happen under an unknown condition, that is, by assuming an
 	 * unknown boolean value (see {@link PushAny}) in their states.
 	 *
 	 * @param entry   the entry state of the semantics
@@ -337,7 +338,8 @@ public class Analysis<
 	 * @param context the context where the semantics is evaluated
 	 * @param pp      the program point raising the errors
 	 *
-	 * @return the result, with the raised errors under an unknown condition
+	 * @return the result, with the raised errors and the halting under an
+	 *             unknown condition
 	 *
 	 * @throws SemanticException if an error occurs during the computation
 	 */
@@ -365,6 +367,12 @@ public class Analysis<
 		ProgramState<A> smashed = result.getSmashedErrorsState();
 		if (!smashed.isBottom() && !smashed.equals(entry.getSmashedErrorsState()))
 			weakened = weakened.withSmashedErrorsState(maybe(smashed, unknown, context, pp));
+		// the same holds for halting: a halt reached by the semantics (e.g.,
+		// a callee calling an exit function) happens only in some of the
+		// executions it was evaluated on
+		ProgramState<A> halt = result.getHalt();
+		if (!halt.isBottom() && !halt.equals(entry.getHalt()))
+			weakened = weakened.withHalt(maybe(halt, unknown, context, pp));
 		return weakened;
 	}
 

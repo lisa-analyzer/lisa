@@ -135,6 +135,22 @@ public class ReplayDomainTest {
 	}
 
 	@Test
+	public void uncertainSemanticsHaltUnderAnUnknownCondition() throws SemanticException {
+		var entry = start();
+		// a semantics halting on all the executions it was evaluated on
+		var halted = entry.withHalt(entry.getExecution()).bottomExecution();
+		var weakened = analysis.uncertainErrors(entry, halted, CTX, pp);
+		Set<SymbolicCase> cases = weakened.getHalt().getState().getStore().getCases();
+		assertEquals(1, cases.size(), "Expected a single case: " + cases);
+		// the halt happens only if an unknown condition holds
+		assertFalse(cases.iterator().next().getPathCondition().isEmpty(),
+				"The halt is still certain: " + cases);
+
+		// a halt that was already in the entry state is not weakened
+		assertEquals(halted, analysis.uncertainErrors(halted, halted, CTX, pp));
+	}
+
+	@Test
 	public void assumptionsGoToThePathCondition() throws SemanticException {
 		var state = start();
 		state = analysis.assign(state, X, plus(Y, integer(1)), CTX, pp);
