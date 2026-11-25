@@ -315,15 +315,72 @@ public class Analysis<
 			SymbolicExpression[] computed,
 			CombinationSemantics<A> semantics)
 			throws SemanticException {
-		AnalysisState<A> restricted = state;
-		boolean exact = true;
-		for (int i = 0; i < computed.length && i < operands.length; i++)
-			if (computed[i] != null) {
-				exact &= restrictsExactly(restricted, operands[i], computed[i]);
-				restricted = restrictTo(restricted, operands[i], computed[i]);
-			}
+		boolean exact = restrictsExactly(state, operands, computed);
+		AnalysisState<A> restricted = restrictTo(state, operands, computed);
 		AnalysisState<A> result = semantics.compute(restricted);
 		return exact ? result : uncertainErrors(restricted, result, context, pp);
+	}
+
+	/**
+	 * Yields the executions of the given state where the given operands
+	 * computed the given expressions, the {@code i}-th operand computing the
+	 * {@code i}-th expression (see
+	 * {@link #restrictTo(AnalysisState, ProgramPoint, SymbolicExpression)}).
+	 * Expressions beyond the operands, and {@code null} ones, do not restrict
+	 * the state.
+	 *
+	 * @param state    the state
+	 * @param operands the operands
+	 * @param computed the expressions computed by the operands, in order
+	 *
+	 * @return the executions of the state where the operands computed the
+	 *             expressions
+	 *
+	 * @throws SemanticException if an error occurs during the computation
+	 */
+	public AnalysisState<A> restrictTo(
+			AnalysisState<A> state,
+			ProgramPoint[] operands,
+			SymbolicExpression[] computed)
+			throws SemanticException {
+		AnalysisState<A> result = state;
+		for (int i = 0; i < computed.length && i < operands.length; i++)
+			if (computed[i] != null)
+				result = restrictTo(result, operands[i], computed[i]);
+		return result;
+	}
+
+	/**
+	 * Yields whether
+	 * {@link #restrictTo(AnalysisState, ProgramPoint[], SymbolicExpression[])}
+	 * yields exactly the executions of the given state where the given
+	 * operands computed the given expressions (see
+	 * {@link #restrictsExactly(AnalysisState, ProgramPoint, SymbolicExpression)}):
+	 * only then, what happens in all the executions of the restricted state
+	 * (e.g., an error raised in all of them) happens in all the ones computing
+	 * the expressions.
+	 *
+	 * @param state    the state
+	 * @param operands the operands
+	 * @param computed the expressions computed by the operands, in order
+	 *
+	 * @return whether the restriction is exact
+	 *
+	 * @throws SemanticException if an error occurs during the computation
+	 */
+	public boolean restrictsExactly(
+			AnalysisState<A> state,
+			ProgramPoint[] operands,
+			SymbolicExpression[] computed)
+			throws SemanticException {
+		AnalysisState<A> current = state;
+		for (int i = 0; i < computed.length && i < operands.length; i++)
+			if (computed[i] != null) {
+				if (!restrictsExactly(current, operands[i], computed[i]))
+					return false;
+				current = restrictTo(current, operands[i], computed[i]);
+			}
+		return true;
 	}
 
 	/**

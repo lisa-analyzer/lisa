@@ -395,11 +395,10 @@ public class AlarmModel {
 	 * transitions or of the ones that follow, or by the violation of the
 	 * property. The values of the identifiers that are not live do not affect
 	 * whether the violation is reached, so transitions need not constrain them.
-	 *
-	 * @param location the location
-	 *
 	 * Without liveness (see {@link #withLiveness(boolean)}), all the
 	 * identifiers of the vocabulary are live.
+	 *
+	 * @param location the location
 	 *
 	 * @return the live identifiers (empty if the location is not part of the
 	 *             model)

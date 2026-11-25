@@ -325,10 +325,7 @@ public abstract class NaryExpression
 	 */
 	protected static boolean singleValues(
 			ExpressionSet[] params) {
-		for (ExpressionSet param : params)
-			if (param.size() != 1)
-				return false;
-		return true;
+		return ExpressionSet.singleValues(params);
 	}
 
 	/**
@@ -367,12 +364,7 @@ public abstract class NaryExpression
 			AnalysisState<A> state,
 			SymbolicExpression... computed)
 			throws SemanticException {
-		Expression[] subs = getSubExpressions();
-		AnalysisState<A> result = state;
-		for (int i = 0; i < computed.length && i < subs.length; i++)
-			if (computed[i] != null)
-				result = interprocedural.getAnalysis().restrictTo(result, subs[i], computed[i]);
-		return result;
+		return interprocedural.getAnalysis().restrictTo(state, getSubExpressions(), computed);
 	}
 
 	/**
@@ -405,15 +397,7 @@ public abstract class NaryExpression
 			AnalysisState<A> state,
 			SymbolicExpression... computed)
 			throws SemanticException {
-		Expression[] subs = getSubExpressions();
-		AnalysisState<A> current = state;
-		for (int i = 0; i < computed.length && i < subs.length; i++)
-			if (computed[i] != null) {
-				if (!interprocedural.getAnalysis().restrictsExactly(current, subs[i], computed[i]))
-					return false;
-				current = interprocedural.getAnalysis().restrictTo(current, subs[i], computed[i]);
-			}
-		return true;
+		return interprocedural.getAnalysis().restrictsExactly(state, getSubExpressions(), computed);
 	}
 
 	/**

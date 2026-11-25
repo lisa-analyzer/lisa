@@ -24,6 +24,7 @@ import it.unive.lisa.lattices.types.TypeSet;
 import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.program.type.BoolType;
+import it.unive.lisa.analysis.AnalysisState.Error;
 import it.unive.lisa.program.type.Int32Type;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.BinaryExpression;
@@ -175,6 +176,83 @@ public class ReplayDomainTest {
 		assertTrue(single(state).onlyConstrains());
 		state = analysis.assign(state, X, integer(1), CTX, pp);
 		assertFalse(single(state).onlyConstrains());
+	}
+
+	private static Set<SymbolicCase> casesOf(
+			ProgramState<? extends ReplayState<?>> state) {
+		return state.getState().getStore().getCases();
+	}
+
+	private static SymbolicCase caseWith(
+			Set<SymbolicCase> cases,
+			int x) {
+		return cases.stream().filter(c -> integer(x).equals(c.getUpdates().get(X))).findFirst()
+				.orElseThrow(() -> new AssertionError("No case with x = " + x + " in " + cases));
+	}
+
+	@Test
+	public void uncertainErrorsWeakenOnlyWhatTheSemanticsAdded() throws SemanticException {
+		var base = start();
+		var one = analysis.assign(base, X, integer(1), CTX, pp);
+		var two = analysis.assign(base, X, integer(2), CTX, pp);
+		Error old = new Error(Int32Type.INSTANCE, null);
+		Error raised = new Error(BoolType.INSTANCE, null);
+		var entry = base.addError(old, one.getExecution());
+		// the semantics raises a new error, adds executions to the old one,
+		// and adds executions to the smashed errors
+		var result = entry.addError(raised, one.getExecution()).addError(old, two.getExecution())
+				.withSmashedErrorsState(one.getExecution());
+		var weakened = analysis.uncertainErrors(entry, result, CTX, pp);
+
+		Set<SymbolicCase> fresh = casesOf(weakened.getErrors().getState(raised));
+		assertEquals(1, fresh.size(), "Expected a single case: " + fresh);
+		assertFalse(fresh.iterator().next().getPathCondition().isEmpty(), "The new error is certain: " + fresh);
+
+		Set<SymbolicCase> grown = casesOf(weakened.getErrors().getState(old));
+		assertEquals(2, grown.size(), "Expected two cases: " + grown);
+		assertTrue(caseWith(grown, 1).getPathCondition().isEmpty(), "The entry part was weakened: " + grown);
+		assertFalse(caseWith(grown, 2).getPathCondition().isEmpty(), "The added part is certain: " + grown);
+
+		Set<SymbolicCase> smashed = casesOf(weakened.getSmashedErrorsState());
+		assertFalse(smashed.iterator().next().getPathCondition().isEmpty(), "The smashed errors are certain");
+
+		// unchanged errors, and bottom results, are left as they are
+		assertEquals(entry, analysis.uncertainErrors(entry, entry, CTX, pp));
+		assertEquals(result.bottom(), analysis.uncertainErrors(entry, result.bottom(), CTX, pp));
+	}
+
+	@Test
+	public void exactCombinationsRaiseCertainErrors() throws SemanticException {
+		var base = start();
+		var one = analysis.assign(base, X, integer(1), CTX, pp);
+		Error raised = new Error(BoolType.INSTANCE, null);
+		// no operand restricts the state: the combination is computed by all
+		// its executions, and the error is raised in all of them
+		var result = analysis.ofCombination(one, CTX, pp, new ProgramPoint[0], new SymbolicExpression[0],
+				s -> s.addError(raised, s.getExecution()));
+		Set<SymbolicCase> cases = casesOf(result.getErrors().getState(raised));
+		assertTrue(cases.iterator().next().getPathCondition().isEmpty(), "The error is not certain: " + cases);
+	}
+
+	@Test
+	public void restrictionsCanBeDisabled() throws SemanticException {
+		var base = start();
+		Constant first = integer(1);
+		Constant second = integer(2);
+		// two cases (y > 0 and 0 > y), each computing a constant at pp
+		var one = analysis.smallStepSemantics(analysis.assume(base, gt(Y, integer(0)), CTX, pp, pp), first, CTX, pp);
+		var two = analysis.smallStepSemantics(analysis.assume(base, gt(integer(0), Y), CTX, pp, pp), second, CTX,
+				pp);
+		var joined = one.lub(two).getExecutionState();
+		assertEquals(2, joined.getStore().getCases().size());
+		// the case that computed the first constant
+		assertEquals(1, domain.restrictTo(joined, pp, first).getStore().getCases().size());
+		assertTrue(domain.restrictsExactly(joined, pp, first));
+		// without restrictions, all cases are kept, and the restriction is not
+		// exact
+		var unrestricted = new ReplayDomain<>(DefaultConfiguration.defaultAbstractDomain(), factory, 2, false);
+		assertEquals(joined, unrestricted.restrictTo(joined, pp, first));
+		assertFalse(unrestricted.restrictsExactly(joined, pp, first));
 	}
 
 	@Test

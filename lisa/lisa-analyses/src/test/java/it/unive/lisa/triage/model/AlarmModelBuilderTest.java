@@ -41,6 +41,7 @@ import it.unive.lisa.triage.smt.Sort;
 import it.unive.lisa.type.Untyped;
 import java.nio.file.Files;
 import java.util.List;
+import java.util.Collections;
 import java.util.Set;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -403,6 +404,32 @@ public class AlarmModelBuilderTest {
 		// raising errors of an unrelated type is not a violation
 		AlarmModel unrelated = build(thrower, thr, Violation.error(Int32Type.INSTANCE));
 		assertTrue(unrelated.getBadCases().isEmpty());
+	}
+
+	/**
+	 * Without liveness (of the model, or of the cache it is built with), all
+	 * the identifiers of the vocabulary are live everywhere.
+	 */
+	@Test
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public void livenessCanBeDisabled() throws SemanticException {
+		CFG thrower = cfg("thrower");
+		Statement thr = node(thrower, "throw");
+		AlarmModel model = build(thrower, thr, Violation.error());
+		for (ModelLocation loc : model.getLocations()) {
+			assertTrue(model.getVocabulary().containsAll(model.getLive(loc)));
+			assertEquals(model.getVocabulary(), model.withLiveness(false).getLive(loc));
+		}
+
+		ResultCache cache = new ResultCache<>();
+		cache.setLiveness(false);
+		SemanticTool t = tool;
+		AnalyzedCFG result = (AnalyzedCFG) t.getResultOf(thrower).iterator().next();
+		AlarmModel without = AlarmModelBuilder.build(t, result, thr, Violation.error(),
+				SymbolicStore.DEFAULT_MAX_CASES, Collections.emptySet(), AlarmModelBuilder.DEFAULT_MAX_LOCATIONS,
+				Collections.emptyList(), Long.MAX_VALUE, cache);
+		for (ModelLocation loc : without.getLocations())
+			assertEquals(without.getVocabulary(), without.getLive(loc));
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })

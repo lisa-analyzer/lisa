@@ -27,6 +27,23 @@ public class ExpressionSet
 		ScopedObject<ExpressionSet> {
 
 	/**
+	 * Yields whether each of the given sets contains a single expression (e.g.,
+	 * the expressions computed by the operands of a statement: then, there is
+	 * a single combination of them).
+	 *
+	 * @param sets the sets
+	 *
+	 * @return whether each set contains a single expression
+	 */
+	public static boolean singleValues(
+			ExpressionSet... sets) {
+		for (ExpressionSet set : sets)
+			if (set.size() != 1)
+				return false;
+		return true;
+	}
+
+	/**
 	 * Builds the empty set lattice element.
 	 */
 	public ExpressionSet() {

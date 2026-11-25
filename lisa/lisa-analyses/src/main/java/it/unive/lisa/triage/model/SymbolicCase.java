@@ -654,7 +654,9 @@ public final class SymbolicCase {
 
 	/**
 	 * Yields the type denoted by the given type token, if it is a constant
-	 * denoting a single type, or {@code null}.
+	 * denoting a single type, or {@code null}. Besides the guards of the
+	 * cases, this decides which type tests can be encoded (see
+	 * {@link AlarmModelBuilder}), so that both agree on them.
 	 *
 	 * @param token the token
 	 * 

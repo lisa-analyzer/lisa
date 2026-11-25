@@ -93,6 +93,52 @@ public class SymbolicStoreTest {
 		return new BinaryExpression(Int32Type.INSTANCE, left, right, NumericNonOverflowingAdd.INSTANCE, LOC);
 	}
 
+	private static BinaryExpression positive() {
+		return new BinaryExpression(BoolType.INSTANCE, X, ZERO, ComparisonGt.INSTANCE, LOC);
+	}
+
+	private static BinaryExpression nonPositive() {
+		return new BinaryExpression(BoolType.INSTANCE, X, ZERO, ComparisonLe.INSTANCE, LOC);
+	}
+
+	/**
+	 * A join keeps the expressions computed by the cases of both stores: a
+	 * case where a point computed nothing known is kept by the restrictions
+	 * to that point, which are then not exact.
+	 */
+	@Test
+	public void joinsKeepTheExpressionsOfBothSides() {
+		Constant one = integer(1);
+		SymbolicStore computed = identity().assume(positive(), pp).computing(one, pp);
+		SymbolicStore other = identity().assume(nonPositive(), pp).computing(integer(2), pp);
+		SymbolicStore both = computed.lub(other);
+		assertEquals(1, both.restrictTo(pp, one).getCases().size());
+		assertTrue(both.restrictsExactly(pp, one));
+
+		// the other side computed nothing at the point
+		SymbolicStore missing = computed.lub(identity().assume(nonPositive(), pp));
+		assertEquals(2, missing.restrictTo(pp, one).getCases().size());
+		assertFalse(missing.restrictsExactly(pp, one));
+	}
+
+	/**
+	 * When a join exceeds the maximum number of cases, the merged case
+	 * computed any of the expressions of the cases: restrictions keep it, and
+	 * are not exact.
+	 */
+	@Test
+	public void mergedCasesComputedAnyExpression() {
+		SymbolicStore bounded = SymbolicStore.identity(factory, 2);
+		Constant one = integer(1);
+		SymbolicStore a = bounded.assume(positive(), pp).computing(one, pp);
+		SymbolicStore b = bounded.assume(nonPositive(), pp).computing(integer(2), pp);
+		SymbolicStore c = bounded.assume(positive(), pp).assume(nonPositive(), pp).computing(integer(3), pp);
+		SymbolicStore merged = a.lub(b).lub(c);
+		assertEquals(1, merged.getCases().size());
+		assertEquals(merged, merged.restrictTo(pp, one));
+		assertFalse(merged.restrictsExactly(pp, one));
+	}
+
 	/**
 	 * Recording an expression that a point already computed yields the same
 	 * store.

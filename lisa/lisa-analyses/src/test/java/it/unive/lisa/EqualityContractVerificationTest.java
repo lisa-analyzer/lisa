@@ -73,6 +73,7 @@ import it.unive.lisa.program.InterfaceUnit;
 import it.unive.lisa.program.Program;
 import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.SyntheticLocation;
+import it.unive.lisa.program.type.BoolType;
 import it.unive.lisa.program.Unit;
 import it.unive.lisa.program.annotations.Annotation;
 import it.unive.lisa.program.annotations.AnnotationMember;
@@ -120,9 +121,12 @@ import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
 import it.unive.lisa.program.type.Int32Type;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.HeapLocation;
+import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.triage.inputs.InputSource;
+import it.unive.lisa.triage.inputs.InputSourceResolver;
 import it.unive.lisa.triage.model.Frame;
+import it.unive.lisa.triage.model.FreshValueFactory;
 import it.unive.lisa.triage.model.HeapOperators;
 import it.unive.lisa.triage.model.ModelLocation;
 import it.unive.lisa.triage.model.SymbolicCase;
@@ -249,6 +253,12 @@ public class EqualityContractVerificationTest {
 
 	private static final CFG cfg1 = new CFG(descr1);
 
+	private static final SymbolicStore store1 = SymbolicStore
+			.identity(new FreshValueFactory(new InputSourceResolver(List.of(), null)), 2);
+
+	private static final SymbolicStore store2 = store1
+			.assume(new Variable(BoolType.INSTANCE, "x", SyntheticLocation.INSTANCE), null);
+
 	private static final CFG cfg2 = new CFG(descr2);
 
 	private static final UnresolvedCall uc1 = new UnresolvedCall(cfg1, loc, CallType.STATIC, null, "fake1");
@@ -374,6 +384,8 @@ public class EqualityContractVerificationTest {
 
 		SingleTypeEqualsVerifierApi<T> verifier = EqualsVerifier.forClass(clazz)
 				.suppress(suppressions)
+				// stores remember their last restriction, that is a store
+				.withPrefabValues(SymbolicStore.class, store1, store2)
 				.withPrefabValues(CFG.class, cfg1, cfg2)
 				.withPrefabValues(Graph.class, cfg1, cfg2)
 				.withPrefabValues(AbstractCodeMember.class, signCfg1, signCfg2)
@@ -742,7 +754,8 @@ public class EqualityContractVerificationTest {
 				.withPrefabValues(Frame.class, Frame.root(result1), Frame.root(result2)));
 		// the factory of fresh values and the bound on cases do not affect
 		// the represented transition
-		verify(SymbolicStore.class, verifier -> verifier.withIgnoredFields("factory", "maxCases", "computed"));
+		verify(SymbolicStore.class,
+				verifier -> verifier.withIgnoredFields("factory", "maxCases", "computed", "last", "tagIndex"));
 		verify(Term.class, verifier -> verifier.withPrefabValues(Sort.class, Sort.INT, Sort.BOOL));
 		verify(Cube.class);
 		verify(Cube.Blocked.class);

@@ -36,8 +36,12 @@ import java.util.function.Supplier;
  * and of different warnings): the states before the nodes of the results (see
  * {@link Reachability#preStateOf(AnalyzedCFG, Statement, Analysis)}), and the
  * results obtained by merging the ones of a callee (see
- * {@link ReplayInterprocedural}). Results are identified by identity, since
- * their states are immutable.
+ * {@link ReplayInterprocedural}), the summaries of the members, and what their
+ * code writes. Results are identified by identity, since their states are
+ * immutable. Since it is shared by all these models, the cache also holds the
+ * options of how they are built (see {@link #setDecidesConditions(boolean)},
+ * {@link #setRestrictsCases(boolean)}, {@link #setTypedFields(boolean)} and
+ * {@link #setLiveness(boolean)}), all enabled by default.
  *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  *
@@ -93,6 +97,33 @@ public class ResultCache<A extends AbstractLattice<A>> {
 	 */
 	private boolean summarized;
 
+	// the options of the models built with this cache (see the setters
+	// below), all enabled by default and disabled only to measure their
+	// contribution
+
+	/**
+	 * Whether the conditions of the models are decided by the analysis to
+	 * strengthen their seeds.
+	 */
+	private boolean decidesConditions = true;
+
+	/**
+	 * Whether the replay restricts each operation to the cases computing its
+	 * operands.
+	 */
+	private boolean restrictsCases = true;
+
+	/**
+	 * Whether the contents of fields qualified by their class are encoded with
+	 * the sort of their declared types.
+	 */
+	private boolean typedFields = true;
+
+	/**
+	 * Whether the models built with this cache use liveness.
+	 */
+	private boolean liveness = true;
+
 	/**
 	 * Yields the facts known to hold whenever the given member returns: boolean
 	 * expressions over the formal parameters of the member (as variables named
@@ -140,12 +171,6 @@ public class ResultCache<A extends AbstractLattice<A>> {
 	}
 
 	/**
-	 * Whether the conditions of the models are decided by the analysis to
-	 * strengthen their seeds.
-	 */
-	private boolean decidesConditions = true;
-
-	/**
 	 * Yields whether the conditions of the models built with this cache are
 	 * decided by the analysis, so that the ones it decides become seeds of the
 	 * models (default: {@code true}).
@@ -169,23 +194,6 @@ public class ResultCache<A extends AbstractLattice<A>> {
 			boolean decidesConditions) {
 		this.decidesConditions = decidesConditions;
 	}
-
-	/**
-	 * Whether the replay restricts each operation to the cases computing its
-	 * operands.
-	 */
-	private boolean restrictsCases = true;
-
-	/**
-	 * Whether the contents of fields qualified by their class are encoded with
-	 * the sort of their declared types.
-	 */
-	private boolean typedFields = true;
-
-	/**
-	 * Whether the models built with this cache use liveness.
-	 */
-	private boolean liveness = true;
 
 	/**
 	 * Yields whether the models built with this cache use liveness (default:

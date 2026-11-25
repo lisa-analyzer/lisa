@@ -715,6 +715,24 @@ public class TypeSetTest {
 	}
 
 	/**
+	 * A value whose types include {@link Untyped} (whose runtime type is not
+	 * known) might be an instance of any token: the check is neither surely
+	 * satisfied nor surely not satisfied.
+	 */
+	@Test
+	public void testTypeCheckWithUntypedValues()
+			throws SemanticException {
+		TypeSet intToken = new TypeSet(types,
+				Collections.singleton(new TypeTokenType(Collections.singleton(Int32Type.INSTANCE))));
+		TypeSet untyped = new TypeSet(types, Collections.singleton(Untyped.INSTANCE));
+		TypeSet untypedOrInt = new TypeSet(types, Set.of(Untyped.INSTANCE, Int32Type.INSTANCE));
+		TypeSet untypedOrString = new TypeSet(types, Set.of(Untyped.INSTANCE, StringType.INSTANCE));
+		satisfies(TypeCheck.INSTANCE, untyped, intToken, Satisfiability.UNKNOWN);
+		satisfies(TypeCheck.INSTANCE, untypedOrInt, intToken, Satisfiability.UNKNOWN);
+		satisfies(TypeCheck.INSTANCE, untypedOrString, intToken, Satisfiability.UNKNOWN);
+	}
+
+	/**
 	 * Assuming that a value is not an instance of the types of a token removes
 	 * all of them (a token denotes all its types), while with several tokens
 	 * (alternatives) only the types that are instances under every token are

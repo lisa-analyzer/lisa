@@ -599,7 +599,7 @@ public class ReplayInterprocedural<A extends AbstractLattice<A>, D extends Abstr
 						callres = callres.addError(new Error(type, thrower),
 								lift(state.getSmashedErrorsState(), lost));
 		}
-		if (!post.getHalt().isBottom())
+		if (post != null && !post.getHalt().isBottom())
 			callres = callres.withHalt(callres.getHalt().lub(lift(post.getHalt(), lost)));
 		return callres;
 	}
