@@ -611,6 +611,24 @@ public final class SymbolicStore {
 	}
 
 	/**
+	 * Assumes the given condition in every case that is not among the given
+	 * ones, keeping the latter as they are.
+	 *
+	 * @param kept      the cases where the condition is not assumed
+	 * @param condition the condition
+	 * @param pp        the program point where the condition is assumed (can be
+	 *                      {@code null})
+	 *
+	 * @return the resulting store
+	 */
+	public SymbolicStore assumeExcept(
+			Set<SymbolicCase> kept,
+			SymbolicExpression condition,
+			ProgramPoint pp) {
+		return map(c -> kept.contains(c) ? c : c.assume(condition, factory, pp));
+	}
+
+	/**
 	 * Forgets the given identifiers in every case.
 	 *
 	 * @param ids the identifiers

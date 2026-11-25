@@ -151,6 +151,33 @@ public class ReplayDomainTest {
 	}
 
 	@Test
+	public void uncertainSemanticsKeepTheEntryHalt() throws SemanticException {
+		var base = start();
+		var one = analysis.assign(base, X, integer(1), CTX, pp);
+		var two = analysis.assign(base, X, integer(2), CTX, pp);
+		// x = 1 halted before the semantics, which also halts on x = 2
+		var entry = base.withHalt(one.getExecution());
+		var halted = base.withHalt(one.lub(two).getExecution());
+		var weakened = analysis.uncertainErrors(entry, halted, CTX, pp);
+		Set<SymbolicCase> cases = weakened.getHalt().getState().getStore().getCases();
+		// still two cases: x = 1 halts for sure, x = 2 under the unknown
+		assertEquals(2, cases.size(), "Expected two cases: " + cases);
+		for (SymbolicCase c : cases)
+			if (c.getUpdates().get(X).equals(integer(1)))
+				assertTrue(c.getPathCondition().isEmpty(), "The previous halt was weakened: " + c);
+			else
+				assertFalse(c.getPathCondition().isEmpty(), "The new halt is certain: " + c);
+	}
+
+	@Test
+	public void onlyConditionsHaveNoEffects() throws SemanticException {
+		var state = analysis.assume(start(), gt(Y, integer(0)), CTX, pp, pp);
+		assertTrue(single(state).onlyConstrains());
+		state = analysis.assign(state, X, integer(1), CTX, pp);
+		assertFalse(single(state).onlyConstrains());
+	}
+
+	@Test
 	public void assumptionsGoToThePathCondition() throws SemanticException {
 		var state = start();
 		state = analysis.assign(state, X, plus(Y, integer(1)), CTX, pp);

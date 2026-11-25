@@ -93,6 +93,35 @@ public interface AbstractDomain<
 	}
 
 	/**
+	 * Assumes the given condition in the executions of {@code after} that are
+	 * not executions of {@code before}, keeping the other ones as they are.
+	 * This is used to make what a semantics adds to a state (e.g., to the
+	 * state of an error) happen under a condition, without weakening what the
+	 * state held before the semantics. The default implementation, for domains
+	 * that cannot tell the executions apart, assumes the condition in all the
+	 * executions of {@code after}.
+	 *
+	 * @param before    the state before the semantics
+	 * @param after     the state after the semantics
+	 * @param condition the condition
+	 * @param context   the context where the condition is assumed
+	 * @param pp        the program point where the condition is assumed
+	 *
+	 * @return the resulting state
+	 *
+	 * @throws SemanticException if an error occurs during the computation
+	 */
+	default L assumeOnAdded(
+			L before,
+			L after,
+			SymbolicExpression condition,
+			ScopeId<?> context,
+			ProgramPoint pp)
+			throws SemanticException {
+		return assume(after, condition, context, pp, pp);
+	}
+
+	/**
 	 * Yields all the instances of a specific domain, of class {@code domain},
 	 * contained inside this domain, also recursively querying inner domains
 	 * (enabling retrieval through combinations of domains, or through domains

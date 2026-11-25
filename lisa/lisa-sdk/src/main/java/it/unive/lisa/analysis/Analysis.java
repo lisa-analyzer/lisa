@@ -331,7 +331,10 @@ public class Analysis<
 	 * state, where the errors it raised (the ones that are not in the entry
 	 * state) and the halting it caused (if the halting state differs from the
 	 * entry one) happen under an unknown condition, that is, by assuming an
-	 * unknown boolean value (see {@link PushAny}) in their states.
+	 * unknown boolean value (see {@link PushAny}) in their states. The
+	 * executions of an error or of the halting state that were already in the
+	 * entry state are kept as they are, if the domain can tell them apart (see
+	 * {@link AbstractDomain#assumeOnAdded}).
 	 *
 	 * @param entry   the entry state of the semantics
 	 * @param result  the result of the semantics
@@ -359,21 +362,40 @@ public class Analysis<
 				ProgramState<A> before = entry.getErrors().function == null ? null
 						: entry.getErrors().function.get(e.getKey());
 				if (!e.getValue().equals(before))
-					raised.put(e.getKey(), maybe(e.getValue(), unknown, context, pp));
+					raised.put(e.getKey(), weaken(before, e.getValue(), unknown, context, pp));
 			}
 			if (!raised.isEmpty())
 				weakened = weakened.removeErrors(raised.keySet()).addErrors(raised);
 		}
 		ProgramState<A> smashed = result.getSmashedErrorsState();
-		if (!smashed.isBottom() && !smashed.equals(entry.getSmashedErrorsState()))
-			weakened = weakened.withSmashedErrorsState(maybe(smashed, unknown, context, pp));
+		ProgramState<A> smashedBefore = entry.getSmashedErrorsState();
+		if (!smashed.isBottom() && !smashed.equals(smashedBefore))
+			weakened = weakened.withSmashedErrorsState(weaken(smashedBefore, smashed, unknown, context, pp));
 		// the same holds for halting: a halt reached by the semantics (e.g.,
 		// a callee calling an exit function) happens only in some of the
 		// executions it was evaluated on
 		ProgramState<A> halt = result.getHalt();
-		if (!halt.isBottom() && !halt.equals(entry.getHalt()))
-			weakened = weakened.withHalt(maybe(halt, unknown, context, pp));
+		ProgramState<A> haltBefore = entry.getHalt();
+		if (!halt.isBottom() && !halt.equals(haltBefore))
+			weakened = weakened.withHalt(weaken(haltBefore, halt, unknown, context, pp));
 		return weakened;
+	}
+
+	// the given state after the semantics, where only the executions added
+	// by the semantics happen under the given unknown condition: the ones
+	// that were already in the state before it are kept as they are (see
+	// AbstractDomain#assumeOnAdded)
+	private ProgramState<A> weaken(
+			ProgramState<A> before,
+			ProgramState<A> after,
+			PushAny unknown,
+			ScopeId<?> context,
+			ProgramPoint pp)
+			throws SemanticException {
+		if (before == null || before.isBottom() || after.isBottom())
+			return maybe(after, unknown, context, pp);
+		A assumed = domain.assumeOnAdded(before.getState(), after.getState(), unknown, context, pp);
+		return new ProgramState<>(assumed, after.getComputedExpressions(), after.getFixpointInformation());
 	}
 
 	// the executions of the given state where the given unknown condition

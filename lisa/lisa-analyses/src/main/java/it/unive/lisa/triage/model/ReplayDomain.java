@@ -206,6 +206,22 @@ public class ReplayDomain<A extends AbstractLattice<A>, D extends AbstractDomain
 	}
 
 	@Override
+	public ReplayState<A> assumeOnAdded(
+			ReplayState<A> before,
+			ReplayState<A> after,
+			SymbolicExpression condition,
+			ScopeId<?> context,
+			ProgramPoint pp)
+			throws SemanticException {
+		A inner = domain.assumeOnAdded(before.getInner(), after.getInner(), condition, context, pp);
+		if (inner.isBottom())
+			return after.withInner(inner);
+		// the cases that were already there are kept as they are, so that
+		// what happened before the semantics stays certain
+		return new ReplayState<>(inner, after.getStore().assumeExcept(before.getStore().getCases(), condition, pp));
+	}
+
+	@Override
 	public Satisfiability satisfies(
 			ReplayState<A> state,
 			SymbolicExpression expression,

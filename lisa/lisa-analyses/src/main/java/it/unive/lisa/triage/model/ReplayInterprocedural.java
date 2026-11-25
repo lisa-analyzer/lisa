@@ -42,6 +42,7 @@ import it.unive.lisa.symbolic.heap.HeapDereference;
 import it.unive.lisa.symbolic.heap.HeapReference;
 import it.unive.lisa.symbolic.heap.MemoryAllocation;
 import it.unive.lisa.symbolic.value.BinaryExpression;
+import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.GlobalVariable;
 import it.unive.lisa.symbolic.value.HeapLocation;
 import it.unive.lisa.symbolic.value.Identifier;
@@ -107,7 +108,11 @@ import org.apache.commons.lang3.tuple.Pair;
  * part of the node evaluated before the call are already part of the transition
  * entering the callees. The operands evaluated before the call that are still
  * to be used are then evaluated at the location where the node resumes: this
- * requires them to yield the same values there.<br>
+ * requires them to yield the same values there. If that part of the node has
+ * no effect, and its conditions only read constants and local variables, its
+ * cases are kept instead, as the conditions hold where the node resumes
+ * exactly when they held before the call: the rest of the node is then still
+ * restricted to the cases that computed its operands.<br>
  * <br>
  * A call is <b>expandable</b> if:
  * <ul>
@@ -691,7 +696,10 @@ public class ReplayInterprocedural<A extends AbstractLattice<A>, D extends Abstr
 		ReplayState<A> replayed = exec.getState().withInner(inner);
 		AnalysisState<ReplayState<A>> state = entryState;
 		if (resume) {
-			replayed = replayed.withStore(replayed.getStore().identity());
+			SymbolicStore store = replayed.getStore();
+			if (!onlyReevaluableConditions(store, call, entryState))
+				store = store.identity();
+			replayed = replayed.withStore(store);
 			state = state.removeAllErrors(true);
 		}
 		state = state.withExecution(new ProgramState<>(
@@ -863,6 +871,64 @@ public class ReplayInterprocedural<A extends AbstractLattice<A>, D extends Abstr
 	 * Yields {@code true} if evaluating the given expression reads the heap or
 	 * global variables.
 	 */
+	/**
+	 * Yields {@code true} if the given store, obtained by evaluating again the
+	 * part of a node before the given call it resumes after, can be kept
+	 * instead of being reset to the identity: its cases have no effect (that
+	 * would be applied twice, as it is already part of the transition entering
+	 * the callees), and their path conditions contain no unknown value and only
+	 * read memory that the callees cannot change (as for the operands of the
+	 * operand rule). Then, the conditions hold at the location where the node
+	 * resumes exactly when they held before the call, and keeping the cases
+	 * (and the expressions they computed) lets the rest of the node be
+	 * restricted to the cases that computed its operands (e.g., in
+	 * {@code (c ? a : b) + f()}, the sum of {@code a} only where {@code c}
+	 * holds).
+	 */
+	private boolean onlyReevaluableConditions(
+			SymbolicStore store,
+			CFGCall call,
+			AnalysisState<ReplayState<A>> entryState) {
+		if (store.isTop())
+			return false;
+		for (SymbolicCase c : store.getCases()) {
+			if (!c.onlyConstrains())
+				return false;
+			for (SymbolicExpression condition : c.getPathCondition())
+				if (!reevaluable(condition) || readsMemory(condition) && !unchangedBy(condition, call, entryState))
+					return false;
+		}
+		return true;
+	}
+
+	// whether the given expression is made only of constants, identifiers
+	// that are not unknown values, and accesses to the memory: evaluating it
+	// again yields the same value, if the memory it reads is unchanged
+	private static boolean reevaluable(
+			SymbolicExpression e) {
+		if (e instanceof Constant)
+			return true;
+		if (e instanceof FreshValue)
+			return false;
+		if (e instanceof Identifier)
+			return true;
+		if (e instanceof AccessChild)
+			return reevaluable(((AccessChild) e).getContainer()) && reevaluable(((AccessChild) e).getChild());
+		if (e instanceof HeapReference)
+			return reevaluable(((HeapReference) e).getExpression());
+		if (e instanceof HeapDereference)
+			return reevaluable(((HeapDereference) e).getExpression());
+		if (e instanceof UnaryExpression)
+			return reevaluable(((UnaryExpression) e).getExpression());
+		if (e instanceof BinaryExpression)
+			return reevaluable(((BinaryExpression) e).getLeft()) && reevaluable(((BinaryExpression) e).getRight());
+		if (e instanceof TernaryExpression)
+			return reevaluable(((TernaryExpression) e).getLeft())
+					&& reevaluable(((TernaryExpression) e).getMiddle())
+					&& reevaluable(((TernaryExpression) e).getRight());
+		return false;
+	}
+
 	private static boolean readsMemory(
 			SymbolicExpression e) {
 		if (e instanceof AccessChild || e instanceof HeapLocation || e instanceof GlobalVariable

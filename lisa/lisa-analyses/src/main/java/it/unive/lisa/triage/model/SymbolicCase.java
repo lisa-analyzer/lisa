@@ -362,6 +362,18 @@ public final class SymbolicCase {
 	}
 
 	/**
+	 * Yields {@code true} if this transition has no effect other than its path
+	 * condition: it updates, forgets and havocs nothing, pushes or pops no
+	 * scope, and consumes no input.
+	 *
+	 * @return whether or not this transition only constrains its executions
+	 */
+	public boolean onlyConstrains() {
+		return updates.isEmpty() && forgotten.isEmpty() && forgottenIf.isEmpty() && !heapHavoc && !havocAll
+				&& scopings.isEmpty() && produced.isEmpty();
+	}
+
+	/**
 	 * Yields {@code true} if the given identifier denotes a heap location.
 	 *
 	 * @param id the identifier
