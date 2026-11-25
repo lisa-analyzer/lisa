@@ -201,20 +201,24 @@ public class InferredTypes
 			// the check holds if the runtime type of the value is a subtype of
 			// the type of a token (unlike a cast, see TypeCast: e.g., an int is
 			// not an instance of a float, but it can be cast to it)
-			Set<Type> instances = instancesOf(relems, types);
+			// several tokens are alternatives (see TypeTokens): the value is
+			// surely an instance only if it is one under every token, and
+			// surely not one only if it is not one under any token
+			Set<Type> instances = TypeTokens.ofAny(relems, types);
 			if (instances.isEmpty() || lelems.isEmpty())
 				// no type token: this is not a type condition
 				return Satisfiability.UNKNOWN;
+			Set<Type> always = TypeTokens.ofEach(relems, types);
 			boolean some = false, all = true;
 			for (Type t : lelems)
 				if (t.isUntyped()) {
 					// an unknown type might be an instance or not
 					some = true;
 					all = false;
-				} else if (instances.contains(t))
-					some = true;
-				else
-					all = false;
+				} else {
+					some |= instances.contains(t);
+					all &= always.contains(t);
+				}
 			if (all)
 				return Satisfiability.SATISFIED;
 			if (!some)
@@ -266,8 +270,10 @@ public class InferredTypes
 			// assume anything
 			return environment;
 
-		// these are all the instances of the types of the tokens
-		Set<Type> okTypes = instancesOf(elems, types);
+		// the types that are instances whatever token an execution evaluates
+		// to (several tokens are alternatives, see TypeTokens): only these
+		// surely fail the negated check
+		Set<Type> okTypes = TypeTokens.ofEach(elems, types);
 
 		TypeSet starting = environment.getState(id);
 		if (eval.isBottom() || starting.isBottom())
@@ -341,7 +347,7 @@ public class InferredTypes
 		else if (operator == TypeCheck.INSTANCE) {
 			// we keep only the instances of the types of the tokens (an
 			// unknown type might be one)
-			Set<Type> instances = instancesOf(tokens, types);
+			Set<Type> instances = TypeTokens.ofAny(tokens, types);
 			update = current.stream().filter(t -> t.isUntyped() || instances.contains(t))
 					.collect(Collectors.toSet());
 		}
@@ -352,29 +358,6 @@ public class InferredTypes
 			return environment.bottom();
 		else
 			return environment.putState(id, new TypeSet(types, update));
-	}
-
-	/**
-	 * Yields the types whose values are instances of the types represented by
-	 * the given type tokens, that is, their subtypes (see
-	 * {@link Type#allInstances(TypeSystem)}). The types that are not
-	 * {@link TypeTokenType}s are ignored.
-	 *
-	 * @param tokens the type tokens
-	 * @param types  the type system
-	 *
-	 * @return the instances of the types of the tokens
-	 */
-	private static Set<Type> instancesOf(
-			Set<Type> tokens,
-			TypeSystem types) {
-		return tokens.stream()
-				.filter(Type::isTypeTokenType)
-				.map(Type::asTypeTokenType)
-				.map(TypeTokenType::getTypes)
-				.flatMap(Set::stream)
-				.flatMap(t -> t.allInstances(types).stream())
-				.collect(Collectors.toSet());
 	}
 
 	/**

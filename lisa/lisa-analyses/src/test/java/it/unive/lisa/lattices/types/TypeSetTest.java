@@ -684,9 +684,11 @@ public class TypeSetTest {
 						new TypeTokenType(Collections.singleton(StringType.INSTANCE))));
 		satisfies(ComparisonEq.INSTANCE, left, right, Satisfiability.UNKNOWN);
 		satisfies(ComparisonNe.INSTANCE, left, right, Satisfiability.UNKNOWN);
-		satisfies(TypeCheck.INSTANCE, integer, right, Satisfiability.SATISFIED);
+		// several tokens are alternatives: an int is an instance under the
+		// first, not under the second
+		satisfies(TypeCheck.INSTANCE, integer, right, Satisfiability.UNKNOWN);
 		satisfies(TypeCheck.INSTANCE, floating, right, Satisfiability.NOT_SATISFIED);
-		satisfies(TypeCheck.INSTANCE, string, right, Satisfiability.SATISFIED);
+		satisfies(TypeCheck.INSTANCE, string, right, Satisfiability.UNKNOWN);
 		satisfies(TypeCheck.INSTANCE, bool, right, Satisfiability.NOT_SATISFIED);
 		satisfies(TypeCheck.INSTANCE, bool_or_string, right, Satisfiability.UNKNOWN);
 	}
@@ -710,6 +712,40 @@ public class TypeSetTest {
 				new UnaryExpression(BoolType.INSTANCE, isBool, LogicalNegation.INSTANCE, fake.getLocation()), fake,
 				fake, oracle);
 		assertEquals(string, act.getState(variable), "Assume(!(x is bool)) returned wrong result");
+	}
+
+	/**
+	 * Assuming that a value is not an instance of the types of a token removes
+	 * all of them (a token denotes all its types), while with several tokens
+	 * (alternatives) only the types that are instances under every token are
+	 * removed.
+	 */
+	@Test
+	public void testAssumeNegatedTypeCheckWithSeveralTokens()
+			throws SemanticException {
+		// !(x instanceof (bool, str)), with x a bool or a str
+		BinaryExpression isBoolOrString = new BinaryExpression(BoolType.INSTANCE, variable,
+				new Constant(new TypeTokenType(Set.of(BoolType.INSTANCE, StringType.INSTANCE)), BoolType.INSTANCE,
+						fake.getLocation()),
+				TypeCheck.INSTANCE, fake.getLocation());
+		TypeEnvironment<TypeSet> act = domain.assumeUnaryExpression(env,
+				new UnaryExpression(BoolType.INSTANCE, isBoolOrString, LogicalNegation.INSTANCE, fake.getLocation()),
+				fake, fake, oracle);
+		assertTrue(act.isBottom(), "Assume(!(x is (bool, str))) returned " + act.getState(variable));
+
+		// !(x instanceof t), with t a bool token in some executions and a str
+		// token in others: no type surely fails the check
+		Variable token = new Variable(Untyped.INSTANCE, "t", fake.getLocation());
+		TypeEnvironment<TypeSet> withToken = env.putState(token, new TypeSet(types,
+				Set.of(new TypeTokenType(Collections.singleton(BoolType.INSTANCE)),
+						new TypeTokenType(Collections.singleton(StringType.INSTANCE)))));
+		act = domain.assumeUnaryExpression(withToken,
+				new UnaryExpression(BoolType.INSTANCE,
+						new BinaryExpression(BoolType.INSTANCE, variable, token, TypeCheck.INSTANCE,
+								fake.getLocation()),
+						LogicalNegation.INSTANCE, fake.getLocation()),
+				fake, fake, oracle);
+		assertEquals(bool_or_string, act.getState(variable), "Assume(!(x is t)) returned wrong result");
 	}
 
 	private void assume(

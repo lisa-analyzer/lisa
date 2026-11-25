@@ -5,7 +5,12 @@ import java.util.Set;
 import java.util.TreeSet;
 
 /**
- * The type of type tokens, used as reference to types in code.
+ * The type of type tokens, used as reference to types in code. A token
+ * represents a set of types, and a value is an instance of the token if it is
+ * an instance of any of them (see
+ * {@link it.unive.lisa.symbolic.value.operator.binary.TypeCheck}). Distinct
+ * tokens among the runtime types of an expression are instead alternatives,
+ * one per execution.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */

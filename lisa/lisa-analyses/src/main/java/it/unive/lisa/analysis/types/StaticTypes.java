@@ -24,10 +24,8 @@ import it.unive.lisa.symbolic.value.operator.binary.TypeConv;
 import it.unive.lisa.symbolic.value.operator.unary.LogicalNegation;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.TypeSystem;
-import it.unive.lisa.type.TypeTokenType;
 import it.unive.lisa.type.Untyped;
 import java.util.Set;
-import java.util.stream.Collectors;
 import org.apache.commons.collections4.SetUtils;
 
 /**
@@ -170,21 +168,17 @@ public class StaticTypes
 			// assume anything
 			return environment;
 
-		// these are all types compatible with the type tokens
-		Set<Type> okTypes = elems.stream()
-				.filter(Type::isTypeTokenType)
-				.map(Type::asTypeTokenType)
-				.map(TypeTokenType::getTypes)
-				.flatMap(Set::stream)
-				.flatMap(t -> t.allInstances(types).stream())
-				.collect(Collectors.toSet());
+		// the types that are instances whatever token an execution evaluates
+		// to (several tokens are alternatives, see TypeTokens): only these
+		// surely fail the negated check
+		Set<Type> okTypes = TypeTokens.ofEach(elems, types);
 
 		Supertype starting = environment.getState(id);
 		if (eval.isBottom() || starting.isBottom())
 			return environment.bottom();
 		Supertype update = null;
 
-		// we keep only the ones that can be casted
+		// we keep only the ones that are not instances
 		Type sup = Type.commonSupertype(SetUtils.difference(starting.type.allInstances(types), okTypes), null);
 		if (sup == null)
 			update = Supertype.BOTTOM;
@@ -245,21 +239,15 @@ public class StaticTypes
 			// is set the type to eval.type
 			update = eval.type.canBeAssignedTo(starting.type) ? eval : bottom();
 		else if (operator == TypeCheck.INSTANCE) {
-			// these are all types compatible with the type tokens
-			Set<Type> filtered = elems.stream()
-					.filter(Type::isTypeTokenType)
-					.map(Type::asTypeTokenType)
-					.map(TypeTokenType::getTypes)
-					.flatMap(Set::stream)
-					.flatMap(t -> t.allInstances(types).stream())
-					.collect(Collectors.toSet());
+			// the instances of the types of some token
+			Set<Type> filtered = TypeTokens.ofAny(elems, types);
 			if (filtered.isEmpty())
 				// if there is no type token in the evaluation,
 				// this is not a type condition and we cannot
 				// assume anything
 				return environment;
 
-			// we keep only the ones that can be casted
+			// we keep only the ones that are instances
 			Type sup = Type.commonSupertype(SetUtils.intersection(starting.type.allInstances(types), filtered), null);
 			if (sup == null)
 				update = Supertype.BOTTOM;
