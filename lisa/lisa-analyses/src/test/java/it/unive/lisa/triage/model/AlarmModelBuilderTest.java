@@ -432,6 +432,24 @@ public class AlarmModelBuilderTest {
 			assertEquals(without.getVocabulary(), without.getLive(loc));
 	}
 
+	@Test
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public void unrestrictedModelsAreNotConfirmable() throws SemanticException {
+		// without case restriction, an execution of the model might pair the
+		// condition of a branch with the values of another one
+		CFG loop = cfg("loop");
+		Statement ret = node(loop, "return");
+		ResultCache cache = new ResultCache<>();
+		cache.setRestrictsCases(false);
+		SemanticTool t = tool;
+		AnalyzedCFG result = (AnalyzedCFG) t.getResultOf(loop).iterator().next();
+		AlarmModel model = AlarmModelBuilder.build(t, result, ret, Violation.reach(),
+				SymbolicStore.DEFAULT_MAX_CASES, Collections.emptySet(), AlarmModelBuilder.DEFAULT_MAX_LOCATIONS,
+				Collections.emptyList(), Long.MAX_VALUE, cache);
+		assertFalse(model.isConfirmable());
+		assertTrue(build(loop, ret, Violation.reach()).isConfirmable());
+	}
+
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private static AlarmModel buildCalls(
 			String name,

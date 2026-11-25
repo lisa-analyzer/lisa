@@ -739,7 +739,11 @@ public final class AlarmModelBuilder {
 			if (!fresh.getStaticType().isUntyped())
 				types.put(fresh, Set.of(fresh.getStaticType()));
 
-		boolean confirmable = root.getId().isStartingId()
+		// without restricting the cases, the transitions might pair the
+		// condition of a branch with the values of another one, so that an
+		// execution of the model might not be one of the program
+		boolean confirmable = cache.restrictsCases()
+				&& root.getId().isStartingId()
 				&& root.getProgram().getEntryPoints().stream()
 						.anyMatch(cfg -> cfg.getDescriptor().equals(root.getDescriptor()));
 

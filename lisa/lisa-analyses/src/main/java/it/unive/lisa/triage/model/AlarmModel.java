@@ -46,8 +46,10 @@ import java.util.Set;
  * the cfg.</li>
  * </ul>
  * A model is <i>confirmable</i> if its initial states correspond to the
- * beginning of the program, so that an execution of the model reaching the bad
- * location corresponds to an execution of the program.
+ * beginning of the program, and its transitions pair each case with the
+ * expressions it computed (see {@link ResultCache#restrictsCases()}), so that
+ * an execution of the model reaching the bad location corresponds to an
+ * execution of the program.
  *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */

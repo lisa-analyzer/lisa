@@ -365,7 +365,11 @@ public class PdrVerifierTest {
 				.withFewestLiteralsRetry(false);
 		Statement ret = node(cfg("shallow"), "return");
 		VerificationResult shallow = check(bare, "shallow", "return", Violation.condition(ret, is("y", 1)));
+		// without case restriction, the models are not confirmable
+		assertEquals(VerificationOutcome.POSSIBLE, shallow.getOutcome(), shallow.toString());
+		shallow = check(bare.withCaseRestriction(true), "shallow", "return", Violation.condition(ret, is("y", 1)));
 		assertEquals(VerificationOutcome.CONFIRMED, shallow.getOutcome(), shallow.toString());
+		bare.withCaseRestriction(false);
 		// the analysis still rules out unreachable statements
 		VerificationResult dead = check(bare, "dead", "w = 1", Violation.reach());
 		assertEquals(VerificationOutcome.REFUTED, dead.getOutcome(), dead.toString());

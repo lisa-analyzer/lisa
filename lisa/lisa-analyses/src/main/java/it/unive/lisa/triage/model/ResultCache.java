@@ -222,7 +222,8 @@ public class ResultCache<A extends AbstractLattice<A>> {
 	 * that computed its operands (default: {@code true}, see
 	 * {@link SymbolicStore#restrictTo(SymbolicExpression, it.unive.lisa.program.cfg.ProgramPoint)}). Without it, after
 	 * a join of executions computing different expressions, every case is
-	 * paired with every expression.
+	 * paired with every expression, and the models built are not confirmable
+	 * (see {@link AlarmModel#isConfirmable()}).
 	 *
 	 * @return whether the replay restricts the cases
 	 */

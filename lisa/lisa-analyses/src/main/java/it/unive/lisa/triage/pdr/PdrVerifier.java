@@ -707,8 +707,10 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 	 * the symbolic store computing its operands (default: {@code true}, see
 	 * {@link ResultCache#restrictsCases()}). Without it, after a join of
 	 * executions computing different expressions, every case is paired with
-	 * every expression, so that confirmations might combine the condition of
-	 * a branch with the value of another one.
+	 * every expression, so that an execution of the model might combine the
+	 * condition of a branch with the value of another one: the models are
+	 * then not confirmable (see {@link AlarmModel#isConfirmable()}), and
+	 * violations can only be refuted.
 	 *
 	 * @param caseRestriction whether or not to restrict the cases
 	 *
@@ -1324,7 +1326,8 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 		}
 		if (!model.isConfirmable())
 			return new VerificationResult(VerificationOutcome.POSSIBLE,
-					path + ", from states that are not the initial ones of the program");
+					path + (caseRestriction ? ", from states that are not the initial ones of the program"
+							: ", in a model whose cases are not restricted"));
 		return new VerificationResult(VerificationOutcome.CONFIRMED,
 				path + " (not yet certified by execution)", inputs.get()).withThrower(thrower);
 	}
