@@ -105,6 +105,58 @@ public class ReplayAnalysis<A extends AbstractLattice<A>, D extends AbstractDoma
 	}
 
 	/**
+	 * {@inheritDoc}<br>
+	 * <br>
+	 * If not all the executions of the given state raise the error, the cases
+	 * moved to the error happen under an unknown condition (by assuming an
+	 * unknown boolean value, see {@link PushAny}), so that the verification
+	 * never takes the error for granted.
+	 */
+	@Override
+	public AnalysisState<ReplayState<A>> moveExecutionToError(
+			AnalysisState<ReplayState<A>> state,
+			Error exception,
+			boolean allExecutions,
+			ScopeId<?> context,
+			ProgramPoint pp)
+			throws SemanticException {
+		return super.moveExecutionToError(allExecutions ? state : maybe(state, context, pp), exception, true,
+				context, pp);
+	}
+
+	/**
+	 * {@inheritDoc}<br>
+	 * <br>
+	 * If not all the executions of {@code erroneous} raise the error, the cases
+	 * moved to the error happen under an unknown condition (see
+	 * {@link #moveExecutionToError(AnalysisState, Error, boolean, ScopeId, ProgramPoint)}).
+	 */
+	@Override
+	public AnalysisState<ReplayState<A>> moveExecutionToError(
+			AnalysisState<ReplayState<A>> normal,
+			AnalysisState<ReplayState<A>> erroneous,
+			Error exception,
+			boolean allExecutions,
+			ScopeId<?> context,
+			ProgramPoint pp)
+			throws SemanticException {
+		return super.moveExecutionToError(normal, allExecutions ? erroneous : maybe(erroneous, context, pp),
+				exception, true, context, pp);
+	}
+
+	// the cases of the given state where an unknown boolean value holds
+	private AnalysisState<ReplayState<A>> maybe(
+			AnalysisState<ReplayState<A>> state,
+			ScopeId<?> context,
+			ProgramPoint pp)
+			throws SemanticException {
+		if (state.getExecution().isBottom())
+			return state;
+		return assume(state, new PushAny(pp.getProgram().getTypes().getBooleanType(), pp.getLocation()), context, pp,
+				pp);
+	}
+
+	/**
 	 * Yields the cases of the given state where the given operands computed the
 	 * given expressions, the {@code i}-th operand computing the {@code i}-th
 	 * expression (see

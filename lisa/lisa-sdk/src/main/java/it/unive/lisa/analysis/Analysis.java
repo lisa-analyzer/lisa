@@ -543,14 +543,24 @@ public class Analysis<
 	 * {@link LiSAConfiguration#shouldSmashError}), the state is set/merged with
 	 * the smashed errors state instead. This corresponds to a <i>total</i>
 	 * move, where all executions raise the error: use
-	 * {@link #moveExecutionToError(AnalysisState, AnalysisState, Error, ScopeId, ProgramPoint)}
-	 * if only some executions raise it.
+	 * {@link #moveExecutionToError(AnalysisState, AnalysisState, Error, boolean, ScopeId, ProgramPoint)}
+	 * if only some executions raise it.<br>
+	 * <br>
+	 * {@code allExecutions} tells whether the error is raised in all the
+	 * executions of the given state, or the state might also hold executions
+	 * that do not raise it (e.g., when the condition raising the error is not
+	 * known). This analysis moves the state in both cases: analyses that tell
+	 * executions apart (e.g., the replay of the analysis results performed to
+	 * verify warnings) override this method to move, in the latter case, the
+	 * executions under an unknown condition.
 	 * 
-	 * @param state     the current analysis state
-	 * @param exception the exception to move the execution state to
-	 * @param context   the interprocedural context where this operation is
-	 *                      being evaluated
-	 * @param pp        the program point where the move happens
+	 * @param state         the current analysis state
+	 * @param exception     the exception to move the execution state to
+	 * @param allExecutions whether all the executions of {@code state} raise
+	 *                          the exception
+	 * @param context       the interprocedural context where this operation is
+	 *                          being evaluated
+	 * @param pp            the program point where the move happens
 	 * 
 	 * @return the updated analysis state
 	 * 
@@ -559,6 +569,7 @@ public class Analysis<
 	public AnalysisState<A> moveExecutionToError(
 			AnalysisState<A> state,
 			Error exception,
+			boolean allExecutions,
 			ScopeId<?> context,
 			ProgramPoint pp)
 			throws SemanticException {
@@ -587,7 +598,9 @@ public class Analysis<
 	 * the error: {@code normal} is the state of the executions that continue
 	 * normally, while {@code erroneous} is the state of the ones that raise the
 	 * error, whose execution state is moved to the error as in
-	 * {@link #moveExecutionToError(AnalysisState, Error, ScopeId, ProgramPoint)}.
+	 * {@link #moveExecutionToError(AnalysisState, Error, boolean, ScopeId, ProgramPoint)}
+	 * (also for the meaning of {@code allExecutions}, referred to the
+	 * executions of {@code erroneous}).
 	 * The result is the least upper bound of the two states after the move. If
 	 * either the normal execution of {@code normal} or the one of
 	 * {@code erroneous} is bottom, this method falls back to a total move or to
@@ -597,10 +610,12 @@ public class Analysis<
 	 *                      the error
 	 * @param erroneous the analysis state of the executions that raise the
 	 *                      error
-	 * @param exception the exception to move the execution state to
-	 * @param context   the interprocedural context where this operation is
-	 *                      being evaluated
-	 * @param pp        the program point where the move happens
+	 * @param exception     the exception to move the execution state to
+	 * @param allExecutions whether all the executions of {@code erroneous}
+	 *                          raise the exception
+	 * @param context       the interprocedural context where this operation is
+	 *                          being evaluated
+	 * @param pp            the program point where the move happens
 	 * 
 	 * @return the updated analysis state
 	 * 
@@ -610,13 +625,14 @@ public class Analysis<
 			AnalysisState<A> normal,
 			AnalysisState<A> erroneous,
 			Error exception,
+			boolean allExecutions,
 			ScopeId<?> context,
 			ProgramPoint pp)
 			throws SemanticException {
 		if (erroneous.isBottom() || erroneous.getExecution().isBottom() || erroneous.getExecutionState().isBottom())
 			return normal.lub(erroneous);
 		if (normal.isBottom() || normal.getExecution().isBottom() || normal.getExecutionState().isBottom())
-			return normal.lub(moveExecutionToError(erroneous, exception, context, pp));
+			return normal.lub(moveExecutionToError(erroneous, exception, allExecutions, context, pp));
 
 		if (events != null)
 			events.post(new AnalysisExecToErrorStart<>(erroneous, exception));
@@ -1087,9 +1103,9 @@ public class Analysis<
 	 * This only applies the callback of the wrapped domain to the normal
 	 * executions of {@code remaining} and {@code moved}, without actually
 	 * moving the latter to the error continuation (see
-	 * {@link #moveExecutionToError(AnalysisState, Error, ScopeId, ProgramPoint)}
+	 * {@link #moveExecutionToError(AnalysisState, Error, boolean, ScopeId, ProgramPoint)}
 	 * and
-	 * {@link #moveExecutionToError(AnalysisState, AnalysisState, Error, ScopeId, ProgramPoint)}).
+	 * {@link #moveExecutionToError(AnalysisState, AnalysisState, Error, boolean, ScopeId, ProgramPoint)}).
 	 * If the normal execution of {@code remaining} is bottom, it is left
 	 * untouched.
 	 */

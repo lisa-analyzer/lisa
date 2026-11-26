@@ -94,7 +94,7 @@ public class Throw
 		sem = sem.forgetIdentifiers(getSubExpression().getMetaVariables(), this);
 		Type thrown = expr.getStaticType().isReferenceType() ? expr.getStaticType().asReferenceType().getInnerType()
 				: expr.getStaticType();
-		AnalysisState<A> moved = analysis.moveExecutionToError(sem, new Error(thrown, this), context, this);
+		AnalysisState<A> moved = analysis.moveExecutionToError(sem, new Error(thrown, this), true, context, this);
 		return moved;
 	}
 

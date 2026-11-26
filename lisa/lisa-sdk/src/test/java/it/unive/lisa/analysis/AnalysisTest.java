@@ -192,7 +192,7 @@ public class AnalysisTest {
 		Statement pp = new NoOp(cfg, LOC);
 		Error err = new Error(VoidType.INSTANCE, pp);
 		AnalysisState<MarkerAbstractLattice> state = base(ps(x));
-		AnalysisState<MarkerAbstractLattice> res = analysis().moveExecutionToError(state, err, null, pp);
+		AnalysisState<MarkerAbstractLattice> res = analysis().moveExecutionToError(state, err, true, null, pp);
 		assertTrue(res.getExecution().isBottom());
 		assertEquals(Set.of(err), res.getErrors().getKeys());
 		assertTrue(res.getSmashedErrors().isBottom());
@@ -206,7 +206,7 @@ public class AnalysisTest {
 		Statement pp = new NoOp(cfg, LOC);
 		Error err = new Error(Untyped.INSTANCE, pp);
 		AnalysisState<MarkerAbstractLattice> state = base(ps(x));
-		AnalysisState<MarkerAbstractLattice> res = smashingAnalysis().moveExecutionToError(state, err, null, pp);
+		AnalysisState<MarkerAbstractLattice> res = smashingAnalysis().moveExecutionToError(state, err, true, null, pp);
 		assertTrue(res.getExecution().isBottom());
 		assertTrue(res.getErrors().isBottom());
 		assertEquals(Set.of(pp), res.getSmashedErrors().getState(Untyped.INSTANCE).elements);
@@ -219,7 +219,7 @@ public class AnalysisTest {
 		Statement pp = new NoOp(cfg, LOC);
 		Error err = new Error(Untyped.INSTANCE, pp);
 		AnalysisState<MarkerAbstractLattice> bottomExec = base(ps()).bottomExecution();
-		assertSame(bottomExec, analysis().moveExecutionToError(bottomExec, err, null, pp));
+		assertSame(bottomExec, analysis().moveExecutionToError(bottomExec, err, true, null, pp));
 	}
 
 	@Test
@@ -231,7 +231,7 @@ public class AnalysisTest {
 		Statement pp = new NoOp(cfg, LOC);
 		Error err = new Error(VoidType.INSTANCE, pp);
 		AnalysisState<
-				MarkerAbstractLattice> res = analysis().moveExecutionToError(base(ps(x)), base(ps(y)), err, null, pp);
+				MarkerAbstractLattice> res = analysis().moveExecutionToError(base(ps(x)), base(ps(y)), err, true, null, pp);
 		assertEquals(Set.of(x), res.getExecutionState().known);
 		assertEquals(Set.of(y), res.getErrors().getState(err).getState().known);
 	}
@@ -245,8 +245,8 @@ public class AnalysisTest {
 		Error err = new Error(VoidType.INSTANCE, pp);
 		AnalysisState<MarkerAbstractLattice> erroneous = base(ps(y));
 		AnalysisState<MarkerAbstractLattice> res = analysis()
-				.moveExecutionToError(erroneous.bottomExecution(), erroneous, err, null, pp);
-		assertEquals(analysis().moveExecutionToError(erroneous, err, null, pp), res);
+				.moveExecutionToError(erroneous.bottomExecution(), erroneous, err, true, null, pp);
+		assertEquals(analysis().moveExecutionToError(erroneous, err, true, null, pp), res);
 	}
 
 	@Test
@@ -258,7 +258,7 @@ public class AnalysisTest {
 		Error err = new Error(VoidType.INSTANCE, pp);
 		AnalysisState<MarkerAbstractLattice> normal = base(ps(x));
 		AnalysisState<MarkerAbstractLattice> res = analysis()
-				.moveExecutionToError(normal, normal.bottomExecution(), err, null, pp);
+				.moveExecutionToError(normal, normal.bottomExecution(), err, true, null, pp);
 		assertEquals(normal, res);
 	}
 

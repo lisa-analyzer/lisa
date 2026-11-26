@@ -6,8 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import it.unive.lisa.DefaultConfiguration;
 import it.unive.lisa.TestParameterProvider;
-import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.AnalysisState.Error;
+import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.ProgramState;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
@@ -37,6 +37,7 @@ import it.unive.lisa.symbolic.value.operator.binary.ComparisonGt;
 import it.unive.lisa.symbolic.value.operator.binary.NumericNonOverflowingAdd;
 import it.unive.lisa.symbolic.value.operator.binary.NumericNonOverflowingMul;
 import it.unive.lisa.triage.inputs.InputSourceResolver;
+import it.unive.lisa.type.Untyped;
 import it.unive.lisa.util.numeric.IntInterval;
 import java.util.List;
 import java.util.Map;
@@ -145,6 +146,25 @@ public class ReplayDomainTest {
 
 		// a halt that was already in the entry state is not weakened
 		assertEquals(halted, analysis.uncertainErrors(halted, halted, CTX, pp));
+	}
+
+	@Test
+	public void movesOfSomeExecutionsHappenUnderAnUnknownCondition() throws SemanticException {
+		var state = analysis.assign(start(), X, integer(1), CTX, pp);
+		AnalysisState.Error error = new AnalysisState.Error(Untyped.INSTANCE, TestParameterProvider.expr);
+		for (boolean all : new boolean[] { true, false }) {
+			// total and partial moves
+			for (var moved : List.of(analysis.moveExecutionToError(state, error, all, CTX, pp),
+					analysis.moveExecutionToError(state, state, error, all, CTX, pp))) {
+				assertEquals(1, moved.getErrors().function.size(), "Expected a single error: " + moved);
+				Set<SymbolicCase> cases = moved.getErrors().function.values().iterator().next().getState()
+						.getStore().getCases();
+				assertEquals(1, cases.size(), "Expected a single case: " + cases);
+				// only if not all the executions raise the error, it happens
+				// under an unknown condition
+				assertEquals(all, cases.iterator().next().getPathCondition().isEmpty(), "allExecutions = " + all);
+			}
+		}
 	}
 
 	@Test
