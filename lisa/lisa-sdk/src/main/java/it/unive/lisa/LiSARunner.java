@@ -152,10 +152,10 @@ public class LiSARunner<A extends AbstractLattice<A>, D extends AbstractDomain<A
 
 	/**
 	 * Verifies the violations reported by the warnings of the given tool
-	 * through the given verifier, replacing each confirmed or refuted warning
-	 * with its verified version. Warnings are passed to the verifier in a
-	 * deterministic order. If the verifier fails, the error is logged and the
-	 * warnings are left possible.
+	 * through the given verifier, replacing each verified warning with a copy
+	 * carrying the result of its verification. Warnings are passed to the
+	 * verifier in a deterministic order. If the verifier fails, the error is
+	 * logged and the warnings are left unverified.
 	 */
 	private void verifyWarnings(
 			SemanticTool<A, D> tool,
@@ -173,15 +173,12 @@ public class LiSARunner<A extends AbstractLattice<A>, D extends AbstractDomain<A
 		TimerLogger.execAction(LOG, "Verifying warnings", () -> {
 			try {
 				Map<StatementMessage, VerificationResult> results = verifier.verify(tool, verifiable);
-				for (Map.Entry<StatementMessage, VerificationResult> result : results.entrySet()) {
-					StatementMessage verified = result.getKey().verified(result.getValue());
-					if (verified != result.getKey())
-						tool.replaceWarning(result.getKey(), verified);
-				}
+				for (Map.Entry<StatementMessage, VerificationResult> result : results.entrySet())
+					tool.replaceWarning(result.getKey(), result.getKey().withVerdict(result.getValue()));
 			} catch (SemanticException | RuntimeException e) {
 				// a failing verification does not invalidate the analysis: the
-				// warnings that have not been verified stay possible
-				LOG.error("Exception while verifying warnings: unverified warnings are left possible", e);
+				// warnings are left unverified
+				LOG.error("Exception while verifying warnings: some warnings are left unverified", e);
 			}
 		});
 	}

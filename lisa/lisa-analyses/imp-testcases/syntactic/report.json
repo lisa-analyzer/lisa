@@ -4,64 +4,55 @@
     "cfg" : "untyped expressions::_return1(expressions* this, untyped x, untyped i)",
     "text" : "i",
     "targetKind" : "EXPRESSION",
-    "message" : "Found variable i",
-    "definite" : false
+    "message" : "Found variable i"
   }, {
     "location" : "'imp-testcases/syntactic/expressions.imp':25:12",
     "cfg" : "untyped expressions::call(expressions* this, untyped i)",
     "text" : "i",
     "targetKind" : "EXPRESSION",
-    "message" : "Found variable i",
-    "definite" : false
+    "message" : "Found variable i"
   }, {
     "location" : "'imp-testcases/syntactic/expressions.imp':29:25",
     "cfg" : "untyped expressions::nestedCall1(expressions* this, untyped i, untyped x)",
     "text" : "i",
     "targetKind" : "EXPRESSION",
-    "message" : "Found variable i",
-    "definite" : false
+    "message" : "Found variable i"
   }, {
     "location" : "'imp-testcases/syntactic/expressions.imp':30:25",
     "cfg" : "untyped expressions::nestedCall1(expressions* this, untyped i, untyped x)",
     "text" : "i",
     "targetKind" : "EXPRESSION",
-    "message" : "Found variable i",
-    "definite" : false
+    "message" : "Found variable i"
   }, {
     "location" : "'imp-testcases/syntactic/expressions.imp':31:16",
     "cfg" : "untyped expressions::nestedCall1(expressions* this, untyped i, untyped x)",
     "text" : "i",
     "targetKind" : "EXPRESSION",
-    "message" : "Found variable i",
-    "definite" : false
+    "message" : "Found variable i"
   }, {
     "location" : "'imp-testcases/syntactic/expressions.imp':35:19",
     "cfg" : "untyped expressions::nestedCall2(expressions* this, untyped i, untyped x)",
     "text" : "i",
     "targetKind" : "EXPRESSION",
-    "message" : "Found variable i",
-    "definite" : false
+    "message" : "Found variable i"
   }, {
     "location" : "'imp-testcases/syntactic/expressions.imp':39:18",
     "cfg" : "untyped expressions::nestedCall3(expressions* this, untyped i, untyped x)",
     "text" : "i",
     "targetKind" : "EXPRESSION",
-    "message" : "Found variable i",
-    "definite" : false
+    "message" : "Found variable i"
   }, {
     "location" : "'imp-testcases/syntactic/expressions.imp':3:6",
     "cfg" : "untyped expressions::assignment(expressions* this)",
     "text" : "i",
     "targetKind" : "EXPRESSION",
-    "message" : "Found variable i",
-    "definite" : false
+    "message" : "Found variable i"
   }, {
     "location" : "'imp-testcases/syntactic/expressions.imp':8:8",
     "cfg" : "untyped expressions::_throw1(expressions* this, untyped x, untyped i)",
     "text" : "i",
     "targetKind" : "EXPRESSION",
-    "message" : "Found variable i",
-    "definite" : false
+    "message" : "Found variable i"
   } ],
   "notices" : [ ],
   "files" : [ "report.json" ],

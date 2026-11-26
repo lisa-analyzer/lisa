@@ -6,8 +6,7 @@
     "context" : "<empty>",
     "contextHash" : "eb5f5da91de44083d423fe942c39ec56",
     "targetKind" : "STATEMENT",
-    "message" : "This assertion might fail",
-    "definite" : false
+    "message" : "This assertion might fail"
   }, {
     "location" : "'imp-testcases/whole-value/loop.imp':8:8",
     "cfg" : "untyped loop::main(loop* this, untyped nondet, untyped value)",
@@ -15,8 +14,7 @@
     "context" : "<empty>",
     "contextHash" : "eb5f5da91de44083d423fe942c39ec56",
     "targetKind" : "STATEMENT",
-    "message" : "This assertion might fail",
-    "definite" : false
+    "message" : "This assertion might fail"
   } ],
   "notices" : [ ],
   "files" : [ "report.json", "untyped_loop.main(loop__this,_untyped_nondet,_untyped_value).graph.json" ],

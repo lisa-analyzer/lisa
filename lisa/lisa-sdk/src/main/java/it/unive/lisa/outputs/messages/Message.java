@@ -1,23 +1,19 @@
 package it.unive.lisa.outputs.messages;
 
 import it.unive.lisa.checks.verification.ReproducingInput;
+import it.unive.lisa.checks.verification.VerificationResult;
 import it.unive.lisa.checks.verification.Violation;
 import it.unive.lisa.interprocedural.ScopeId;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import org.apache.commons.lang3.StringUtils;
 
 /**
  * A message reported by LiSA on the program under analysis. Besides its text, a
- * message records whether it is definite (i.e., the reported behavior happens
- * in at least one execution of the program), refuted (i.e., the reported
- * behavior happens in no execution of the program), or possible, the context it
- * has been reported on (if any), and, for definite messages, the
- * {@link ReproducingInput}s that make the reported behavior happen, if known.
- * Messages can also carry the {@link Violation} they report, so that it can be
- * verified after the analysis, and the explanation of the outcome of that
- * verification: neither is part of the identity of the message.
+ * message records the context it has been reported on (if any), the
+ * {@link Violation} it reports (if any), so that it can be verified after the
+ * analysis, and the {@link VerificationResult} of that verification (if it has
+ * been verified). The violation is not part of the identity of the message.
  *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
@@ -38,156 +34,46 @@ public class Message
 	private final ScopeId<?> context;
 
 	/**
-	 * Whether or not this message is definite
-	 */
-	private final boolean definite;
-
-	/**
-	 * Whether or not this message is refuted
-	 */
-	private final boolean refuted;
-
-	/**
 	 * The violation reported by this message, if known
 	 */
 	private final Violation violation;
 
 	/**
-	 * The explanation of the outcome of the verification of the violation
-	 * reported by this message, if any
+	 * The result of the verification of the violation reported by this
+	 * message, if it has been verified
 	 */
-	private final String explanation;
+	private final VerificationResult verdict;
 
 	/**
-	 * The inputs reproducing the behavior reported by this message
-	 */
-	private final List<ReproducingInput> reproducingInputs;
-
-	/**
-	 * Builds a possible message, with no reproducing inputs.
+	 * Builds the message.
 	 *
 	 * @param message the message of this message
 	 */
 	public Message(
 			String message) {
-		this(message, false, null);
+		this(message, null, null, null);
 	}
 
 	/**
 	 * Builds the message.
 	 *
-	 * @param message           the message of this message
-	 * @param definite          whether or not this message is definite, that
-	 *                              is, if the reported behavior happens in at
-	 *                              least one execution of the program
-	 * @param reproducingInputs the inputs reproducing the behavior reported by
-	 *                              this message (can be {@code null} if no
-	 *                              inputs are known)
-	 */
-	public Message(
-			String message,
-			boolean definite,
-			List<ReproducingInput> reproducingInputs) {
-		this(message, null, definite, reproducingInputs);
-	}
-
-	/**
-	 * Builds the message.
-	 *
-	 * @param message           the message of this message
-	 * @param context           the context where this message was reported on
-	 *                              (can be {@code null})
-	 * @param definite          whether or not this message is definite, that
-	 *                              is, if the reported behavior happens in at
-	 *                              least one execution of the program
-	 * @param reproducingInputs the inputs reproducing the behavior reported by
-	 *                              this message (can be {@code null} if no
-	 *                              inputs are known)
-	 */
-	public Message(
-			String message,
-			ScopeId<?> context,
-			boolean definite,
-			List<ReproducingInput> reproducingInputs) {
-		this(message, context, definite, false, reproducingInputs, null);
-	}
-
-	/**
-	 * Builds the message.
-	 *
-	 * @param message           the message of this message
-	 * @param context           the context where this message was reported on
-	 *                              (can be {@code null})
-	 * @param definite          whether or not this message is definite, that
-	 *                              is, if the reported behavior happens in at
-	 *                              least one execution of the program
-	 * @param refuted           whether or not this message is refuted, that is,
-	 *                              if the reported behavior happens in no
-	 *                              execution of the program (a message cannot
-	 *                              be both definite and refuted)
-	 * @param reproducingInputs the inputs reproducing the behavior reported by
-	 *                              this message (can be {@code null} if no
-	 *                              inputs are known)
-	 * @param violation         the violation reported by this message (can be
-	 *                              {@code null} if unknown)
-	 * 
-	 * @throws IllegalArgumentException if both {@code definite} and
-	 *                                      {@code refuted} are {@code true}
+	 * @param message   the message of this message
+	 * @param context   the context where this message was reported on (can be
+	 *                      {@code null})
+	 * @param violation the violation reported by this message (can be
+	 *                      {@code null} if unknown)
+	 * @param verdict   the result of the verification of the violation (can be
+	 *                      {@code null} if it has not been verified)
 	 */
 	protected Message(
 			String message,
 			ScopeId<?> context,
-			boolean definite,
-			boolean refuted,
-			List<ReproducingInput> reproducingInputs,
-			Violation violation) {
-		this(message, context, definite, refuted, reproducingInputs, violation, null);
-	}
-
-	/**
-	 * Builds the message.
-	 *
-	 * @param message           the message of this message
-	 * @param context           the context where this message was reported on
-	 *                              (can be {@code null})
-	 * @param definite          whether or not this message is definite, that
-	 *                              is, if the reported behavior happens in at
-	 *                              least one execution of the program
-	 * @param refuted           whether or not this message is refuted, that is,
-	 *                              if the reported behavior happens in no
-	 *                              execution of the program (a message cannot
-	 *                              be both definite and refuted)
-	 * @param reproducingInputs the inputs reproducing the behavior reported by
-	 *                              this message (can be {@code null} if no
-	 *                              inputs are known)
-	 * @param violation         the violation reported by this message (can be
-	 *                              {@code null} if unknown)
-	 * @param explanation       the explanation of the outcome of the
-	 *                              verification of the violation (can be
-	 *                              {@code null} if there is none)
-	 * 
-	 * @throws IllegalArgumentException if both {@code definite} and
-	 *                                      {@code refuted} are {@code true}
-	 */
-	protected Message(
-			String message,
-			ScopeId<?> context,
-			boolean definite,
-			boolean refuted,
-			List<ReproducingInput> reproducingInputs,
 			Violation violation,
-			String explanation) {
-		if (definite && refuted)
-			throw new IllegalArgumentException("A message cannot be both definite and refuted");
+			VerificationResult verdict) {
 		this.message = message;
 		this.context = context;
-		this.definite = definite;
-		this.refuted = refuted;
 		this.violation = violation;
-		this.explanation = explanation;
-		this.reproducingInputs = reproducingInputs == null || reproducingInputs.isEmpty()
-				? Collections.emptyList()
-				: Collections.unmodifiableList(List.copyOf(reproducingInputs));
+		this.verdict = verdict;
 	}
 
 	/**
@@ -222,27 +108,6 @@ public class Message
 	}
 
 	/**
-	 * Yields whether or not this message is definite, that is, if the reported
-	 * behavior happens in at least one execution of the program.
-	 *
-	 * @return {@code true} if this message is definite, {@code false} if it is
-	 *             possible
-	 */
-	public final boolean isDefinite() {
-		return definite;
-	}
-
-	/**
-	 * Yields whether or not this message is refuted, that is, if the reported
-	 * behavior happens in no execution of the program.
-	 *
-	 * @return {@code true} if this message is refuted
-	 */
-	public final boolean isRefuted() {
-		return refuted;
-	}
-
-	/**
 	 * Yields the violation reported by this message, if known.
 	 *
 	 * @return the violation, or {@code null}
@@ -252,23 +117,14 @@ public class Message
 	}
 
 	/**
-	 * Yields the explanation of the outcome of the verification of the
-	 * violation reported by this message, if any (e.g., why the violation could
-	 * be neither confirmed nor refuted).
+	 * Yields the result of the verification of the violation reported by this
+	 * message, if it has been verified (see {@link #getViolation()}).
 	 *
-	 * @return the explanation, or {@code null}
+	 * @return the result, or {@code null} if this message has not been
+	 *             verified
 	 */
-	public final String getExplanation() {
-		return explanation;
-	}
-
-	/**
-	 * Yields the inputs reproducing the behavior reported by this message.
-	 *
-	 * @return the inputs (empty if none are known)
-	 */
-	public final List<ReproducingInput> getReproducingInputs() {
-		return reproducingInputs;
+	public final VerificationResult getVerdict() {
+		return verdict;
 	}
 
 	/**
@@ -324,22 +180,34 @@ public class Message
 			return cmp;
 		if ((cmp = StringUtils.compare(getContextHash(), o.getContextHash())) != 0)
 			return cmp;
-		if ((cmp = Boolean.compare(definite, o.definite)) != 0)
+		return compare(verdict, o.verdict);
+	}
+
+	private static int compare(
+			VerificationResult first,
+			VerificationResult second) {
+		if (first == second)
+			return 0;
+		if (first == null)
+			return -1;
+		if (second == null)
+			return 1;
+		int cmp;
+		if ((cmp = first.getOutcome().compareTo(second.getOutcome())) != 0)
 			return cmp;
-		if ((cmp = Boolean.compare(refuted, o.refuted)) != 0)
+		List<ReproducingInput> inputs = first.getReproducingInputs();
+		List<ReproducingInput> others = second.getReproducingInputs();
+		if ((cmp = Integer.compare(inputs.size(), others.size())) != 0)
 			return cmp;
-		if ((cmp = Integer.compare(reproducingInputs.size(), o.reproducingInputs.size())) != 0)
-			return cmp;
-		for (int i = 0; i < reproducingInputs.size(); i++)
-			if ((cmp = reproducingInputs.get(i).compareTo(o.reproducingInputs.get(i))) != 0)
+		for (int i = 0; i < inputs.size(); i++)
+			if ((cmp = inputs.get(i).compareTo(others.get(i))) != 0)
 				return cmp;
-		return 0;
+		return StringUtils.compare(first.getExplanation(), second.getExplanation());
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(Objects.toString(context, null), getContextHash(), definite, refuted, message,
-				reproducingInputs);
+		return Objects.hash(Objects.toString(context, null), getContextHash(), message, verdict);
 	}
 
 	@Override
@@ -352,12 +220,10 @@ public class Message
 		if (getClass() != obj.getClass())
 			return false;
 		Message other = (Message) obj;
-		return definite == other.definite
-				&& refuted == other.refuted
-				&& Objects.equals(Objects.toString(context, null), Objects.toString(other.context, null))
+		return Objects.equals(Objects.toString(context, null), Objects.toString(other.context, null))
 				&& Objects.equals(getContextHash(), other.getContextHash())
 				&& Objects.equals(message, other.message)
-				&& Objects.equals(reproducingInputs, other.reproducingInputs);
+				&& Objects.equals(verdict, other.verdict);
 	}
 
 	@Override

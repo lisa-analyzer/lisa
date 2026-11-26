@@ -112,11 +112,11 @@ public class LiSAConfiguration
 	/**
 	 * The {@link WarningVerifier} instance used to verify the
 	 * {@link Violation}s reported by the warnings issued by the
-	 * {@link SemanticCheck}s, once all checks have been executed: confirmed
-	 * warnings become definite (with their reproducing inputs), and refuted
-	 * warnings are marked as refuted. If no value is set for this field, no
-	 * verification takes place and all warnings are possible. Defaults to
-	 * {@code null}.
+	 * {@link SemanticCheck}s, once all checks have been executed: each
+	 * verified warning carries the result of its verification (see
+	 * {@link it.unive.lisa.outputs.messages.Message#getVerdict()}). If no value
+	 * is set for this field, no verification takes place and no warning
+	 * carries a result. Defaults to {@code null}.
 	 */
 	public WarningVerifier<?, ?> warningVerifier;
 

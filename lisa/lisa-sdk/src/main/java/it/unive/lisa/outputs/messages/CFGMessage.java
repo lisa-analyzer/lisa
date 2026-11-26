@@ -1,9 +1,7 @@
 package it.unive.lisa.outputs.messages;
 
-import it.unive.lisa.checks.verification.ReproducingInput;
 import it.unive.lisa.interprocedural.ScopeId;
 import it.unive.lisa.program.cfg.CFG;
-import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -29,50 +27,22 @@ public class CFGMessage
 	public CFGMessage(
 			CFG cfg,
 			String message) {
-		this(cfg, message, false, null);
-	}
-
-	/**
-	 * Builds the message.
-	 * 
-	 * @param cfg               the cfg where this message was reported on
-	 * @param message           the message of this message
-	 * @param definite          whether or not this message is definite, that
-	 *                              is, if the reported behavior happens in at
-	 *                              least one execution of the program
-	 * @param reproducingInputs the inputs reproducing the behavior reported by
-	 *                              this message (can be {@code null} if no
-	 *                              inputs are known)
-	 */
-	public CFGMessage(
-			CFG cfg,
-			String message,
-			boolean definite,
-			List<ReproducingInput> reproducingInputs) {
-		this(cfg, message, null, definite, reproducingInputs);
+		this(cfg, message, null);
 	}
 
 	/**
 	 * Builds the message.
 	 *
-	 * @param cfg               the cfg where this message was reported on
-	 * @param message           the message of this message
-	 * @param context           the context where this message was reported on
-	 *                              (can be {@code null})
-	 * @param definite          whether or not this message is definite, that
-	 *                              is, if the reported behavior happens in at
-	 *                              least one execution of the program
-	 * @param reproducingInputs the inputs reproducing the behavior reported by
-	 *                              this message (can be {@code null} if no
-	 *                              inputs are known)
+	 * @param cfg     the cfg where this message was reported on
+	 * @param message the message of this message
+	 * @param context the context where this message was reported on (can be
+	 *                    {@code null})
 	 */
 	public CFGMessage(
 			CFG cfg,
 			String message,
-			ScopeId<?> context,
-			boolean definite,
-			List<ReproducingInput> reproducingInputs) {
-		super(cfg.getDescriptor().getLocation(), message, context, definite, reproducingInputs);
+			ScopeId<?> context) {
+		super(cfg.getDescriptor().getLocation(), message, context, null, null);
 		this.cfg = cfg;
 	}
 

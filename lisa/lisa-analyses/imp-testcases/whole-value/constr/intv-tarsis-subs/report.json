@@ -6,8 +6,7 @@
     "context" : "<empty>",
     "contextHash" : "eb5f5da91de44083d423fe942c39ec56",
     "targetKind" : "STATEMENT",
-    "message" : "This assertion might fail",
-    "definite" : false
+    "message" : "This assertion might fail"
   }, {
     "location" : "'imp-testcases/whole-value/subs.imp':11:8",
     "cfg" : "untyped subs::main(subs* this, untyped nondet)",
@@ -15,8 +14,7 @@
     "context" : "<empty>",
     "contextHash" : "eb5f5da91de44083d423fe942c39ec56",
     "targetKind" : "STATEMENT",
-    "message" : "This assertion might fail",
-    "definite" : false
+    "message" : "This assertion might fail"
   }, {
     "location" : "'imp-testcases/whole-value/subs.imp':12:8",
     "cfg" : "untyped subs::main(subs* this, untyped nondet)",
@@ -24,8 +22,7 @@
     "context" : "<empty>",
     "contextHash" : "eb5f5da91de44083d423fe942c39ec56",
     "targetKind" : "STATEMENT",
-    "message" : "This assertion always fails",
-    "definite" : false
+    "message" : "This assertion always fails"
   } ],
   "notices" : [ ],
   "files" : [ "report.json", "untyped_subs.main(subs__this,_untyped_nondet).graph.json" ],

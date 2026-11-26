@@ -142,7 +142,8 @@ public class JsonReportTest {
 		JsonReport.JsonMessage c = new JsonReport.JsonMessage(new Message("bar"));
 		assertTrue(a.compareTo(c) != 0);
 
-		JsonReport.JsonMessage d = new JsonReport.JsonMessage(new Message("foo", true, null));
+		JsonReport.JsonMessage d = new JsonReport.JsonMessage(new Message("foo"));
+		d.setVerification(new JsonReport.JsonVerification(VerificationResult.CONFIRMED));
 		assertTrue(a.compareTo(d) != 0);
 		assertTrue(!a.equals(d));
 	}
@@ -158,15 +159,17 @@ public class JsonReportTest {
 				null,
 				0,
 				"42");
-		Message definite = new CFGMessage(cfg, "w1", true, List.of(input));
 		Message possible = new Message("w2");
 		Statement st = new NoOp(cfg, new SourceCodeLocation("file", 5, 6));
 		cfg.addNode(st, true);
-		Message onStatement = new StatementMessage(st, "w3", new UniqueScope<>(), false, null);
+		Message definite = new StatementMessage(st, "w1", null, Violation.reach())
+				.withVerdict(new VerificationResult(VerificationOutcome.CONFIRMED, null, List.of(input)));
+		Message onStatement = new StatementMessage(st, "w3", new UniqueScope<>(), null);
 		Message refuted = new StatementMessage(st, "w4", null, Violation.reach())
-				.verified(VerificationResult.REFUTED);
+				.withVerdict(VerificationResult.REFUTED);
 		Message explained = new StatementMessage(st, "w5", null, Violation.reach())
-				.verified(new VerificationResult(VerificationOutcome.POSSIBLE, "budget exhausted"));
+				.withVerdict(new VerificationResult(VerificationOutcome.POSSIBLE, "budget exhausted"));
+		Message onCfg = new CFGMessage(cfg, "w6");
 
 		LiSAConfiguration conf = new LiSAConfiguration();
 		LiSARunInfo info = new LiSARunInfo(
@@ -177,20 +180,24 @@ public class JsonReportTest {
 				new DateTime(),
 				new DateTime());
 		LiSAReport report = new LiSAReport(
-				conf, info, List.of(definite, possible, onStatement, refuted, explained), List.of(definite),
+				conf, info, List.of(definite, possible, onStatement, refuted, explained, onCfg), List.of(definite),
 				Collections.emptyList());
 		JsonReport original = new JsonReport(report);
 
 		JsonReport.JsonMessage structured = original.getWarnings().stream()
-				.filter(m -> m.getMessage().equals("w1")).findFirst().get();
+				.filter(m -> m.getMessage().equals("w6")).findFirst().get();
 		assertEquals(loc.toString(), structured.getLocation());
 		assertEquals(cfg.getDescriptor().getFullSignatureWithParNames(), structured.getCfg());
 		assertEquals(null, structured.getText());
 		assertEquals("CFG", structured.getTargetKind());
-		assertTrue(structured.isDefinite());
-		assertEquals(1, structured.getReproducingInputs().size());
-		assertEquals("42", structured.getReproducingInputs().get(0).getValue());
-		assertEquals("parameter x of foo", structured.getReproducingInputs().get(0).getSource());
+		assertEquals(null, structured.getVerification());
+
+		JsonReport.JsonMessage definiteJson = original.getWarnings().stream()
+				.filter(m -> m.getMessage().equals("w1")).findFirst().get();
+		assertEquals("confirmed", definiteJson.getVerification().getOutcome());
+		assertEquals(1, definiteJson.getVerification().getReproducingInputs().size());
+		assertEquals("42", definiteJson.getVerification().getReproducingInputs().get(0).getValue());
+		assertEquals("parameter x of foo", definiteJson.getVerification().getReproducingInputs().get(0).getSource());
 
 		JsonReport.JsonMessage statement = original.getWarnings().stream()
 				.filter(m -> m.getMessage().equals("w3")).findFirst().get();
@@ -201,20 +208,17 @@ public class JsonReportTest {
 		assertEquals(new UniqueScope<>().getHash(), statement.getContextHash());
 		assertEquals(null, structured.getContextHash());
 		assertEquals(null, structured.getContext());
-		assertTrue(!statement.isDefinite());
-		assertTrue(!statement.isRefuted());
+		assertEquals(null, statement.getVerification());
 
 		JsonReport.JsonMessage refutedJson = original.getWarnings().stream()
 				.filter(m -> m.getMessage().equals("w4")).findFirst().get();
-		assertTrue(refutedJson.isRefuted());
-		assertTrue(!refutedJson.isDefinite());
-		assertEquals(null, refutedJson.getExplanation());
+		assertEquals("refuted", refutedJson.getVerification().getOutcome());
+		assertEquals(null, refutedJson.getVerification().getExplanation());
 
 		JsonReport.JsonMessage explainedJson = original.getWarnings().stream()
 				.filter(m -> m.getMessage().equals("w5")).findFirst().get();
-		assertTrue(!explainedJson.isDefinite());
-		assertTrue(!explainedJson.isRefuted());
-		assertEquals("budget exhausted", explainedJson.getExplanation());
+		assertEquals("possible", explainedJson.getVerification().getOutcome());
+		assertEquals("budget exhausted", explainedJson.getVerification().getExplanation());
 
 		StringWriter writer = new StringWriter();
 		original.dump(writer);
@@ -223,14 +227,16 @@ public class JsonReportTest {
 		assertEquals(original.getNotices(), reRead.getNotices());
 		assertEquals(original, reRead);
 		assertEquals("budget exhausted", reRead.getWarnings().stream()
-				.filter(m -> m.getMessage().equals("w5")).findFirst().get().getExplanation());
+				.filter(m -> m.getMessage().equals("w5")).findFirst().get().getVerification().getExplanation());
 	}
 
 	@Test
 	public void explanationsAreIgnoredWhenComparingMessages() {
 		JsonReport.JsonMessage first = new JsonReport.JsonMessage(new Message("w1"));
+		first.setVerification(new JsonReport.JsonVerification(VerificationResult.POSSIBLE));
 		JsonReport.JsonMessage second = new JsonReport.JsonMessage(new Message("w1"));
-		second.setExplanation("budget exhausted");
+		second.setVerification(new JsonReport.JsonVerification(
+				new VerificationResult(VerificationOutcome.POSSIBLE, "budget exhausted")));
 		assertEquals(first, second);
 		assertEquals(first.hashCode(), second.hashCode());
 		assertEquals(0, first.compareTo(second));
@@ -252,7 +258,7 @@ public class JsonReportTest {
 		new JsonReport(report).dump(writer);
 		String dumped = writer.toString();
 		assertTrue(dumped.contains("\"targetKind\" : \"GENERIC\""));
-		assertTrue(dumped.contains("\"definite\" : false"));
+		assertTrue(!dumped.contains("\"verification\""));
 		assertTrue(!dumped.contains("\"location\""));
 		assertTrue(!dumped.contains("\"cfg\""));
 		assertTrue(!dumped.contains("\"text\""));

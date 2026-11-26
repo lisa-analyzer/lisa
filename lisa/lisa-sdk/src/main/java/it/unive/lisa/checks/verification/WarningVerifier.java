@@ -18,8 +18,8 @@ import java.util.Map;
  * {@link SemanticTool#warnOn(it.unive.lisa.program.cfg.statement.Statement, it.unive.lisa.interprocedural.ScopeId, Violation, String)}):
  * once all checks have been executed, LiSA passes all the warnings carrying a
  * violation to the verifier selected through the configuration of the analysis,
- * and turns confirmed warnings into definite ones (with their reproducing
- * inputs) and refuted warnings into refuted ones.
+ * and attaches to each verified warning the result of its verification (see
+ * {@link it.unive.lisa.outputs.messages.Message#getVerdict()}).
  *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  *

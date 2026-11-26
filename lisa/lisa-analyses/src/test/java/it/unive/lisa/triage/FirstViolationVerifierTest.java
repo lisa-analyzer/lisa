@@ -151,8 +151,7 @@ public class FirstViolationVerifierTest {
 
 	private static void assertPossible(
 			Message warning) {
-		assertFalse(warning.isDefinite(), warning.toString());
-		assertFalse(warning.isRefuted(), warning.toString());
+		assertTrue(warning.getVerdict() == null || warning.getVerdict().isPossible(), warning.toString());
 	}
 
 	/**
@@ -237,7 +236,9 @@ public class FirstViolationVerifierTest {
 		assertTrue(expensive.limits.get(1) > 0 && expensive.limits.get(1) < 500, expensive.limits.toString());
 		// the budget ran out before the third warning
 		assertEquals(1, warnings.values().stream()
-				.filter(w -> FirstViolationVerifier.NOT_VERIFIED_IN_TIME.equals(w.getExplanation())).count(),
+				.filter(w -> w.getVerdict() != null
+						&& FirstViolationVerifier.NOT_VERIFIED_IN_TIME.equals(w.getVerdict().getExplanation()))
+				.count(),
 				warnings.toString());
 		// the bound is removed after the verification
 		assertEquals(0, expensive.limit);
@@ -296,7 +297,9 @@ public class FirstViolationVerifierTest {
 				new FirstViolationVerifier(new Slow<>(0), expensive).withDeadline(1));
 		assertTrue(expensive.limits.isEmpty(), expensive.limits.toString());
 		assertEquals(3, warnings.values().stream()
-				.filter(w -> FirstViolationVerifier.NOT_VERIFIED_IN_TIME.equals(w.getExplanation())).count(),
+				.filter(w -> w.getVerdict() != null
+						&& FirstViolationVerifier.NOT_VERIFIED_IN_TIME.equals(w.getVerdict().getExplanation()))
+				.count(),
 				warnings.toString());
 
 		// the time left until the deadline bounds each warning
@@ -317,11 +320,11 @@ public class FirstViolationVerifierTest {
 				+ "  c_always() { def w = 0; w = 1; return w; }\n"
 				+ "}");
 		assertEquals(3, warnings.size(), warnings.toString());
-		assertTrue(warnings.get("a_dead").isRefuted(), warnings.toString());
-		assertTrue(warnings.get("b_always").isDefinite(), warnings.toString());
+		assertTrue(warnings.get("a_dead").getVerdict().isRefuted(), warnings.toString());
+		assertTrue(warnings.get("b_always").getVerdict().isConfirmed(), warnings.toString());
 		// not verified, since b_always has been confirmed first
 		assertPossible(warnings.get("c_always"));
-		assertEquals(FirstViolationVerifier.NOT_VERIFIED, warnings.get("c_always").getExplanation());
+		assertEquals(FirstViolationVerifier.NOT_VERIFIED, warnings.get("c_always").getVerdict().getExplanation());
 	}
 
 	@Test
@@ -335,18 +338,18 @@ public class FirstViolationVerifierTest {
 				+ "}");
 		assertEquals(4, warnings.size(), warnings.toString());
 		// refuted by reachability
-		assertTrue(warnings.get("a_dead").isRefuted(), warnings.toString());
+		assertTrue(warnings.get("a_dead").getVerdict().isRefuted(), warnings.toString());
 		// refuted by pdr
-		assertTrue(warnings.get("b_relational").isRefuted(), warnings.toString());
+		assertTrue(warnings.get("b_relational").getVerdict().isRefuted(), warnings.toString());
 		// confirmed by pdr, with the reproducing inputs
 		Message confirmed = warnings.get("c_shallow");
-		assertTrue(confirmed.isDefinite(), warnings.toString());
-		assertTrue(confirmed.getReproducingInputs().stream()
+		assertTrue(confirmed.getVerdict().isConfirmed(), warnings.toString());
+		assertTrue(confirmed.getVerdict().getReproducingInputs().stream()
 				.anyMatch(i -> i.getSource().startsWith("parameter x of") && i.getValue().equals("42")),
-				confirmed.getReproducingInputs().toString());
+				confirmed.getVerdict().getReproducingInputs().toString());
 		// not verified, since c_shallow has been confirmed first
 		assertPossible(warnings.get("d_shallow"));
-		assertEquals(FirstViolationVerifier.NOT_VERIFIED, warnings.get("d_shallow").getExplanation());
+		assertEquals(FirstViolationVerifier.NOT_VERIFIED, warnings.get("d_shallow").getVerdict().getExplanation());
 	}
 
 	@Test
@@ -356,8 +359,8 @@ public class FirstViolationVerifierTest {
 		Map<String, Message> warnings = analyze("class A { ~A() {} }\n"
 				+ "class test { both(x) { if (x > 0)\n throw new A();\n else\n throw new A(); } }",
 				new WarnOnFirstThrow<>());
-		assertTrue(warnings.get("both").isDefinite(), warnings.toString());
-		assertTrue(warnings.get("both").getReproducingInputs().isEmpty(), warnings.toString());
+		assertTrue(warnings.get("both").getVerdict().isConfirmed(), warnings.toString());
+		assertTrue(warnings.get("both").getVerdict().getReproducingInputs().isEmpty(), warnings.toString());
 
 		// some executions return normally: reachability cannot confirm the
 		// warning, while pdr does, with a positive x
@@ -366,10 +369,10 @@ public class FirstViolationVerifierTest {
 				+ "class test { some(x) { if (x > 0)\n throw new A();\n return x; } }",
 				new WarnOnFirstThrow<>());
 		Message some = warnings.get("some");
-		assertTrue(some.isDefinite(), warnings.toString());
-		assertTrue(some.getReproducingInputs().stream()
+		assertTrue(some.getVerdict().isConfirmed(), warnings.toString());
+		assertTrue(some.getVerdict().getReproducingInputs().stream()
 				.anyMatch(i -> i.getSource().startsWith("parameter x of") && Integer.parseInt(i.getValue()) > 0),
-				some.getReproducingInputs().toString());
+				some.getVerdict().getReproducingInputs().toString());
 	}
 
 	@Test
@@ -379,20 +382,20 @@ public class FirstViolationVerifierTest {
 		Map<String, Message> warnings = analyze("class A { ~A() {} }\n"
 				+ "class test { h(a) { throw new A(); } main() { def x = this.h(0); return x; } }",
 				new WarnOnAssignedCalls<>(), true);
-		assertTrue(warnings.get("main").isDefinite(), warnings.toString());
+		assertTrue(warnings.get("main").getVerdict().isConfirmed(), warnings.toString());
 		// errors raised by the actual parameters of the call are raised when
 		// evaluating it
 		warnings = analyze("class A { ~A() {} }\n"
 				+ "class test { h(a) { throw new A(); } g(a) { return a; } "
 				+ "main() { def x = this.g(this.h(0)); return x; } }",
 				new WarnOnAssignedCalls<>(), true);
-		assertTrue(warnings.get("main").isDefinite(), warnings.toString());
+		assertTrue(warnings.get("main").getVerdict().isConfirmed(), warnings.toString());
 		// while errors raised by other parts of the node are not
 		warnings = analyze("class A { ~A() {} }\n"
 				+ "class test { h(a) { throw new A(); } g(a) { return a; } "
 				+ "main() { def x = this.h(0) + this.g(1); return x; } }",
 				new WarnOnAssignedCalls<>(), true);
-		assertTrue(warnings.get("main").isRefuted(), warnings.toString());
+		assertTrue(warnings.get("main").getVerdict().isRefuted(), warnings.toString());
 	}
 
 	@Test
@@ -402,7 +405,7 @@ public class FirstViolationVerifierTest {
 		Map<String, Message> warnings = analyze("class A { ~A() {} }\n"
 				+ "class test { caught(x) { def w = 0; try {\n throw new A();\n } catch (A e) { while (true) w = 1; } } }",
 				new WarnOnFirstThrow<>());
-		assertTrue(warnings.get("caught").isRefuted(), warnings.toString());
+		assertTrue(warnings.get("caught").getVerdict().isRefuted(), warnings.toString());
 	}
 
 	@Test

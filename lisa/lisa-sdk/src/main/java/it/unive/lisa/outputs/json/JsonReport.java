@@ -7,6 +7,8 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import it.unive.lisa.LiSAReport;
 import it.unive.lisa.LiSARunInfo;
 import it.unive.lisa.checks.verification.ReproducingInput;
+import it.unive.lisa.checks.verification.VerificationOutcome;
+import it.unive.lisa.checks.verification.VerificationResult;
 import it.unive.lisa.conf.LiSAConfiguration;
 import it.unive.lisa.outputs.messages.Message;
 import it.unive.lisa.outputs.messages.MessageWithLocation;
@@ -284,17 +286,13 @@ public class JsonReport {
 	 * the signature of the cfg they are related to (if any), a textual
 	 * representation of the target they have been reported on (if any, and if
 	 * it is not a cfg), the context they have been reported on and its hash (if
-	 * any), the kind of the target, the text of the message, whether the
-	 * message is definite, refuted, or possible, the inputs reproducing the
-	 * reported behavior (if any), and the explanation of the outcome of its
-	 * verification (if any). The explanation is informative only: it is not
-	 * part of the identity of the message, and it is ignored when comparing
-	 * messages.
+	 * any), the kind of the target, the text of the message, and the result of
+	 * its verification (if it has been verified, see {@link JsonVerification}).
 	 * 
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 */
-	@JsonPropertyOrder({ "location", "cfg", "text", "context", "contextHash", "targetKind", "message", "definite",
-			"refuted", "reproducingInputs", "explanation" })
+	@JsonPropertyOrder({ "location", "cfg", "text", "context", "contextHash", "targetKind", "message",
+			"verification" })
 	public static class JsonMessage
 			implements
 			Comparable<JsonMessage> {
@@ -318,20 +316,12 @@ public class JsonReport {
 
 		private String message;
 
-		private boolean definite;
-
-		@JsonInclude(JsonInclude.Include.NON_DEFAULT)
-		private boolean refuted;
-
-		@JsonInclude(JsonInclude.Include.NON_EMPTY)
-		private List<JsonReproducingInput> reproducingInputs;
-
 		@JsonInclude(JsonInclude.Include.NON_NULL)
-		private String explanation;
+		private JsonVerification verification;
 
 		/**
-		 * Builds an empty possible message, with no location, cfg, target,
-		 * text, context, context hash, reproducing inputs, and explanation.
+		 * Builds an empty message, with no location, cfg, target, text,
+		 * context, context hash, and verification.
 		 */
 		public JsonMessage() {
 			this.location = null;
@@ -341,10 +331,7 @@ public class JsonReport {
 			this.contextHash = null;
 			this.targetKind = null;
 			this.message = null;
-			this.definite = false;
-			this.refuted = false;
-			this.reproducingInputs = new ArrayList<>();
-			this.explanation = null;
+			this.verification = null;
 		}
 
 		/**
@@ -363,12 +350,7 @@ public class JsonReport {
 			this.contextHash = message.getContextHash();
 			this.targetKind = message.getTag();
 			this.message = message.getMessage();
-			this.definite = message.isDefinite();
-			this.refuted = message.isRefuted();
-			this.reproducingInputs = new ArrayList<>();
-			for (ReproducingInput input : message.getReproducingInputs())
-				this.reproducingInputs.add(new JsonReproducingInput(input));
-			this.explanation = message.getExplanation();
+			this.verification = message.getVerdict() == null ? null : new JsonVerification(message.getVerdict());
 		}
 
 		/**
@@ -512,86 +494,24 @@ public class JsonReport {
 		}
 
 		/**
-		 * Yields whether or not this message is definite.
+		 * Yields the result of the verification of this message, if it has
+		 * been verified.
 		 * 
-		 * @return {@code true} if this message is definite, {@code false} if it
-		 *             is possible
+		 * @return the result, or {@code null}
 		 */
-		public boolean isDefinite() {
-			return definite;
+		public JsonVerification getVerification() {
+			return verification;
 		}
 
 		/**
-		 * Sets whether or not this message is definite.
+		 * Sets the result of the verification of this message.
 		 * 
-		 * @param definite {@code true} if this message is definite,
-		 *                     {@code false} if it is possible
+		 * @param verification the result (can be {@code null} if this message
+		 *                         has not been verified)
 		 */
-		public void setDefinite(
-				boolean definite) {
-			this.definite = definite;
-		}
-
-		/**
-		 * Yields whether or not this message is refuted, that is, if the
-		 * reported behavior happens in no execution of the program.
-		 * 
-		 * @return {@code true} if this message is refuted
-		 */
-		public boolean isRefuted() {
-			return refuted;
-		}
-
-		/**
-		 * Sets whether or not this message is refuted.
-		 * 
-		 * @param refuted {@code true} if this message is refuted
-		 */
-		public void setRefuted(
-				boolean refuted) {
-			this.refuted = refuted;
-		}
-
-		/**
-		 * Yields the inputs reproducing the behavior reported by this message.
-		 * 
-		 * @return the inputs (empty if none are known)
-		 */
-		public List<JsonReproducingInput> getReproducingInputs() {
-			return reproducingInputs;
-		}
-
-		/**
-		 * Sets the inputs reproducing the behavior reported by this message.
-		 * 
-		 * @param reproducingInputs the inputs (can be {@code null} if none are
-		 *                              known)
-		 */
-		public void setReproducingInputs(
-				List<JsonReproducingInput> reproducingInputs) {
-			this.reproducingInputs = reproducingInputs == null ? new ArrayList<>() : reproducingInputs;
-		}
-
-		/**
-		 * Yields the explanation of the outcome of the verification of this
-		 * message, if any.
-		 * 
-		 * @return the explanation, or {@code null}
-		 */
-		public String getExplanation() {
-			return explanation;
-		}
-
-		/**
-		 * Sets the explanation of the outcome of the verification of this
-		 * message.
-		 * 
-		 * @param explanation the explanation (can be {@code null} if there is
-		 *                        none)
-		 */
-		public void setExplanation(
-				String explanation) {
-			this.explanation = explanation;
+		public void setVerification(
+				JsonVerification verification) {
+			this.verification = verification;
 		}
 
 		@Override
@@ -607,20 +527,15 @@ public class JsonReport {
 				res.append("in context ").append(context).append(" ");
 			if (targetKind != null)
 				res.append("[").append(targetKind).append("] ");
-			if (definite)
-				res.append("[DEFINITE] ");
-			if (refuted)
-				res.append("[REFUTED] ");
 			res.append(message);
-			if (!reproducingInputs.isEmpty())
-				res.append(" ").append(reproducingInputs);
+			if (verification != null)
+				res.append(" ").append(verification);
 			return res.toString();
 		}
 
 		@Override
 		public int hashCode() {
-			return Objects.hash(cfg, context, contextHash, definite, refuted, location, message, reproducingInputs,
-					targetKind, text);
+			return Objects.hash(cfg, context, contextHash, location, message, targetKind, text, verification);
 		}
 
 		@Override
@@ -633,16 +548,14 @@ public class JsonReport {
 			if (getClass() != obj.getClass())
 				return false;
 			JsonMessage other = (JsonMessage) obj;
-			return definite == other.definite
-					&& refuted == other.refuted
-					&& Objects.equals(location, other.location)
+			return Objects.equals(location, other.location)
 					&& Objects.equals(cfg, other.cfg)
 					&& Objects.equals(text, other.text)
 					&& Objects.equals(context, other.context)
 					&& Objects.equals(contextHash, other.contextHash)
 					&& Objects.equals(message, other.message)
-					&& Objects.equals(reproducingInputs, other.reproducingInputs)
-					&& Objects.equals(targetKind, other.targetKind);
+					&& Objects.equals(targetKind, other.targetKind)
+					&& Objects.equals(verification, other.verification);
 		}
 
 		@Override
@@ -663,9 +576,153 @@ public class JsonReport {
 				return cmp;
 			if ((cmp = StringUtils.compare(message, o.message)) != 0)
 				return cmp;
-			if ((cmp = Boolean.compare(definite, o.definite)) != 0)
-				return cmp;
-			if ((cmp = Boolean.compare(refuted, o.refuted)) != 0)
+			if (verification == o.verification)
+				return 0;
+			if (verification == null)
+				return -1;
+			if (o.verification == null)
+				return 1;
+			return verification.compareTo(o.verification);
+		}
+
+	}
+
+	/**
+	 * A {@link VerificationResult} that is ready to dump into a
+	 * {@link JsonReport}, made of the outcome of the verification (the
+	 * lowercase name of the {@link VerificationOutcome}), the inputs
+	 * reproducing the violation (if any), and the explanation of the outcome
+	 * (if any). The explanation is informative only: it is not part of the
+	 * identity of the result, and it is ignored when comparing results.
+	 * 
+	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+	 */
+	@JsonPropertyOrder({ "outcome", "reproducingInputs", "explanation" })
+	public static class JsonVerification
+			implements
+			Comparable<JsonVerification> {
+
+		private String outcome;
+
+		@JsonInclude(JsonInclude.Include.NON_EMPTY)
+		private List<JsonReproducingInput> reproducingInputs;
+
+		@JsonInclude(JsonInclude.Include.NON_NULL)
+		private String explanation;
+
+		/**
+		 * Builds an empty result, with no outcome, reproducing inputs, and
+		 * explanation.
+		 */
+		public JsonVerification() {
+			this.outcome = null;
+			this.reproducingInputs = new ArrayList<>();
+			this.explanation = null;
+		}
+
+		/**
+		 * Builds a result starting from the given one.
+		 * 
+		 * @param result the result to represent
+		 */
+		public JsonVerification(
+				VerificationResult result) {
+			this.outcome = result.getOutcome().name().toLowerCase();
+			this.reproducingInputs = new ArrayList<>();
+			for (ReproducingInput input : result.getReproducingInputs())
+				this.reproducingInputs.add(new JsonReproducingInput(input));
+			this.explanation = result.getExplanation();
+		}
+
+		/**
+		 * Yields the outcome of the verification, that is, the lowercase name
+		 * of a {@link VerificationOutcome}.
+		 * 
+		 * @return the outcome
+		 */
+		public String getOutcome() {
+			return outcome;
+		}
+
+		/**
+		 * Sets the outcome of the verification.
+		 * 
+		 * @param outcome the outcome
+		 */
+		public void setOutcome(
+				String outcome) {
+			this.outcome = outcome;
+		}
+
+		/**
+		 * Yields the inputs reproducing the violation.
+		 * 
+		 * @return the inputs (empty if none are known)
+		 */
+		public List<JsonReproducingInput> getReproducingInputs() {
+			return reproducingInputs;
+		}
+
+		/**
+		 * Sets the inputs reproducing the violation.
+		 * 
+		 * @param reproducingInputs the inputs (can be {@code null} if none are
+		 *                              known)
+		 */
+		public void setReproducingInputs(
+				List<JsonReproducingInput> reproducingInputs) {
+			this.reproducingInputs = reproducingInputs == null ? new ArrayList<>() : reproducingInputs;
+		}
+
+		/**
+		 * Yields the explanation of the outcome, if any.
+		 * 
+		 * @return the explanation, or {@code null}
+		 */
+		public String getExplanation() {
+			return explanation;
+		}
+
+		/**
+		 * Sets the explanation of the outcome.
+		 * 
+		 * @param explanation the explanation (can be {@code null} if there is
+		 *                        none)
+		 */
+		public void setExplanation(
+				String explanation) {
+			this.explanation = explanation;
+		}
+
+		@Override
+		public String toString() {
+			return "[" + outcome + "]" + (reproducingInputs.isEmpty() ? "" : " " + reproducingInputs);
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(outcome, reproducingInputs);
+		}
+
+		@Override
+		public boolean equals(
+				Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			JsonVerification other = (JsonVerification) obj;
+			return Objects.equals(outcome, other.outcome)
+					&& Objects.equals(reproducingInputs, other.reproducingInputs);
+		}
+
+		@Override
+		public int compareTo(
+				JsonVerification o) {
+			int cmp;
+			if ((cmp = StringUtils.compare(outcome, o.outcome)) != 0)
 				return cmp;
 			if ((cmp = Integer.compare(reproducingInputs.size(), o.reproducingInputs.size())) != 0)
 				return cmp;

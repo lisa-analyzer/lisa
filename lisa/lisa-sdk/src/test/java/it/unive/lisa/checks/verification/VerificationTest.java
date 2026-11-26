@@ -3,6 +3,7 @@ package it.unive.lisa.checks.verification;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -253,26 +254,21 @@ public class VerificationTest {
 		cfg.addNode(st, true);
 		Violation violation = Violation.reach();
 		StatementMessage warning = new StatementMessage(st, "w", null, violation);
-		assertFalse(warning.isDefinite());
-		assertFalse(warning.isRefuted());
+		assertNull(warning.getVerdict());
 		assertSame(violation, warning.getViolation());
 
-		assertSame(warning, warning.verified(VerificationResult.POSSIBLE));
-
 		ReproducingInput input = new ReproducingInput(new SourceCodeLocation("test", 1, 0), "x", null, 0, "42");
-		StatementMessage confirmed = warning
-				.verified(new VerificationResult(VerificationOutcome.CONFIRMED, null, List.of(input)));
-		assertTrue(confirmed.isDefinite());
-		assertFalse(confirmed.isRefuted());
-		assertEquals(List.of(input), confirmed.getReproducingInputs());
+		VerificationResult result = new VerificationResult(VerificationOutcome.CONFIRMED, null, List.of(input));
+		StatementMessage confirmed = warning.withVerdict(result);
+		assertSame(result, confirmed.getVerdict());
 		assertSame(violation, confirmed.getViolation());
 		assertNotEquals(warning, confirmed);
 
-		StatementMessage refuted = warning.verified(VerificationResult.REFUTED);
-		assertFalse(refuted.isDefinite());
-		assertTrue(refuted.isRefuted());
-		assertTrue(refuted.getReproducingInputs().isEmpty());
+		StatementMessage refuted = warning.withVerdict(VerificationResult.REFUTED);
+		assertTrue(refuted.getVerdict().isRefuted());
 		assertNotEquals(warning, refuted);
+		assertNotEquals(confirmed, refuted);
+		assertEquals(refuted, warning.withVerdict(new VerificationResult(VerificationOutcome.REFUTED, null)));
 	}
 
 	@Test

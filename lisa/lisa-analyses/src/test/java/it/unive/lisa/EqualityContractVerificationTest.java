@@ -59,8 +59,8 @@ import it.unive.lisa.lattices.types.Supertype;
 import it.unive.lisa.outputs.json.JsonReport;
 import it.unive.lisa.outputs.json.JsonReport.JsonMessage;
 import it.unive.lisa.outputs.json.JsonReport.JsonReproducingInput;
+import it.unive.lisa.outputs.json.JsonReport.JsonVerification;
 import it.unive.lisa.outputs.messages.Message;
-import it.unive.lisa.outputs.messages.StatementMessage;
 import it.unive.lisa.outputs.serializableGraph.SerializableEdge;
 import it.unive.lisa.outputs.serializableGraph.SerializableGraph;
 import it.unive.lisa.outputs.serializableGraph.SerializableNode;
@@ -402,6 +402,7 @@ public class EqualityContractVerificationTest {
 				.withPrefabValues(UnresolvedCall.class, uc1, uc2)
 				.withPrefabValues(EventQueue.class, new EventQueue(null), new EventQueue(null))
 				.withPrefabValues(Set.class, s1, s2)
+				.withPrefabValues(VerificationResult.class, VerificationResult.CONFIRMED, VerificationResult.REFUTED)
 				.withPrefabValues(PatriciaTrieMap.class, PatriciaTrieMap.empty().put(2, 1),
 						PatriciaTrieMap.empty().put(3, 2))
 				.withPrefabValues(PatriciaTrieNode.class, new PatriciaTrieLeaf<>(2, 2, 1),
@@ -707,20 +708,17 @@ public class EqualityContractVerificationTest {
 	@Test
 	public void testMessages() {
 		// serialization requires non final fields
+		verify(JsonMessage.class, Warning.NONFINAL_FIELDS);
 		// the explanation of the verification of a message is not part of its
 		// identity
-		verify(JsonMessage.class, verifier -> verifier.withIgnoredFields("explanation"), Warning.NONFINAL_FIELDS);
+		verify(JsonVerification.class, verifier -> verifier.withIgnoredFields("explanation"),
+				Warning.NONFINAL_FIELDS);
 		verify(JsonReproducingInput.class, Warning.NONFINAL_FIELDS);
-		// neither the violation reported by a message nor the explanation of
-		// its verification (and the statement raising a confirmed error) are
-		// part of its identity
-		verify(Message.class, verifier -> verifier.withIgnoredFields("violation", "explanation"));
+		// the violation reported by a message is not part of its identity
+		verify(Message.class, verifier -> verifier.withIgnoredFields("violation"));
 		Reflections scanner = mkReflections();
 		for (Class<? extends Message> message : scanner.getSubTypesOf(Message.class))
-			if (StatementMessage.class.isAssignableFrom(message))
-				verify(message, verifier -> verifier.withIgnoredFields("violation", "explanation", "thrower"));
-			else
-				verify(message, verifier -> verifier.withIgnoredFields("violation", "explanation"));
+			verify(message, verifier -> verifier.withIgnoredFields("violation"));
 	}
 
 	@Test

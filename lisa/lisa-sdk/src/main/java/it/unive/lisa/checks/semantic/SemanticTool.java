@@ -7,7 +7,6 @@ import it.unive.lisa.analysis.Analysis;
 import it.unive.lisa.analysis.AnalyzedCFG;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
-import it.unive.lisa.checks.verification.ReproducingInput;
 import it.unive.lisa.checks.verification.Violation;
 import it.unive.lisa.checks.verification.WarningVerifier;
 import it.unive.lisa.conf.LiSAConfiguration;
@@ -26,7 +25,6 @@ import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
 import it.unive.lisa.util.file.FileManager;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -207,7 +205,7 @@ public class SemanticTool<A extends AbstractLattice<A>, D extends AbstractDomain
 	}
 
 	/**
-	 * Reports a new possible warning, with no reproducing inputs, with the
+	 * Reports a new warning with the
 	 * given message on the given statement, in the given context (e.g., the one
 	 * of the result that caused the warning).
 	 * 
@@ -222,7 +220,7 @@ public class SemanticTool<A extends AbstractLattice<A>, D extends AbstractDomain
 		if (statement instanceof Expression)
 			warnOn((Expression) statement, context, message);
 		else
-			addWarning(new StatementMessage(statement, message, context, false, null));
+			addWarning(new StatementMessage(statement, message, context, null));
 	}
 
 	/**
@@ -273,7 +271,7 @@ public class SemanticTool<A extends AbstractLattice<A>, D extends AbstractDomain
 	}
 
 	/**
-	 * Reports a new possible warning, with no reproducing inputs, with the
+	 * Reports a new warning with the
 	 * given message on the given expression, in the given context (e.g., the
 	 * one of the result that caused the warning).
 	 * 
@@ -285,11 +283,11 @@ public class SemanticTool<A extends AbstractLattice<A>, D extends AbstractDomain
 			Expression expression,
 			ScopeId<A> context,
 			String message) {
-		addWarning(new ExpressionMessage(expression, message, context, false, null));
+		addWarning(new ExpressionMessage(expression, message, context, null));
 	}
 
 	/**
-	 * Reports a new possible warning, with no reproducing inputs, with the
+	 * Reports a new warning with the
 	 * given message on the given cfg, in the given context (e.g., the one of
 	 * the result that caused the warning).
 	 * 
@@ -301,11 +299,11 @@ public class SemanticTool<A extends AbstractLattice<A>, D extends AbstractDomain
 			CFG cfg,
 			ScopeId<A> context,
 			String message) {
-		addWarning(new CFGMessage(cfg, message, context, false, null));
+		addWarning(new CFGMessage(cfg, message, context));
 	}
 
 	/**
-	 * Reports a new possible notice, with no reproducing inputs, with the given
+	 * Reports a new notice with the given
 	 * message on the given statement, in the given context (e.g., the one of
 	 * the result that caused the notice).
 	 * 
@@ -317,39 +315,14 @@ public class SemanticTool<A extends AbstractLattice<A>, D extends AbstractDomain
 			Statement statement,
 			ScopeId<A> context,
 			String message) {
-		noticeOn(statement, context, message, false, null);
-	}
-
-	/**
-	 * Reports a new notice with the given message on the given statement, in
-	 * the given context (e.g., the one of the result that caused the notice).
-	 * If {@code statement} is an instance of {@link Expression}, then
-	 * {@link #noticeOn(Expression, ScopeId, String, boolean, List)} is invoked.
-	 * 
-	 * @param statement         the statement to notice on
-	 * @param context           the context where the notice is reported
-	 * @param message           the message of the notice
-	 * @param definite          whether or not the notice is definite, that is,
-	 *                              if the reported behavior happens in at least
-	 *                              one execution of the program
-	 * @param reproducingInputs the inputs reproducing the behavior reported by
-	 *                              the notice (can be {@code null} if no inputs
-	 *                              are known)
-	 */
-	public void noticeOn(
-			Statement statement,
-			ScopeId<A> context,
-			String message,
-			boolean definite,
-			List<ReproducingInput> reproducingInputs) {
 		if (statement instanceof Expression)
-			noticeOn((Expression) statement, context, message, definite, reproducingInputs);
+			noticeOn((Expression) statement, context, message);
 		else
-			addNotice(new StatementMessage(statement, message, context, definite, reproducingInputs));
+			addNotice(new StatementMessage(statement, message, context, null));
 	}
 
 	/**
-	 * Reports a new possible notice, with no reproducing inputs, with the given
+	 * Reports a new notice with the given
 	 * message on the given expression, in the given context (e.g., the one of
 	 * the result that caused the notice).
 	 * 
@@ -361,34 +334,11 @@ public class SemanticTool<A extends AbstractLattice<A>, D extends AbstractDomain
 			Expression expression,
 			ScopeId<A> context,
 			String message) {
-		noticeOn(expression, context, message, false, null);
+		addNotice(new ExpressionMessage(expression, message, context, null));
 	}
 
 	/**
-	 * Reports a new notice with the given message on the given expression, in
-	 * the given context (e.g., the one of the result that caused the notice).
-	 * 
-	 * @param expression        the expression to notice on
-	 * @param context           the context where the notice is reported
-	 * @param message           the message of the notice
-	 * @param definite          whether or not the notice is definite, that is,
-	 *                              if the reported behavior happens in at least
-	 *                              one execution of the program
-	 * @param reproducingInputs the inputs reproducing the behavior reported by
-	 *                              the notice (can be {@code null} if no inputs
-	 *                              are known)
-	 */
-	public void noticeOn(
-			Expression expression,
-			ScopeId<A> context,
-			String message,
-			boolean definite,
-			List<ReproducingInput> reproducingInputs) {
-		addNotice(new ExpressionMessage(expression, message, context, definite, reproducingInputs));
-	}
-
-	/**
-	 * Reports a new possible notice, with no reproducing inputs, with the given
+	 * Reports a new notice with the given
 	 * message on the given cfg, in the given context (e.g., the one of the
 	 * result that caused the notice).
 	 * 
@@ -400,30 +350,7 @@ public class SemanticTool<A extends AbstractLattice<A>, D extends AbstractDomain
 			CFG cfg,
 			ScopeId<A> context,
 			String message) {
-		noticeOn(cfg, context, message, false, null);
-	}
-
-	/**
-	 * Reports a new notice with the given message on the given cfg, in the
-	 * given context (e.g., the one of the result that caused the notice).
-	 * 
-	 * @param cfg               the cfg to notice on
-	 * @param context           the context where the notice is reported
-	 * @param message           the message of the notice
-	 * @param definite          whether or not the notice is definite, that is,
-	 *                              if the reported behavior happens in at least
-	 *                              one execution of the program
-	 * @param reproducingInputs the inputs reproducing the behavior reported by
-	 *                              the notice (can be {@code null} if no inputs
-	 *                              are known)
-	 */
-	public void noticeOn(
-			CFG cfg,
-			ScopeId<A> context,
-			String message,
-			boolean definite,
-			List<ReproducingInput> reproducingInputs) {
-		addNotice(new CFGMessage(cfg, message, context, definite, reproducingInputs));
+		addNotice(new CFGMessage(cfg, message, context));
 	}
 
 }
