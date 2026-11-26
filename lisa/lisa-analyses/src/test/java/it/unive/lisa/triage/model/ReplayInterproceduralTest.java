@@ -132,7 +132,9 @@ public class ReplayInterproceduralTest {
 			Statement st)
 			throws SemanticException {
 		AnalyzedCFG<A> result = tool.getResultOf(main).iterator().next();
-		FreshValueFactory factory = new FreshValueFactory(new InputSourceResolver(tool));
+		// the nondet native produces user inputs
+		FreshValueFactory factory = new FreshValueFactory(
+				new InputSourceResolver(tool, target -> target.getConstruct() == InputSourceResolverTest.Nondet.class));
 		ReplayDomain<A, D> domain = new ReplayDomain<>(tool.getAnalysis().domain, factory, 8);
 		ReplayInterprocedural<A, D> replay = new ReplayInterprocedural<>(tool, result, domain);
 		AnalysisState<ReplayState<A>> pre = ReplayStates.lift(result.getAnalysisStateBefore(st), domain);
