@@ -43,7 +43,7 @@ public class InputSource {
 
 		/**
 		 * The value returned by a call to native code modeling a user input
-		 * (see {@link it.unive.lisa.program.cfg.statement.UserInput}).
+		 * (see {@link UserInputs}).
 		 */
 		CALL_RESULT,
 

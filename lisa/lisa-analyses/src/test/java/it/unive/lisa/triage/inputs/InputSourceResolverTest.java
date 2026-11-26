@@ -33,7 +33,6 @@ import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.PluggableStatement;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.UnaryExpression;
-import it.unive.lisa.program.cfg.statement.UserInput;
 import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.program.type.BoolType;
 import it.unive.lisa.program.type.Int32Type;
@@ -83,8 +82,7 @@ public class InputSourceResolverTest {
 			extends
 			UnaryExpression
 			implements
-			PluggableStatement,
-			UserInput {
+			PluggableStatement {
 
 		private Statement originating;
 
@@ -138,7 +136,8 @@ public class InputSourceResolverTest {
 		@Override
 		public void afterExecution(
 				SemanticTool<A, D> tool) {
-			resolver = new InputSourceResolver(tool);
+			// the nondet native produces user inputs
+			resolver = new InputSourceResolver(tool, target -> target.getConstruct() == Nondet.class);
 		}
 
 	}

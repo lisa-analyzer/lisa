@@ -11,7 +11,6 @@ import it.unive.lisa.program.cfg.Parameter;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.statement.Statement;
-import it.unive.lisa.program.cfg.statement.UserInput;
 import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.program.cfg.statement.call.OpenCall;
 import it.unive.lisa.symbolic.value.BinaryExpression;
@@ -62,19 +61,21 @@ public class InputSourceResolver {
 
 	private final Map<CodeLocation, Collection<NativeCFG>> natives;
 
+	private final UserInputs inputs;
+
 	/**
 	 * Builds the resolver for the program whose results are stored in the given
-	 * tool.
+	 * tool, where no native code produces user inputs.
 	 *
 	 * @param tool the tool containing the results of the analysis
 	 */
 	public InputSourceResolver(
 			SemanticTool<?, ?> tool) {
-		this(tool.getResults().keySet(), tool.getCallGraph());
+		this(tool, UserInputs.NONE);
 	}
 
 	/**
-	 * Builds the resolver.
+	 * Builds the resolver, where no native code produces user inputs.
 	 *
 	 * @param cfgs      the cfgs of the program
 	 * @param callgraph the call graph built during the analysis (can be
@@ -84,6 +85,36 @@ public class InputSourceResolver {
 	public InputSourceResolver(
 			Collection<CFG> cfgs,
 			CallGraph callgraph) {
+		this(cfgs, callgraph, UserInputs.NONE);
+	}
+
+	/**
+	 * Builds the resolver for the program whose results are stored in the given
+	 * tool.
+	 *
+	 * @param tool   the tool containing the results of the analysis
+	 * @param inputs the native code producing user inputs
+	 */
+	public InputSourceResolver(
+			SemanticTool<?, ?> tool,
+			UserInputs inputs) {
+		this(tool.getResults().keySet(), tool.getCallGraph(), inputs);
+	}
+
+	/**
+	 * Builds the resolver.
+	 *
+	 * @param cfgs      the cfgs of the program
+	 * @param callgraph the call graph built during the analysis (can be
+	 *                      {@code null}, in which case calls to native cfgs are
+	 *                      not recognized)
+	 * @param inputs    the native code producing user inputs
+	 */
+	public InputSourceResolver(
+			Collection<CFG> cfgs,
+			CallGraph callgraph,
+			UserInputs inputs) {
+		this.inputs = inputs;
 		this.parameters = new LinkedHashMap<>();
 		this.parameterOwners = new LinkedHashMap<>();
 		this.calls = new LinkedHashMap<>();
@@ -157,7 +188,7 @@ public class InputSourceResolver {
 					.map(t -> t.getDescriptor().getFullSignatureWithParNames())
 					.collect(Collectors.joining(" or "));
 			// only natives modeling user inputs produce inputs
-			boolean input = targets.stream().anyMatch(t -> UserInput.class.isAssignableFrom(t.getConstruct()));
+			boolean input = targets.stream().anyMatch(inputs::isUserInput);
 			return new InputSource(input ? InputSource.Kind.CALL_RESULT : InputSource.Kind.IMPRECISE_CALL_RESULT,
 					location, value.getStaticType(), constraints, description);
 		}

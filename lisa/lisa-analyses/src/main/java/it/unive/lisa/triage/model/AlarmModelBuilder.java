@@ -426,7 +426,7 @@ public final class AlarmModelBuilder {
 		for (Statement node : cone(root, chain.isEmpty() ? bad : chain.get(0).getMiddle()))
 			cone.add(new ModelLocation(frame, node));
 
-		InputSourceResolver resolver = new InputSourceResolver(tool);
+		InputSourceResolver resolver = new InputSourceResolver(tool, cache.getUserInputs());
 		FreshValueFactory factory = reuse != null && reuse.factory != null ? reuse.factory
 				: new FreshValueFactory(resolver, new HeapModel(root.getProgram(),
 						cache.getHeapWrites().arrayProperties(), cache.getGlobalWrites().globalsOf(root.getProgram()),

@@ -21,6 +21,7 @@ import it.unive.lisa.triage.bmc.Unrolling;
 import it.unive.lisa.triage.encoding.ExpressionEncoderFactory;
 import it.unive.lisa.triage.inputs.InputSource;
 import it.unive.lisa.triage.inputs.ReproducingInputs;
+import it.unive.lisa.triage.inputs.UserInputs;
 import it.unive.lisa.triage.model.AlarmModel;
 import it.unive.lisa.triage.model.AlarmModelBuilder;
 import it.unive.lisa.triage.model.EdgeTransition;
@@ -97,7 +98,8 @@ import org.apache.commons.lang3.tuple.Triple;
  * <li>the global variables and the contents of the heap that the summarized
  * calls cannot write ({@link #withGlobalWrites(GlobalWrites)} and
  * {@link #withHeapWrites(HeapWrites)}, unknown by default: frontends provide
- * them);</li>
+ * them), and the native code producing user inputs
+ * ({@link #withUserInputs(UserInputs)}, none by default);</li>
  * <li>the expansion of the calls along imprecise counterexamples
  * ({@link #withMaxRounds(int)}, {@code 1} disabling it), and the growth of the
  * bound on cases when counterexamples rely on merged values
@@ -126,8 +128,8 @@ import org.apache.commons.lang3.tuple.Triple;
  * results of the analysis ({@link #withDecidedConditions(boolean)},
  * {@link #withLiveness(boolean)}, {@link #withTypedFields(boolean)},
  * {@link #withCaseRestriction(boolean)},
- * {@link #withGlobalWrites(GlobalWrites)} and
- * {@link #withHeapWrites(HeapWrites)}, see {@link ResultCache}) take effect at
+ * {@link #withGlobalWrites(GlobalWrites)}, {@link #withHeapWrites(HeapWrites)}
+ * and {@link #withUserInputs(UserInputs)}, see {@link ResultCache}) take effect at
  * the next {@link #init(SemanticTool)}, so that this information is never
  * computed with different choices; the others take effect from the next
  * verification.
@@ -224,6 +226,12 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 	private ExpressionEncoderFactory encoders = ExpressionEncoderFactory.DEFAULT;
 
 	private GlobalWrites globalWrites = GlobalWrites.UNKNOWN;
+
+	/**
+	 * The native code producing user inputs (see
+	 * {@link #withUserInputs(UserInputs)}).
+	 */
+	private UserInputs userInputs = UserInputs.NONE;
 
 	private HeapWrites heapWrites = HeapWrites.UNKNOWN;
 
@@ -433,6 +441,24 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 	public PdrVerifier<A, D> withGlobalWrites(
 			GlobalWrites globalWrites) {
 		this.globalWrites = globalWrites;
+		return this;
+	}
+
+	/**
+	 * Sets the native code whose unknown results are inputs provided by the
+	 * user, as the frontend knows it (default: {@link UserInputs#NONE}): only
+	 * their values, and the ones of the parameters of the entrypoints, are
+	 * picked freely by counterexamples, while the other unknown values make
+	 * counterexamples imprecise. This takes effect at the next
+	 * {@link #init(SemanticTool)}.
+	 *
+	 * @param userInputs the native code producing user inputs
+	 *
+	 * @return this verifier
+	 */
+	public PdrVerifier<A, D> withUserInputs(
+			UserInputs userInputs) {
+		this.userInputs = userInputs;
 		return this;
 	}
 
@@ -791,6 +817,7 @@ public class PdrVerifier<A extends AbstractLattice<A>, D extends AbstractDomain<
 		this.reachability.init(tool);
 		this.cache = new ResultCache<>();
 		this.cache.setGlobalWrites(globalWrites);
+		this.cache.setUserInputs(userInputs);
 		this.cache.setHeapWrites(heapWrites);
 		this.cache.setDecidesConditions(decidedConditions);
 		this.cache.setLiveness(liveness);

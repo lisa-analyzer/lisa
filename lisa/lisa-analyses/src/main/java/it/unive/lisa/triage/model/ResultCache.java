@@ -14,6 +14,7 @@ import it.unive.lisa.program.cfg.Parameter;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Variable;
+import it.unive.lisa.triage.inputs.UserInputs;
 import it.unive.lisa.triage.reachability.Reachability;
 import it.unive.lisa.type.Untyped;
 import java.util.ArrayList;
@@ -61,6 +62,11 @@ public class ResultCache<A extends AbstractLattice<A>> {
 	 * knows them.
 	 */
 	private GlobalWrites globalWrites = GlobalWrites.UNKNOWN;
+
+	/**
+	 * The native code producing user inputs, as the frontend knows it.
+	 */
+	private UserInputs userInputs = UserInputs.NONE;
 
 	/**
 	 * For each member, the global variables written by its code and by the code
@@ -301,6 +307,26 @@ public class ResultCache<A extends AbstractLattice<A>> {
 	 */
 	public GlobalWrites getGlobalWrites() {
 		return globalWrites;
+	}
+
+	/**
+	 * Sets the native code producing user inputs, as the frontend knows it (by
+	 * default, none).
+	 *
+	 * @param userInputs the native code producing user inputs
+	 */
+	public void setUserInputs(
+			UserInputs userInputs) {
+		this.userInputs = userInputs;
+	}
+
+	/**
+	 * Yields the native code producing user inputs, as the frontend knows it.
+	 *
+	 * @return the native code producing user inputs
+	 */
+	public UserInputs getUserInputs() {
+		return userInputs;
 	}
 
 	/**
