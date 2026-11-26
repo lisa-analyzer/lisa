@@ -3,7 +3,9 @@ package it.unive.lisa.triage.model;
 import it.unive.lisa.analysis.AbstractDomain;
 import it.unive.lisa.analysis.AbstractLattice;
 import it.unive.lisa.analysis.Analysis;
+import it.unive.lisa.analysis.AnalysisState.Error;
 import it.unive.lisa.analysis.AnalysisState;
+import it.unive.lisa.analysis.CombinationSemantics;
 import it.unive.lisa.analysis.ProgramState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.interprocedural.ScopeId;
@@ -12,6 +14,7 @@ import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.AccessChild;
 import it.unive.lisa.symbolic.heap.HeapExpression;
 import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.symbolic.value.PushAny;
 import it.unive.lisa.type.Type;
 import java.util.Collections;
 import java.util.HashMap;
@@ -31,7 +34,10 @@ import java.util.function.UnaryOperator;
  * performs the assignment as during the analysis, so that it can answer the
  * queries of the replay. Assignments of locations of the abstraction of the
  * heap of the analysis that do not come from such a write make the heap
- * unconstrained.
+ * unconstrained. The semantics of a statement on one of the combinations of the
+ * expressions computed by its operands is evaluated only in the cases computing
+ * that combination (see
+ * {@link #ofCombination(AnalysisState, ScopeId, ProgramPoint, ProgramPoint[], SymbolicExpression[], CombinationSemantics)}).
  *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  *
@@ -66,6 +72,183 @@ public class ReplayAnalysis<A extends AbstractLattice<A>, D extends AbstractDoma
 			ReplayDomain<A, D> domain,
 			Predicate<Type> shouldSmashError) {
 		super(domain, shouldSmashError);
+	}
+
+	/**
+	 * {@inheritDoc}<br>
+	 * <br>
+	 * The semantics is evaluated in the cases of the given state where the
+	 * operands computed the given expressions (see
+	 * {@link #restrictTo(AnalysisState, ProgramPoint[], SymbolicExpression[])}),
+	 * so that, e.g., the value of a branch of a conditional expression is not
+	 * paired with the cases of the other one. If these cases are not known
+	 * exactly (see
+	 * {@link #restrictsExactly(AnalysisState, ProgramPoint[], SymbolicExpression[])}),
+	 * the errors raised by the semantics might be raised only in some of them
+	 * (e.g., an error raised in all of them might not be raised in the cases
+	 * computing another combination): they are raised under an unknown
+	 * condition (see {@link #uncertainErrors}).
+	 */
+	@Override
+	public AnalysisState<ReplayState<A>> ofCombination(
+			AnalysisState<ReplayState<A>> state,
+			ScopeId<?> context,
+			ProgramPoint pp,
+			ProgramPoint[] operands,
+			SymbolicExpression[] computed,
+			CombinationSemantics<ReplayState<A>> semantics)
+			throws SemanticException {
+		boolean exact = restrictsExactly(state, operands, computed);
+		AnalysisState<ReplayState<A>> restricted = restrictTo(state, operands, computed);
+		AnalysisState<ReplayState<A>> result = semantics.compute(restricted);
+		return exact ? result : uncertainErrors(restricted, result, context, pp);
+	}
+
+	/**
+	 * Yields the cases of the given state where the given operands computed the
+	 * given expressions, the {@code i}-th operand computing the {@code i}-th
+	 * expression (see
+	 * {@link ReplayDomain#restrictTo(ReplayState, ProgramPoint, SymbolicExpression)}).
+	 * Expressions beyond the operands, and {@code null} ones, do not restrict
+	 * the state.
+	 *
+	 * @param state    the state
+	 * @param operands the operands
+	 * @param computed the expressions computed by the operands, in order
+	 *
+	 * @return the cases of the state where the operands computed the
+	 *             expressions
+	 */
+	public AnalysisState<ReplayState<A>> restrictTo(
+			AnalysisState<ReplayState<A>> state,
+			ProgramPoint[] operands,
+			SymbolicExpression[] computed) {
+		AnalysisState<ReplayState<A>> result = state;
+		for (int i = 0; i < computed.length && i < operands.length; i++)
+			if (computed[i] != null)
+				result = restrictTo(result, operands[i], computed[i]);
+		return result;
+	}
+
+	/**
+	 * Yields whether
+	 * {@link #restrictTo(AnalysisState, ProgramPoint[], SymbolicExpression[])}
+	 * yields exactly the cases of the given state where the given operands
+	 * computed the given expressions (see
+	 * {@link ReplayDomain#restrictsExactly(ReplayState, ProgramPoint, SymbolicExpression)}):
+	 * only then, what happens in all the cases of the restricted state (e.g.,
+	 * an error raised in all of them) happens in all the ones computing the
+	 * expressions.
+	 *
+	 * @param state    the state
+	 * @param operands the operands
+	 * @param computed the expressions computed by the operands, in order
+	 *
+	 * @return whether the restriction is exact
+	 */
+	public boolean restrictsExactly(
+			AnalysisState<ReplayState<A>> state,
+			ProgramPoint[] operands,
+			SymbolicExpression[] computed) {
+		AnalysisState<ReplayState<A>> current = state;
+		for (int i = 0; i < computed.length && i < operands.length; i++)
+			if (computed[i] != null) {
+				if (!current.getExecution().isBottom()
+						&& !domain.restrictsExactly(current.getExecutionState(), operands[i], computed[i]))
+					return false;
+				current = restrictTo(current, operands[i], computed[i]);
+			}
+		return true;
+	}
+
+	// the cases of the given state where the given program point computed the
+	// given expression
+	private AnalysisState<ReplayState<A>> restrictTo(
+			AnalysisState<ReplayState<A>> state,
+			ProgramPoint pp,
+			SymbolicExpression computed) {
+		if (state.getExecution().isBottom())
+			return state;
+		ReplayState<A> restricted = domain.restrictTo(state.getExecutionState(), pp, computed);
+		if (restricted == state.getExecutionState())
+			return state;
+		return state.withExecution(new ProgramState<>(
+				restricted,
+				state.getExecutionExpressions(),
+				state.getExecutionInformation()));
+	}
+
+	/**
+	 * Yields the given result of a semantics evaluated on the given entry
+	 * state, where the errors it raised (the ones that are not in the entry
+	 * state) and the halting it caused (if the halting state differs from the
+	 * entry one) happen under an unknown condition, that is, by assuming an
+	 * unknown boolean value (see {@link PushAny}) in their states. The cases of
+	 * an error or of the halting state that were already in the entry state are
+	 * kept as they are (see
+	 * {@link ReplayDomain#assumeOnAdded(ReplayState, ReplayState, SymbolicExpression, ScopeId, ProgramPoint)}).
+	 *
+	 * @param entry   the entry state of the semantics
+	 * @param result  the result of the semantics
+	 * @param context the context where the semantics is evaluated
+	 * @param pp      the program point raising the errors
+	 *
+	 * @return the result, with the raised errors and the halting under an
+	 *             unknown condition
+	 *
+	 * @throws SemanticException if an error occurs during the computation
+	 */
+	public AnalysisState<ReplayState<A>> uncertainErrors(
+			AnalysisState<ReplayState<A>> entry,
+			AnalysisState<ReplayState<A>> result,
+			ScopeId<?> context,
+			ProgramPoint pp)
+			throws SemanticException {
+		if (result.isBottom() || result.isTop())
+			return result;
+		PushAny unknown = new PushAny(pp.getProgram().getTypes().getBooleanType(), pp.getLocation());
+		AnalysisState<ReplayState<A>> weakened = result;
+		if (result.getErrors().function != null) {
+			Map<Error, ProgramState<ReplayState<A>>> raised = new HashMap<>();
+			for (Map.Entry<Error, ProgramState<ReplayState<A>>> e : result.getErrors()) {
+				ProgramState<ReplayState<A>> before = entry.getErrors().function == null ? null
+						: entry.getErrors().function.get(e.getKey());
+				if (!e.getValue().equals(before))
+					raised.put(e.getKey(), weaken(before, e.getValue(), unknown, context, pp));
+			}
+			if (!raised.isEmpty())
+				weakened = weakened.removeErrors(raised.keySet()).addErrors(raised);
+		}
+		ProgramState<ReplayState<A>> smashed = result.getSmashedErrorsState();
+		ProgramState<ReplayState<A>> smashedBefore = entry.getSmashedErrorsState();
+		if (!smashed.isBottom() && !smashed.equals(smashedBefore))
+			weakened = weakened.withSmashedErrorsState(weaken(smashedBefore, smashed, unknown, context, pp));
+		// the same holds for halting: a halt reached by the semantics (e.g.,
+		// a callee calling an exit function) happens only in some of the
+		// cases it was evaluated on
+		ProgramState<ReplayState<A>> halt = result.getHalt();
+		ProgramState<ReplayState<A>> haltBefore = entry.getHalt();
+		if (!halt.isBottom() && !halt.equals(haltBefore))
+			weakened = weakened.withHalt(weaken(haltBefore, halt, unknown, context, pp));
+		return weakened;
+	}
+
+	// the given state after the semantics, where only the cases added by the
+	// semantics happen under the given unknown condition: the ones that were
+	// already in the state before it are kept as they are
+	private ProgramState<ReplayState<A>> weaken(
+			ProgramState<ReplayState<A>> before,
+			ProgramState<ReplayState<A>> after,
+			PushAny unknown,
+			ScopeId<?> context,
+			ProgramPoint pp)
+			throws SemanticException {
+		if (after.isBottom())
+			return after;
+		ReplayState<A> assumed = before == null || before.isBottom()
+				? domain.assume(after.getState(), unknown, context, pp, pp)
+				: domain.assumeOnAdded(before.getState(), after.getState(), unknown, context, pp);
+		return new ProgramState<>(assumed, after.getComputedExpressions(), after.getFixpointInformation());
 	}
 
 	/**

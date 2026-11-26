@@ -33,7 +33,6 @@ import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.edge.ErrorEdge;
 import it.unive.lisa.program.cfg.protection.ProtectedBlock;
-import it.unive.lisa.program.cfg.statement.CombinationSemantics;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.VariableRef;
@@ -224,83 +223,26 @@ public class Analysis<
 	}
 
 	/**
-	 * Yields the executions of the given state where the given program point
-	 * computed the given expression. The domain of this analysis decides which
-	 * executions these are (see
-	 * {@link AbstractDomain#restrictTo(AbstractLattice, ProgramPoint, SymbolicExpression)}):
-	 * domains that do not record what each execution computed yield the state
-	 * itself.
-	 *
-	 * @param state    the state
-	 * @param pp       the program point (e.g., the operand of a statement)
-	 * @param computed the expression computed by the program point
-	 *
-	 * @return the executions of the state where the program point computed the
-	 *             expression
-	 *
-	 * @throws SemanticException if an error occurs during the computation
-	 */
-	public AnalysisState<A> restrictTo(
-			AnalysisState<A> state,
-			ProgramPoint pp,
-			SymbolicExpression computed)
-			throws SemanticException {
-		if (state.getExecution().isBottom())
-			return state;
-		A restricted = domain.restrictTo(state.getExecutionState(), pp, computed);
-		if (restricted == state.getExecutionState())
-			return state;
-		return state.withExecution(new ProgramState<>(
-				restricted,
-				state.getExecutionExpressions(),
-				state.getExecutionInformation()));
-	}
-
-	/**
-	 * Yields whether
-	 * {@link #restrictTo(AnalysisState, ProgramPoint, SymbolicExpression)}
-	 * yields exactly the executions of the given state where the given program
-	 * point computed the given expression (see
-	 * {@link AbstractDomain#restrictsExactly(AbstractLattice, ProgramPoint, SymbolicExpression)}).
-	 *
-	 * @param state    the state
-	 * @param pp       the program point (e.g., the operand of a statement)
-	 * @param computed the expression computed by the program point
-	 *
-	 * @return whether the restriction is exact
-	 *
-	 * @throws SemanticException if an error occurs during the computation
-	 */
-	public boolean restrictsExactly(
-			AnalysisState<A> state,
-			ProgramPoint pp,
-			SymbolicExpression computed)
-			throws SemanticException {
-		if (state.getExecution().isBottom())
-			return true;
-		return domain.restrictsExactly(state.getExecutionState(), pp, computed);
-	}
-
-	/**
 	 * Evaluates the semantics of a statement on one of the combinations of the
 	 * expressions computed by its operands (e.g., on one of the pairs of the
-	 * expressions computed by the operands of a binary expression), in the
-	 * executions of the given state computing that combination (see
-	 * {@link #restrictTo(AnalysisState, ProgramPoint, SymbolicExpression)}). If
-	 * these executions are not known exactly (see
-	 * {@link #restrictsExactly(AnalysisState, ProgramPoint, SymbolicExpression)}),
-	 * the errors raised by the semantics might be raised only in some of them
-	 * (e.g., an error raised in all of them might not be raised in the
-	 * executions computing another combination): they are raised under an
-	 * unknown condition (see {@link #uncertainErrors}).
+	 * expressions computed by the operands of a binary expression). Statements
+	 * evaluating their semantics on each combination of the expressions
+	 * computed by their operands (as the unary, binary and ternary ones do, see
+	 * {@link it.unive.lisa.program.cfg.statement.NaryExpression#ofCombination})
+	 * evaluate it through this method, when there is more than one
+	 * combination. This analysis simply evaluates the semantics on the given
+	 * state: analyses that record which executions computed each expression
+	 * (e.g., the replay of the analysis results performed to verify warnings)
+	 * override it to evaluate the semantics only in the executions computing
+	 * the combination.
 	 *
 	 * @param state     the state where the operands have been evaluated
 	 * @param context   the context where the semantics is evaluated
 	 * @param pp        the statement
 	 * @param operands  the operands of the statement
 	 * @param computed  the expressions computed by the operands, in order
-	 *                      ({@code null} ones, or ones beyond the operands, do
-	 *                      not restrict the state)
+	 *                      ({@code null} ones, or ones beyond the operands,
+	 *                      are not part of the combination)
 	 * @param semantics the semantics of the statement on the combination
 	 *
 	 * @return the state after the semantics
@@ -315,158 +257,7 @@ public class Analysis<
 			SymbolicExpression[] computed,
 			CombinationSemantics<A> semantics)
 			throws SemanticException {
-		boolean exact = restrictsExactly(state, operands, computed);
-		AnalysisState<A> restricted = restrictTo(state, operands, computed);
-		AnalysisState<A> result = semantics.compute(restricted);
-		return exact ? result : uncertainErrors(restricted, result, context, pp);
-	}
-
-	/**
-	 * Yields the executions of the given state where the given operands
-	 * computed the given expressions, the {@code i}-th operand computing the
-	 * {@code i}-th expression (see
-	 * {@link #restrictTo(AnalysisState, ProgramPoint, SymbolicExpression)}).
-	 * Expressions beyond the operands, and {@code null} ones, do not restrict
-	 * the state.
-	 *
-	 * @param state    the state
-	 * @param operands the operands
-	 * @param computed the expressions computed by the operands, in order
-	 *
-	 * @return the executions of the state where the operands computed the
-	 *             expressions
-	 *
-	 * @throws SemanticException if an error occurs during the computation
-	 */
-	public AnalysisState<A> restrictTo(
-			AnalysisState<A> state,
-			ProgramPoint[] operands,
-			SymbolicExpression[] computed)
-			throws SemanticException {
-		AnalysisState<A> result = state;
-		for (int i = 0; i < computed.length && i < operands.length; i++)
-			if (computed[i] != null)
-				result = restrictTo(result, operands[i], computed[i]);
-		return result;
-	}
-
-	/**
-	 * Yields whether
-	 * {@link #restrictTo(AnalysisState, ProgramPoint[], SymbolicExpression[])}
-	 * yields exactly the executions of the given state where the given operands
-	 * computed the given expressions (see
-	 * {@link #restrictsExactly(AnalysisState, ProgramPoint, SymbolicExpression)}):
-	 * only then, what happens in all the executions of the restricted state
-	 * (e.g., an error raised in all of them) happens in all the ones computing
-	 * the expressions.
-	 *
-	 * @param state    the state
-	 * @param operands the operands
-	 * @param computed the expressions computed by the operands, in order
-	 *
-	 * @return whether the restriction is exact
-	 *
-	 * @throws SemanticException if an error occurs during the computation
-	 */
-	public boolean restrictsExactly(
-			AnalysisState<A> state,
-			ProgramPoint[] operands,
-			SymbolicExpression[] computed)
-			throws SemanticException {
-		AnalysisState<A> current = state;
-		for (int i = 0; i < computed.length && i < operands.length; i++)
-			if (computed[i] != null) {
-				if (!restrictsExactly(current, operands[i], computed[i]))
-					return false;
-				current = restrictTo(current, operands[i], computed[i]);
-			}
-		return true;
-	}
-
-	/**
-	 * Yields the given result of a semantics evaluated on the given entry
-	 * state, where the errors it raised (the ones that are not in the entry
-	 * state) and the halting it caused (if the halting state differs from the
-	 * entry one) happen under an unknown condition, that is, by assuming an
-	 * unknown boolean value (see {@link PushAny}) in their states. The
-	 * executions of an error or of the halting state that were already in the
-	 * entry state are kept as they are, if the domain can tell them apart (see
-	 * {@link AbstractDomain#assumeOnAdded}).
-	 *
-	 * @param entry   the entry state of the semantics
-	 * @param result  the result of the semantics
-	 * @param context the context where the semantics is evaluated
-	 * @param pp      the program point raising the errors
-	 *
-	 * @return the result, with the raised errors and the halting under an
-	 *             unknown condition
-	 *
-	 * @throws SemanticException if an error occurs during the computation
-	 */
-	public AnalysisState<A> uncertainErrors(
-			AnalysisState<A> entry,
-			AnalysisState<A> result,
-			ScopeId<?> context,
-			ProgramPoint pp)
-			throws SemanticException {
-		if (result.isBottom() || result.isTop())
-			return result;
-		PushAny unknown = new PushAny(pp.getProgram().getTypes().getBooleanType(), pp.getLocation());
-		AnalysisState<A> weakened = result;
-		if (result.getErrors().function != null) {
-			Map<Error, ProgramState<A>> raised = new HashMap<>();
-			for (Entry<Error, ProgramState<A>> e : result.getErrors()) {
-				ProgramState<A> before = entry.getErrors().function == null ? null
-						: entry.getErrors().function.get(e.getKey());
-				if (!e.getValue().equals(before))
-					raised.put(e.getKey(), weaken(before, e.getValue(), unknown, context, pp));
-			}
-			if (!raised.isEmpty())
-				weakened = weakened.removeErrors(raised.keySet()).addErrors(raised);
-		}
-		ProgramState<A> smashed = result.getSmashedErrorsState();
-		ProgramState<A> smashedBefore = entry.getSmashedErrorsState();
-		if (!smashed.isBottom() && !smashed.equals(smashedBefore))
-			weakened = weakened.withSmashedErrorsState(weaken(smashedBefore, smashed, unknown, context, pp));
-		// the same holds for halting: a halt reached by the semantics (e.g.,
-		// a callee calling an exit function) happens only in some of the
-		// executions it was evaluated on
-		ProgramState<A> halt = result.getHalt();
-		ProgramState<A> haltBefore = entry.getHalt();
-		if (!halt.isBottom() && !halt.equals(haltBefore))
-			weakened = weakened.withHalt(weaken(haltBefore, halt, unknown, context, pp));
-		return weakened;
-	}
-
-	// the given state after the semantics, where only the executions added
-	// by the semantics happen under the given unknown condition: the ones
-	// that were already in the state before it are kept as they are (see
-	// AbstractDomain#assumeOnAdded)
-	private ProgramState<A> weaken(
-			ProgramState<A> before,
-			ProgramState<A> after,
-			PushAny unknown,
-			ScopeId<?> context,
-			ProgramPoint pp)
-			throws SemanticException {
-		if (before == null || before.isBottom() || after.isBottom())
-			return maybe(after, unknown, context, pp);
-		A assumed = domain.assumeOnAdded(before.getState(), after.getState(), unknown, context, pp);
-		return new ProgramState<>(assumed, after.getComputedExpressions(), after.getFixpointInformation());
-	}
-
-	// the executions of the given state where the given unknown condition
-	// holds
-	private ProgramState<A> maybe(
-			ProgramState<A> state,
-			PushAny unknown,
-			ScopeId<?> context,
-			ProgramPoint pp)
-			throws SemanticException {
-		if (state.isBottom())
-			return state;
-		A assumed = domain.assume(state.getState(), unknown, context, pp, pp);
-		return new ProgramState<>(assumed, state.getComputedExpressions(), state.getFixpointInformation());
+		return semantics.compute(state);
 	}
 
 	@Override

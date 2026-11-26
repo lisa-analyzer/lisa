@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import it.unive.lisa.DefaultConfiguration;
 import it.unive.lisa.TestParameterProvider;
-import it.unive.lisa.analysis.Analysis;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.AnalysisState.Error;
 import it.unive.lisa.analysis.ProgramState;
@@ -66,11 +65,8 @@ public class ReplayDomainTest {
 	private ReplayDomain<SimpleAbstractState<Monolith, ValueEnvironment<IntInterval>, TypeEnvironment<TypeSet>>,
 			SimpleAbstractDomain<Monolith, ValueEnvironment<IntInterval>, TypeEnvironment<TypeSet>>> domain;
 
-	private Analysis<ReplayState<SimpleAbstractState<Monolith,
-			ValueEnvironment<IntInterval>,
-			TypeEnvironment<TypeSet>>>,
-			ReplayDomain<SimpleAbstractState<Monolith, ValueEnvironment<IntInterval>, TypeEnvironment<TypeSet>>,
-					SimpleAbstractDomain<Monolith, ValueEnvironment<IntInterval>, TypeEnvironment<TypeSet>>>> analysis;
+	private ReplayAnalysis<SimpleAbstractState<Monolith, ValueEnvironment<IntInterval>, TypeEnvironment<TypeSet>>,
+			SimpleAbstractDomain<Monolith, ValueEnvironment<IntInterval>, TypeEnvironment<TypeSet>>> analysis;
 
 	@BeforeEach
 	public void setup() {

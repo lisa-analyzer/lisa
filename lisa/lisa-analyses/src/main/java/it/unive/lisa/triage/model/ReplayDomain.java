@@ -185,7 +185,19 @@ public class ReplayDomain<A extends AbstractLattice<A>, D extends AbstractDomain
 		return new ReplayState<>(inner, restricted(state.getStore(), expression, src).assume(expression, src));
 	}
 
-	@Override
+	/**
+	 * Yields the part of the given state made of the cases where the given
+	 * program point computed the given expression (see
+	 * {@link SymbolicStore#restrictTo(ProgramPoint, SymbolicExpression)}), or
+	 * the state itself if this domain does not restrict the cases.
+	 *
+	 * @param state    the state
+	 * @param pp       the program point (e.g., the operand of a statement)
+	 * @param computed the expression computed by the program point
+	 *
+	 * @return the cases of the state where the program point computed the
+	 *             expression
+	 */
 	public ReplayState<A> restrictTo(
 			ReplayState<A> state,
 			ProgramPoint pp,
@@ -196,7 +208,21 @@ public class ReplayDomain<A extends AbstractLattice<A>, D extends AbstractDomain
 		return store == state.getStore() ? state : new ReplayState<>(state.getInner(), store);
 	}
 
-	@Override
+	/**
+	 * Yields whether {@link #restrictTo(ReplayState, ProgramPoint, SymbolicExpression)}
+	 * yields exactly the cases of the given state where the given program
+	 * point computed the given expression, or it might also keep other ones
+	 * (e.g., the ones where the store does not know what the point computed):
+	 * only in the former case, what happens in all the cases of the restricted
+	 * state (e.g., an error raised in all of them) happens in all the cases
+	 * computing the expression, and not in other ones.
+	 *
+	 * @param state    the state
+	 * @param pp       the program point (e.g., the operand of a statement)
+	 * @param computed the expression computed by the program point
+	 *
+	 * @return whether the restriction is exact
+	 */
 	public boolean restrictsExactly(
 			ReplayState<A> state,
 			ProgramPoint pp,
@@ -205,7 +231,23 @@ public class ReplayDomain<A extends AbstractLattice<A>, D extends AbstractDomain
 		return restricts && state.getStore().restrictsExactly(pp, computed);
 	}
 
-	@Override
+	/**
+	 * Assumes the given condition in the cases of {@code after} that are not
+	 * cases of {@code before}, keeping the other ones as they are (see
+	 * {@link SymbolicStore#assumeExcept}): this makes what a semantics adds to
+	 * a state (e.g., to the state of an error) happen under a condition,
+	 * without weakening what the state held before the semantics.
+	 *
+	 * @param before    the state before the semantics
+	 * @param after     the state after the semantics
+	 * @param condition the condition
+	 * @param context   the context where the condition is assumed
+	 * @param pp        the program point where the condition is assumed
+	 *
+	 * @return the resulting state
+	 *
+	 * @throws SemanticException if an error occurs during the computation
+	 */
 	public ReplayState<A> assumeOnAdded(
 			ReplayState<A> before,
 			ReplayState<A> after,
@@ -213,7 +255,8 @@ public class ReplayDomain<A extends AbstractLattice<A>, D extends AbstractDomain
 			ScopeId<?> context,
 			ProgramPoint pp)
 			throws SemanticException {
-		A inner = domain.assumeOnAdded(before.getInner(), after.getInner(), condition, context, pp);
+		// the wrapped domain cannot tell the executions apart
+		A inner = domain.assume(after.getInner(), condition, context, pp, pp);
 		if (inner.isBottom())
 			return after.withInner(inner);
 		// the cases that were already there are kept as they are, so that

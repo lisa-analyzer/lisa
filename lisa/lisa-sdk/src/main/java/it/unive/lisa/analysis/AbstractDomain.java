@@ -1,7 +1,6 @@
 package it.unive.lisa.analysis;
 
 import it.unive.lisa.interprocedural.ScopeId;
-import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import java.util.ArrayList;
@@ -35,91 +34,6 @@ public interface AbstractDomain<
 	SemanticOracle makeOracle(
 			L state,
 			ScopeId<?> context);
-
-	/**
-	 * Yields the part of the given state made of the executions where the given
-	 * program point computed the given expression, for domains that know which
-	 * executions computed which expressions (e.g., the ones replaying the
-	 * semantics of statements symbolically, where the executions joined from
-	 * different branches might have computed different expressions). Statements
-	 * evaluating their semantics over each combination of the expressions
-	 * computed by their operands use this to evaluate it in the executions
-	 * computing that combination. The default implementation, for domains that
-	 * do not know it, yields the given state.
-	 *
-	 * @param state    the state
-	 * @param pp       the program point (e.g., the operand of a statement)
-	 * @param computed the expression computed by the program point
-	 *
-	 * @return the executions of the state where the program point computed the
-	 *             expression
-	 *
-	 * @throws SemanticException if an error occurs during the computation
-	 */
-	default L restrictTo(
-			L state,
-			ProgramPoint pp,
-			SymbolicExpression computed)
-			throws SemanticException {
-		return state;
-	}
-
-	/**
-	 * Yields whether
-	 * {@link #restrictTo(AbstractLattice, ProgramPoint, SymbolicExpression)}
-	 * yields exactly the executions of the given state where the given program
-	 * point computed the given expression, or it might also keep other ones
-	 * (e.g., the ones where the domain does not know what the point computed).
-	 * Only in the former case, what happens in all the executions of the
-	 * restricted state (e.g., an error raised in all of them) happens in all
-	 * the executions computing the expression, and not in other ones. The
-	 * default implementation, for domains that do not know it, yields
-	 * {@code false}.
-	 *
-	 * @param state    the state
-	 * @param pp       the program point (e.g., the operand of a statement)
-	 * @param computed the expression computed by the program point
-	 *
-	 * @return whether the restriction is exact
-	 *
-	 * @throws SemanticException if an error occurs during the computation
-	 */
-	default boolean restrictsExactly(
-			L state,
-			ProgramPoint pp,
-			SymbolicExpression computed)
-			throws SemanticException {
-		return false;
-	}
-
-	/**
-	 * Assumes the given condition in the executions of {@code after} that are
-	 * not executions of {@code before}, keeping the other ones as they are.
-	 * This is used to make what a semantics adds to a state (e.g., to the state
-	 * of an error) happen under a condition, without weakening what the state
-	 * held before the semantics. The default implementation, for domains that
-	 * cannot tell the executions apart, assumes the condition in all the
-	 * executions of {@code after}.
-	 *
-	 * @param before    the state before the semantics
-	 * @param after     the state after the semantics
-	 * @param condition the condition
-	 * @param context   the context where the condition is assumed
-	 * @param pp        the program point where the condition is assumed
-	 *
-	 * @return the resulting state
-	 *
-	 * @throws SemanticException if an error occurs during the computation
-	 */
-	default L assumeOnAdded(
-			L before,
-			L after,
-			SymbolicExpression condition,
-			ScopeId<?> context,
-			ProgramPoint pp)
-			throws SemanticException {
-		return assume(after, condition, context, pp, pp);
-	}
 
 	/**
 	 * Yields all the instances of a specific domain, of class {@code domain},
