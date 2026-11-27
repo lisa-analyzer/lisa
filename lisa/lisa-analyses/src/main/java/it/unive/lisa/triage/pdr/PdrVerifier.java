@@ -129,8 +129,8 @@ import org.apache.commons.lang3.tuple.Triple;
  * {@link #withLiveness(boolean)}, {@link #withTypedFields(boolean)},
  * {@link #withCaseRestriction(boolean)},
  * {@link #withGlobalWrites(GlobalWrites)}, {@link #withHeapWrites(HeapWrites)}
- * and {@link #withUserInputs(UserInputs)}, see {@link ResultCache}) take effect at
- * the next {@link #init(SemanticTool)}, so that this information is never
+ * and {@link #withUserInputs(UserInputs)}, see {@link ResultCache}) take effect
+ * at the next {@link #init(SemanticTool)}, so that this information is never
  * computed with different choices; the others take effect from the next
  * verification.
  *

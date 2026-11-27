@@ -39,8 +39,8 @@ public class Message
 	private final Violation violation;
 
 	/**
-	 * The result of the verification of the violation reported by this
-	 * message, if it has been verified
+	 * The result of the verification of the violation reported by this message,
+	 * if it has been verified
 	 */
 	private final VerificationResult verdict;
 
@@ -120,8 +120,7 @@ public class Message
 	 * Yields the result of the verification of the violation reported by this
 	 * message, if it has been verified (see {@link #getViolation()}).
 	 *
-	 * @return the result, or {@code null} if this message has not been
-	 *             verified
+	 * @return the result, or {@code null} if this message has not been verified
 	 */
 	public final VerificationResult getVerdict() {
 		return verdict;

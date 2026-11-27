@@ -231,7 +231,8 @@ public class AnalysisTest {
 		Statement pp = new NoOp(cfg, LOC);
 		Error err = new Error(VoidType.INSTANCE, pp);
 		AnalysisState<
-				MarkerAbstractLattice> res = analysis().moveExecutionToError(base(ps(x)), base(ps(y)), err, true, null, pp);
+				MarkerAbstractLattice> res = analysis().moveExecutionToError(base(ps(x)), base(ps(y)), err, true, null,
+						pp);
 		assertEquals(Set.of(x), res.getExecutionState().known);
 		assertEquals(Set.of(y), res.getErrors().getState(err).getState().known);
 	}

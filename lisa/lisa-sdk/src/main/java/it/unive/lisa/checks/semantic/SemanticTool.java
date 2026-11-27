@@ -205,9 +205,8 @@ public class SemanticTool<A extends AbstractLattice<A>, D extends AbstractDomain
 	}
 
 	/**
-	 * Reports a new warning with the
-	 * given message on the given statement, in the given context (e.g., the one
-	 * of the result that caused the warning).
+	 * Reports a new warning with the given message on the given statement, in
+	 * the given context (e.g., the one of the result that caused the warning).
 	 * 
 	 * @param statement the statement to warn on
 	 * @param context   the context where the warning is reported
@@ -271,9 +270,8 @@ public class SemanticTool<A extends AbstractLattice<A>, D extends AbstractDomain
 	}
 
 	/**
-	 * Reports a new warning with the
-	 * given message on the given expression, in the given context (e.g., the
-	 * one of the result that caused the warning).
+	 * Reports a new warning with the given message on the given expression, in
+	 * the given context (e.g., the one of the result that caused the warning).
 	 * 
 	 * @param expression the expression to warn on
 	 * @param context    the context where the warning is reported
@@ -287,9 +285,8 @@ public class SemanticTool<A extends AbstractLattice<A>, D extends AbstractDomain
 	}
 
 	/**
-	 * Reports a new warning with the
-	 * given message on the given cfg, in the given context (e.g., the one of
-	 * the result that caused the warning).
+	 * Reports a new warning with the given message on the given cfg, in the
+	 * given context (e.g., the one of the result that caused the warning).
 	 * 
 	 * @param cfg     the cfg to warn on
 	 * @param context the context where the warning is reported
@@ -303,9 +300,8 @@ public class SemanticTool<A extends AbstractLattice<A>, D extends AbstractDomain
 	}
 
 	/**
-	 * Reports a new notice with the given
-	 * message on the given statement, in the given context (e.g., the one of
-	 * the result that caused the notice).
+	 * Reports a new notice with the given message on the given statement, in
+	 * the given context (e.g., the one of the result that caused the notice).
 	 * 
 	 * @param statement the statement to notice on
 	 * @param context   the context where the notice is reported
@@ -322,9 +318,8 @@ public class SemanticTool<A extends AbstractLattice<A>, D extends AbstractDomain
 	}
 
 	/**
-	 * Reports a new notice with the given
-	 * message on the given expression, in the given context (e.g., the one of
-	 * the result that caused the notice).
+	 * Reports a new notice with the given message on the given expression, in
+	 * the given context (e.g., the one of the result that caused the notice).
 	 * 
 	 * @param expression the expression to notice on
 	 * @param context    the context where the notice is reported
@@ -338,9 +333,8 @@ public class SemanticTool<A extends AbstractLattice<A>, D extends AbstractDomain
 	}
 
 	/**
-	 * Reports a new notice with the given
-	 * message on the given cfg, in the given context (e.g., the one of the
-	 * result that caused the notice).
+	 * Reports a new notice with the given message on the given cfg, in the
+	 * given context (e.g., the one of the result that caused the notice).
 	 * 
 	 * @param cfg     the cfg to notice on
 	 * @param context the context where the notice is reported

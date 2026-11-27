@@ -229,20 +229,19 @@ public class Analysis<
 	 * evaluating their semantics on each combination of the expressions
 	 * computed by their operands (as the unary, binary and ternary ones do, see
 	 * {@link it.unive.lisa.program.cfg.statement.NaryExpression#ofCombination})
-	 * evaluate it through this method, when there is more than one
-	 * combination. This analysis simply evaluates the semantics on the given
-	 * state: analyses that record which executions computed each expression
-	 * (e.g., the replay of the analysis results performed to verify warnings)
-	 * override it to evaluate the semantics only in the executions computing
-	 * the combination.
+	 * evaluate it through this method, when there is more than one combination.
+	 * This analysis simply evaluates the semantics on the given state: analyses
+	 * that record which executions computed each expression (e.g., the replay
+	 * of the analysis results performed to verify warnings) override it to
+	 * evaluate the semantics only in the executions computing the combination.
 	 *
 	 * @param state     the state where the operands have been evaluated
 	 * @param context   the context where the semantics is evaluated
 	 * @param pp        the statement
 	 * @param operands  the operands of the statement
 	 * @param computed  the expressions computed by the operands, in order
-	 *                      ({@code null} ones, or ones beyond the operands,
-	 *                      are not part of the combination)
+	 *                      ({@code null} ones, or ones beyond the operands, are
+	 *                      not part of the combination)
 	 * @param semantics the semantics of the statement on the combination
 	 *
 	 * @return the state after the semantics
@@ -600,16 +599,15 @@ public class Analysis<
 	 * error, whose execution state is moved to the error as in
 	 * {@link #moveExecutionToError(AnalysisState, Error, boolean, ScopeId, ProgramPoint)}
 	 * (also for the meaning of {@code allExecutions}, referred to the
-	 * executions of {@code erroneous}).
-	 * The result is the least upper bound of the two states after the move. If
-	 * either the normal execution of {@code normal} or the one of
-	 * {@code erroneous} is bottom, this method falls back to a total move or to
-	 * no move at all, respectively.
+	 * executions of {@code erroneous}). The result is the least upper bound of
+	 * the two states after the move. If either the normal execution of
+	 * {@code normal} or the one of {@code erroneous} is bottom, this method
+	 * falls back to a total move or to no move at all, respectively.
 	 * 
-	 * @param normal    the analysis state of the executions that do not raise
-	 *                      the error
-	 * @param erroneous the analysis state of the executions that raise the
-	 *                      error
+	 * @param normal        the analysis state of the executions that do not
+	 *                          raise the error
+	 * @param erroneous     the analysis state of the executions that raise the
+	 *                          error
 	 * @param exception     the exception to move the execution state to
 	 * @param allExecutions whether all the executions of {@code erroneous}
 	 *                          raise the exception

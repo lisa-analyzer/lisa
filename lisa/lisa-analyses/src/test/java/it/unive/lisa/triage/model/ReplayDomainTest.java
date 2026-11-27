@@ -6,8 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import it.unive.lisa.DefaultConfiguration;
 import it.unive.lisa.TestParameterProvider;
-import it.unive.lisa.analysis.AnalysisState.Error;
 import it.unive.lisa.analysis.AnalysisState;
+import it.unive.lisa.analysis.AnalysisState.Error;
 import it.unive.lisa.analysis.ProgramState;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;

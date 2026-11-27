@@ -1209,7 +1209,8 @@ public final class SymbolicCase {
 		pc.add(factory.summary(Untyped.INSTANCE, SummaryValue.Kind.MERGE, SummaryValue.MERGED_CONDITIONS,
 				SyntheticLocation.INSTANCE));
 		addDefinitions(pc, pathCondition);
-		return new SymbolicCase(Collections.unmodifiableList(pc), updates, forgotten, forgottenIf, heapHavoc, preservedHeap, havocAll, scopings,
+		return new SymbolicCase(Collections.unmodifiableList(pc), updates, forgotten, forgottenIf, heapHavoc,
+				preservedHeap, havocAll, scopings,
 				produced);
 	}
 

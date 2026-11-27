@@ -209,13 +209,14 @@ public class ReplayDomain<A extends AbstractLattice<A>, D extends AbstractDomain
 	}
 
 	/**
-	 * Yields whether {@link #restrictTo(ReplayState, ProgramPoint, SymbolicExpression)}
-	 * yields exactly the cases of the given state where the given program
-	 * point computed the given expression, or it might also keep other ones
-	 * (e.g., the ones where the store does not know what the point computed):
-	 * only in the former case, what happens in all the cases of the restricted
-	 * state (e.g., an error raised in all of them) happens in all the cases
-	 * computing the expression, and not in other ones.
+	 * Yields whether
+	 * {@link #restrictTo(ReplayState, ProgramPoint, SymbolicExpression)} yields
+	 * exactly the cases of the given state where the given program point
+	 * computed the given expression, or it might also keep other ones (e.g.,
+	 * the ones where the store does not know what the point computed): only in
+	 * the former case, what happens in all the cases of the restricted state
+	 * (e.g., an error raised in all of them) happens in all the cases computing
+	 * the expression, and not in other ones.
 	 *
 	 * @param state    the state
 	 * @param pp       the program point (e.g., the operand of a statement)

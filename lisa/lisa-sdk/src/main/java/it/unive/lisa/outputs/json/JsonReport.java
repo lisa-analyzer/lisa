@@ -494,8 +494,8 @@ public class JsonReport {
 		}
 
 		/**
-		 * Yields the result of the verification of this message, if it has
-		 * been verified.
+		 * Yields the result of the verification of this message, if it has been
+		 * verified.
 		 * 
 		 * @return the result, or {@code null}
 		 */
