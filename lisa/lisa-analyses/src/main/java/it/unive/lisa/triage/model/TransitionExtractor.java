@@ -22,6 +22,8 @@ import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.call.CFGCall;
 import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.triage.reachability.Reachability;
+import it.unive.lisa.symbolic.SymbolicExpression;
+import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.type.Type;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -359,6 +361,7 @@ public class TransitionExtractor<A extends AbstractLattice<A>, D extends Abstrac
 						callee.getValue()));
 
 		SymbolicStore exit = null;
+		Map<Identifier, Set<Type>> returned = new LinkedHashMap<>();
 		if (result.getAllExitpoints().contains(node) && !post.getExecution().isBottom()) {
 			exit = post.getExecutionState().getStore();
 			if (!frame.isRoot() && resumeNode != null) {
@@ -370,12 +373,21 @@ public class TransitionExtractor<A extends AbstractLattice<A>, D extends Abstrac
 						post,
 						replay.getAnalysis(),
 						frame.getParent().getResult().getId());
-				if (!back.getExecution().isBottom())
+				if (!back.getExecution().isBottom()) {
 					outgoing.add(new EdgeTransition(
 							location,
 							new ModelLocation(frame.getParent(), resumeNode, call),
 							null,
 							back.getExecutionState().getStore()));
+					// the meta variable of the call, holding the returned
+					// value, is not known before the node where the caller
+					// resumes
+					for (SymbolicExpression e : back.getExecutionExpressions())
+						if (e instanceof Identifier)
+							returned.computeIfAbsent((Identifier) e, i -> new LinkedHashSet<>())
+									.addAll(replay.getAnalysis().getRuntimeTypesOf(back, e,
+											frame.getParent().getResult().getId(), call));
+				}
 			}
 		}
 
@@ -388,7 +400,7 @@ public class TransitionExtractor<A extends AbstractLattice<A>, D extends Abstrac
 					leave(location, e.getKey(), e.getValue(), outgoing, escaping, e.getKey().getThrower());
 
 		return new NodeTransitions(location, outgoing, exit, raisedErrors(node, post), partial, replay.getCalls(),
-				escaping);
+				escaping).withTypes(returned);
 	}
 
 	/**

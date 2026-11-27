@@ -22,6 +22,7 @@ import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.call.CFGCall;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.BinaryExpression;
+import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.OutOfScopeIdentifier;
 import it.unive.lisa.symbolic.value.PushAny;
@@ -39,6 +40,7 @@ import it.unive.lisa.type.Type;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -715,26 +717,24 @@ public final class AlarmModelBuilder {
 			if (pre.getExecution().isBottom())
 				continue;
 			TransitionExtractor<A, D> extractor = extractors.get(loc.getFrame());
-			for (Identifier id : vocabulary)
-				if (pre.getExecutionState().knowsIdentifier(id))
-					types.computeIfAbsent(id, i -> new LinkedHashSet<>())
-							.addAll(extractor.getAnalysis().getRuntimeTypesOf(pre, id,
-									loc.getFrame().getResult().getId(), loc.getNode()));
+			collectTypes(extractor, pre, loc, vocabulary, types);
 		}
+		// the identifiers that the states before the nodes do not know (e.g.,
+		// the meta variables of the calls, where the nodes resume after
+		// expanded callees)
+		for (NodeTransitions tr : transitions.values())
+			for (Map.Entry<Identifier, Set<Type>> t : tr.getTypes().entrySet())
+				if (vocabulary.contains(t.getKey()) && !t.getValue().isEmpty())
+					types.computeIfAbsent(t.getKey(), i -> new LinkedHashSet<>()).addAll(t.getValue());
 		// the identifiers of the callers visible in callees hold the values of
 		// the identifiers of the callers (whose types might be unknown where
-		// they are out of scope)
-		for (Identifier id : vocabulary)
-			if (id instanceof OutOfScopeIdentifier) {
-				Identifier current = id;
-				for (ScopeToken token : scopesOf(id))
-					current = current instanceof OutOfScopeIdentifier
-							? ((OutOfScopeIdentifier) current).popScope(token, null)
-							: current;
-				Set<Type> original = current == null ? null : types.get(current);
-				if (original != null)
-					types.computeIfAbsent(id, i -> new LinkedHashSet<>()).addAll(original);
-			}
+		// they are out of scope), and the identifiers that no state of the
+		// analysis knows (e.g., the meta variables of the calls that resume
+		// after expanded callees, holding the values they return) hold the
+		// values the transitions assign to them
+		do
+			typesOfOutOfScope(vocabulary, types);
+		while (typesOfAssigned(vocabulary, transitions.values(), types));
 		for (FreshValue fresh : factory.getValues().values())
 			if (!fresh.getStaticType().isUntyped())
 				types.put(fresh, Set.of(fresh.getStaticType()));
@@ -979,6 +979,24 @@ public final class AlarmModelBuilder {
 		return false;
 	}
 
+	/**
+	 * Adds to the given map the runtime types, in the given state of the given
+	 * location, of the identifiers of the vocabulary that the state knows.
+	 */
+	private static <A extends AbstractLattice<A>, D extends AbstractDomain<A>> void collectTypes(
+			TransitionExtractor<A, D> extractor,
+			AnalysisState<A> state,
+			ModelLocation loc,
+			Set<Identifier> vocabulary,
+			Map<Identifier, Set<Type>> types)
+			throws SemanticException {
+		for (Identifier id : vocabulary)
+			if (state.getExecutionState().knowsIdentifier(id))
+				types.computeIfAbsent(id, i -> new LinkedHashSet<>())
+						.addAll(extractor.getAnalysis().getRuntimeTypesOf(state, id,
+								loc.getFrame().getResult().getId(), loc.getNode()));
+	}
+
 	private static void collect(
 			NodeTransitions tr,
 			Set<Identifier> ids) {
@@ -1080,6 +1098,77 @@ public final class AlarmModelBuilder {
 			if (t.isUntyped() || !sorts.sortOf(t).equals(sort))
 				return false;
 		return true;
+	}
+
+	/**
+	 * Gives to the identifiers of the callers visible in callees the types of
+	 * the identifiers of the callers they denote.
+	 */
+	private static void typesOfOutOfScope(
+			Set<Identifier> vocabulary,
+			Map<Identifier, Set<Type>> types)
+			throws SemanticException {
+		for (Identifier id : vocabulary)
+			if (id instanceof OutOfScopeIdentifier) {
+				Identifier current = id;
+				for (ScopeToken token : scopesOf(id))
+					current = current instanceof OutOfScopeIdentifier
+							? ((OutOfScopeIdentifier) current).popScope(token, null)
+							: current;
+				Set<Type> original = current == null ? null : types.get(current);
+				if (original != null)
+					types.computeIfAbsent(id, i -> new LinkedHashSet<>()).addAll(original);
+			}
+	}
+
+	/**
+	 * Gives to the identifiers of the vocabulary without types the types of the
+	 * values that the transitions assign to them, if the types of all of these
+	 * are known.
+	 *
+	 * @return whether some identifier has been given types
+	 */
+	private static boolean typesOfAssigned(
+			Set<Identifier> vocabulary,
+			Collection<NodeTransitions> transitions,
+			Map<Identifier, Set<Type>> types) {
+		Map<Identifier, Set<Type>> assigned = new LinkedHashMap<>();
+		Set<Identifier> unknown = new HashSet<>();
+		for (NodeTransitions tr : transitions)
+			for (EdgeTransition e : tr.getOutgoing())
+				for (SymbolicCase c : e.getStore().getCases())
+					for (Map.Entry<Identifier, SymbolicExpression> u : c.getUpdates().entrySet()) {
+						Identifier id = u.getKey();
+						if (!vocabulary.contains(id) || types.containsKey(id) || unknown.contains(id))
+							continue;
+						Set<Type> value = typesOfValue(u.getValue(), types);
+						if (value == null || value.isEmpty()) {
+							unknown.add(id);
+							assigned.remove(id);
+						} else
+							assigned.computeIfAbsent(id, i -> new LinkedHashSet<>()).addAll(value);
+					}
+		types.putAll(assigned);
+		return !assigned.isEmpty();
+	}
+
+	/**
+	 * Yields the types of the given value of a transition, if known: the ones
+	 * of identifiers (also read guarded by whether they are defined) and the
+	 * static types of constants and fresh values. Yields {@code null}
+	 * otherwise.
+	 */
+	private static Set<Type> typesOfValue(
+			SymbolicExpression value,
+			Map<Identifier, Set<Type>> types) {
+		if (value instanceof BinaryExpression
+				&& ((BinaryExpression) value).getOperator() instanceof HeapOperators.DefinedRead)
+			return typesOfValue(((BinaryExpression) value).getLeft(), types);
+		if (value instanceof FreshValue || value instanceof Constant)
+			return value.getStaticType().isUntyped() ? null : Set.of(value.getStaticType());
+		if (value instanceof Identifier)
+			return types.get(value);
+		return null;
 	}
 
 	private static void collect(

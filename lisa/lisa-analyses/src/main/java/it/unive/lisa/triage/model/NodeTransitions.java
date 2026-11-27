@@ -2,10 +2,13 @@ package it.unive.lisa.triage.model;
 
 import it.unive.lisa.analysis.AnalysisState.Error;
 import it.unive.lisa.program.cfg.statement.Statement;
+import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.type.Type;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * The symbolic transitions starting at a node of a cfg, as extracted by a
@@ -48,6 +51,14 @@ public class NodeTransitions {
 	private final List<ReplayedCall> calls;
 
 	private final List<EscapingError> escaping;
+
+	/**
+	 * The runtime types that the analysis gives to identifiers in the states
+	 * reached by the transitions, that the state before the node might not
+	 * know (e.g., the meta variable of a call, holding the value returned by
+	 * an expanded callee where the node resumes).
+	 */
+	private Map<Identifier, Set<Type>> types = Collections.emptyMap();
 
 	/**
 	 * An error raised inside an expanded callee, that is not caught by any of
@@ -229,7 +240,7 @@ public class NodeTransitions {
 			return this;
 		List<EdgeTransition> all = new ArrayList<>(outgoing);
 		all.addAll(more);
-		return new NodeTransitions(location, all, exit, errors, partial, calls, escaping);
+		return new NodeTransitions(location, all, exit, errors, partial, calls, escaping).withTypes(types);
 	}
 
 	/**
@@ -242,7 +253,35 @@ public class NodeTransitions {
 	 */
 	public NodeTransitions withTransitions(
 			List<EdgeTransition> transitions) {
-		return new NodeTransitions(location, new ArrayList<>(transitions), exit, errors, partial, calls, escaping);
+		return new NodeTransitions(location, new ArrayList<>(transitions), exit, errors, partial, calls, escaping)
+				.withTypes(types);
+	}
+
+	/**
+	 * Yields the runtime types that the analysis gives to identifiers in the
+	 * states reached by the transitions, that the state before the node might
+	 * not know (e.g., the meta variable of a call, holding the value returned
+	 * by an expanded callee where the node resumes).
+	 *
+	 * @return the types of the identifiers
+	 */
+	public Map<Identifier, Set<Type>> getTypes() {
+		return types;
+	}
+
+	/**
+	 * Yields a copy of these transitions, where the analysis gives the given
+	 * runtime types to identifiers (see {@link #getTypes()}).
+	 *
+	 * @param types the types of the identifiers
+	 *
+	 * @return the copy
+	 */
+	public NodeTransitions withTypes(
+			Map<Identifier, Set<Type>> types) {
+		NodeTransitions copy = new NodeTransitions(location, outgoing, exit, errors, partial, calls, escaping);
+		copy.types = Collections.unmodifiableMap(types);
+		return copy;
 	}
 
 	/**
