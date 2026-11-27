@@ -2,6 +2,8 @@ package it.unive.lisa.triage.model;
 
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.ProgramPoint;
+import it.unive.lisa.symbolic.SymbolicExpression;
+import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.PushAny;
 import it.unive.lisa.triage.inputs.InputSource;
 import it.unive.lisa.triage.inputs.InputSourceResolver;
@@ -9,6 +11,7 @@ import it.unive.lisa.type.Type;
 import java.util.ArrayDeque;
 import java.util.Collections;
 import java.util.Deque;
+import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -29,6 +32,11 @@ public class FreshValueFactory {
 	private final Map<String, FreshValue> values;
 
 	private long next;
+
+	/**
+	 * The {@link SharedValue}s created by this factory, by the value they name.
+	 */
+	private final Map<SymbolicExpression, SharedValue> shared = new HashMap<>();
 
 	/**
 	 * The fresh values produced during the current runs (see
@@ -177,6 +185,27 @@ public class FreshValueFactory {
 		AllocationOffset offset = new AllocationOffset(location, next++);
 		values.put(offset.getName(), offset);
 		return offset;
+	}
+
+	/**
+	 * Yields the {@link SharedValue} naming the given value of the given
+	 * identifier: the same value always yields the same name.
+	 *
+	 * @param named the identifier whose value is named
+	 * @param value the value
+	 *
+	 * @return the shared value
+	 */
+	public synchronized SharedValue shared(
+			Identifier named,
+			SymbolicExpression value) {
+		SharedValue known = shared.get(value);
+		if (known == null) {
+			known = new SharedValue(named, value, value.getCodeLocation(), next++);
+			values.put(known.getName(), known);
+			shared.put(value, known);
+		}
+		return known;
 	}
 
 	/**

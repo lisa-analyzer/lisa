@@ -4,6 +4,7 @@ import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.triage.model.HeapModel;
 import it.unive.lisa.triage.model.HeapType;
+import it.unive.lisa.triage.model.SharedValue;
 import it.unive.lisa.triage.smt.Sort;
 import it.unive.lisa.type.CharacterType;
 import it.unive.lisa.type.Type;
@@ -189,6 +190,9 @@ public class SortPolicy {
 	 */
 	public Sort sortOf(
 			Identifier id) {
+		if (id instanceof SharedValue)
+			// encoded as the values of the identifier it names
+			return sortOf(((SharedValue) id).getNamed());
 		if (id.getStaticType() == HeapType.FIELD) {
 			// the values of a field whose declared type has a sort of its own
 			// can only be values of that sort
@@ -260,6 +264,8 @@ public class SortPolicy {
 	 */
 	public boolean mayBeFloat(
 			Identifier id) {
+		if (id instanceof SharedValue)
+			return mayBeFloat(((SharedValue) id).getNamed());
 		Set<Type> ts = types.get(id);
 		return ts != null && ts.stream().anyMatch(SortPolicy::isFloat);
 	}
@@ -275,6 +281,8 @@ public class SortPolicy {
 	 */
 	public boolean holdsOnlyFloats(
 			Identifier id) {
+		if (id instanceof SharedValue)
+			return holdsOnlyFloats(((SharedValue) id).getNamed());
 		Set<Type> ts = types.get(id);
 		if (ts == null || ts.isEmpty())
 			return isFloat(id.getStaticType());
@@ -318,6 +326,8 @@ public class SortPolicy {
 	 */
 	public boolean mayBeOpaque(
 			SymbolicExpression expression) {
+		if (expression instanceof SharedValue)
+			return mayBeOpaque(((SharedValue) expression).getNamed());
 		if (expression instanceof Identifier) {
 			Set<Type> ts = types.get(expression);
 			if (ts != null && !ts.isEmpty())

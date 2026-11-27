@@ -700,18 +700,57 @@ public final class SymbolicCase {
 
 	/**
 	 * Yields the given value, or a summary if it is too large to be tracked
-	 * (see {@link #MAX_VALUE_SIZE}).
+	 * (see {@link #MAX_VALUE_SIZE}). A value whose tree is larger than
+	 * {@link #MAX_VALUE_SIZE}, but that has few shared sub-expressions (e.g.,
+	 * the contents of a field read and written many times, that occur twice in
+	 * each write), is named by a {@link SharedValue}, so that the values using
+	 * it do not grow with its tree: its definition must be added to the path
+	 * condition (see {@link #define(List, SymbolicExpression)}).
 	 */
 	private static SymbolicExpression bounded(
 			Identifier id,
 			SymbolicExpression value,
 			FreshValueFactory factory) {
-		if (distinct(value, Collections.newSetFromMap(new IdentityHashMap<>()), MAX_VALUE_SIZE) <= MAX_VALUE_SIZE
-				&& size(value, new IdentityHashMap<>(), MAX_VALUE_TREE_SIZE) <= MAX_VALUE_TREE_SIZE)
-			return value;
+		if (distinct(value, Collections.newSetFromMap(new IdentityHashMap<>()), MAX_VALUE_SIZE) <= MAX_VALUE_SIZE) {
+			long tree = size(value, new IdentityHashMap<>(), MAX_VALUE_TREE_SIZE);
+			if (tree <= MAX_VALUE_SIZE)
+				return value;
+			if (tree <= MAX_VALUE_TREE_SIZE)
+				return factory.shared(id, value);
+		}
 		return factory.summary(id.getStaticType(),
 				HeapModel.isHeapState(id) ? SummaryValue.Kind.HEAP : SummaryValue.Kind.UNSUPPORTED,
 				"value of " + id + " too large to track", value.getCodeLocation());
+	}
+
+	/**
+	 * Yields the given path condition, extended with the definition of the
+	 * given value if it is a {@link SharedValue} that the path condition does
+	 * not define yet.
+	 */
+	private static List<SymbolicExpression> define(
+			List<SymbolicExpression> pc,
+			SymbolicExpression value) {
+		if (!(value instanceof SharedValue))
+			return pc;
+		for (SymbolicExpression cond : pc)
+			if (SharedValue.isDefinition(cond) && ((BinaryExpression) cond).getLeft() == value)
+				return pc;
+		List<SymbolicExpression> res = new ArrayList<>(pc);
+		res.add(((SharedValue) value).definition());
+		return Collections.unmodifiableList(res);
+	}
+
+	/**
+	 * Adds to the given path condition the definitions of {@link SharedValue}s
+	 * among the given conditions that it does not contain yet.
+	 */
+	private static void addDefinitions(
+			List<SymbolicExpression> pc,
+			List<SymbolicExpression> conditions) {
+		for (SymbolicExpression cond : conditions)
+			if (SharedValue.isDefinition(cond) && !pc.contains(cond))
+				pc.add(cond);
 	}
 
 	/**
@@ -785,9 +824,10 @@ public final class SymbolicCase {
 			SymbolicExpression value,
 			FreshValueFactory factory) {
 		Map<Identifier, SymbolicExpression> upd = new LinkedHashMap<>(updates);
-		upd.put(id, bounded(id, value, factory));
-		return new SymbolicCase(pathCondition, Collections.unmodifiableMap(upd), forgotten, forgottenIf, heapHavoc,
-				preservedHeap, havocAll, scopings, produced);
+		SymbolicExpression v = bounded(id, value, factory);
+		upd.put(id, v);
+		return new SymbolicCase(define(pathCondition, v), Collections.unmodifiableMap(upd), forgotten, forgottenIf,
+				heapHavoc, preservedHeap, havocAll, scopings, produced);
 	}
 
 	/**
@@ -951,7 +991,8 @@ public final class SymbolicCase {
 			return this;
 		Map<Identifier, SymbolicExpression> upd = new LinkedHashMap<>(updates);
 		SymbolicExpression v = substitute(value, factory, pp);
-		upd.put(id, bounded(id, v, factory));
+		SymbolicExpression bv = bounded(id, v, factory);
+		upd.put(id, bv);
 		// an unknown value assigned where it is introduced (e.g., the result
 		// of a call to code that is not part of the program) is consumed here
 		Set<InputValue> prod = value instanceof PushAny && v instanceof InputValue
@@ -965,8 +1006,8 @@ public final class SymbolicCase {
 		}
 		if (HeapModel.tracksDefinition(id))
 			upd.put(HeapModel.defined(id), new Constant(Untyped.INSTANCE, true, value.getCodeLocation()));
-		return new SymbolicCase(pathCondition, Collections.unmodifiableMap(upd), forg, forgottenIf, heapHavoc,
-				preservedHeap, havocAll, scopings, prod);
+		return new SymbolicCase(define(pathCondition, bv), Collections.unmodifiableMap(upd), forg, forgottenIf,
+				heapHavoc, preservedHeap, havocAll, scopings, prod);
 	}
 
 	/**
@@ -1162,9 +1203,13 @@ public final class SymbolicCase {
 	 */
 	public SymbolicCase withLostConditions(
 			FreshValueFactory factory) {
-		List<SymbolicExpression> pc = List.of(factory.summary(Untyped.INSTANCE, SummaryValue.Kind.MERGE,
-				SummaryValue.MERGED_CONDITIONS, SyntheticLocation.INSTANCE));
-		return new SymbolicCase(pc, updates, forgotten, forgottenIf, heapHavoc, preservedHeap, havocAll, scopings,
+		// the definitions of the shared values are kept, as they do not
+		// constrain the executions
+		List<SymbolicExpression> pc = new ArrayList<>();
+		pc.add(factory.summary(Untyped.INSTANCE, SummaryValue.Kind.MERGE, SummaryValue.MERGED_CONDITIONS,
+				SyntheticLocation.INSTANCE));
+		addDefinitions(pc, pathCondition);
+		return new SymbolicCase(Collections.unmodifiableList(pc), updates, forgotten, forgottenIf, heapHavoc, preservedHeap, havocAll, scopings,
 				produced);
 	}
 
@@ -1178,8 +1223,8 @@ public final class SymbolicCase {
 	 * @return whether or not the path condition is lost
 	 */
 	public boolean hasLostConditions() {
-		return pathCondition.stream().allMatch(c -> c instanceof SummaryValue
-				&& SummaryValue.MERGED_CONDITIONS.equals(((SummaryValue) c).getReason()));
+		return pathCondition.stream().allMatch(c -> SharedValue.isDefinition(c) || (c instanceof SummaryValue
+				&& SummaryValue.MERGED_CONDITIONS.equals(((SummaryValue) c).getReason())));
 	}
 
 	/**
@@ -1287,6 +1332,13 @@ public final class SymbolicCase {
 			FreshValueFactory factory,
 			Map<Identifier, SymbolicExpression> reads,
 			Map<SymbolicExpression, SymbolicExpression> done) {
+		if (expression instanceof SharedValue) {
+			// the value named is over the values before the next case: it is
+			// named again, so that a value is never defined twice (e.g., when
+			// a case is composed with itself)
+			SharedValue shared = (SharedValue) expression;
+			return factory.shared(shared.getNamed(), substituteOnce(shared.getValue(), factory, reads, done));
+		}
 		if (expression instanceof FreshValue)
 			return expression;
 		if (expression instanceof Identifier) {
@@ -1356,14 +1408,18 @@ public final class SymbolicCase {
 		// it are not represented precisely
 		SymbolicExpression dropped = null;
 		for (SymbolicExpression cond : first.pathCondition)
-			if (!pc.contains(cond))
+			if (!pc.contains(cond) && !SharedValue.isDefinition(cond))
 				dropped = cond;
 		for (SymbolicExpression cond : second.pathCondition)
-			if (!pc.contains(cond))
+			if (!pc.contains(cond) && !SharedValue.isDefinition(cond))
 				dropped = cond;
 		if (dropped != null)
 			pc.add(factory.summary(dropped.getStaticType(), SummaryValue.Kind.MERGE, SummaryValue.MERGED_CONDITIONS,
 					location));
+		// the definitions of the shared values do not constrain the
+		// executions: they are all kept
+		addDefinitions(pc, first.pathCondition);
+		addDefinitions(pc, second.pathCondition);
 
 		Set<Identifier> keys = new LinkedHashSet<>(first.updates.keySet());
 		keys.addAll(second.updates.keySet());

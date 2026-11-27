@@ -751,7 +751,9 @@ public class AlarmModel {
 								? ((InputValue) fresh.getValue()).getSource().getDescription()
 								: fresh.getValue() instanceof SummaryValue
 										? "summary of " + ((SummaryValue) fresh.getValue()).getReason()
-										: "allocated references")
+										: fresh.getValue() instanceof SharedValue
+												? "value of " + ((SharedValue) fresh.getValue()).getNamed()
+												: "allocated references")
 						.append("\n");
 		}
 
