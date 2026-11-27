@@ -19,9 +19,8 @@ import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.symbolic.value.operator.binary.StringConcat;
-import java.util.HashMap;
+import it.unive.lisa.util.datastructures.trie.PatriciaTrieMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 import org.junit.jupiter.api.Test;
 
@@ -77,46 +76,46 @@ public class SubstringsTest {
 	};
 
 	public SubstringsTest() {
-		Map<Identifier, ExpressionInverseSet> mapA = new HashMap<>();
+		PatriciaTrieMap<Identifier, ExpressionInverseSet> mapA = PatriciaTrieMap.empty();
 		Set<SymbolicExpression> setA = new HashSet<>();
 		setA.add(y);
 		setA.add(w);
-		mapA.put(x, new ExpressionInverseSet(setA));
+		mapA = mapA.put(x, new ExpressionInverseSet(setA));
 
-		Map<Identifier, ExpressionInverseSet> mapB = new HashMap<>();
+		PatriciaTrieMap<Identifier, ExpressionInverseSet> mapB = PatriciaTrieMap.empty();
 		Set<SymbolicExpression> setB = new HashSet<>();
 		Set<SymbolicExpression> setB2 = new HashSet<>();
 		setB.add(z);
 		setB2.add(w);
-		mapB.put(y, new ExpressionInverseSet(setB));
-		mapB.put(x, new ExpressionInverseSet(setB2));
+		mapB = mapB.put(y, new ExpressionInverseSet(setB));
+		mapB = mapB.put(x, new ExpressionInverseSet(setB2));
 
-		Map<Identifier, ExpressionInverseSet> mapC = new HashMap<>();
+		PatriciaTrieMap<Identifier, ExpressionInverseSet> mapC = PatriciaTrieMap.empty();
 		Set<SymbolicExpression> setC = new HashSet<>();
 		setC.add(z);
-		mapC.put(x, new ExpressionInverseSet(setC));
+		mapC = mapC.put(x, new ExpressionInverseSet(setC));
 
-		Map<Identifier, ExpressionInverseSet> mapD = new HashMap<>();
+		PatriciaTrieMap<Identifier, ExpressionInverseSet> mapD = PatriciaTrieMap.empty();
 		Set<SymbolicExpression> setD = new HashSet<>();
 		setD.add(w);
-		mapD.put(y, new ExpressionInverseSet(setD));
+		mapD = mapD.put(y, new ExpressionInverseSet(setD));
 
-		Map<Identifier, ExpressionInverseSet> mapE = new HashMap<>();
+		PatriciaTrieMap<Identifier, ExpressionInverseSet> mapE = PatriciaTrieMap.empty();
 		Set<SymbolicExpression> setE1 = new HashSet<>();
 		Set<SymbolicExpression> setE2 = new HashSet<>();
 		setE1.add(y);
 		setE2.add(x);
-		mapE.put(x, new ExpressionInverseSet(setE1));
-		mapE.put(y, new ExpressionInverseSet(setE2));
+		mapE = mapE.put(x, new ExpressionInverseSet(setE1));
+		mapE = mapE.put(y, new ExpressionInverseSet(setE2));
 
-		Map<Identifier, ExpressionInverseSet> mapF = new HashMap<>();
+		PatriciaTrieMap<Identifier, ExpressionInverseSet> mapF = PatriciaTrieMap.empty();
 		Set<SymbolicExpression> setF1 = new HashSet<>();
 		Set<SymbolicExpression> setF2 = new HashSet<>();
 		setF1.add(y);
 		setF1.add(c);
 		setF2.add(z);
-		mapF.put(x, new ExpressionInverseSet(setF1));
-		mapF.put(w, new ExpressionInverseSet(setF2));
+		mapF = mapF.put(x, new ExpressionInverseSet(setF1));
+		mapF = mapF.put(w, new ExpressionInverseSet(setF2));
 
 		valA = new Substrings(new ExpressionInverseSet(), mapA);
 		valB = new Substrings(new ExpressionInverseSet(), mapB);
@@ -131,16 +130,11 @@ public class SubstringsTest {
 	@Test
 	public void testConstructor() {
 		Substrings first = new Substrings();
-
-		Map<Identifier, ExpressionInverseSet> f = new HashMap<>();
-
+		PatriciaTrieMap<Identifier, ExpressionInverseSet> f = PatriciaTrieMap.empty();
 		Set<SymbolicExpression> set = new HashSet<>();
-
 		set.add(y);
 		ExpressionInverseSet eis = new ExpressionInverseSet(set);
-
-		f.put(x, eis);
-
+		f = f.put(x, eis);
 		Substrings second = new Substrings(new ExpressionInverseSet(), f);
 
 		assertTrue(first.isBottom());
@@ -153,17 +147,13 @@ public class SubstringsTest {
 	@Test
 	public void testForgetIdentifier()
 			throws SemanticException {
-		Map<Identifier, ExpressionInverseSet> f = new HashMap<>();
-
+		PatriciaTrieMap<Identifier, ExpressionInverseSet> f = PatriciaTrieMap.empty();
 		Set<SymbolicExpression> set = new HashSet<>();
 		Identifier y = new Variable(StringType.INSTANCE, "y", SyntheticLocation.INSTANCE);
 		Identifier x = new Variable(StringType.INSTANCE, "x", SyntheticLocation.INSTANCE);
-
 		set.add(y);
 		ExpressionInverseSet eis = new ExpressionInverseSet(set);
-
-		f.put(x, eis);
-
+		f = f.put(x, eis);
 		Substrings domain = new Substrings(new ExpressionInverseSet(), f);
 
 		assertFalse(domain.forgetIdentifier(x, pp).knowsIdentifier(x));

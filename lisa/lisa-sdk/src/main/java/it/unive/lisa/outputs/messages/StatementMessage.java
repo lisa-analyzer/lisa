@@ -1,5 +1,8 @@
 package it.unive.lisa.outputs.messages;
 
+import it.unive.lisa.checks.verification.VerificationResult;
+import it.unive.lisa.checks.verification.Violation;
+import it.unive.lisa.interprocedural.ScopeId;
 import it.unive.lisa.program.cfg.statement.Statement;
 
 /**
@@ -25,8 +28,61 @@ public class StatementMessage
 	public StatementMessage(
 			Statement statement,
 			String message) {
-		super(statement.getLocation(), message);
+		this(statement, message, null, null, null);
+	}
+
+	/**
+	 * Builds the message, reporting the given violation (if any), that can be
+	 * verified after the analysis.
+	 *
+	 * @param statement the statement where this message is reported on
+	 * @param message   the message of this message
+	 * @param context   the context where this message was reported on (can be
+	 *                      {@code null})
+	 * @param violation the violation reported by this message (can be
+	 *                      {@code null} if unknown)
+	 */
+	public StatementMessage(
+			Statement statement,
+			String message,
+			ScopeId<?> context,
+			Violation violation) {
+		this(statement, message, context, violation, null);
+	}
+
+	/**
+	 * Builds the message.
+	 *
+	 * @param statement the statement where this message is reported on
+	 * @param message   the message of this message
+	 * @param context   the context where this message was reported on (can be
+	 *                      {@code null})
+	 * @param violation the violation reported by this message (can be
+	 *                      {@code null} if unknown)
+	 * @param verdict   the result of the verification of the violation (can be
+	 *                      {@code null} if it has not been verified)
+	 */
+	protected StatementMessage(
+			Statement statement,
+			String message,
+			ScopeId<?> context,
+			Violation violation,
+			VerificationResult verdict) {
+		super(statement.getLocation(), message, context, violation, verdict);
 		this.statement = statement;
+	}
+
+	/**
+	 * Yields a copy of this message carrying the given result of the
+	 * verification of the violation it reports (see {@link #getVerdict()}).
+	 *
+	 * @param verdict the result of the verification
+	 *
+	 * @return the verified message
+	 */
+	public StatementMessage withVerdict(
+			VerificationResult verdict) {
+		return new StatementMessage(statement, getMessage(), getContext(), getViolation(), verdict);
 	}
 
 	/**
@@ -82,6 +138,16 @@ public class StatementMessage
 	}
 
 	@Override
+	public String getCFGSignature() {
+		return statement.getCFG().getDescriptor().getFullSignatureWithParNames();
+	}
+
+	@Override
+	public String getTargetText() {
+		return statement.toString();
+	}
+
+	@Override
 	public String getTag() {
 		return "STATEMENT";
 	}
@@ -90,7 +156,7 @@ public class StatementMessage
 	public String toString() {
 		return getLocationWithBrackets()
 				+ " on '"
-				+ statement.getCFG().getDescriptor().getFullSignatureWithParNames()
+				+ getCFGSignature()
 				+ "': "
 				+ getTaggedMessage();
 	}

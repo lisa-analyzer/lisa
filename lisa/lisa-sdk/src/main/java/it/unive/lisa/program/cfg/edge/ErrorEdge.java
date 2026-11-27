@@ -5,6 +5,7 @@ import it.unive.lisa.analysis.AbstractLattice;
 import it.unive.lisa.analysis.Analysis;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.interprocedural.ScopeId;
 import it.unive.lisa.program.cfg.protection.CatchBlock;
 import it.unive.lisa.program.cfg.protection.ProtectedBlock;
 import it.unive.lisa.program.cfg.protection.ProtectionBlock;
@@ -148,11 +149,17 @@ public class ErrorEdge
 		return StringUtils.join(typeNames, ", ") + (variable == null ? "" : ", variable: " + variable.getName());
 	}
 
-	@Override
-	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> traverseForward(
-			AnalysisState<A> state,
-			Analysis<A, D> analysis)
-			throws SemanticException {
+	/**
+	 * Yields the error types that are not caught by this edge, even if they can
+	 * be assigned to one of {@link #getTypes()}. These are the types caught by
+	 * the catch blocks of protection blocks nested inside the one that this
+	 * edge belongs to, that catch errors before this edge does, and the types
+	 * caught by other catch blocks of the same protection block that are more
+	 * specific than the ones caught by this edge.
+	 * 
+	 * @return the excluded types
+	 */
+	public Collection<Type> getExcludedTypes() {
 		Collection<Type> excluded = new HashSet<>();
 		Collection<ProtectionBlock> blocks = getSource().getCFG().getProtectionsOf(getSource());
 
@@ -176,16 +183,26 @@ public class ErrorEdge
 				break;
 			}
 
-		return analysis.moveErrorsToExecution(state, getSource(), protectedBlock, Arrays.asList(types), excluded,
-				variable);
+		return excluded;
+	}
+
+	@Override
+	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> traverseForward(
+			AnalysisState<A> state,
+			Analysis<A, D> analysis,
+			ScopeId<?> context)
+			throws SemanticException {
+		return analysis.moveErrorsToExecution(state, context, getSource(), protectedBlock, Arrays.asList(types),
+				getExcludedTypes(), variable);
 	}
 
 	@Override
 	public <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> traverseBackwards(
 			AnalysisState<A> state,
-			Analysis<A, D> analysis)
+			Analysis<A, D> analysis,
+			ScopeId<?> context)
 			throws SemanticException {
-		return traverseForward(state, analysis);
+		return traverseForward(state, analysis, context);
 	}
 
 	@Override

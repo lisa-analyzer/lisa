@@ -1,0 +1,42 @@
+{
+  "warnings" : [ ],
+  "notices" : [ ],
+  "files" : [ "report.json", "untyped_factorialLoop.factorialLoop(factorialLoop__this,_untyped_n)_2474d6007168316af8ca82b3ebcfa93f.graph.json", "untyped_factorialLoop.factorialLoop(factorialLoop__this,_untyped_n)_3d2c5cb7b494b69dde86e90281c2426d.graph.json", "untyped_factorialLoop.factorialLoop(factorialLoop__this,_untyped_n)_d191297dd44df77b961dc056918d4b73.graph.json", "untyped_factorialLoop.factorialLoopAux1(factorialLoop__this,_untyped_n)_6a2fa057f5f3ec99c72079f84fc7400d.graph.json", "untyped_factorialLoop.factorialLoopAux1(factorialLoop__this,_untyped_n)_77c1184d94215329deabdfcf96aa9472.graph.json", "untyped_factorialLoop.factorialLoopAux1(factorialLoop__this,_untyped_n)_c625effbc74e7c8ab845594b74ce6e43.graph.json", "untyped_factorialLoop.factorialLoopAux2(factorialLoop__this,_untyped_n)_d44e3d35b67fa70e1fd21a7ece4d1ffb.graph.json", "untyped_factorialLoop.factorialLoopAux2(factorialLoop__this,_untyped_n)_e03ff68f501f8d18de3682783693c7a2.graph.json", "untyped_factorialLoop.main(factorialLoop__this,_untyped_a).graph.json" ],
+  "info" : {
+    "cfgs" : "4",
+    "duration" : "135ms",
+    "end" : "2026-10-28T19:53:50.857+01:00",
+    "expressions" : "40",
+    "files" : "9",
+    "globals" : "0",
+    "members" : "4",
+    "notices" : "0",
+    "programs" : "1",
+    "start" : "2026-10-28T19:53:50.722+01:00",
+    "statements" : "14",
+    "units" : "1",
+    "version" : "1.0",
+    "warnings" : "0"
+  },
+  "configuration" : {
+    "asynchronousListeners" : "",
+    "backwardDescendingFixpoint" : "unset",
+    "backwardFixpoint" : "BackwardAscendingFixpoint",
+    "dumpForcesUnwinding" : "false",
+    "fixpointWorkingSet" : "OrderBasedWorkingSet",
+    "forwardDescendingFixpoint" : "unset",
+    "forwardFixpoint" : "ForwardAscendingFixpoint",
+    "glbThreshold" : "5",
+    "hotspots" : "unset",
+    "openCallPolicy" : "TopExecutionPolicy",
+    "outputs" : "JSONReportDumper, JSONResults",
+    "recursionWideningThreshold" : "5",
+    "semanticChecks" : "",
+    "shouldSmashError" : "unset",
+    "synchronousListeners" : "",
+    "syntacticChecks" : "",
+    "useWideningPoints" : "true",
+    "wideningThreshold" : "5",
+    "workdir" : "test-outputs/interprocedural/factorialLoop/inlined"
+  }
+}

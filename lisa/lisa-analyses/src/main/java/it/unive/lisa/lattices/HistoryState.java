@@ -86,6 +86,10 @@ public class HistoryState<A extends AbstractLattice<A>>
 		return reversed;
 	}
 
+	/**
+	 * Yields an iterator over the states recorded in this history, from the
+	 * oldest one to the current (i.e., most recent) one.
+	 */
 	@Override
 	public Iterator<A> iterator() {
 		return new Iterator<A>() {
@@ -185,15 +189,18 @@ public class HistoryState<A extends AbstractLattice<A>>
 		return new HistoryState<>(current.lub(other.current));
 	}
 
+	/**
+	 * {@inheritDoc} Since {@code this} represents the history recorded so far
+	 * for a given instruction, while {@code other} is the newly computed state
+	 * for that same instruction (whose own history, if any, belongs to a
+	 * different iteration and is thus irrelevant here), the result keeps
+	 * {@code this} as its history and only combines the current states, pushing
+	 * the join on top of it as the new current state.
+	 */
 	@Override
 	public HistoryState<A> upchainAux(
 			HistoryState<A> other)
 			throws SemanticException {
-		// this represents the history of states for a given
-		// instruction, while other represents the new state computed
-		// for that instruction. The latter's history comes from another
-		// instruction, so we discard it and just add its current state
-		// to this
 		return new HistoryState<>(this.current.lub(other.current), this);
 	}
 
@@ -204,39 +211,39 @@ public class HistoryState<A extends AbstractLattice<A>>
 		return new HistoryState<>(current.glb(other.current));
 	}
 
+	/**
+	 * {@inheritDoc} See {@link #upchainAux(HistoryState)} for why only
+	 * {@code other}'s current state, and not its history, is taken into
+	 * account.
+	 */
 	@Override
 	public HistoryState<A> downchainAux(
 			HistoryState<A> other)
 			throws SemanticException {
-		// this represents the history of states for a given
-		// instruction, while other represents the new state computed
-		// for that instruction. The latter's history comes from another
-		// instruction, so we discard it and just add its current state
-		// to this
 		return new HistoryState<>(this.current.glb(other.current), this);
 	}
 
+	/**
+	 * {@inheritDoc} See {@link #upchainAux(HistoryState)} for why only
+	 * {@code other}'s current state, and not its history, is taken into
+	 * account.
+	 */
 	@Override
 	public HistoryState<A> wideningAux(
 			HistoryState<A> other)
 			throws SemanticException {
-		// this represents the history of states for a given
-		// instruction, while other represents the new state computed
-		// for that instruction. The latter's history comes from another
-		// instruction, so we discard it and just add its current state
-		// to this
 		return new HistoryState<>(this.current.widening(other.current), this);
 	}
 
+	/**
+	 * {@inheritDoc} See {@link #upchainAux(HistoryState)} for why only
+	 * {@code other}'s current state, and not its history, is taken into
+	 * account.
+	 */
 	@Override
 	public HistoryState<A> narrowingAux(
 			HistoryState<A> other)
 			throws SemanticException {
-		// this represents the history of states for a given
-		// instruction, while other represents the new state computed
-		// for that instruction. The latter's history comes from another
-		// instruction, so we discard it and just add its current state
-		// to this
 		return new HistoryState<>(this.current.narrowing(other.current), this);
 	}
 

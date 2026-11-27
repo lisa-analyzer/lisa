@@ -1,5 +1,8 @@
 package it.unive.lisa.outputs.messages;
 
+import it.unive.lisa.checks.verification.VerificationResult;
+import it.unive.lisa.checks.verification.Violation;
+import it.unive.lisa.interprocedural.ScopeId;
 import it.unive.lisa.program.cfg.CodeLocation;
 import java.util.Objects;
 
@@ -26,7 +29,29 @@ public abstract class MessageWithLocation
 	protected MessageWithLocation(
 			CodeLocation location,
 			String message) {
-		super(message);
+		this(location, message, null, null, null);
+	}
+
+	/**
+	 * Builds the message.
+	 *
+	 * @param location  the location in the program where this message is
+	 *                      reported on
+	 * @param message   the message of this message
+	 * @param context   the context where this message was reported on (can be
+	 *                      {@code null})
+	 * @param violation the violation reported by this message (can be
+	 *                      {@code null} if unknown)
+	 * @param verdict   the result of the verification of the violation (can be
+	 *                      {@code null} if it has not been verified)
+	 */
+	protected MessageWithLocation(
+			CodeLocation location,
+			String message,
+			ScopeId<?> context,
+			Violation violation,
+			VerificationResult verdict) {
+		super(message, context, violation, verdict);
 		Objects.requireNonNull(location, "The location of a message with location cannot be null");
 		this.location = location;
 	}

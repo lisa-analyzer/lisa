@@ -8,8 +8,9 @@ import it.unive.lisa.util.representation.StructuredRepresentation;
 import java.util.Objects;
 
 /**
- * A lattice structure tracking prefixes of strings.
- * 
+ * The lattice structure used by {@link it.unive.lisa.analysis.string.Prefix},
+ * tracking the longest known common prefix of a set of strings.
+ *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public class StrPrefix

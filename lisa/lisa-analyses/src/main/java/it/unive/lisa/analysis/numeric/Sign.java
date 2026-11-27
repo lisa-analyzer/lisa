@@ -44,8 +44,13 @@ import java.util.Set;
 /**
  * The basic overflow-insensitive Sign abstract domain, tracking zero, strictly
  * positive and strictly negative integer values, implemented as a
- * {@link BaseNonRelationalValueDomain}.
- * 
+ * {@link BaseNonRelationalValueDomain}. Variables are approximated by their
+ * sign only; arithmetic and comparison operators are evaluated according to the
+ * usual sign rules (e.g., the product of two values with the same sign is
+ * positive), and every approximation collapses to top as soon as the sign of
+ * the result cannot be determined precisely (e.g., adding a positive and a
+ * negative value).
+ *
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
 public class Sign

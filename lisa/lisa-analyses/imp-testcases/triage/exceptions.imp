@@ -1,0 +1,53 @@
+// Triage benchmark, exceptions and heap (analyzed with intervals).
+// Conventions as in numeric.imp.
+class A { ~A() {} }
+
+class P {
+	f;
+	~P() {}
+}
+
+class exceptions {
+
+	bug_throw(x) {
+		try {
+			if (x == 3)
+				throw new A();
+		} catch (A e) {
+			this.bug();
+		}
+	}
+
+	safe_throw(x) {
+		try {
+			if (x > 0 && x < 0)
+				throw new A();
+		} catch (A e) {
+			this.bug();
+		}
+	}
+
+	safe_throw_relational(x) {
+		def y = x;
+		try {
+			if (x != y)
+				throw new A();
+		} catch (A e) {
+			this.bug();
+		}
+	}
+
+	bug_field(x) {
+		def o = new P();
+		o.f = x;
+		if (o.f == 7)
+			this.bug();
+	}
+
+	safe_field(x) {
+		def o = new P();
+		o.f = 1;
+		if (o.f == 2)
+			this.bug();
+	}
+}

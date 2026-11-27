@@ -93,7 +93,10 @@ public abstract class BinaryStatement
 		AnalysisState<A> result = state.bottomExecution();
 		for (SymbolicExpression left : params[0])
 			for (SymbolicExpression right : params[1])
-				result = result.lub(fwdBinarySemantics(interprocedural, state, left, right, expressions));
+				result = result.lub(singleValues(params)
+						? fwdBinarySemantics(interprocedural, state, left, right, expressions)
+						: ofCombination(interprocedural, state,
+								s -> fwdBinarySemantics(interprocedural, s, left, right, expressions), left, right));
 
 		return result;
 	}
@@ -190,5 +193,4 @@ public abstract class BinaryStatement
 			throws SemanticException {
 		return fwdBinarySemantics(interprocedural, state, left, right, expressions);
 	}
-
 }

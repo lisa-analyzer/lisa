@@ -85,13 +85,18 @@ public class UnitMessage
 	}
 
 	@Override
+	public String getTargetText() {
+		return unit.getName();
+	}
+
+	@Override
 	public String getTag() {
 		return "UNIT";
 	}
 
 	@Override
 	public String toString() {
-		return getLocationWithBrackets() + " on '" + unit.getName() + "': " + getTaggedMessage();
+		return getLocationWithBrackets() + " on '" + getTargetText() + "': " + getTaggedMessage();
 	}
 
 }

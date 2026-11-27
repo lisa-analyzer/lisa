@@ -155,12 +155,7 @@ public class BackwardAnalyzedCFG<
 	 */
 	public AnalysisState<A> getAnalysisStateBefore(
 			Statement st) {
-		if (st instanceof Call) {
-			Call original = (Call) st;
-			while (original.getSource() != null)
-				original = original.getSource();
-			st = original;
-		}
+		st = Call.originalOf(st);
 
 		return results.getState(st);
 	}
@@ -177,12 +172,7 @@ public class BackwardAnalyzedCFG<
 	public AnalysisState<A> getAnalysisStateAfter(
 			Statement st)
 			throws SemanticException {
-		if (st instanceof Call) {
-			Call original = (Call) st;
-			while (original.getSource() != null)
-				original = original.getSource();
-			st = original;
-		}
+		st = Call.originalOf(st);
 
 		if (!(st instanceof Expression) || ((Expression) st).getParentStatement() == null)
 			if (getAllExitpoints().contains(st))
@@ -197,12 +187,12 @@ public class BackwardAnalyzedCFG<
 			return results.getState(succ);
 
 		// last chance: there is no successor, so it might be an exit point of
-		// the analysis
+		// the analysis, or its followers have to be used instead
 		Statement target = ((Expression) st).getRootStatement();
 		if (getAllExitpoints().contains(target))
 			return exitStates.getState(target);
 
-		return exitStates.lattice.bottom();
+		return lub(followersOf(target), true);
 	}
 
 	/**

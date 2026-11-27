@@ -107,7 +107,11 @@ public abstract class TernaryStatement
 		for (SymbolicExpression left : params[0])
 			for (SymbolicExpression middle : params[1])
 				for (SymbolicExpression right : params[2])
-					result = result.lub(fwdTernarySemantics(interprocedural, state, left, middle, right, expressions));
+					result = result.lub(singleValues(params)
+							? fwdTernarySemantics(interprocedural, state, left, middle, right, expressions)
+							: ofCombination(interprocedural, state,
+									s -> fwdTernarySemantics(interprocedural, s, left, middle, right, expressions),
+									left, middle, right));
 
 		return result;
 	}
@@ -213,5 +217,4 @@ public abstract class TernaryStatement
 			throws SemanticException {
 		return fwdTernarySemantics(interprocedural, state, left, middle, right, expressions);
 	}
-
 }

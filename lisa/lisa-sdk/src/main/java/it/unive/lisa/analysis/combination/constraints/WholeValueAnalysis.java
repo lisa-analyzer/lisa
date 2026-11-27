@@ -1,5 +1,6 @@
 package it.unive.lisa.analysis.combination.constraints;
 
+import it.unive.lisa.analysis.AnalysisState.Error;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticOracle;
 import it.unive.lisa.analysis.combination.constraints.events.WholeValueConstraintsEnd;
@@ -9,11 +10,14 @@ import it.unive.lisa.analysis.value.ValueLattice;
 import it.unive.lisa.events.EventQueue;
 import it.unive.lisa.lattices.Satisfiability;
 import it.unive.lisa.program.cfg.ProgramPoint;
+import it.unive.lisa.program.cfg.protection.ProtectedBlock;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * The constraint-based whole-value analysis among an arbitrary number of client
@@ -230,6 +234,57 @@ public class WholeValueAnalysis
 	}
 
 	@Override
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public Pair<WholeValue, WholeValue> onExecutionToError(
+			WholeValue remaining,
+			WholeValue moved,
+			Error error,
+			ProgramPoint pp)
+			throws SemanticException {
+		ValueLattice<?>[] left = new ValueLattice<?>[participants.length];
+		ValueLattice<?>[] right = new ValueLattice<?>[participants.length];
+		for (int i = 0; i < participants.length; i++) {
+			Pair<ValueLattice<?>, ValueLattice<?>> res = ((ValueDomain) participants[i])
+					.onExecutionToError(remaining.get(i), moved.get(i), error, pp);
+			left[i] = res.getLeft();
+			right[i] = res.getRight();
+		}
+		return Pair.of(new WholeValue(left), new WholeValue(right));
+	}
+
+	@Override
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public WholeValue onErrorToExecution(
+			WholeValue state,
+			ProtectedBlock protectedBlock,
+			ProgramPoint pp)
+			throws SemanticException {
+		ValueLattice<?>[] lattices = new ValueLattice<?>[participants.length];
+		for (int i = 0; i < participants.length; i++)
+			lattices[i] = (ValueLattice<?>) ((ValueDomain) participants[i]).onErrorToExecution(state.get(i),
+					protectedBlock, pp);
+		return new WholeValue(lattices);
+	}
+
+	@Override
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public Pair<WholeValue, WholeValue> onExecutionToHalting(
+			WholeValue remaining,
+			WholeValue moved,
+			ProgramPoint pp)
+			throws SemanticException {
+		ValueLattice<?>[] left = new ValueLattice<?>[participants.length];
+		ValueLattice<?>[] right = new ValueLattice<?>[participants.length];
+		for (int i = 0; i < participants.length; i++) {
+			Pair<ValueLattice<?>, ValueLattice<?>> res = ((ValueDomain) participants[i])
+					.onExecutionToHalting(remaining.get(i), moved.get(i), pp);
+			left[i] = res.getLeft();
+			right[i] = res.getRight();
+		}
+		return Pair.of(new WholeValue(left), new WholeValue(right));
+	}
+
+	@Override
 	public WholeValue makeLattice() {
 		ValueLattice<?>[] lattices = new ValueLattice<?>[participants.length];
 		for (int i = 0; i < participants.length; i++)
@@ -257,6 +312,11 @@ public class WholeValueAnalysis
 			ProgramPoint pp,
 			SemanticOracle oracle)
 			throws SemanticException {
+		if (state.isBottom())
+			return null;
+		if (state.isTop())
+			return Collections.emptySet();
+
 		EventQueue events = oracle.getEventQueue();
 		if (events != null)
 			events.post(new WholeValueConstraintsStart(state, e));

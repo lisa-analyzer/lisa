@@ -1,0 +1,33 @@
+name: 'Set up z3'
+description: 'Installs a pinned release of the z3 SMT solver and adds it to the PATH, so that tests needing a solver are not skipped'
+
+inputs:
+  version:
+    description: 'z3 release to install'
+    required: false
+    default: '4.16.0'
+  glibc:
+    description: 'glibc version of the release build'
+    required: false
+    default: '2.39'
+  sha256:
+    description: 'SHA-256 of the release archive (must match version and glibc)'
+    required: false
+    default: '7288c49a5bd6dbafd7b0b0d1f65956b91672da24b08f09242919af159be3418e'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: 'Download and install z3'
+      shell: bash
+      run: |
+        set -euo pipefail
+        name="z3-${{ inputs.version }}-x64-glibc-${{ inputs.glibc }}"
+        curl --silent --show-error --fail -L -o "$RUNNER_TEMP/z3.zip" \
+          "https://github.com/Z3Prover/z3/releases/download/z3-${{ inputs.version }}/$name.zip"
+        echo "${{ inputs.sha256 }}  $RUNNER_TEMP/z3.zip" | sha256sum --check
+        unzip -q "$RUNNER_TEMP/z3.zip" -d "$RUNNER_TEMP"
+        echo "$RUNNER_TEMP/$name/bin" >> "$GITHUB_PATH"
+    - name: 'Check z3'
+      shell: bash
+      run: z3 --version

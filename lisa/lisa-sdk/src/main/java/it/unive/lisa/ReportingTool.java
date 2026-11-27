@@ -191,6 +191,31 @@ public class ReportingTool {
 	}
 
 	/**
+	 * Reports the given warning.
+	 *
+	 * @param warning the warning to report
+	 */
+	protected void addWarning(
+			Message warning) {
+		warnings.add(warning);
+	}
+
+	/**
+	 * Replaces a warning with another one (e.g., the result of its
+	 * verification). This is meant to be used by LiSA when verifying warnings
+	 * after the semantic checks have been executed.
+	 *
+	 * @param original    the warning to replace
+	 * @param replacement the new warning
+	 */
+	public void replaceWarning(
+			Message original,
+			Message replacement) {
+		warnings.remove(original);
+		warnings.add(replacement);
+	}
+
+	/**
 	 * Returns an <b>unmodifiable</b> view of the warnings that have been
 	 * generated up to now using this tool.
 	 * 
@@ -293,6 +318,16 @@ public class ReportingTool {
 			Expression expression,
 			String message) {
 		notices.add(new ExpressionMessage(expression, message));
+	}
+
+	/**
+	 * Reports the given notice.
+	 *
+	 * @param notice the notice to report
+	 */
+	protected void addNotice(
+			Message notice) {
+		notices.add(notice);
 	}
 
 	/**

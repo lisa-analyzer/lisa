@@ -7,7 +7,7 @@ import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.lattices.FunctionalLattice;
 import it.unive.lisa.program.cfg.CFG;
-import java.util.Map;
+import it.unive.lisa.util.datastructures.trie.PatriciaTrieMap;
 import org.apache.commons.lang3.tuple.Pair;
 
 /**
@@ -38,7 +38,7 @@ public class FixpointResults<
 
 	private FixpointResults(
 			CFGResults<A> lattice,
-			Map<CFG, CFGResults<A>> function) {
+			PatriciaTrieMap<CFG, CFGResults<A>> function) {
 		super(lattice, function);
 	}
 
@@ -63,7 +63,11 @@ public class FixpointResults<
 			throws SemanticException {
 		if (function == null)
 			function = mkNewFunction(null, false);
-		CFGResults<A> res = function.computeIfAbsent(cfg, c -> new CFGResults<>(result.top()));
+		CFGResults<A> res = function.get(cfg);
+		if (res == null) {
+			res = new CFGResults<>(result.top());
+			function = function.put(cfg, res);
+		}
 		return res.putResult(token, result);
 	}
 
@@ -113,7 +117,7 @@ public class FixpointResults<
 			CFG cfg) {
 		if (function == null)
 			return;
-		function.remove(cfg);
+		function = function.remove(cfg);
 		if (function.isEmpty())
 			function = null;
 	}
@@ -121,7 +125,7 @@ public class FixpointResults<
 	@Override
 	public FixpointResults<A> mk(
 			CFGResults<A> lattice,
-			Map<CFG, CFGResults<A>> function) {
+			PatriciaTrieMap<CFG, CFGResults<A>> function) {
 		return new FixpointResults<>(lattice, function);
 	}
 

@@ -13,7 +13,19 @@ import java.util.Set;
  * Given two expressions, with the second one evaluating to a type token, a
  * {@link BinaryExpression} using this operator checks if the runtime types of
  * the value the first argument evaluates to are subtypes of the ones contained
- * in the token.<br>
+ * in the token (that is, if the value is an instance of one of them, see
+ * {@link it.unive.lisa.type.Type#allInstances(it.unive.lisa.type.TypeSystem)}).
+ * This is not whether the value can be cast to one of them (see
+ * {@link TypeCast}): for instance, an integer value is not an instance of a
+ * floating point type, even though it can be cast to it.<br>
+ * <br>
+ * A token with several types denotes all of them: the value is an instance of
+ * the token if it is an instance of any of its types (as for a tuple of classes
+ * passed to Python's {@code isinstance}). Instead, when the second argument
+ * might evaluate to several tokens (e.g., its runtime types contain more than
+ * one {@link TypeTokenType}), these are alternatives: each execution evaluates
+ * it to one of them, and the check surely holds only if it holds for every
+ * token.<br>
  * <br>
  * First argument expression type: any {@link Type}<br>
  * Second argument expression type: {@link TypeTokenType}<br>

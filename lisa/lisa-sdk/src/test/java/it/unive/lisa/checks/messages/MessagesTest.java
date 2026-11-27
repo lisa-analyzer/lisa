@@ -153,6 +153,63 @@ public class MessagesTest {
 	}
 
 	@Test
+	public void testTagsAndTaggedMessage() {
+		assertEquals("GENERIC", new Message("foo").getTag());
+		assertEquals("UNIT", new UnitMessage(unit1, "foo").getTag());
+		assertEquals("GLOBAL", new GlobalMessage(unit1, global1, "foo").getTag());
+		assertEquals("CFG", new CFGMessage(cfg1, "foo").getTag());
+		assertEquals("DESCRIPTOR", new CFGDescriptorMessage(descriptor1, "foo").getTag());
+		assertEquals("STATEMENT", new StatementMessage(st1, "foo").getTag());
+		assertEquals("EXPRESSION", new ExpressionMessage(e1, "foo").getTag());
+
+		Message m = new Message("bar");
+		assertEquals("[GENERIC] bar", m.getTaggedMessage());
+		assertEquals(m.getTaggedMessage(), m.toString());
+		assertEquals("bar", m.getMessage());
+	}
+
+	@Test
+	public void testEqualsAndHashCodeRequireEveryComponentToMatch() {
+		UnitMessage u1 = new UnitMessage(unit1, "foo");
+		UnitMessage u2 = new UnitMessage(unit1, "foo");
+		assertEquals(u1, u2);
+		assertEquals(u1.hashCode(), u2.hashCode());
+		assertNotEquals(u1, new UnitMessage(unit1, "bar"));
+		assertNotEquals(u1, new UnitMessage(unit2, "foo"));
+		assertNotEquals(u1, new Message("foo"));
+		assertNotEquals(u1, null);
+
+		GlobalMessage g1 = new GlobalMessage(unit1, global1, "foo");
+		GlobalMessage g2 = new GlobalMessage(unit1, global1, "foo");
+		assertEquals(g1, g2);
+		assertEquals(g1.hashCode(), g2.hashCode());
+		assertNotEquals(g1, new GlobalMessage(unit1, global2, "foo"));
+	}
+
+	@Test
+	public void testGetExpressionCastsTheUnderlyingStatement() {
+		ExpressionMessage em = new ExpressionMessage(e1, "foo");
+		assertEquals(e1, em.getExpression());
+		assertEquals(e1, em.getStatement());
+	}
+
+	@Test
+	public void testGetLocationWithBracketsWrapsTheLocation() {
+		UnitMessage u = new UnitMessage(unit1, "foo");
+		assertEquals("[" + u.getLocation() + "]", u.getLocationWithBrackets());
+	}
+
+	@Test
+	public void testGettersReturnConstructorArguments() {
+		assertEquals(unit1, new UnitMessage(unit1, "foo").getUnit());
+		assertEquals(unit1, new GlobalMessage(unit1, global1, "foo").getUnit());
+		assertEquals(global1, new GlobalMessage(unit1, global1, "foo").getGlobal());
+		assertEquals(cfg1, new CFGMessage(cfg1, "foo").getCFG());
+		assertEquals(descriptor1, new CFGDescriptorMessage(descriptor1, "foo").getDescriptor());
+		assertEquals(st1, new StatementMessage(st1, "foo").getStatement());
+	}
+
+	@Test
 	public void testDifferentType() {
 		List<Message> msgs = List.of(
 				new Message("bar"),

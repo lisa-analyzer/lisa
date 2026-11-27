@@ -148,32 +148,29 @@ public interface NumericType
 	 * Computes the set of {@link Type}s representing the common ones among the
 	 * given sets. The result is computed as follows:
 	 * <ul>
-	 * <li>if both arguments have no numeric types among their possible types,
-	 * then an empty set is returned</li>
-	 * <li>for each pair {@code <t1, t2>} where {@code t1} is a type of
-	 * {@code left} and {@code t2} is a type of {@code right}:
+	 * <li>{@code left} and {@code right} are first filtered, keeping only their
+	 * numeric and {@link Untyped} types</li>
+	 * <li>if, after filtering, neither side has any numeric type left (that is,
+	 * each side is either empty or made exclusively of {@link Untyped}), an
+	 * empty set is returned</li>
+	 * <li>otherwise, for each pair {@code <t1, t2>} where {@code t1} is a
+	 * filtered type of {@code left} and {@code t2} is a filtered type of
+	 * {@code right}:
 	 * <ul>
-	 * <li>if {@code t1} is {@link Untyped}, then {@link Untyped#INSTANCE} is
-	 * added to the set</li>
-	 * <li>if {@code t2} is {@link Untyped}, then {@link Untyped#INSTANCE} is
-	 * added to the set</li>
-	 * <li>if {@code t1} can be assigned to {@code t2}, then {@code t2} is added
-	 * to the set</li>
-	 * <li>if {@code t2} can be assigned to {@code t1}, then {@code t1} is added
-	 * to the set</li>
-	 * <li>if none of the above conditions hold (that is usually a symptom of a
-	 * type error), a singleton set containing {@link Untyped#INSTANCE} is
-	 * immediately returned</li>
+	 * <li>if both {@code t1} and {@code t2} are {@link Untyped}, then
+	 * {@code t1} is added to the result</li>
+	 * <li>if only {@code t1} is {@link Untyped}, then {@code t2} is added to
+	 * the result</li>
+	 * <li>if only {@code t2} is {@link Untyped}, then {@code t1} is added to
+	 * the result</li>
+	 * <li>otherwise, {@code t1.commonSupertype(t2)} is added to the result</li>
 	 * </ul>
 	 * </li>
-	 * <li>if the set of possible types is not empty, it is returned as-is,
-	 * otherwise a singleton set containing {@link Untyped#INSTANCE} is
-	 * returned</li>
 	 * </ul>
-	 * 
+	 *
 	 * @param left  the left-hand side of the operation
 	 * @param right the right-hand side of the operation
-	 * 
+	 *
 	 * @return the set of possible runtime types
 	 */
 	public static Set<Type> commonNumericalType(

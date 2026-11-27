@@ -701,6 +701,7 @@ class IMPCodeMemberVisitor
 		case "float":
 			return Float32Type.INSTANCE;
 		case "bool":
+		case "boolean":
 			return BoolType.INSTANCE;
 		case "string":
 			return StringType.INSTANCE;

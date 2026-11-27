@@ -6,6 +6,7 @@ import it.unive.lisa.analysis.Analysis;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.interprocedural.ScopeId;
 import it.unive.lisa.lattices.ExpressionSet;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.program.cfg.statement.call.CFGCall;
@@ -32,6 +33,7 @@ public class DefaultScopingStrategy
 			ScopeToken scope,
 			AnalysisState<A> state,
 			Analysis<A, D> analysis,
+			ScopeId<?> context,
 			ExpressionSet[] actuals)
 			throws SemanticException {
 		ExpressionSet[] locals = new ExpressionSet[actuals.length];
@@ -46,7 +48,8 @@ public class DefaultScopingStrategy
 			CFGCall call,
 			ScopeToken scope,
 			AnalysisState<A> state,
-			Analysis<A, D> analysis)
+			Analysis<A, D> analysis,
+			ScopeId<?> context)
 			throws SemanticException {
 		if (call.returnsVoid(state))
 			return state.popScope(scope, call);
@@ -56,12 +59,12 @@ public class DefaultScopingStrategy
 		if (state.getExecutionExpressions().isEmpty()) {
 			// a return value is expected, but nothing is left on the stack
 			PushInv inv = new PushInv(meta.getStaticType(), call.getLocation());
-			return analysis.assign(state, meta, inv, call).popScope(scope, call);
+			return analysis.assign(state, meta, inv, context, call).popScope(scope, call);
 		}
 
 		AnalysisState<A> tmp = state.bottomExecution();
 		for (SymbolicExpression ret : state.getExecutionExpressions())
-			tmp = tmp.lub(analysis.assign(state, meta, ret, call));
+			tmp = tmp.lub(analysis.assign(state, meta, ret, context, call));
 
 		return tmp.popScope(scope, call);
 	}

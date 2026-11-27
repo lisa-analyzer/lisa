@@ -1,5 +1,6 @@
 package it.unive.lisa.outputs.messages;
 
+import it.unive.lisa.interprocedural.ScopeId;
 import it.unive.lisa.program.cfg.CFG;
 import org.apache.commons.lang3.StringUtils;
 
@@ -26,7 +27,22 @@ public class CFGMessage
 	public CFGMessage(
 			CFG cfg,
 			String message) {
-		super(cfg.getDescriptor().getLocation(), message);
+		this(cfg, message, null);
+	}
+
+	/**
+	 * Builds the message.
+	 *
+	 * @param cfg     the cfg where this message was reported on
+	 * @param message the message of this message
+	 * @param context the context where this message was reported on (can be
+	 *                    {@code null})
+	 */
+	public CFGMessage(
+			CFG cfg,
+			String message,
+			ScopeId<?> context) {
+		super(cfg.getDescriptor().getLocation(), message, context, null, null);
 		this.cfg = cfg;
 	}
 
@@ -83,6 +99,11 @@ public class CFGMessage
 	}
 
 	@Override
+	public String getCFGSignature() {
+		return cfg.getDescriptor().getFullSignatureWithParNames();
+	}
+
+	@Override
 	public String getTag() {
 		return "CFG";
 	}
@@ -91,7 +112,7 @@ public class CFGMessage
 	public String toString() {
 		return getLocationWithBrackets()
 				+ " on '"
-				+ cfg.getDescriptor().getFullSignatureWithParNames()
+				+ getCFGSignature()
 				+ "': "
 				+ getTaggedMessage();
 	}

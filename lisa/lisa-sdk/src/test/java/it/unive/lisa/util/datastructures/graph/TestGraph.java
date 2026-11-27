@@ -19,7 +19,7 @@ public class TestGraph
 		public <V> boolean accept(
 				GraphVisitor<TestGraph, TestNode, TestEdge, V> visitor,
 				V tool) {
-			return false;
+			return visitor.visit(tool, null, this);
 		}
 
 		@Override
@@ -79,7 +79,7 @@ public class TestGraph
 		public <V> boolean accept(
 				GraphVisitor<TestGraph, TestNode, TestEdge, V> visitor,
 				V tool) {
-			return false;
+			return visitor.visit(tool, null, this);
 		}
 
 		@Override

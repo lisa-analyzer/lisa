@@ -14,7 +14,7 @@ public class GlobalMessage
 		MessageWithLocation {
 
 	/**
-	 * The nit containing the global where this message was reported on
+	 * The unit containing the global where this message was reported on
 	 */
 	private final Unit unit;
 
@@ -42,8 +42,8 @@ public class GlobalMessage
 
 	/**
 	 * Yields the unit containing the global where this message was reported on.
-	 * 
-	 * @return the global
+	 *
+	 * @return the unit
 	 */
 	public Unit getUnit() {
 		return unit;
@@ -110,6 +110,11 @@ public class GlobalMessage
 	}
 
 	@Override
+	public String getTargetText() {
+		return unit.getName() + "::" + global.getName();
+	}
+
+	@Override
 	public String getTag() {
 		return "GLOBAL";
 	}
@@ -118,9 +123,7 @@ public class GlobalMessage
 	public String toString() {
 		return getLocationWithBrackets()
 				+ " on '"
-				+ unit.getName()
-				+ "::"
-				+ global.getName()
+				+ getTargetText()
 				+ "': "
 				+ getTaggedMessage();
 	}

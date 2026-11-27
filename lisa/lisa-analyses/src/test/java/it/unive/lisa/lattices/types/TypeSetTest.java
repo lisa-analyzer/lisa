@@ -653,7 +653,8 @@ public class TypeSetTest {
 		satisfies(ComparisonEq.INSTANCE, left, left, Satisfiability.SATISFIED);
 		satisfies(ComparisonNe.INSTANCE, left, left, Satisfiability.NOT_SATISFIED);
 		satisfies(TypeCheck.INSTANCE, integer, left, Satisfiability.SATISFIED);
-		satisfies(TypeCheck.INSTANCE, floating, left, Satisfiability.SATISFIED);
+		// a float is not an instance of int, even though it can be cast to it
+		satisfies(TypeCheck.INSTANCE, floating, left, Satisfiability.NOT_SATISFIED);
 		satisfies(TypeCheck.INSTANCE, string, left, Satisfiability.NOT_SATISFIED);
 		satisfies(TypeCheck.INSTANCE, bool, left, Satisfiability.NOT_SATISFIED);
 		satisfies(TypeCheck.INSTANCE, bool_or_string, left, Satisfiability.NOT_SATISFIED);
@@ -670,9 +671,9 @@ public class TypeSetTest {
 		right = new TypeSet(types, new TypeTokenType(Set.of(Int32Type.INSTANCE, StringType.INSTANCE)));
 		satisfies(ComparisonEq.INSTANCE, left, right, Satisfiability.UNKNOWN);
 		satisfies(ComparisonNe.INSTANCE, left, right, Satisfiability.UNKNOWN);
-		satisfies(TypeCheck.INSTANCE, integer, right, Satisfiability.UNKNOWN);
-		satisfies(TypeCheck.INSTANCE, floating, right, Satisfiability.UNKNOWN);
-		satisfies(TypeCheck.INSTANCE, string, right, Satisfiability.UNKNOWN);
+		satisfies(TypeCheck.INSTANCE, integer, right, Satisfiability.SATISFIED);
+		satisfies(TypeCheck.INSTANCE, floating, right, Satisfiability.NOT_SATISFIED);
+		satisfies(TypeCheck.INSTANCE, string, right, Satisfiability.SATISFIED);
 		satisfies(TypeCheck.INSTANCE, bool, right, Satisfiability.NOT_SATISFIED);
 		satisfies(TypeCheck.INSTANCE, bool_or_string, right, Satisfiability.UNKNOWN);
 
@@ -683,8 +684,10 @@ public class TypeSetTest {
 						new TypeTokenType(Collections.singleton(StringType.INSTANCE))));
 		satisfies(ComparisonEq.INSTANCE, left, right, Satisfiability.UNKNOWN);
 		satisfies(ComparisonNe.INSTANCE, left, right, Satisfiability.UNKNOWN);
+		// several tokens are alternatives: an int is an instance under the
+		// first, not under the second
 		satisfies(TypeCheck.INSTANCE, integer, right, Satisfiability.UNKNOWN);
-		satisfies(TypeCheck.INSTANCE, floating, right, Satisfiability.UNKNOWN);
+		satisfies(TypeCheck.INSTANCE, floating, right, Satisfiability.NOT_SATISFIED);
 		satisfies(TypeCheck.INSTANCE, string, right, Satisfiability.UNKNOWN);
 		satisfies(TypeCheck.INSTANCE, bool, right, Satisfiability.NOT_SATISFIED);
 		satisfies(TypeCheck.INSTANCE, bool_or_string, right, Satisfiability.UNKNOWN);
@@ -693,6 +696,75 @@ public class TypeSetTest {
 	private final Variable variable = new Variable(Int32Type.INSTANCE, "x", fake.getLocation());
 
 	private final TypeEnvironment<TypeSet> env = new TypeEnvironment<>(string).putState(variable, bool_or_string);
+
+	/**
+	 * Assuming that a value is not an instance of a type keeps its other
+	 * runtime types.
+	 */
+	@Test
+	public void testAssumeNegatedTypeCheck()
+			throws SemanticException {
+		BinaryExpression isBool = new BinaryExpression(BoolType.INSTANCE, variable,
+				new Constant(new TypeTokenType(Collections.singleton(BoolType.INSTANCE)), BoolType.INSTANCE,
+						fake.getLocation()),
+				TypeCheck.INSTANCE, fake.getLocation());
+		TypeEnvironment<TypeSet> act = domain.assumeUnaryExpression(env,
+				new UnaryExpression(BoolType.INSTANCE, isBool, LogicalNegation.INSTANCE, fake.getLocation()), fake,
+				fake, oracle);
+		assertEquals(string, act.getState(variable), "Assume(!(x is bool)) returned wrong result");
+	}
+
+	/**
+	 * A value whose types include {@link Untyped} (whose runtime type is not
+	 * known) might be an instance of any token: the check is neither surely
+	 * satisfied nor surely not satisfied.
+	 */
+	@Test
+	public void testTypeCheckWithUntypedValues()
+			throws SemanticException {
+		TypeSet intToken = new TypeSet(types,
+				Collections.singleton(new TypeTokenType(Collections.singleton(Int32Type.INSTANCE))));
+		TypeSet untyped = new TypeSet(types, Collections.singleton(Untyped.INSTANCE));
+		TypeSet untypedOrInt = new TypeSet(types, Set.of(Untyped.INSTANCE, Int32Type.INSTANCE));
+		TypeSet untypedOrString = new TypeSet(types, Set.of(Untyped.INSTANCE, StringType.INSTANCE));
+		satisfies(TypeCheck.INSTANCE, untyped, intToken, Satisfiability.UNKNOWN);
+		satisfies(TypeCheck.INSTANCE, untypedOrInt, intToken, Satisfiability.UNKNOWN);
+		satisfies(TypeCheck.INSTANCE, untypedOrString, intToken, Satisfiability.UNKNOWN);
+	}
+
+	/**
+	 * Assuming that a value is not an instance of the types of a token removes
+	 * all of them (a token denotes all its types), while with several tokens
+	 * (alternatives) only the types that are instances under every token are
+	 * removed.
+	 */
+	@Test
+	public void testAssumeNegatedTypeCheckWithSeveralTokens()
+			throws SemanticException {
+		// !(x instanceof (bool, str)), with x a bool or a str
+		BinaryExpression isBoolOrString = new BinaryExpression(BoolType.INSTANCE, variable,
+				new Constant(new TypeTokenType(Set.of(BoolType.INSTANCE, StringType.INSTANCE)), BoolType.INSTANCE,
+						fake.getLocation()),
+				TypeCheck.INSTANCE, fake.getLocation());
+		TypeEnvironment<TypeSet> act = domain.assumeUnaryExpression(env,
+				new UnaryExpression(BoolType.INSTANCE, isBoolOrString, LogicalNegation.INSTANCE, fake.getLocation()),
+				fake, fake, oracle);
+		assertTrue(act.isBottom(), "Assume(!(x is (bool, str))) returned " + act.getState(variable));
+
+		// !(x instanceof t), with t a bool token in some executions and a str
+		// token in others: no type surely fails the check
+		Variable token = new Variable(Untyped.INSTANCE, "t", fake.getLocation());
+		TypeEnvironment<TypeSet> withToken = env.putState(token, new TypeSet(types,
+				Set.of(new TypeTokenType(Collections.singleton(BoolType.INSTANCE)),
+						new TypeTokenType(Collections.singleton(StringType.INSTANCE)))));
+		act = domain.assumeUnaryExpression(withToken,
+				new UnaryExpression(BoolType.INSTANCE,
+						new BinaryExpression(BoolType.INSTANCE, variable, token, TypeCheck.INSTANCE,
+								fake.getLocation()),
+						LogicalNegation.INSTANCE, fake.getLocation()),
+				fake, fake, oracle);
+		assertEquals(bool_or_string, act.getState(variable), "Assume(!(x is t)) returned wrong result");
+	}
 
 	private void assume(
 			BinaryOperator op,

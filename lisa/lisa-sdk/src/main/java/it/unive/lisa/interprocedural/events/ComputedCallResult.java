@@ -82,7 +82,7 @@ public class ComputedCallResult<A extends AbstractLattice<A>>
 
 	@Override
 	public ProgramPoint getProgramPoint() {
-		return call.getSource() != null ? call.getSource() : call;
+		return call.getOriginal();
 	}
 
 	/**

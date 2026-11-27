@@ -136,7 +136,7 @@ public class Annotation
 
 	@Override
 	public String toString() {
-		if (annotationMembers == null)
+		if (annotationMembers == null || annotationMembers.isEmpty())
 			return annotationName;
 
 		return annotationName + annotationMembers.toString();
@@ -156,11 +156,14 @@ public class Annotation
 				o.annotationMembers);
 		builder.compute(AnnotationMember::compareTo);
 
-		if (builder.sameContent())
-			// only properties left to check
-			return 0;
+		if (!builder.sameContent())
+			return builder.getOnlyFirst().iterator().next().compareTo(builder.getOnlySecond().iterator().next());
 
-		return builder.getOnlyFirst().iterator().next().compareTo(builder.getOnlySecond().iterator().next());
+		// name and members are the same: fall back to inherited, so that
+		// this stays consistent with equals() - Annotations relies on this
+		// class' natural ordering (via a TreeSet) to detect duplicates, and
+		// two annotations differing only in inherited are not duplicates
+		return Boolean.compare(inherited, o.inherited);
 	}
 
 }

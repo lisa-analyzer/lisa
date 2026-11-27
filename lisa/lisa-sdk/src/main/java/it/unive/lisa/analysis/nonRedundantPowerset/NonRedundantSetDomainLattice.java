@@ -6,8 +6,8 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.value.ValueLattice;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.Identifier;
+import java.util.HashSet;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.function.Predicate;
 
 /**
@@ -44,7 +44,7 @@ public abstract class NonRedundantSetDomainLattice<S extends NonRedundantSetDoma
 			Identifier id,
 			ProgramPoint pp)
 			throws SemanticException {
-		Set<L> newElements = new TreeSet<>();
+		Set<L> newElements = new HashSet<>();
 		for (L elem : this.elements)
 			newElements.add(elem.forgetIdentifier(id, pp));
 		return mk(newElements).removeRedundancy();
@@ -55,7 +55,7 @@ public abstract class NonRedundantSetDomainLattice<S extends NonRedundantSetDoma
 			Iterable<Identifier> ids,
 			ProgramPoint pp)
 			throws SemanticException {
-		Set<L> newElements = new TreeSet<>();
+		Set<L> newElements = new HashSet<>();
 		for (L elem : this.elements)
 			newElements.add(elem.forgetIdentifiers(ids, pp));
 		return mk(newElements).removeRedundancy();
@@ -66,7 +66,7 @@ public abstract class NonRedundantSetDomainLattice<S extends NonRedundantSetDoma
 			Predicate<Identifier> test,
 			ProgramPoint pp)
 			throws SemanticException {
-		Set<L> newElements = new TreeSet<>();
+		Set<L> newElements = new HashSet<>();
 		for (L elem : this.elements)
 			newElements.add(elem.forgetIdentifiersIf(test, pp));
 		return mk(newElements).removeRedundancy();
@@ -77,7 +77,7 @@ public abstract class NonRedundantSetDomainLattice<S extends NonRedundantSetDoma
 			ScopeToken token,
 			ProgramPoint pp)
 			throws SemanticException {
-		Set<L> newElements = new TreeSet<>();
+		Set<L> newElements = new HashSet<>();
 		for (L elem : this.elements)
 			newElements.add(elem.pushScope(token, pp));
 		return mk(newElements).removeRedundancy();
@@ -88,7 +88,7 @@ public abstract class NonRedundantSetDomainLattice<S extends NonRedundantSetDoma
 			ScopeToken token,
 			ProgramPoint pp)
 			throws SemanticException {
-		Set<L> newElements = new TreeSet<>();
+		Set<L> newElements = new HashSet<>();
 		for (L elem : this.elements)
 			newElements.add(elem.popScope(token, pp));
 		return mk(newElements).removeRedundancy();

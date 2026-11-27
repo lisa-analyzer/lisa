@@ -102,6 +102,41 @@ public class EventQueueTest {
 		queue.close();
 	}
 
+	// regression test: the async dispatcher thread used to be started
+	// unconditionally, even with zero asynchronous listeners, wasting a
+	// thread permanently blocked on the (never fed) async queue
+	@Test
+	public void noDispatcherThreadIsStartedWithoutAsyncListeners() throws Exception {
+		EventQueue queue = new EventQueue(
+				List.of(new RecordingListener()),
+				List.of(),
+				null);
+		try {
+			java.lang.reflect.Field f = EventQueue.class.getDeclaredField("asyncThread");
+			f.setAccessible(true);
+			Thread asyncThread = (Thread) f.get(queue);
+			assertTrue(!asyncThread.isAlive(), "the async dispatcher thread should not have been started");
+		} finally {
+			queue.close();
+		}
+	}
+
+	@Test
+	public void aDispatcherThreadIsStartedWithAsyncListeners() throws Exception {
+		EventQueue queue = new EventQueue(
+				List.of(),
+				List.of(new RecordingListener()),
+				null);
+		try {
+			java.lang.reflect.Field f = EventQueue.class.getDeclaredField("asyncThread");
+			f.setAccessible(true);
+			Thread asyncThread = (Thread) f.get(queue);
+			assertTrue(asyncThread.isAlive(), "the async dispatcher thread should have been started");
+		} finally {
+			queue.close();
+		}
+	}
+
 	@Test
 	public void closeWaitsForAsyncProcessing() throws Exception {
 		RecordingListener listener = new RecordingListener();

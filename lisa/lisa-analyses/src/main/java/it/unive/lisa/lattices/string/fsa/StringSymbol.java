@@ -3,9 +3,12 @@ package it.unive.lisa.lattices.string.fsa;
 import it.unive.lisa.util.datastructures.automaton.TransitionSymbol;
 
 /**
- * A {@link TransitionSymbol} for single characters, represented as strings for
- * simple modeling of epsilon.
- * 
+ * A {@link TransitionSymbol} labeling the transitions of a
+ * {@link SimpleAutomaton}. Symbols normally represent a single character, but
+ * are internally backed by a string (rather than a {@code char}), which allows
+ * modeling epsilon ({@link #EPSILON}) as the empty string and merging adjacent
+ * symbols through {@link #concat(StringSymbol)} in a uniform way.
+ *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public class StringSymbol

@@ -12,7 +12,8 @@ import java.util.Objects;
 
 /**
  * A global variable, scoped by its container. Instances of this class can refer
- * both to instance variables or static global variables.
+ * both to instance variables or static global variables. A global can be final,
+ * that is, its value cannot change after it has been initialized.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
@@ -37,6 +38,8 @@ public class Global
 	private final boolean isInstance;
 
 	private final Unit container;
+
+	private final boolean isFinal;
 
 	/**
 	 * Builds an untyped global variable, identified by its name. The type of
@@ -96,6 +99,32 @@ public class Global
 			boolean isInstance,
 			Type staticType,
 			Annotations annotations) {
+		this(location, container, name, isInstance, staticType, annotations, false);
+	}
+
+	/**
+	 * Builds the global, identified by its name and its type, happening at the
+	 * given location in the program.
+	 * 
+	 * @param location    the location where this global is defined within the
+	 *                        program
+	 * @param container   the {@link Unit} containing this global
+	 * @param name        the name of this global
+	 * @param isInstance  whether or not this is an instance global
+	 * @param staticType  the type of this global. If unknown, use
+	 *                        {@link Untyped#INSTANCE}
+	 * @param annotations the annotations of this global variable
+	 * @param isFinal     whether or not this global is final, that is, its
+	 *                        value cannot change after it has been initialized
+	 */
+	public Global(
+			CodeLocation location,
+			Unit container,
+			String name,
+			boolean isInstance,
+			Type staticType,
+			Annotations annotations,
+			boolean isFinal) {
 		Objects.requireNonNull(name, "The name of a global cannot be null");
 		Objects.requireNonNull(staticType, "The type of a global cannot be null");
 		Objects.requireNonNull(location, "The location of a global cannot be null");
@@ -106,6 +135,7 @@ public class Global
 		this.annotations = annotations;
 		this.container = container;
 		this.isInstance = isInstance;
+		this.isFinal = isFinal;
 	}
 
 	/**
@@ -144,6 +174,16 @@ public class Global
 		return isInstance;
 	}
 
+	/**
+	 * Yields {@code true} if and only if this global is final, that is, its
+	 * value cannot change after it has been initialized.
+	 * 
+	 * @return {@code true} only if that condition holds
+	 */
+	public boolean isFinal() {
+		return isFinal;
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -151,6 +191,7 @@ public class Global
 		result = prime * result + ((annotations == null) ? 0 : annotations.hashCode());
 		result = prime * result + ((container == null) ? 0 : container.hashCode());
 		result = prime * result + (isInstance ? 1231 : 1237);
+		result = prime * result + (isFinal ? 1231 : 1237);
 		result = prime * result + ((location == null) ? 0 : location.hashCode());
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
 		result = prime * result + ((staticType == null) ? 0 : staticType.hashCode());
@@ -178,6 +219,8 @@ public class Global
 		} else if (!container.equals(other.container))
 			return false;
 		if (isInstance != other.isInstance)
+			return false;
+		if (isFinal != other.isFinal)
 			return false;
 		if (location == null) {
 			if (other.location != null)

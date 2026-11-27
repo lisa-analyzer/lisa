@@ -9,9 +9,9 @@ Program-wide fixpoint
       Semantics of a = new A()
         Semantics of new A()
           Analysis: Small step semantics of new A
-          Analysis: Small step semantics of $rec@'imp-testcases/visualization/visualization.imp':29:22
-          Analysis: Assignment of $rec@'imp-testcases/visualization/visualization.imp':29:22 to ref$new A
-          Analysis: Assignment of this to ['imp-testcases/visualization/visualization.imp':29:22]:$rec@'imp-testcases/visualization/visualization.imp':29:22
+          Analysis: Small step semantics of $rec@'imp-testcases/visualization/visualization.imp':29:20
+          Analysis: Assignment of $rec@'imp-testcases/visualization/visualization.imp':29:20 to ref$new A
+          Analysis: Assignment of this to ['imp-testcases/visualization/visualization.imp':29:20]:$rec@'imp-testcases/visualization/visualization.imp':29:20
           Fixpoint of untyped A::A(A*)
             Semantics of i1 = 0
               Semantics of 0
@@ -22,12 +22,12 @@ Program-wide fixpoint
             Traversal of [ i1 = 0 ] ---> [ ret ]
             Semantics of ret
               Analysis: Small step semantics of skip
-          Analysis: Transferring throwers from untyped A::A(A*) [at 'imp-testcases/visualization/visualization.imp':2:4] to A::A($rec@'imp-testcases/visualization/visualization.imp':29:22)
-          Analysis: Returning from call [1 targets] A::A($rec@'imp-testcases/visualization/visualization.imp':29:22)
+          Analysis: Transferring throwers from untyped A::A(A*) [at 'imp-testcases/visualization/visualization.imp':2:4] to A::A($rec@'imp-testcases/visualization/visualization.imp':29:20)
+          Analysis: Returning from call [1 targets] A::A($rec@'imp-testcases/visualization/visualization.imp':29:20)
           Analysis: Small step semantics of skip
         Semantics of a
           Analysis: Small step semantics of a
-        Analysis: Assignment of a to $rec@'imp-testcases/visualization/visualization.imp':29:22
+        Analysis: Assignment of a to $rec@'imp-testcases/visualization/visualization.imp':29:20
       Traversal of [ a = new A() ] ---> [ one = getPositive(a, getOne(a)) ]
       Semantics of one = getPositive(a, getOne(a))
         Semantics of getPositive(a, getOne(a))
@@ -36,26 +36,26 @@ Program-wide fixpoint
           Semantics of getOne(a)
             Semantics of a
               Analysis: Small step semantics of a
-            Analysis: Assignment of this to ['imp-testcases/visualization/visualization.imp':30:41]:a
+            Analysis: Assignment of this to ['imp-testcases/visualization/visualization.imp':30:32]:a
             Fixpoint of untyped A::getOne(A*)
               Semantics of rec = new tests()
                 Semantics of new tests()
                   Analysis: Small step semantics of new tests
-                  Analysis: Small step semantics of $rec@'imp-testcases/visualization/visualization.imp':6:25
-                  Analysis: Assignment of $rec@'imp-testcases/visualization/visualization.imp':6:25 to ref$new tests
-                  Analysis: Small step semantics of open_call_ret_value@'imp-testcases/visualization/visualization.imp':6:25
+                  Analysis: Small step semantics of $rec@'imp-testcases/visualization/visualization.imp':6:19
+                  Analysis: Assignment of $rec@'imp-testcases/visualization/visualization.imp':6:19 to ref$new tests
+                  Analysis: Small step semantics of open_call_ret_value@'imp-testcases/visualization/visualization.imp':6:19
                 Semantics of rec
                   Analysis: Small step semantics of rec
-                Analysis: Assignment of rec to $rec@'imp-testcases/visualization/visualization.imp':6:25
+                Analysis: Assignment of rec to $rec@'imp-testcases/visualization/visualization.imp':6:19
               Traversal of [ rec = new tests() ] ---> [ x = open(rec) ]
               Semantics of x = open(rec)
                 Semantics of open(rec)
                   Semantics of rec
                     Analysis: Small step semantics of rec
-                  Analysis: Small step semantics of open_call_ret_value@'imp-testcases/visualization/visualization.imp':7:22
+                  Analysis: Small step semantics of open_call_ret_value@'imp-testcases/visualization/visualization.imp':7:13
                 Semantics of x
                   Analysis: Small step semantics of x
-                Analysis: Assignment of x to open_call_ret_value@'imp-testcases/visualization/visualization.imp':7:22
+                Analysis: Assignment of x to open_call_ret_value@'imp-testcases/visualization/visualization.imp':7:13
               Traversal of [ x = open(rec) ] ---> [ <(x, 10) ]
               Semantics of <(x, 10)
                 Semantics of x
@@ -90,11 +90,11 @@ Program-wide fixpoint
                 Semantics of 1
                   Analysis: Small step semantics of 1
                 Analysis: Assignment of ret_value@getOne to 1
-            Analysis: Assignment of ['imp-testcases/visualization/visualization.imp':30:41]:call_ret_value@'imp-testcases/visualization/visualization.imp':30:41 to ret_value@getOne
+            Analysis: Assignment of ['imp-testcases/visualization/visualization.imp':30:32]:call_ret_value@'imp-testcases/visualization/visualization.imp':30:32 to ret_value@getOne
             Analysis: Transferring throwers from untyped A::getOne(A*) [at 'imp-testcases/visualization/visualization.imp':5:4] to getOne(a)
             Analysis: Returning from call [1 targets] getOne(a)
-          Analysis: Assignment of this to ['imp-testcases/visualization/visualization.imp':30:42]:a
-          Analysis: Assignment of i to ['imp-testcases/visualization/visualization.imp':30:42]:call_ret_value@'imp-testcases/visualization/visualization.imp':30:41
+          Analysis: Assignment of this to ['imp-testcases/visualization/visualization.imp':30:18]:a
+          Analysis: Assignment of i to ['imp-testcases/visualization/visualization.imp':30:18]:call_ret_value@'imp-testcases/visualization/visualization.imp':30:32
           Fixpoint of untyped A::getPositive(A*, untyped)
             Semantics of <=(i, 0)
               Semantics of i
@@ -124,12 +124,12 @@ Program-wide fixpoint
               Semantics of i
                 Analysis: Small step semantics of i
               Analysis: Assignment of ret_value@getPositive to i
-          Analysis: Assignment of ['imp-testcases/visualization/visualization.imp':30:42]:call_ret_value@'imp-testcases/visualization/visualization.imp':30:42 to ret_value@getPositive
+          Analysis: Assignment of ['imp-testcases/visualization/visualization.imp':30:18]:call_ret_value@'imp-testcases/visualization/visualization.imp':30:18 to ret_value@getPositive
           Analysis: Transferring throwers from untyped A::getPositive(A*, untyped) [at 'imp-testcases/visualization/visualization.imp':12:4] to getPositive(a, getOne(a))
           Analysis: Returning from call [1 targets] getPositive(a, getOne(a))
         Semantics of one
           Analysis: Small step semantics of one
-        Analysis: Assignment of one to call_ret_value@'imp-testcases/visualization/visualization.imp':30:42
+        Analysis: Assignment of one to call_ret_value@'imp-testcases/visualization/visualization.imp':30:18
       Traversal of [ one = getPositive(a, getOne(a)) ] ---> [ positive = identity(a, one) ]
       Semantics of positive = identity(a, one)
         Semantics of identity(a, one)
@@ -137,8 +137,8 @@ Program-wide fixpoint
             Analysis: Small step semantics of a
           Semantics of one
             Analysis: Small step semantics of one
-          Analysis: Assignment of this to ['imp-testcases/visualization/visualization.imp':31:37]:a
-          Analysis: Assignment of i to ['imp-testcases/visualization/visualization.imp':31:37]:one
+          Analysis: Assignment of this to ['imp-testcases/visualization/visualization.imp':31:23]:a
+          Analysis: Assignment of i to ['imp-testcases/visualization/visualization.imp':31:23]:one
           Fixpoint of untyped A::identity(A*, untyped)
             Semantics of i3 = 1
               Semantics of 1
@@ -151,12 +151,12 @@ Program-wide fixpoint
               Semantics of i
                 Analysis: Small step semantics of i
               Analysis: Assignment of ret_value@identity to i
-          Analysis: Assignment of ['imp-testcases/visualization/visualization.imp':31:37]:call_ret_value@'imp-testcases/visualization/visualization.imp':31:37 to ret_value@identity
+          Analysis: Assignment of ['imp-testcases/visualization/visualization.imp':31:23]:call_ret_value@'imp-testcases/visualization/visualization.imp':31:23 to ret_value@identity
           Analysis: Transferring throwers from untyped A::identity(A*, untyped) [at 'imp-testcases/visualization/visualization.imp':19:4] to identity(a, one)
           Analysis: Returning from call [1 targets] identity(a, one)
         Semantics of positive
           Analysis: Small step semantics of positive
-        Analysis: Assignment of positive to call_ret_value@'imp-testcases/visualization/visualization.imp':31:37
+        Analysis: Assignment of positive to call_ret_value@'imp-testcases/visualization/visualization.imp':31:23
       Traversal of [ positive = identity(a, one) ] ---> [ minusone = -1 ]
       Semantics of minusone = -1
         Semantics of -1
@@ -171,8 +171,8 @@ Program-wide fixpoint
             Analysis: Small step semantics of a
           Semantics of minusone
             Analysis: Small step semantics of minusone
-          Analysis: Assignment of this to ['imp-testcases/visualization/visualization.imp':33:42]:a
-          Analysis: Assignment of i to ['imp-testcases/visualization/visualization.imp':33:42]:minusone
+          Analysis: Assignment of this to ['imp-testcases/visualization/visualization.imp':33:23]:a
+          Analysis: Assignment of i to ['imp-testcases/visualization/visualization.imp':33:23]:minusone
           Fixpoint of untyped A::identity(A*, untyped)
             Semantics of i3 = 1
               Semantics of 1
@@ -185,12 +185,12 @@ Program-wide fixpoint
               Semantics of i
                 Analysis: Small step semantics of i
               Analysis: Assignment of ret_value@identity to i
-          Analysis: Assignment of ['imp-testcases/visualization/visualization.imp':33:42]:call_ret_value@'imp-testcases/visualization/visualization.imp':33:42 to ret_value@identity
+          Analysis: Assignment of ['imp-testcases/visualization/visualization.imp':33:23]:call_ret_value@'imp-testcases/visualization/visualization.imp':33:23 to ret_value@identity
           Analysis: Transferring throwers from untyped A::identity(A*, untyped) [at 'imp-testcases/visualization/visualization.imp':19:4] to identity(a, minusone)
           Analysis: Returning from call [1 targets] identity(a, minusone)
         Semantics of negative
           Analysis: Small step semantics of negative
-        Analysis: Assignment of negative to call_ret_value@'imp-testcases/visualization/visualization.imp':33:42
+        Analysis: Assignment of negative to call_ret_value@'imp-testcases/visualization/visualization.imp':33:23
       Traversal of [ negative = identity(a, minusone) ] ---> [ top = helper(this, one, a) ]
       Semantics of top = helper(this, one, a)
         Semantics of helper(this, one, a)
@@ -200,9 +200,9 @@ Program-wide fixpoint
             Analysis: Small step semantics of one
           Semantics of a
             Analysis: Small step semantics of a
-          Analysis: Assignment of this to ['imp-testcases/visualization/visualization.imp':34:36]:this
-          Analysis: Assignment of i to ['imp-testcases/visualization/visualization.imp':34:36]:one
-          Analysis: Assignment of dispatcher to ['imp-testcases/visualization/visualization.imp':34:36]:a
+          Analysis: Assignment of this to ['imp-testcases/visualization/visualization.imp':34:18]:this
+          Analysis: Assignment of i to ['imp-testcases/visualization/visualization.imp':34:18]:one
+          Analysis: Assignment of dispatcher to ['imp-testcases/visualization/visualization.imp':34:18]:a
           Fixpoint of untyped tests::helper(tests*, untyped, untyped)
             Semantics of return identity(dispatcher, i)
               Semantics of identity(dispatcher, i)
@@ -210,8 +210,8 @@ Program-wide fixpoint
                   Analysis: Small step semantics of dispatcher
                 Semantics of i
                   Analysis: Small step semantics of i
-                Analysis: Assignment of this to ['imp-testcases/visualization/visualization.imp':38:36]:dispatcher
-                Analysis: Assignment of i to ['imp-testcases/visualization/visualization.imp':38:36]:i
+                Analysis: Assignment of this to ['imp-testcases/visualization/visualization.imp':38:15]:dispatcher
+                Analysis: Assignment of i to ['imp-testcases/visualization/visualization.imp':38:15]:i
                 Fixpoint of untyped A::identity(A*, untyped)
                   Semantics of i3 = 1
                     Semantics of 1
@@ -224,16 +224,16 @@ Program-wide fixpoint
                     Semantics of i
                       Analysis: Small step semantics of i
                     Analysis: Assignment of ret_value@identity to i
-                Analysis: Assignment of ['imp-testcases/visualization/visualization.imp':38:36]:call_ret_value@'imp-testcases/visualization/visualization.imp':38:36 to ret_value@identity
+                Analysis: Assignment of ['imp-testcases/visualization/visualization.imp':38:15]:call_ret_value@'imp-testcases/visualization/visualization.imp':38:15 to ret_value@identity
                 Analysis: Transferring throwers from untyped A::identity(A*, untyped) [at 'imp-testcases/visualization/visualization.imp':19:4] to identity(dispatcher, i)
                 Analysis: Returning from call [1 targets] identity(dispatcher, i)
-              Analysis: Assignment of ret_value@helper to call_ret_value@'imp-testcases/visualization/visualization.imp':38:36
-          Analysis: Assignment of ['imp-testcases/visualization/visualization.imp':34:36]:call_ret_value@'imp-testcases/visualization/visualization.imp':34:36 to ret_value@helper
+              Analysis: Assignment of ret_value@helper to call_ret_value@'imp-testcases/visualization/visualization.imp':38:15
+          Analysis: Assignment of ['imp-testcases/visualization/visualization.imp':34:18]:call_ret_value@'imp-testcases/visualization/visualization.imp':34:18 to ret_value@helper
           Analysis: Transferring throwers from untyped tests::helper(tests*, untyped, untyped) [at 'imp-testcases/visualization/visualization.imp':37:4] to helper(this, one, a)
           Analysis: Returning from call [1 targets] helper(this, one, a)
         Semantics of top
           Analysis: Small step semantics of top
-        Analysis: Assignment of top to call_ret_value@'imp-testcases/visualization/visualization.imp':34:36
+        Analysis: Assignment of top to call_ret_value@'imp-testcases/visualization/visualization.imp':34:18
       Traversal of [ top = helper(this, one, a) ] ---> [ ret ]
       Semantics of ret
         Analysis: Small step semantics of skip

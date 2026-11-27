@@ -157,12 +157,7 @@ public class AnalyzedCFG<A extends AbstractLattice<A>>
 	public AnalysisState<A> getAnalysisStateBefore(
 			Statement st)
 			throws SemanticException {
-		if (st instanceof Call) {
-			Call original = (Call) st;
-			while (original.getSource() != null)
-				original = original.getSource();
-			st = original;
-		}
+		st = Call.originalOf(st);
 
 		if (!(st instanceof Expression) || ((Expression) st).getParentStatement() == null)
 			if (getEntrypoints().contains(st))
@@ -177,12 +172,12 @@ public class AnalyzedCFG<A extends AbstractLattice<A>>
 			return results.getState(pred);
 
 		// last chance: there is no predecessor, so it might be an entry point
-		// of the analysis
+		// of the analysis, or its predecessors have to be used instead
 		Statement root = ((Expression) st).getRootStatement();
 		if (getEntrypoints().contains(root))
 			return entryStates.getState(root);
 
-		return entryStates.lattice.bottom();
+		return lub(predecessorsOf(root), false);
 	}
 
 	/**
@@ -194,12 +189,7 @@ public class AnalyzedCFG<A extends AbstractLattice<A>>
 	 */
 	public AnalysisState<A> getAnalysisStateAfter(
 			Statement st) {
-		if (st instanceof Call) {
-			Call original = (Call) st;
-			while (original.getSource() != null)
-				original = original.getSource();
-			st = original;
-		}
+		st = Call.originalOf(st);
 
 		return results.getState(st);
 	}

@@ -69,7 +69,8 @@ public class DefaultParamInitialization
 			StatementStore<A> expressions)
 			throws SemanticException {
 		return interprocedural.getAnalysis()
-				.smallStepSemantics(entryState, new PushAny(getStaticType(), getLocation()), this);
+				.smallStepSemantics(entryState, new PushAny(getStaticType(), getLocation()),
+						interprocedural.getCurrentContext(), this);
 	}
 
 }

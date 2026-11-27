@@ -7,6 +7,7 @@ import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
+import it.unive.lisa.interprocedural.ScopeId;
 import it.unive.lisa.program.ConstantGlobal;
 import it.unive.lisa.program.Global;
 import it.unive.lisa.program.Unit;
@@ -136,14 +137,16 @@ public class AccessGlobal
 			InterproceduralAnalysis<A, D> interprocedural,
 			StatementStore<A> expressions)
 			throws SemanticException {
+		ScopeId<A> context = interprocedural.getCurrentContext();
 		Analysis<A, D> analysis = interprocedural.getAnalysis();
 		if (target instanceof ConstantGlobal)
-			return analysis.smallStepSemantics(entryState, ((ConstantGlobal) target).getConstant(), this);
+			return analysis.smallStepSemantics(entryState, ((ConstantGlobal) target).getConstant(), context, this);
 
 		// unit globals are unique, we can directly access those
 		return analysis.smallStepSemantics(
 				entryState,
 				new GlobalVariable(target.getStaticType(), toString(), target.getAnnotations(), getLocation()),
+				context,
 				this);
 	}
 

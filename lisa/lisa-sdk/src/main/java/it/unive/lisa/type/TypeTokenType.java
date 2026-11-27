@@ -5,7 +5,12 @@ import java.util.Set;
 import java.util.TreeSet;
 
 /**
- * The type of type tokens, used as reference to types in code.
+ * The type of type tokens, used as reference to types in code. A token
+ * represents a set of types, and a value is an instance of the token if it is
+ * an instance of any of them (see
+ * {@link it.unive.lisa.symbolic.value.operator.binary.TypeCheck}). Distinct
+ * tokens among the runtime types of an expression are instead alternatives, one
+ * per execution.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
@@ -77,7 +82,12 @@ public class TypeTokenType
 	@Override
 	public Type commonSupertype(
 			Type other) {
-		return other == this ? this : Untyped.INSTANCE;
+		// unlike most other Type implementations in this package,
+		// TypeTokenType is not a singleton: distinct instances wrapping the
+		// same set of types are common (e.g., built independently by
+		// TypeSystem#cast/#convert) and must be recognized as the same type
+		// here, consistently with equals()
+		return equals(other) ? this : Untyped.INSTANCE;
 	}
 
 	@Override

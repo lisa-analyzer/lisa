@@ -24,17 +24,19 @@ import it.unive.lisa.symbolic.value.operator.binary.TypeConv;
 import it.unive.lisa.symbolic.value.operator.unary.LogicalNegation;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.TypeSystem;
-import it.unive.lisa.type.TypeTokenType;
 import it.unive.lisa.type.Untyped;
 import java.util.Set;
-import java.util.stream.Collectors;
 import org.apache.commons.collections4.SetUtils;
 
 /**
  * A {@link NonRelationalTypeDomain} that tracks the static type of variables,
- * and that computes expression types using their static type. Typing
- * information is thus deemed to be the set of all subtypes of the tracked type.
- * 
+ * and that computes expression types using their static type
+ * ({@link Supertype}). Typing information is thus deemed to be the set of all
+ * subtypes of the tracked type: this domain never computes the actual runtime
+ * types of an expression, and it never narrows the type information beyond what
+ * is already known from the program's declared types, except when it can be
+ * refined by casts and type checks.
+ *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public class StaticTypes
@@ -160,27 +162,23 @@ public class StaticTypes
 
 		TypeSystem types = src.getProgram().getTypes();
 		Set<Type> elems = eval.type.allInstances(types);
-		if (elems.stream().anyMatch(Type::isTypeTokenType))
+		if (elems.stream().noneMatch(Type::isTypeTokenType))
 			// if there is no type token in the evaluation,
 			// this is not a type condition and we cannot
 			// assume anything
 			return environment;
 
-		// these are all types compatible with the type tokens
-		Set<Type> okTypes = elems.stream()
-				.filter(Type::isTypeTokenType)
-				.map(Type::asTypeTokenType)
-				.map(TypeTokenType::getTypes)
-				.flatMap(Set::stream)
-				.flatMap(t -> t.allInstances(types).stream())
-				.collect(Collectors.toSet());
+		// the types that are instances whatever token an execution evaluates
+		// to (several tokens are alternatives, see TypeTokens): only these
+		// surely fail the negated check
+		Set<Type> okTypes = TypeTokens.ofEach(elems, types);
 
 		Supertype starting = environment.getState(id);
 		if (eval.isBottom() || starting.isBottom())
 			return environment.bottom();
 		Supertype update = null;
 
-		// we keep only the ones that can be casted
+		// we keep only the ones that are not instances
 		Type sup = Type.commonSupertype(SetUtils.difference(starting.type.allInstances(types), okTypes), null);
 		if (sup == null)
 			update = Supertype.BOTTOM;
@@ -226,19 +224,6 @@ public class StaticTypes
 
 		TypeSystem types = src.getProgram().getTypes();
 		Set<Type> elems = eval.type.allInstances(types);
-		// these are all types compatible with the type tokens
-		Set<Type> filtered = elems.stream()
-				.filter(Type::isTypeTokenType)
-				.map(Type::asTypeTokenType)
-				.map(TypeTokenType::getTypes)
-				.flatMap(Set::stream)
-				.flatMap(t -> t.allInstances(types).stream())
-				.collect(Collectors.toSet());
-		if (filtered.isEmpty())
-			// if there is no type token in the evaluation,
-			// this is not a type condition and we cannot
-			// assume anything
-			return environment;
 
 		BinaryOperator operator = expression.getOperator();
 		Supertype starting = environment.getState(id);
@@ -254,7 +239,15 @@ public class StaticTypes
 			// is set the type to eval.type
 			update = eval.type.canBeAssignedTo(starting.type) ? eval : bottom();
 		else if (operator == TypeCheck.INSTANCE) {
-			// we keep only the ones that can be casted
+			// the instances of the types of some token
+			Set<Type> filtered = TypeTokens.ofAny(elems, types);
+			if (filtered.isEmpty())
+				// if there is no type token in the evaluation,
+				// this is not a type condition and we cannot
+				// assume anything
+				return environment;
+
+			// we keep only the ones that are instances
 			Type sup = Type.commonSupertype(SetUtils.intersection(starting.type.allInstances(types), filtered), null);
 			if (sup == null)
 				update = Supertype.BOTTOM;

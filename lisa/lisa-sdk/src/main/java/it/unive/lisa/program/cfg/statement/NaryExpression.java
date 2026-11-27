@@ -3,6 +3,7 @@ package it.unive.lisa.program.cfg.statement;
 import it.unive.lisa.analysis.AbstractDomain;
 import it.unive.lisa.analysis.AbstractLattice;
 import it.unive.lisa.analysis.AnalysisState;
+import it.unive.lisa.analysis.CombinationSemantics;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
@@ -12,6 +13,7 @@ import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.statement.evaluation.EvaluationOrder;
 import it.unive.lisa.program.cfg.statement.evaluation.LeftToRightEvaluation;
+import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
@@ -312,9 +314,68 @@ public abstract class NaryExpression
 	}
 
 	/**
+	 * Yields whether each sub-expression computed a single expression: then,
+	 * there is a single combination of them, and the semantics of this
+	 * expression can be evaluated directly on the state, without
+	 * {@link #ofCombination(InterproceduralAnalysis, AnalysisState, CombinationSemantics, SymbolicExpression...)}.
+	 * 
+	 * @param params the expressions computed by the sub-expressions
+	 * 
+	 * @return whether each sub-expression computed a single expression
+	 */
+	protected static boolean singleValues(
+			ExpressionSet[] params) {
+		return ExpressionSet.singleValues(params);
+	}
+
+	/**
+	 * Evaluates the given semantics of this expression on a combination of the
+	 * expressions computed by its sub-expressions, through
+	 * {@link it.unive.lisa.analysis.Analysis#ofCombination(AnalysisState, it.unive.lisa.interprocedural.ScopeId, it.unive.lisa.program.cfg.ProgramPoint, it.unive.lisa.program.cfg.ProgramPoint[], SymbolicExpression[], CombinationSemantics)}:
+	 * the analysis might evaluate it only in the executions computing that
+	 * combination. Implementations of
+	 * {@link #forwardSemanticsAux(InterproceduralAnalysis, AnalysisState, ExpressionSet[], StatementStore)}
+	 * evaluating their semantics on each combination of the expressions
+	 * computed by their sub-expressions must use this for each combination,
+	 * when there are several ones (see {@link #singleValues(ExpressionSet[])}).
+	 * Expressions beyond the sub-expressions (e.g., default values of missing
+	 * arguments), and {@code null} ones, are not part of the combination.
+	 * 
+	 * @param <A>             the kind of {@link AbstractLattice} produced by
+	 *                            the domain {@code D}
+	 * @param <D>             the kind of {@link AbstractDomain} to run during
+	 *                            the analysis
+	 * @param interprocedural the interprocedural analysis of the program to
+	 *                            analyze
+	 * @param state           the state
+	 * @param semantics       the semantics on the combination
+	 * @param computed        the expressions computed by the sub-expressions,
+	 *                            in order
+	 * 
+	 * @return the state after the semantics
+	 * 
+	 * @throws SemanticException if something goes wrong during the computation
+	 */
+	protected <A extends AbstractLattice<A>, D extends AbstractDomain<A>> AnalysisState<A> ofCombination(
+			InterproceduralAnalysis<A, D> interprocedural,
+			AnalysisState<A> state,
+			CombinationSemantics<A> semantics,
+			SymbolicExpression... computed)
+			throws SemanticException {
+		return interprocedural.getAnalysis().ofCombination(state, interprocedural.getCurrentContext(), this,
+				getSubExpressions(), computed, semantics);
+	}
+
+	/**
 	 * Computes the forward semantics of the expression, after the semantics of
 	 * all sub-expressions have been computed. Meta variables from the
 	 * sub-expressions will be forgotten after this call returns.
+	 * Implementations evaluating the semantics on each combination of the
+	 * expressions computed by the sub-expressions (that is, on each element of
+	 * the cartesian product of {@code params}) must evaluate each one through
+	 * {@link #ofCombination(InterproceduralAnalysis, AnalysisState, CombinationSemantics, SymbolicExpression...)}
+	 * when there are several combinations, so that the analysis can evaluate it
+	 * only in the executions computing it.
 	 * 
 	 * @param <A>             the kind of {@link AbstractLattice} produced by
 	 *                            the domain {@code D}

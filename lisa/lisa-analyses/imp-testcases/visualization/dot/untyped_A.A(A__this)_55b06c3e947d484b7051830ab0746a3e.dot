@@ -1,0 +1,12 @@
+digraph "untyped A::A(A* this)" {
+edge ["dir"="forward"]
+graph ["label"="untyped A::A(A* this)","labelloc"="t"]
+"node0" ["label"=<i1 = 0<br/><br/>{ expressions: [i1],<br/>state: { heap: monolith,<br/>type: { ['imp-testcases/visualization/visualization.imp':29:20]:$rec@'imp-testcases/visualization/visualization.imp':29:20: [A*],<br/>['imp-testcases/visualization/visualization.imp':29:20]:this: [tests*],<br/>heap[w]:heap: [A],<br/>i1: [int32],<br/>this: [A*] },<br/>value: { i1: [0, 0] }<br/> }<br/> }<br/>>,"shape"="rect","id"="node0","style"="dashed"]
+"node3" ["label"=<ret<br/><br/>{ expressions: [skip],<br/>state: { heap: monolith,<br/>type: { ['imp-testcases/visualization/visualization.imp':29:20]:$rec@'imp-testcases/visualization/visualization.imp':29:20: [A*],<br/>['imp-testcases/visualization/visualization.imp':29:20]:this: [tests*],<br/>heap[w]:heap: [A],<br/>i1: [int32],<br/>this: [A*] },<br/>value: { i1: [0, 0] }<br/> }<br/> }<br/>>,"shape"="rect","id"="node3"]
+subgraph "cluster_legend" {
+edge ["dir"="none"]
+graph ["label"=<Legend>,"style"="dotted"]
+"legend" ["label"=<<table border="0" cellpadding="2" cellspacing="0" cellborder="0"><tr><td align="right">node border&nbsp;</td><td align="left"><font color="gray">gray</font>, single</td></tr><tr><td align="right">entrypoint border&nbsp;</td><td align="left"><font color="black">black</font>, dashed</td></tr><tr><td align="right">exitpoint border&nbsp;</td><td align="left"><font color="black">black</font>, solid</td></tr><tr><td align="right">sequential edge&nbsp;</td><td align="left"><font color="black">black</font>, solid</td></tr><tr><td align="right">true edge&nbsp;</td><td align="left"><font color="blue">blue</font>, dashed</td></tr><tr><td align="right">false edge&nbsp;</td><td align="left"><font color="red">red</font>, dashed</td></tr><tr><td align="right">error edge&nbsp;</td><td align="left"><font color="orange">orange</font>, dashed</td></tr></table>>,"shape"="none"]
+}
+"node0" -> "node3"
+}
