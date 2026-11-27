@@ -271,6 +271,34 @@ public class HeapModel {
 			Set<String> arrayProperties,
 			Set<String> undeclared,
 			Set<String> summaries) {
+		this(program, arrayProperties, undeclared, summaries, Collections.emptyMap());
+	}
+
+	/**
+	 * Builds the heap model of the given program, as
+	 * {@link #HeapModel(Program, Set, Set, Set)} does, where the fields with
+	 * the given names, used by the models of the frontend and not declared by
+	 * the program, have the given declared types (see
+	 * {@link HeapWrites#fieldTypes()}).
+	 *
+	 * @param program         the program
+	 * @param arrayProperties the names of the variables that, when accessed on
+	 *                            an array, denote a property of the array
+	 *                            (e.g., its length) rather than an index
+	 * @param undeclared      the names of the global variables that are not
+	 *                            declared
+	 * @param summaries       the names of the identifiers that, as children of
+	 *                            heap accesses, denote any of several locations
+	 *                            (see {@link HeapWrites#summaryChildren()})
+	 * @param modelFields     the declared types of the fields of the models of
+	 *                            the frontend, by their names
+	 */
+	public HeapModel(
+			Program program,
+			Set<String> arrayProperties,
+			Set<String> undeclared,
+			Set<String> summaries,
+			Map<String, Type> modelFields) {
 		this.arrayProperties = arrayProperties;
 		this.summaries = summaries;
 		Map<String, Set<Unit>> declaring = new LinkedHashMap<>();
@@ -303,6 +331,8 @@ public class HeapModel {
 					else
 						mutable.add(g.getName());
 				}
+		for (Map.Entry<String, Type> f : modelFields.entrySet())
+			fieldTypes.putIfAbsent(FIELD_PREFIX + f.getKey(), f.getValue());
 		// properties of arrays cannot change (unless a mutable field shares
 		// their name)
 		for (String property : arrayProperties)

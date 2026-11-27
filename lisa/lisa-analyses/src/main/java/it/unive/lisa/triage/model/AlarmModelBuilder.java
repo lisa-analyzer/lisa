@@ -432,7 +432,7 @@ public final class AlarmModelBuilder {
 		FreshValueFactory factory = reuse != null && reuse.factory != null ? reuse.factory
 				: new FreshValueFactory(resolver, new HeapModel(root.getProgram(),
 						cache.getHeapWrites().arrayProperties(), cache.getGlobalWrites().globalsOf(root.getProgram()),
-						cache.getHeapWrites().summaryChildren()));
+						cache.getHeapWrites().summaryChildren(), cache.getHeapWrites().fieldTypes()));
 		if (reuse != null)
 			reuse.factory = factory;
 		// the locations are extracted once, in the order they are discovered:

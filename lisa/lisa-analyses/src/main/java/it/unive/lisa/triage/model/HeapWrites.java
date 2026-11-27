@@ -1,8 +1,10 @@
 package it.unive.lisa.triage.model;
 
 import it.unive.lisa.program.cfg.CodeMember;
+import it.unive.lisa.type.Type;
 import java.util.Collections;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
 
@@ -62,6 +64,20 @@ public interface HeapWrites {
 	 */
 	default Set<String> arrayProperties() {
 		return HeapModel.DEFAULT_ARRAY_PROPERTIES;
+	}
+
+	/**
+	 * Yields the declared types of the values of the fields that the models of
+	 * the frontend use, and that the program does not declare (e.g., the
+	 * length of the lists of a library model), by the names of the fields: as
+	 * for the fields declared by the program, their values always have the
+	 * declared type, and they are encoded with its sort (see
+	 * {@link HeapModel#fieldTypes()}). By default, there is none.
+	 *
+	 * @return the declared types of the fields
+	 */
+	default Map<String, Type> fieldTypes() {
+		return Collections.emptyMap();
 	}
 
 	/**
