@@ -828,11 +828,7 @@ public class Analysis<
 			Error cont = entry.getKey();
 			ProgramState<A> contState = entry.getValue();
 
-			Statement thrower = cont.getThrower();
-			if (thrower instanceof Expression)
-				thrower = ((Expression) thrower).getRootStatement();
-
-			if (origin.containsNode(thrower)) {
+			if (thrownWithin(cont.getThrower(), origin)) {
 				Error newEx = cont.withThrower(target);
 				if (newErrors.containsKey(newEx))
 					newErrors.put(newEx, contState.lub(newErrors.get(newEx)));
@@ -846,11 +842,7 @@ public class Analysis<
 		Map<Type, Set<Statement>> toAdd = new HashMap<>();
 		for (Entry<Type, GenericSetLattice<Statement>> ex : state.getSmashedErrors())
 			for (Statement st : ex.getValue()) {
-				Statement thrower = st;
-				if (thrower instanceof Expression)
-					thrower = ((Expression) thrower).getRootStatement();
-
-				if (origin.containsNode(thrower)) {
+				if (thrownWithin(st, origin)) {
 					toRemove.computeIfAbsent(ex.getKey(), k -> new HashSet<>()).add(st);
 					toAdd.computeIfAbsent(ex.getKey(), k -> new HashSet<>()).add(target);
 				}
@@ -865,6 +857,19 @@ public class Analysis<
 			events.post(new AnalysisTransferThrowersEnd<>(state, res, target, origin));
 
 		return res;
+	}
+
+	/**
+	 * Yields whether the given thrower belongs to the given cfg: its root
+	 * statement is a node of the cfg, or it is a statement of the cfg that is
+	 * not one of its nodes (e.g., a synthetic expression that a frontend
+	 * evaluates on behalf of a node).
+	 */
+	private static boolean thrownWithin(
+			Statement thrower,
+			CFG origin) {
+		Statement root = thrower instanceof Expression ? ((Expression) thrower).getRootStatement() : thrower;
+		return origin.containsNode(root) || thrower.getCFG() == origin;
 	}
 
 	/**
