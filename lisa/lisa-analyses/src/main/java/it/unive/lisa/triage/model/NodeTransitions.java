@@ -54,9 +54,9 @@ public class NodeTransitions {
 
 	/**
 	 * The runtime types that the analysis gives to identifiers in the states
-	 * reached by the transitions, that the state before the node might not
-	 * know (e.g., the meta variable of a call, holding the value returned by
-	 * an expanded callee where the node resumes).
+	 * reached by the transitions, that the state before the node might not know
+	 * (e.g., the meta variable of a call, holding the value returned by an
+	 * expanded callee where the node resumes).
 	 */
 	private Map<Identifier, Set<Type>> types = Collections.emptyMap();
 
